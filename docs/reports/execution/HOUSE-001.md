@@ -33,4 +33,4 @@ The in-memory normalizer MUST convert `\r\n` → `\n` before computing character
 
 ## Unverified
 - How the owner's other git client behaves with the new `.gitattributes` (expected: no EOL-only changes).
-- `AI_WORKLOG.md` items marked "to confirm by user" (the other tools used, and who spotted the ADR-0004 quota issue).
+- `AI_WORKLOG.md` items marked "to confirm by user" (the other tools used, and who spotted the ADR-0004 quota issue). **Resolved 2026-09-24:** the owner said these items may be removed or corrected. Unknown items were removed; the NVIDIA NIM decision now cites the owner's HOUSE-001 prompt.

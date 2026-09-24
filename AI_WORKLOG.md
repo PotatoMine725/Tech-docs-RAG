@@ -1,6 +1,6 @@
 # AI worklog
 
-A record of how AI tools were used in this project, required by the submission (`docs/specs/assignment-requirements.md` § Submission). The log is honest. Mistakes are recorded when they were real: a failing test, a user correction, or a wrong assumption. Anything that cannot be checked from the repository is marked **to confirm by user**.
+A record of how AI tools were used in this project, required by the submission (`docs/specs/assignment-requirements.md` § Submission). The log is honest. Mistakes are recorded when they were real: a failing test, a user correction, or a wrong assumption. Only facts recorded in the repository (commits, prompts, reports, ADRs) or stated by the owner are logged; anything else is left out rather than guessed.
 
 ## Tools used
 
@@ -9,8 +9,7 @@ A record of how AI tools were used in this project, required by the submission (
 | Claude Code (CLI) | Claude Sonnet 5 (commit `3d5a606`, co-author trailer) | SETUP-001: project skeleton, specs, corpus migration |
 | Claude Code (CLI) | Claude Opus 5.5 (`claude-opus-5-5`; commits `490068f` onward) | ADR drafting, master plan, corpus analysis, repo hygiene, evaluation design |
 | GitNexus (`npx gitnexus`) | local code index | Impact analysis before edits, change detection before commits |
-| Other agent for the chunking consultation (`docs/plans/chunking-consultation-handoff.md`) | to confirm by user | Advice on chunking strategy before ADR-0003 |
-| Tool that wrote `agents/prompts/*.md` | to confirm by user | Task prompts 00–14 |
+| Chunking consultation (`docs/plans/chunking-consultation-handoff.md`, cited as context by ADR-0003) | — | A handoff written by Claude Code so another agent could advise on chunking before ADR-0003 |
 | Google Gemini API | not used yet (planned: `gemini-embedding-001`, `gemini-3.5-flash-lite`, `gemini-3.5-flash`, ADR-0004) | Embeddings, answers, LLM judge (from EPIC-03) |
 
 ## Log
@@ -27,13 +26,13 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 ### 2026-09-24 ADR-0003 / ADR-0004 (commits `490068f`, `6f9e1d5`)
 - *AI did:* drafted the chunking ADR (D1–D9) from corpus measurements and the consultation handoff, and the model-selection ADR (D10–D13); aligned `CLAUDE.md` and the specs.
 - *AI got wrong:* (1) The first D11 choice (`gemini-3.5-flash` as answer model, 20 requests/day) did not fit the evaluation budget (about 120+ answer calls per full run, so 6+ days per run). (2) ADR-0003 says 498 H1–H3 sections remain after removing repeats; the reproducible EPIC-01 inventory finds 450 (other figures match). The measurement code was not saved.
-- *How found:* (1) quota arithmetic recorded in ADR-0004 "Resolved issue" (who spotted it: to confirm by user); (2) EPIC-01 recomputation.
+- *How found:* (1) quota arithmetic recorded in ADR-0004 "Resolved issue"; (2) EPIC-01 recomputation.
 - *Fix:* (1) D11/D12 amended: Flash-Lite answers and judges, Flash is the fallback; (2) recorded as unexplained in the [EPIC-01 report](docs/reports/epics/EPIC-01-corpus-analysis.md); no decision depends on it.
-- *Human decision:* accepted D1–D13; chose to support English and Vietnamese questions (D9). Other providers considered and ruled out (e.g. NVIDIA NIM): to confirm by user, since the repository does not record this.
+- *Human decision:* accepted D1–D13; chose to support English and Vietnamese questions (D9). NVIDIA NIM was considered and ruled out (stated in the owner's HOUSE-001 prompt, `docs/prompt-log/claude-code/HOUSE-001.md`).
 
 ### 2026-09-24 Master plan (commits `278e14e`, `128cd72`)
 - *AI did:* master plan with phases, dependencies, exit gates, quota plan, cut line and open decisions; epic stubs.
-- *AI got wrong:* (1) The plan first gave EVAL-001 the whole job of writing questions and ground truth, but the owner's EVAL-001 prompt is design only. (2) The repo-structure table said "EVAL-001 prompt file is empty" while the same commit added the 17.7K prompt (possibly written after the plan was drafted: to confirm by user).
+- *AI got wrong:* (1) The plan first gave EVAL-001 the whole job of writing questions and ground truth, but the owner's EVAL-001 prompt is design only. (2) The repo-structure table said "EVAL-001 prompt file is empty" while the same commit added the 17.7K prompt.
 - *How found:* the AI reading the EVAL-001 prompt after the first commit.
 - *Fix:* `128cd72` split stage A into EVAL-001 (design) and EVAL-002 (write + freeze) and removed the stale row.
 - *Human decision:* everything is due 2026-10-01.
