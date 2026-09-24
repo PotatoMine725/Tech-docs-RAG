@@ -50,6 +50,7 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 - *How found:* re-checking `git ls-files --eol` after each attempt (the counts had not changed).
 - *Fix:* NUL-separated paths (`-z`) in Python, and file times bumped before the checkout. Verified 0 CRLF files outside `agents/`, and the corpus hashes unchanged.
 - *Human decision:* run HOUSE-001 before EVAL-001.
+- *Verifier findings (99-VERIFY, [review](docs/reviews/code/HOUSE-001-verify.md)):* verdict ACCEPT. No incorrect output found: the corpus checksums, LF storage, CLAUDE.md single block and Submission items were all reproduced. Minor gaps only: the "72 files w/crlf" starting state and the "first two attempts did nothing" story cannot be re-checked; the "git status clean" done-criterion was not met at commit time (owner's `agents/` edits, disclosed); no test guards `.gitattributes` or catches an EOL regression.
 
 ### 2026-09-24 EVAL-001
 - *AI did:* evaluation dataset design: 36 evaluation + 6 dev blueprints with verbatim evidence quotes, absence proofs for the "not in the documents" cases, a generated coverage matrix, the design document, and 13 offline tests ([report](docs/reports/execution/EVAL-001.md)).
