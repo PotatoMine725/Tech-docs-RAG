@@ -4,6 +4,7 @@
 # 18 en / 18 vi; 7 parallel EN/VI groups; plus 6 dev blueprints (split: dev).
 # Ground truth comes only from corpus/sources (24 accepted docs). Quotes are verbatim (<= 300 chars).
 # Parallel pairs share expected_sources, ground_truth and acceptance criteria through YAML anchors.
+# Evidence slots (owner decision D1): a retrieval hit needs every slot; any source within a slot counts.
 version: 1
 created: 2026-09-24
 # The owner approves the blueprints before EVAL-002 turns them into questions.
@@ -21,6 +22,7 @@ blueprints:
     expected_sources: &pg001_src
       - source_id: "22"
         heading_path: "Querying Data"
+        slot: S1
     acceptable_alternate_sources: []
     objective: Recall whether EF Core skips the database when the requested entities are already loaded in the context.
     concepts: [EF Core, LINQ query, DbContext, query execution]
@@ -100,12 +102,15 @@ blueprints:
     expected_sources: &pg002_src
       - source_id: "13"
         heading_path: "Handle errors in ASP.NET Core > Developer exception page"
+        slot: S1
     acceptable_alternate_sources: &pg002_alt
       - source_id: "13"
         heading_path: "Handle errors in ASP.NET Core > Developer Exception Page"
+        slot: S1
         note: Older variants; they support P2 and P3 but not P1.
       - source_id: "12"
         heading_path: "Handle errors in ASP.NET Core APIs > Developer Exception Page"
+        slot: S1
         note: 'Same default-on rule as #13 variants 1-5.'
     objective: Explain when the developer exception page is on, where the page's version variants describe it differently.
     concepts: [developer exception page, Development environment, WebApplication.CreateBuilder, UseDeveloperExceptionPage]
@@ -203,15 +208,19 @@ blueprints:
     expected_sources: &pg003_src
       - source_id: "02"
         heading_path: "Asynchronous programming scenarios > Recognize CPU-bound and I/O-bound scenarios"
+        slot: S1
     acceptable_alternate_sources: &pg003_alt
       - source_id: "02"
         heading_path: "Asynchronous programming scenarios > Explore the asynchronous programming model > CPU-bound example: Run game calculation"
+        slot: S1
         note: Partial support (Task.Run for CPU-bound work).
       - source_id: "02"
         heading_path: "Asynchronous programming scenarios > Explore the asynchronous programming model > I/O-bound example: Download data from web service"
+        slot: S1
         note: Partial support (await without Task.Run for I/O).
       - source_id: "02"
         heading_path: "Asynchronous programming scenarios > Explore the asynchronous programming model"
+        slot: S1
         note: Partial support (two bullets state the split, Task for I/O-bound code and Task.Run for CPU-bound code; supports P2, P1 in part).
     objective: Choose the right async implementation for an I/O-bound task and for a CPU-bound task.
     concepts: [async, await, Task.Run, I/O-bound, CPU-bound, Task Parallel Library]
@@ -295,9 +304,11 @@ blueprints:
     expected_sources: &pg004_src
       - source_id: "23"
         heading_path: "Routing in ASP.NET Core > Route constraints"
+        slot: S1
     acceptable_alternate_sources: &pg004_alt
       - source_id: "23"
         heading_path: "Routing in ASP.NET Core > Route constraint reference"
+        slot: S1
         note: Older variant with the same warning.
     objective: Diagnose why invalid input returns 404 when route constraints are used to validate it.
     concepts: [route constraints, input validation, 404 Not Found, 400 Bad Request]
@@ -377,6 +388,7 @@ blueprints:
     expected_sources: &pg005_src
       - source_id: "03"
         heading_path: "Unit testing best practices for .NET > Best practices > Avoid multiple Act tasks"
+        slot: S1
     acceptable_alternate_sources: []
     objective: Explain why a unit test should contain only one Act step.
     concepts: [unit testing, Arrange-Act-Assert, single Act, parameterized tests]
@@ -463,11 +475,14 @@ blueprints:
     expected_sources: &pg006_src
       - source_id: "29"
         heading_path: "ASP0033: `[ValidatableType]` is applied to an inaccessible type > Rule description"
+        slot: S1
       - source_id: "29"
         heading_path: "ASP0033: `[ValidatableType]` is applied to an inaccessible type > How to fix violations"
+        slot: S1
     acceptable_alternate_sources: &pg006_alt
       - source_id: "29"
         heading_path: "ASP0033: `[ValidatableType]` is applied to an inaccessible type > Cause"
+        slot: S1
         note: Supports P1.
     objective: Diagnose why validation is silently skipped for a file-local or private type marked [ValidatableType], and fix it.
     concepts: [ASP0033, ValidatableType, validation source generator, accessibility]
@@ -547,18 +562,23 @@ blueprints:
     expected_sources: &pg007_src
       - source_id: "10"
         heading_path: "Dependency injection in ASP.NET Core > Service lifetimes"
+        slot: S1
     acceptable_alternate_sources: &pg007_alt
       - source_id: "11"
         heading_path: "Factory-based middleware activation in ASP.NET Core"
+        slot: S1
         note: Supports P3 only.
       - source_id: "11"
         heading_path: "Factory-based middleware activation in ASP.NET Core > Additional resources"
+        slot: S1
         note: Supports P3 only (the intros of variants 2-3 are stored under this heading and repeat the per-request sentence).
       - source_id: "11"
         heading_path: "Factory-based middleware activation in ASP.NET Core > IMiddleware"
+        slot: S1
         note: Supports P2 and P3 by example (conventional InvokeAsync parameter vs IMiddleware constructor).
       - source_id: "10"
         heading_path: "Dependency injection in ASP.NET Core > Lifetime and registration options"
+        slot: S1
         note: Supports P2 only ("Scoped and transient services must be resolved in the `InvokeAsync` method.").
     objective: Diagnose a runtime exception when middleware takes a scoped service in its constructor, and name the fixes.
     concepts: [middleware, scoped lifetime, constructor injection, InvokeAsync, factory-based middleware]
@@ -641,9 +661,11 @@ blueprints:
     expected_sources:
       - source_id: "01"
         heading_path: "Asynchronous programming with async and await > Async/await vs ContinueWith > Why async/await is preferred"
+        slot: S1
     acceptable_alternate_sources:
       - source_id: "01"
         heading_path: "Asynchronous programming with async and await > Async/await vs ContinueWith"
+        slot: S1
         note: Parent H2; introduces the comparison.
     objective: Compare async/await with ContinueWith chains.
     concepts: [async, await, ContinueWith, task continuation, exception handling]
@@ -697,15 +719,19 @@ blueprints:
     expected_sources:
       - source_id: "26"
         heading_path: "The C# type system > Value types and reference types"
+        slot: S1
     acceptable_alternate_sources:
       - source_id: "07"
         heading_path: "C# classes"
+        slot: S1
         note: Partial support for P1 (assigning a class variable copies the reference, so both variables point to the same object).
       - source_id: "07"
         heading_path: "C# classes > Create objects"
+        slot: S1
         note: Partial support for P1 and P2 (reference sharing for classes; with structs, assignment copies the data).
       - source_id: "20"
         heading_path: "A tour of the C# language > Familiar C# features"
+        slot: S1
         note: Partial support for P1 (collections are reference types).
     objective: Predict what happens after assigning a list variable to another and changing it through the second one.
     concepts: [value types, reference types, assignment semantics, List<T>]
@@ -755,14 +781,18 @@ blueprints:
     expected_sources:
       - source_id: "11"
         heading_path: "Factory-based middleware activation in ASP.NET Core"
+        slot: S1
       - source_id: "11"
         heading_path: "Factory-based middleware activation in ASP.NET Core > IMiddleware"
+        slot: S1
     acceptable_alternate_sources:
       - source_id: "11"
         heading_path: "Factory-based middleware activation in ASP.NET Core > Additional resources"
+        slot: S1
         note: The intros of variants 2 and 3 are stored under this heading (the variant has no own H1).
       - source_id: "10"
         heading_path: "Dependency injection in ASP.NET Core > Service lifetimes"
+        slot: S1
         note: Partial support for P1 and P2 (inject into Invoke/InvokeAsync, or use factory-based middleware activated per request). Same sentences as PG-007.
     objective: Compare how conventional middleware and factory-activated (IMiddleware) middleware get a scoped service.
     concepts: [IMiddleware, IMiddlewareFactory, conventional middleware, scoped services, UseMiddleware]
@@ -817,9 +847,11 @@ blueprints:
     expected_sources:
       - source_id: "21"
         heading_path: "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Logical patterns > Precedence and order of checking"
+        slot: S1
     acceptable_alternate_sources:
       - source_id: "21"
         heading_path: "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Parenthesized pattern"
+        slot: S1
         note: Partial support for P3 and P4 (parentheses emphasize or change precedence in logical patterns).
     objective: Diagnose why `c is not >= 'a' and <= 'z'` does not mean "not a lowercase letter", and fix it.
     concepts: [pattern matching, logical patterns, not, and, or, precedence]
@@ -874,6 +906,7 @@ blueprints:
     expected_sources:
       - source_id: "21"
         heading_path: "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > List patterns"
+        slot: S1
     acceptable_alternate_sources: []
     objective: Apply the slice-pattern rules of C# list patterns.
     concepts: [list patterns, slice pattern, pattern matching]
@@ -924,6 +957,7 @@ blueprints:
     expected_sources:
       - source_id: "16"
         heading_path: "Integral numeric types (C# reference) > Integer literals"
+        slot: S1
     acceptable_alternate_sources: []
     objective: Work out the type and value of an unsuffixed hexadecimal literal.
     concepts: [integer literals, literal suffix, uint, unchecked, hexadecimal]
@@ -978,6 +1012,7 @@ blueprints:
     expected_sources:
       - source_id: "20"
         heading_path: "A tour of the C# language > File-based apps"
+        slot: S1
     acceptable_alternate_sources: []
     objective: Recall what file-based apps are and how to run one.
     concepts: [file-based apps, dotnet run, shebang, C# 14, .NET 10]
@@ -1032,14 +1067,18 @@ blueprints:
     expected_sources:
       - source_id: "13"
         heading_path: "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithRedirects"
+        slot: S1
       - source_id: "13"
         heading_path: "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithReExecute"
+        slot: S2
     acceptable_alternate_sources:
       - source_id: "13"
         heading_path: "Handle errors in ASP.NET Core > UseStatusCodePagesWithRedirects"
+        slot: S1
         note: Older variant (H2).
       - source_id: "13"
         heading_path: "Handle errors in ASP.NET Core > UseStatusCodePagesWithReExecute"
+        slot: S2
         note: Older variant (H2).
     objective: Compare UseStatusCodePagesWithRedirects and UseStatusCodePagesWithReExecute.
     concepts: [status code pages, 302 redirect, re-execute pipeline, status code preservation]
@@ -1107,9 +1146,11 @@ blueprints:
     expected_sources:
       - source_id: "13"
         heading_path: "Handle errors in ASP.NET Core > IExceptionHandler"
+        slot: S1
     acceptable_alternate_sources:
       - source_id: "13"
         heading_path: "Handle errors in ASP.NET Core > IExceptionHandler > SuppressDiagnosticsCallback"
+        slot: S1
         note: Single copy; supports P2 and P3.
     objective: Explain whether logs and metrics are emitted for exceptions an IExceptionHandler handles.
     concepts: [IExceptionHandler, TryHandleAsync, diagnostics, SuppressDiagnosticsCallback, .NET 10]
@@ -1172,6 +1213,7 @@ blueprints:
     expected_sources:
       - source_id: "17"
         heading_path: "Integration tests in ASP.NET Core > Disable shadow copying"
+        slot: S1
     acceptable_alternate_sources: []
     objective: Explain the shadow-copying problem in xUnit integration tests and how to turn it off.
     concepts: [shadow copying, xUnit, xunit.runner.json, Assembly.Location]
@@ -1223,6 +1265,7 @@ blueprints:
     expected_sources:
       - source_id: "23"
         heading_path: "Routing in ASP.NET Core > Short-circuit middleware after routing"
+        slot: S1
     acceptable_alternate_sources: []
     objective: Stop requests for robots.txt and favicon.ico from running the whole middleware pipeline.
     concepts: [short-circuit, MapShortCircuit, ShortCircuit, middleware pipeline]
@@ -1280,6 +1323,7 @@ blueprints:
     expected_sources:
       - source_id: "15"
         heading_path: "How to create backend application using Asp.net C# Web API Core"
+        slot: S1
     acceptable_alternate_sources: []
     objective: Diagnose the NU1202 error when installing JwtBearer 8.0.5 on a net5.0 project, using the Q&A thread.
     concepts: [NU1202, Microsoft.AspNetCore.Authentication.JwtBearer, net5.0, .NET 8, package compatibility]
@@ -1333,9 +1377,11 @@ blueprints:
     expected_sources:
       - source_id: "12"
         heading_path: "Handle errors in ASP.NET Core APIs > Additional error handling features > Validation failure error response"
+        slot: S1
     acceptable_alternate_sources:
       - source_id: "12"
         heading_path: "Handle errors in ASP.NET Core APIs > Additional error handling features > Key differences for controllers"
+        slot: S1
         note: Partial support (automatic 400 responses on validation failure; override InvalidModelStateResponseFactory for custom formatting).
     objective: Recall what web API controllers return on model validation failure and how to customize it.
     concepts: [ValidationProblemDetails, InvalidModelStateResponseFactory, ConfigureApiBehaviorOptions, model validation]
@@ -1390,6 +1436,7 @@ blueprints:
     expected_sources:
       - source_id: "18"
         heading_path: "Introduction"
+        slot: S1
     acceptable_alternate_sources: []
     objective: Recall whether C# was designed to compete with C or assembly on performance.
     concepts: [C# design goals, language specification, performance]
@@ -1434,8 +1481,10 @@ blueprints:
     expected_sources:
       - source_id: "10"
         heading_path: "Dependency injection in ASP.NET Core > Entity Framework contexts"
+        slot: S1
       - source_id: "22"
         heading_path: "Querying Data > Loading a single entity"
+        slot: S2
     acceptable_alternate_sources: []
     objective: Combine the default DbContext lifetime (#10) with loading one entity (#22).
     concepts: [DbContext lifetime, scoped, AddDbContext, SingleAsync]
@@ -1485,8 +1534,10 @@ blueprints:
     expected_sources:
       - source_id: "03"
         heading_path: "Unit testing best practices for .NET > Best practices > Follow test naming standards"
+        slot: S1
       - source_id: "28"
         heading_path: "Unit testing C# in .NET using dotnet test and xUnit > Create a test > Add more tests"
+        slot: S2
     acceptable_alternate_sources: []
     objective: Check the tutorial's test name (#28) against the naming standard (#03).
     concepts: [test naming, method-scenario-expected behavior, xUnit Theory]
@@ -1547,12 +1598,14 @@ blueprints:
     expected_sources:
       - source_id: "04"
         heading_path: "Built-in types and literals > `default` expressions"
+        slot: S1
       - source_id: "26"
         heading_path: "The C# type system > Value types and reference types"
+        slot: S2
     acceptable_alternate_sources:
       - source_id: "20"
         heading_path: "A tour of the C# language > Familiar C# features"
-        stands_in_for: "26"
+        slot: S2
         note: States that string is a reference type ("reference types like `string`, arrays, and other collections").
     objective: Explain the default value of a string from the kind of type string is.
     concepts: [default expression, reference types, value types, string]
@@ -1587,7 +1640,7 @@ blueprints:
       must_not_claim:
         - default(string) is an empty string.
     citation_acceptance_criteria:
-      - One citation per premise; each from the matching document.
+      - "One citation per slot: S1 from #04 '`default` expressions'; S2 from #26 'Value types and reference types' or #20 'Familiar C# features'."
     question_notes: Ask what `string s = default;` holds and why.
     reason_for_inclusion: Cross-document analyze case in the types cluster.
 
@@ -1601,8 +1654,10 @@ blueprints:
     expected_sources:
       - source_id: "13"
         heading_path: "Handle errors in ASP.NET Core > IExceptionHandler"
+        slot: S1
       - source_id: "10"
         heading_path: "Dependency injection in ASP.NET Core > Entity Framework contexts"
+        slot: S2
     acceptable_alternate_sources: []
     objective: Decide whether a custom IExceptionHandler should take the app's DbContext in its constructor, using both lifetimes.
     concepts: [IExceptionHandler, singleton, DbContext, scoped, lifetime mismatch]
@@ -1714,6 +1769,7 @@ blueprints:
     answer_acceptance_criteria:
       acceptable_variations:
         - The refusal is written in Vietnamese.
+        - "Mentioning related content from the documents is fine if the refusal says the topic isn't covered and doesn't present that content as the answer (owner rule D2)."
       must_not_claim:
         - Any rate-limiting API, middleware name or policy option presented as from the documents.
     citation_acceptance_criteria:
@@ -1806,6 +1862,7 @@ blueprints:
     expected_sources:
       - source_id: "07"
         heading_path: "C# classes > Static classes"
+        slot: S1
     acceptable_alternate_sources: []
     objective: Recall what a static class is.
     concepts: [static class, sealed]
@@ -1852,12 +1909,15 @@ blueprints:
     expected_sources:
       - source_id: "04"
         heading_path: "Built-in types and literals > Numeric types > Native-sized integers"
+        slot: S1
     acceptable_alternate_sources:
       - source_id: "16"
         heading_path: "Integral numeric types (C# reference) > Characteristics of the integral types"
+        slot: S1
         note: Supports P1 (32-bit in a 32-bit process, 64-bit in a 64-bit process) and names interop uses.
       - source_id: "16"
         heading_path: "Integral numeric types (C# reference) > Native sized integers"
+        slot: S1
         note: Partial support for P1 (storage matches the natural integer size of the machine).
     objective: Recall what nint and nuint are and when to use them.
     concepts: [nint, nuint, native-sized integers, interop]
@@ -1904,9 +1964,11 @@ blueprints:
     expected_sources:
       - source_id: "06"
         heading_path: "C# keywords > Contextual keywords"
+        slot: S1
     acceptable_alternate_sources:
       - source_id: "06"
         heading_path: "C# keywords"
+        slot: S1
         note: Supports P1 ("Contextual keywords have special meaning only in a limited program context and can be used as identifiers outside that context.").
     objective: Explain what a contextual keyword is.
     concepts: [contextual keywords, reserved words]
@@ -1949,6 +2011,7 @@ blueprints:
     expected_sources:
       - source_id: "02"
         heading_path: "Asynchronous programming scenarios > Review considerations for asynchronous programming > Return 'async void' only from event handlers"
+        slot: S1
     acceptable_alternate_sources: []
     objective: Explain when async void is acceptable and why to avoid it elsewhere.
     concepts: [async void, event handlers, exceptions]
@@ -2013,11 +2076,12 @@ blueprints:
       answer_points: []
       evidence: []
     answer_acceptance_criteria:
-      acceptable_variations: []
+      acceptable_variations:
+        - "Mentioning related content from the documents is fine if the refusal says the topic isn't covered and doesn't present that content as the answer (owner rule D2)."
       must_not_claim:
         - Any refresh-token flow presented as from the documents.
     citation_acceptance_criteria:
-      - No citation is required.
+      - No citation is required; any citation must not be presented as supporting an answer.
     question_notes: Dev set.
     reason_for_inclusion: Dev set, EN insufficient.
 
@@ -2055,6 +2119,6 @@ blueprints:
         - Any API-versioning package or attribute presented as from the documents.
         - MapGroup or a route prefix such as /v1 presented as the documents' way to version an API.
     citation_acceptance_criteria:
-      - No citation is required.
+      - No citation is required; any citation must not be presented as supporting an answer.
     question_notes: Dev set.
     reason_for_inclusion: Dev set, VI insufficient.

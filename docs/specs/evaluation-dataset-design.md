@@ -48,7 +48,7 @@ easy 7 · medium 17 · hard 12. Difficulty means how hard the retrieval and reas
 28 single-source, 4 cross-document. Each cross-document case joins two premises that are **each stated in one document**, and neither document alone answers:
 - #10 + #22: default DbContext lifetime + loading one entity.
 - #03 + #28: naming standard + the tutorial's test name.
-- #04 + #26: `default` gives null for reference types + string is a reference type. #04 alone shows the value (`string? defaultString = default; // null`) but not why; #20 'Familiar C# features' can stand in for #26 (`stands_in_for`, §18).
+- #04 + #26: `default` gives null for reference types + string is a reference type. #04 alone shows the value (`string? defaultString = default; // null`) but not why; #20 'Familiar C# features' is in the same evidence slot as #26 (§18).
 - #13 + #10: IExceptionHandler is a singleton + DbContext is scoped + the lifetime rule.
 
 Two of them use the same #10 section on purpose; each uses a different sentence from it and pairs it with a different document.
@@ -77,7 +77,7 @@ A structural finding from this task: in version-heavy pages the **intro of each 
 - Verifying calls with Moq (near #03's mock terminology).
 
 Each has an absence proof in `evidence-map.yaml`: the search terms, a case-insensitive search over the 24 accepted documents, and zero hits. Words that matched unrelated text are noted too ("track" in a URL, "limiter" in "delimiter"). A test re-runs every search. None is based on the excluded documents.
-Scoring: `correct_refusal` or `hallucination` (OD-5). They are left out of source/section hit and MRR (proposal in `evaluation-spec.md`). The refusal rule itself is OD-9 (EPIC-03), and the dev set has 2 more near-miss cases for tuning it.
+Scoring: `correct_refusal` or `hallucination` (OD-5). A refusal may mention related content if it says the topic isn't covered and doesn't present that content as the answer (owner decision D2). They are left out of source/section hit and MRR (proposal in `evaluation-spec.md`). The refusal rule itself is OD-9 (EPIC-03), and the dev set has 2 more near-miss cases for tuning it.
 
 ## 12. How the ground truth was made
 - Sections were chosen from the EPIC-01 section inventory and topic map; then each chosen section was read in full.
@@ -119,8 +119,9 @@ No two blueprints share the same information need, evidence and retrieval challe
 
 ## 18. Schema
 Ground truth and generated output are kept in **separate files**, because one question set is run through two arms and each arm produces its own answer.
-- **Question file** (EVAL-002, `data/evaluation/questions/eval-v1.jsonl`, one line per case): `id`, `blueprint_id`, `split`, `question`, `language`, `parallel_group_id`, `scope`, `expected_answer` (short prose from the required points), `answer_points[{id,text,required}]`, `expected_sources[{source_id,heading_path,evidence_variant?}]`, `acceptable_alternate_sources[{source_id,heading_path,stands_in_for?,note}]` (`stands_in_for` is required in cross-document cases: the expected source the alternate replaces under the "all expected sources" hit rule; proposed, test-checked), `evidence[{source_id,heading_path,quote}]`, `acceptable_variations`, `must_not_claim`, `citation_criteria`, `cognitive_level`, `difficulty`, `size_class`, `failure_mode`, `retrieval_challenges`, `concepts`, `question_chars`. Insufficient cases have empty sources and points and `expected_behavior`.
+- **Question file** (EVAL-002, `data/evaluation/questions/eval-v1.jsonl`, one line per case): `id`, `blueprint_id`, `split`, `question`, `language`, `parallel_group_id`, `scope`, `expected_answer` (short prose from the required points), `answer_points[{id,text,required}]`, `expected_sources[{source_id,heading_path,slot,evidence_variant?}]`, `acceptable_alternate_sources[{source_id,heading_path,slot,note}]` (`slot` = evidence slot, owner decision D1: a retrieval hit needs every slot, and any source within a slot counts; test-checked), `evidence[{source_id,heading_path,quote}]`, `acceptable_variations`, `must_not_claim`, `citation_criteria`, `cognitive_level`, `difficulty`, `size_class`, `failure_mode`, `retrieval_challenges`, `concepts`, `question_chars`. Insufficient cases have empty sources and points and `expected_behavior`.
 - **Result file per arm** (EVAL-003/004, `data/evaluation/results/`): `case_id`, `arm`, `retrieved[{rank,chunk_id,source_id,heading_path,char_start,char_end,score}]`, `generated_answer`, `generated_citations[{chunk_id,source_id,heading_path,excerpt}]`, `latency_ms{embed_query,retrieve,generate}`, `model_used`, `retries`, `fallback_used`, `result`, `points_covered`, `citation_label`, `judge_notes`, `spot_checked`.
+- **Evidence slots (D1).** Most cases have one slot (S1). The 4 cross-document cases have one slot per document. BP-EVAL-022 has one slot per method, because its blueprint requires both methods in the top 5. BP-EVAL-017 lists two #11 sections but does not require both in the top 5, so it has one slot; the owner can split it.
 - The brief's five fields per record (question, expected answer, expected source, generated answer, result) come from joining the two files by `id`, per arm.
 
 ## 19. Coverage matrix
@@ -179,9 +180,9 @@ Dev set (tuning only): BP-DEV-001 #07 static classes (en) · 002 #04 native-size
 |---|---|---|
 | Owner review of the 42 blueprints | Owner reviewed; independent review done (`docs/reviews/evaluation/EVAL-001-blueprint-review.md`). **Pending: the owner's re-check of the cases whose ground truth changed** (009/010, 016, 022, 023, 024, 025, 031, 036; review §5) | EVAL-002 |
 | Citation-quality method (OD-12) and labels | Labels proposed in `evaluation-spec.md`; method open | EVAL-003 |
-| Source hit for cross-document cases (all vs any) | Proposed: "all" primary, "any" secondary; an alternate counts for the expected source named in its `stands_in_for` | EVAL-003 |
+| Source hit for cross-document cases (all vs any) | **Decided (owner, D1, 2026-09-24):** evidence slots; all slots needed, any source within a slot; secondary = fraction of slots satisfied (`evaluation-spec.md`) | — |
 | Correct-variant check for mixed-version cases | Proposed: section hit@5 counts any variant (D8); failure analysis also reports whether the `evidence_variant` was retrieved when a case sets one (none does at present) | EVAL-003 / EPIC-06 |
-| Refusal rule for "insufficient information" (OD-9) | Open; dev set prepared for tuning it | EPIC-03 |
+| Refusal rule for "insufficient information" (OD-9) | Scoring side **decided (owner, D2, 2026-09-24):** related content may be mentioned if the answer says the topic isn't covered and doesn't present it as the answer; the judge labels unanswerable cases the system answered. The retrieval gate / threshold stays open | EPIC-03 (RAG-002) |
 | Vietnamese wording rule (identifiers stay English) | Proposed | EVAL-002 |
 | Questions may include short code taken from the page (016, 018) | Proposed | EVAL-002 |
 | Mapping heading paths to character spans in normalized text (section hit@5) | Depends on EPIC-02: the inventory has raw line ranges, D8 needs normalized offsets | EPIC-02 / EVAL-003 |

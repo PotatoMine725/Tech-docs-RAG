@@ -29,10 +29,14 @@
 - Independent review (2026-09-24, after the owner's review): a separate read-only agent reported 24 findings (4 high, 9 medium, 11 low) in [`docs/reviews/evaluation/EVAL-001-blueprint-review.md`](../../reviews/evaluation/EVAL-001-blueprint-review.md). Each finding's corpus quote was re-checked by script (all found in the named sections).
   - While triaging, a YAML defect was found: 32 values cut off at " #" and one variation read as a mapping. It was fixed in `9e0ab15`, with 2 new tests that failed before the fix (44 passed after).
   - Then all 24 findings were addressed (23 accepted, 1 partly accepted); the response table is section 5 of the review.
-  - A new test for `stands_in_for` failed with the field removed and passed with it.
+  - A new test for `stands_in_for` failed with the field removed and passed with it. (The field was later replaced by `slot`, below.)
   - The evidence map now has 11 distractor sections (one wrong entry removed, two added).
   - `.venv/Scripts/python.exe -m pytest`: **45 passed**.
   - After the alternates were added, a script compared the dev and eval sets on expected *and* alternate sections: no dev section matches any eval section. The disjointness test covers expected sources only.
+  - Owner decisions after the review (2026-09-24):
+    - **D1, evidence slots.** Every expected/alternate source now has `slot: S1|S2`; hit = all slots, any source within a slot. `stands_in_for` was replaced by `slot` (#20 is in 031's S2 slot, and 031's citation criterion accepts #20). 022 has two slots because its blueprint requires both methods. The new slot test failed before the tagging (the file still contained `stands_in_for`) and passed after. Test count unchanged (17 in the blueprint file), 45 in total.
+    - **D2, refusal rule.** Related content may be mentioned if the answer says the topic isn't covered and doesn't present it as the answer. It is applied to 034, DEV-005 and DEV-006 (the others already said so). The label rules and the judge-decides rule are in `evaluation-spec.md`. The downstream task prompts (RAG-002, EVAL-003a/b) are updated in a separate `DOCS:` commit.
+    - **D3, 030 stays cross-document.** Already implemented; no change.
   - 030: #28 also has a `[Fact]` test `IsPrime_InputIs1_ReturnFalse` with an input below 2, so `question_notes` now name the `[Theory]` test.
 
 ## Exit-gate check (prompt §22)

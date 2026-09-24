@@ -1,6 +1,6 @@
 # Evaluation specification
 
-Status: dataset mix (OD-4) and result labels (OD-5) decided 2026-09-24. Other metric details are **proposed** (marked) until EVAL-003 decides them. Undecided items are TBD / DECISION REQUIRED.
+Status: dataset mix (OD-4), result labels (OD-5), the evidence-slot hit rule (D1) and the refusal rule (D2) decided by the owner 2026-09-24. Other metric details are **proposed** (marked) until EVAL-003 decides them. Undecided items are TBD / DECISION REQUIRED.
 
 ## Known facts
 - At least 30 questions; each case: question, expected answer/ground truth, expected source, generated answer, result.
@@ -34,16 +34,24 @@ Every generated answer gets exactly one `result`:
 | `partially_correct` | answerable | At least one required point present, at least one missing; nothing wrong. |
 | `incorrect` | answerable | A wrong or `must_not_claim` statement, or no required point present. |
 | `false_refusal` | answerable | The system said the documents are insufficient although they contain the answer. |
-| `correct_refusal` | corpus-insufficient | The system said the documents don't contain enough information and made no unsupported claim. |
-| `hallucination` | corpus-insufficient | The system answered anyway (any substantive claim not supported by the documents). |
+| `correct_refusal` | corpus-insufficient | The system said the documents don't contain enough information and made no unsupported claim. It may mention related content from the documents if it says the topic isn't covered and doesn't present that content as the answer (D2). |
+| `hallucination` | corpus-insufficient | The system answered anyway: any substantive claim not supported by the documents, or related content presented as the answer (D2). |
+
+**Who labels unanswerable cases (D2, owner 2026-09-24):** if the system marks the answer insufficient, the result is `correct_refusal` (no judge call). If it doesn't, the LLM judge decides between `correct_refusal` and `hallucination` with the rule above; such answers are never auto-labelled `hallucination`. This needs the generation step to keep `missing_information` and allow optional related citations on insufficient answers (RAG-002).
 
 Plus a **points-covered score** for answerable cases: required points present ÷ required points (e.g. 3/4 = 0.75). It gives finer comparisons between the two arms than the label alone. Optional points never lower the score.
 
+## Retrieval hit rule: evidence slots (D1, decided by the owner 2026-09-24)
+- Every expected and alternate source of an answerable case belongs to one **evidence slot** (`slot: S1`, `S2`, …; test-checked).
+- **All of the slots, any source within a slot.** source hit@5 = 1 when every slot has at least one of its sources among the top-5 chunks. section hit@5 = the same at section level (a top-5 chunk overlaps a span of a section listed in that slot; any variant counts, ADR-0003 D8). An alternate source counts only for its own slot.
+- Most cases have one slot, so any listed source or section counts. Several slots: the 4 cross-document cases (one slot per document) and BP-EVAL-022 (one slot per method, because its blueprint requires both in the top 5).
+- Secondary, reported separately: fraction of slots satisfied.
+- MRR is unchanged: 1 / rank of the first chunk that hits any slot.
+- Citations in cross-document cases: one per slot, from any source in that slot (e.g. BP-EVAL-031 slot S2 = #26 or #20).
+
 ## Proposed for EVAL-003 (not decided; marked `metric_decision: proposed`)
 - **Citation quality** (method is OD-12): one label per answer: `correct_evidence` (a cited chunk contains the evidence for the answer's claim), `correct_source_wrong_evidence` (right document, but the cited chunk doesn't support the claim), `unsupported_citation` (cited chunk from an unrelated place), `citation_missing`. Judge the chunk *text* against the evidence, not heading strings: Arm A may label a merged small section with the first section's heading path (ADR-0003 D3), and Arm B uses the nearest preceding heading (D5).
-- **Cross-document cases:** source hit@5 = all expected sources in the top 5 (primary); "any expected source" reported as secondary.
-- **Acceptable alternate sources:** a hit on an `acceptable_alternate_sources` section counts as a source/section hit for that case. In cross-document cases each alternate names the expected source it replaces (`stands_in_for`), and counts only for that source under the "all" rule.
-- **Corpus-insufficient cases:** excluded from source hit@5, section hit@5 and MRR (no expected source). Scored only with `correct_refusal` / `hallucination`.
+- **Corpus-insufficient cases:** excluded from source hit@5, section hit@5 and MRR (no expected source). Scored only with `correct_refusal` / `hallucination` (who labels them: D2 above).
 - **Vietnamese questions:** API names and identifiers stay in their original form (e.g. `DbContext`, `UseExceptionHandler`), as a Vietnamese developer would type them.
 - **Record layout:** ground truth lives only in the question files (`data/evaluation/questions/`). Generated answer, citations, retrieved chunks, latency per stage, model used, retry count and `result` go into per-arm result files (`data/evaluation/results/`) keyed by case `id`, so one question set serves both arms.
 

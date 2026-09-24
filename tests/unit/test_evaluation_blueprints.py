@@ -192,14 +192,22 @@ def test_answerable_cases_have_ground_truth_and_criteria():
             assert len({s["source_id"] for s in b["expected_sources"]}) >= 2, b["id"]
 
 
-def test_cross_document_alternates_name_the_source_they_stand_in_for():
-    """Under the "all expected sources in the top 5" rule, an alternate can count only if it says which source it replaces."""
+def test_sources_are_grouped_in_evidence_slots():
+    """Owner decision D1: a retrieval hit needs every slot; within a slot, any listed source counts."""
+    assert "stands_in_for" not in BLUEPRINTS.read_text(encoding="utf-8")
     for b in _blueprints():
-        if b["scope"] != "cross-document":
+        if b["scope"] == "corpus-insufficient":
             continue
-        expected = {s["source_id"] for s in b["expected_sources"]}
-        for alt in b["acceptable_alternate_sources"]:
-            assert alt.get("stands_in_for") in expected, (b["id"], alt["heading_path"])
+        entries = b["expected_sources"] + b["acceptable_alternate_sources"]
+        assert all(re.fullmatch(r"S\d+", str(e.get("slot"))) for e in entries), b["id"]
+        expected_by_slot = defaultdict(set)
+        for s in b["expected_sources"]:
+            expected_by_slot[s["slot"]].add(s["source_id"])
+        assert {a["slot"] for a in b["acceptable_alternate_sources"]} <= set(expected_by_slot), b["id"]
+        if b["scope"] == "cross-document":
+            assert len(expected_by_slot) >= 2, b["id"]
+            documents = [next(iter(ids)) for ids in expected_by_slot.values() if len(ids) == 1]
+            assert len(documents) == len(expected_by_slot) == len(set(documents)), (b["id"], expected_by_slot)
 
 
 def test_every_required_point_is_supported_by_a_quote():
