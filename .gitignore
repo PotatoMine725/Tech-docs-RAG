@@ -151,6 +151,7 @@ activemq-data/
 .env
 .envrc
 .venv
+.cache/
 env/
 venv/
 ENV/
@@ -216,3 +217,15 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- Knowledge Assistant ---
+# Real secrets never committed; .env.example is the tracked template.
+.env
+!.env.example
+# Generated vector-store data: policy TBD (DECISION REQUIRED). Ignored by default; .gitkeep tracked.
+data/chroma/*
+!data/chroma/.gitkeep
+output/reports/*
+output/exports/*
+!output/reports/.gitkeep
+!output/exports/.gitkeep

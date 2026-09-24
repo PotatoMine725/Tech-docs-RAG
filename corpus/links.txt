@@ -1,0 +1,29 @@
+1. **Asynchronous programming - C# | Microsoft Learn**: https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/
+2. **Asynchronous programming scenarios - C# | Microsoft Learn**: https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/async-scenarios
+3. **Best practices for writing unit tests - .NET - Microsoft Learn**: https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-best-practices
+4. **Built-in types and literals - C# | Microsoft Learn**: https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/built-in-types
+5. **C# Guide - .NET managed language - Microsoft Learn**: https://learn.microsoft.com/en-us/dotnet/csharp/
+6. **C# Keywords and contextual keywords - C# reference - Microsoft Learn**: https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/
+7. **C# classes - Microsoft Learn**: https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/classes
+8. **C# docs - get started, tutorials, reference. - A tour of C# | Microsoft Learn**: https://learn.microsoft.com/en-us/dotnet/csharp/tour-of-csharp/
+9. **C# language reference - Microsoft Learn**: https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/
+10. **Dependency injection in ASP.NET Core | Microsoft Learn**: https://learn.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-10.0
+11. **Factory-based middleware activation in ASP.NET Core - Microsoft Learn**: https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/extensibility?view=aspnetcore-10.0
+12. **Handle errors in ASP.NET Core APIs - Microsoft Learn**: https://learn.microsoft.com/en-us/aspnet/core/fundamentals/error-handling-api?view=aspnetcore-10.0
+13. **Handle errors in ASP.NET Core | Microsoft Learn**: https://learn.microsoft.com/en-us/aspnet/core/fundamentals/error-handling?view=aspnetcore-10.0
+14. **Hello World - Introductory tutorial - A tour of C# | Microsoft Learn**: https://learn.microsoft.com/en-us/dotnet/csharp/tour-of-csharp/tutorials/hello-world
+15. **How to create backend application using Asp.net C# Web API Core - Microsoft Learn**: https://learn.microsoft.com/en-gb/answers/questions/1679916/how-to-create-backend-application-using-asp-net-c
+16. **Integral numeric types (C# reference) - Microsoft Learn**: https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/integral-numeric-types
+17. **Integration tests in ASP.NET Core | Microsoft Learn**: https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-10.0
+18. **Introduction - C# language specification | Microsoft Learn**: https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/introduction
+19. **Order unit tests - .NET | Microsoft Learn**: https://learn.microsoft.com/en-us/dotnet/core/testing/order-unit-tests
+20. **Overview - A tour of C# | Microsoft Learn**: https://learn.microsoft.com/en-us/dotnet/csharp/tour-of-csharp/overview
+21. **Pattern matching using the is and switch expressions. - C# reference - Microsoft Learn**: https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/patterns
+22. **Querying Data - EF Core - Microsoft Learn**: https://learn.microsoft.com/en-us/ef/core/querying/
+23. **Routing in ASP.NET Core | Microsoft Learn**: https://learn.microsoft.com/en-us/aspnet/core/fundamentals/routing?view=aspnetcore-10.0
+24. **Sharing services added with dependencies via the basic view - Microsoft Q&A**: https://learn.microsoft.com/en-gb/answers/questions/1512035/sharing-services-added-with-dependencies-via-the-b
+25. **Technical Source Selection and Evaluation for a C#/.NET Retrieval-Augmented Generation Knowledge Base**: *(Nguồn tài liệu Markdown nội bộ, không có URL web bên ngoài)*
+26. **The C# type system - Microsoft Learn**: https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/
+27. **Understanding the Routing Mechanism in ASP.NET Core - Multicode**: https://multicode.io/understanding-the-routing-mechanism-in-asp-net-core/
+28. **Unit testing C# code in .NET using dotnet test and xUnit - .NET - Microsoft Learn**: https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-csharp-with-xunit
+29. **asp0033.md - AspNetCore.Docs - GitHub**: https://github.com/dotnet/AspNetCore.Docs/blob/main/aspnetcore/diagnostics/asp0033.md
