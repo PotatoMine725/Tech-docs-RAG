@@ -37,7 +37,7 @@
 |---|---|---|
 | Thu 24 Sep | This master plan | — |
 | Fri 25 Sep | EPIC-01 corpus analysis. Start EPIC-02 (core models, Markdown parser, normalization). Answer OD-1…OD-3. | **G1** |
-| Sat 26 Sep | EVAL-001: questions + ground truth, **committed to git**. Finish EPIC-02 chunkers + stats. | **M1 ground truth frozen**, **G2** |
+| Sat 26 Sep | EVAL-001: design the dataset (mix, coverage, rubric). Then EVAL-002: write the questions + ground truth, **committed to git**. Finish EPIC-02 chunkers + stats. | **M1 ground truth frozen**, **G2** |
 | Sun 27 Sep | EPIC-03. First check V-1 (how embedding requests are counted). Index Arm A before 14:00 and Arm B after 14:00 if quota needs it (two quota days in one calendar day). Then retrieval, generation, citations, "insufficient information", retry/fallback. | **M2 first end-to-end answer** |
 | Mon 28 Sep | Finish EPIC-03. EPIC-05 stage B: runner + metrics (offline tests). Retrieval-only metrics for both arms (embeddings only, cheap). Dry run of 3–5 questions after 14:00. Start EPIC-04 GUI. | **G3** |
 | Tue 29 Sep | Morning: full answer + judge run, both arms. After 14:00: fresh quota → re-run slot if needed. Judge spot-check. Finish GUI. Draft evaluation report. | **G4**, **G5B** |
@@ -59,7 +59,7 @@
 
 ```mermaid
 flowchart LR
-  E01["EPIC-01 Corpus analysis"] --> E05A["EPIC-05 A: EVAL-001 questions + ground truth"]
+  E01["EPIC-01 Corpus analysis"] --> E05A["EPIC-05 A: EVAL-001 design, EVAL-002 questions + ground truth"]
   E01 -.-> E02["EPIC-02 Ingestion"]
   E05A ==>|"M1: committed before any index"| E03["EPIC-03 RAG baseline"]
   E02 --> E03
@@ -74,7 +74,7 @@ flowchart LR
   E07 --> D(("1 Oct deadline"))
 ```
 
-**Critical path** (a delay here delays the deadline): EPIC-01 → EVAL-001 freeze (M1) → EPIC-03 indexing (also needs EPIC-02) → EPIC-05 stage B run → EPIC-06 → EPIC-07 → 1 Oct.
+**Critical path** (a delay here delays the deadline): EPIC-01 → EVAL-001 design → EVAL-002 freeze (M1) → EPIC-03 indexing (also needs EPIC-02) → EPIC-05 stage B run → EPIC-06 → EPIC-07 → 1 Oct.
 EPIC-04 (GUI) is off the critical path: build it while evaluation runs or waits for quota.
 
 ## 4. Epics
@@ -157,19 +157,21 @@ Exit gate **G4**:
 ### EPIC-05 Evaluation
 Two stages, because the questions must be frozen before indexing, but scoring needs the finished pipeline. **Role:** evaluation-designer.
 
-**Stage A — EVAL-001 Design evaluation dataset.** **When:** Sat 26 Sep · **Phase:** 1
+**Stage A — evaluation dataset.** **When:** Sat 26 Sep · **Phase:** 1 · **Proposed tasks:**
+- **EVAL-001 Design evaluation dataset** (prompt in `docs/prompt-log/claude-code/`): the design only. Question mix (OD-4), coverage plan, answer rubric and "result" values (OD-5). No final questions yet.
+- **EVAL-002 Write and freeze the dataset:** write the ≥ 30 questions + ground truth following the EVAL-001 design, then commit (M1).
+
 Deliverables:
-- ≥ 30 cases → `data/evaluation/questions/` (JSONL). Each case: id, question, `language` (en/vi), expected answer (ground truth), expected `source_id`, expected heading path, EN/VI pair id for the parallel subset (ADR-0003 D8/D9).
-- Coverage: small docs (#09, #18, #22, #29) as well as #13/#17/#23; both languages; mix per OD-4. Any "not in the documents" questions must never be built from excluded docs (CLAUDE.md rule 4).
-- Answer-quality rubric and allowed values of the "result" field written into `docs/specs/evaluation-spec.md` (OD-5).
-- Offline schema test for the question file.
+- EVAL-001: dataset design. Coverage must include small docs (#09, #18, #22, #29) as well as #13/#17/#23 and both languages. Any "not in the documents" questions must never be built from excluded docs (CLAUDE.md rule 4). The answer-quality rubric and allowed "result" values are written into `docs/specs/evaluation-spec.md`.
+- EVAL-002: ≥ 30 cases → `data/evaluation/questions/` (JSONL). Each case: id, question, `language` (en/vi), expected answer (ground truth), expected `source_id`, expected heading path, EN/VI pair id for the parallel subset (ADR-0003 D8/D9).
+- EVAL-002: offline schema test for the question file.
 
 Exit gate **G5A = M1 ground truth frozen**:
 - [ ] ≥ 30 cases; schema test passes (every source_id is accepted, every heading path exists in the EPIC-01 inventory, no excluded doc referenced).
 - [ ] File **committed to git before any ChromaDB index is built** — the commit time is the proof.
 - [ ] After the freeze, any change is a logged amendment (what, why, date), never a quiet edit.
 
-**Stage B — runner, metrics, runs, report.** **When:** Mon 28 – Tue 29 Sep · **Phase:** 3 · **Proposed tasks:** EVAL-002 (runner + metrics), EVAL-003 (runs + spot-check + report)
+**Stage B — runner, metrics, runs, report.** **When:** Mon 28 – Tue 29 Sep · **Phase:** 3 · **Proposed tasks:** EVAL-003 (runner + metrics), EVAL-004 (runs + spot-check + report)
 Deliverables:
 - Resumable, checkpointed runner (can stop and continue without repeating paid calls) → `data/evaluation/results/`. One record per case per arm: generated answer, retrieved chunk IDs and ranks, citations, model used, retry/fallback count, latency per stage (embed query, retrieve, generate), judge verdict, result.
 - Metrics (ADR-0003 D8, ADR-0004 D12): source hit@5, section hit@5, MRR (retrieval-only, run first); answer quality by rubric using the `gemini-3.5-flash-lite` judge; citation quality (does the cited chunk contain the evidence; method OD-12); latency, with retried calls reported separately.
@@ -308,6 +310,5 @@ Gaps this plan covers:
 | Core models are one-field stubs | EPIC-02 |
 | Retrieval, project and quality specs mostly TBD | EPIC-03, EPIC-05, EPIC-07 |
 | Agent role files are TBD | When each epic starts (optional) |
-| EVAL-001 prompt file is empty | EPIC-05 stage A |
 | MarkItDown not in `pyproject.toml` | EPIC-02 |
 | `requirements.txt` lacks PySide6 (pyproject has it) | EPIC-07 |
