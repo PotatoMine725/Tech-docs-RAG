@@ -12,7 +12,7 @@ Grounded RAG desktop assistant over a curated corpus. Details live in `docs/`; k
 8. **Tests/validation:** offline tests by default; Gemini tests use `@pytest.mark.gemini` (deselected). Run with `.venv/Scripts/python.exe -m pytest`. MUST NOT report success for unverified checks.
 9. **Data/evaluation:** MUST NOT fabricate results, scores, latency, ground truth. Ground truth (expected `source_id` + heading path) is written before indexes are built; LLM-judge verdicts get a manual spot-check (ADR-0004 D12). Unknown decisions are marked TBD / DECISION REQUIRED.
 10. **Docs:** specs=WHAT/WHY, architecture=HOW, plans=WILL, reports=HAPPENED, reviews=QUALITY, knowledge=DISTILLED, snapshots=POINT-IN-TIME, prompt-log=HISTORY, agents/=OPERATIONAL. Do not merge them.
-11. **Git safety:** MUST NOT commit secrets or overwrite untracked files without a backup. Before editing symbols, follow the GitNexus rules below.
+11. **Git safety:** MUST NOT commit secrets or overwrite untracked files without a backup. Before editing symbols, follow the GitNexus rules below. **Branches:** `dev` is the integration branch; every task/feature branch starts from `dev` and merges back into `dev`. `main` holds stable versions only: merge `dev` → `main` or push `main` only when the owner says so.
 
 Legacy question-bank rules (superseded for this project, preserved): `docs/specs/question-bank-rules.md`.
 
