@@ -45,9 +45,18 @@ absence_proofs:
   - id: ABS-004
     blueprint: BP-EVAL-036
     topic: Verifying calls with the Moq library
-    zero_hit_terms: [Moq, NSubstitute, Times.Once, "Verify(", mocking framework]
-    result: 0 hits for every term in the 24 accepted documents.
-    closest_corpus_text: "#03 'Unit testing terminology' defines fake, mock and stub with hand-written classes; no library."
+    zero_hit_terms: [Moq, NSubstitute, Times.Once, "Verify(", mocking framework, call count]
+    allowed_hits:
+      - term: "Mock<"
+        source_id: "03"
+        heading_path: "Unit testing best practices for .NET > Best practices > Handle stub static references with seams"
+        note: "Creating a mock object: `new Mock<IDateTimeProvider>()` (2 occurrences, both in this section)."
+      - term: ".Setup("
+        source_id: "03"
+        heading_path: "Unit testing best practices for .NET > Best practices > Handle stub static references with seams"
+        note: "Stubbing a return value: `.Setup(dtp => dtp.DayOfWeek()).Returns(DayOfWeek.Monday)`."
+    result: 0 hits for every zero-hit term. The corpus shows creating a mock and stubbing a return value, never verifying how often a method was called.
+    closest_corpus_text: "#03 'Unit testing terminology' defines fake, mock and stub with hand-written classes; #03 'Handle stub static references with seams' uses `new Mock<T>()` and `.Setup(...).Returns(...)` without naming the library and without any call verification."
 
   - id: ABS-005
     blueprint: BP-DEV-005
@@ -96,11 +105,6 @@ distractors:
     affects: [BP-EVAL-027]
     note: "7 copies, each two links; shares vocabulary with #12 validation."
   - source_id: "13"
-    heading_path: "Handle errors in ASP.NET Core > IExceptionHandler"
-    kind: outdated_variant
-    affects: [BP-EVAL-023]
-    note: "Variants 2 and 3 lack the .NET 10 diagnostics statement (only variant 1 has it)."
-  - source_id: "13"
     heading_path: "Handle errors in ASP.NET Core > Developer Exception Page"
     kind: outdated_variant
     affects: [BP-EVAL-003, BP-EVAL-004]
@@ -115,3 +119,13 @@ distractors:
     kind: link_only_section
     affects: [BP-EVAL-035]
     note: "Exact heading match with no content (see ABS-003)."
+  - source_id: "20"
+    heading_path: "A tour of the C# language > Distinctive C# features"
+    kind: same_symbol_other_construct
+    affects: [BP-EVAL-019]
+    note: "Uses `..` as a range expression and as a spread element, not as a list-pattern slice."
+  - source_id: "20"
+    heading_path: "A tour of the C# language"
+    kind: related_statement
+    affects: [BP-EVAL-028]
+    note: "Says C# lets developers write 'highly performant code', which can pull an answer toward 'yes, as fast as C'."

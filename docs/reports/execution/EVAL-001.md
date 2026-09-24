@@ -26,6 +26,12 @@
 - `.venv/Scripts/python.exe -m pytest`: 41 passed at commit `585f434`.
 - Follow-up after review: five evidence quotes had been trimmed so far that they no longer contained the fact they were meant to prove (BP-EVAL-025, 026, 027, 029, BP-DEV-002). They were replaced with full sentences, and 17 missing supporting quotes were added (62 → 79 quotes). Every quote now lists the answer points it `supports`, and a new test fails if a required point has none: 1 failed before the edit, 14 passed after. Matrix: source IDs are quoted.
 - `.venv/Scripts/python.exe -m pytest` after the follow-up: **42 passed**.
+- Independent review (2026-09-24, after the owner's review): a separate read-only agent reported 24 findings (4 high, 9 medium, 11 low) in [`docs/reviews/evaluation/EVAL-001-blueprint-review.md`](../../reviews/evaluation/EVAL-001-blueprint-review.md). Each finding's corpus quote was re-checked by script (all found in the named sections).
+  - While triaging, a YAML defect was found: 32 values cut off at " #" and one variation read as a mapping. It was fixed in `9e0ab15`, with 2 new tests that failed before the fix (44 passed after).
+  - Then all 24 findings were addressed (23 accepted, 1 partly accepted); the response table is section 5 of the review.
+  - A new test for `stands_in_for` failed with the field removed and passed with it.
+  - The evidence map now has 11 distractor sections (one wrong entry removed, two added).
+  - `.venv/Scripts/python.exe -m pytest`: **45 passed**.
 
 ## Exit-gate check (prompt §22)
 | Criterion | Result |

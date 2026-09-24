@@ -24,11 +24,11 @@ Proposed wording rule for EVAL-002: the Vietnamese question is natural Vietnames
 - **Tiny documents with real content:** #22 (3 cases), #29 (2), #18 (1).
 - **Version-heavy documents (ADR-0003):** #13 (5 cases), #23 (3), #17 (1).
 - **Medium documents:** #01, #02, #03, #04, #10, #11, #12, #15, #16, #20, #21, #26, #28.
-- **No expected-source case, on purpose:** #05, #08, #09 are hub pages: links with at most one-line captions. Measured on content lines: #08 has 48 link items out of 50, #09 13 of 15, and #05 is links, icons and short captions. They appear as **distractors** instead (link-list noise). #06 and #07 are covered by the dev set, so the evaluation set stays free of their sections.
+- **No expected-source case, on purpose:** #05, #08, #09 are hub pages: links with at most one-line captions. Measured on content lines: #08 has 48 link items out of 50, #09 13 of 15, and #05 is links, icons and short captions. They appear as **distractors** instead (link-list noise). #06 and #07 are covered by the dev set, so no evaluation case expects their sections. #07 'C# classes' and 'Create objects' appear only as acceptable alternates for 016 (reference assignment), a different fact from the dev case's 'Static classes'.
 - No single document dominates: the most used is #13 with 5 of 32 answerable cases (16%). A huge document is the only expected source in 8 of 32 answerable cases (25%) and one of two sources in 1 more (032), although huge documents hold 73% of the text.
 
 ## 6. Retrieval difficulty
-Only 2 answerable cases are plain semantic matches (`direct_semantic`). The rest carry at least one challenge (full counts in the matrix):
+Only 3 answerable cases are plain semantic matches (`direct_semantic`: 001, 002, 021). The rest carry at least one challenge (full counts in the matrix):
 - evidence in one specific subsection (9);
 - the same topic in another document (11);
 - version variants (9);
@@ -48,7 +48,7 @@ easy 7 · medium 17 · hard 12. Difficulty means how hard the retrieval and reas
 28 single-source, 4 cross-document. Each cross-document case joins two premises that are **each stated in one document**, and neither document alone answers:
 - #10 + #22: default DbContext lifetime + loading one entity.
 - #03 + #28: naming standard + the tutorial's test name.
-- #04 + #26: `default` gives null for reference types + string is a reference type.
+- #04 + #26: `default` gives null for reference types + string is a reference type. #04 alone shows the value (`string? defaultString = default; // null`) but not why; #20 'Familiar C# features' can stand in for #26 (`stands_in_for`, §18).
 - #13 + #10: IExceptionHandler is a singleton + DbContext is scoped + the lifetime rule.
 
 Two of them use the same #10 section on purpose; each uses a different sentence from it and pairs it with a different document.
@@ -56,7 +56,7 @@ Two of them use the same #10 section on purpose; each uses a different sentence 
 ## 10. Failure-mode coverage (ADR-0003)
 | Failure mode | Cases |
 |---|---|
-| Mixed-version answers | 003, 004 (developer exception page), 023 (.NET 10 diagnostics, only variant 1) |
+| Mixed-version answers | 003, 004 (developer exception page), 023 (.NET 10 vs .NET 8/9 diagnostics; every variant states both) |
 | Near-duplicate chunks filling the top 5 | 020 (#04 vs #16), 022 (7 copies each), 024 (5 identical copies) |
 | Fixed-size split of code/table from its explanation | 005, 006 (table), 016, 018 |
 | Link-list / navigation noise | 019, 021 (#08 links), 035 (link-only section) |
@@ -89,8 +89,8 @@ Scoring: `correct_refusal` or `hallucination` (OD-5). They are left out of sourc
   That is how the task's "inspect all 24 documents" was met: the structure of every document from the inventory (headings, sizes, variant counts), and full reads where a case was considered. The rest of the huge documents was not read line by line.
 - Every answer point comes from the text of the cited section. No web search, no model memory, no outside best practice.
 - Every answerable case carries verbatim evidence quotes (≤ 300 chars) with `source_id` and a heading path that exists in the inventory. Each quote lists the answer points it `supports`; a test fails if any required point has no supporting quote.
-- Quotes keep the original Markdown, including link markup such as `[text](url)`. So the EVAL-002 validator and the citation judge must match quotes against a chunk's `display_text`, which keeps links (ADR-0003 D5), after the same whitespace/line-ending normalization. They must not match against `embed_text`, where links are reduced to their text. A test checks that each quote appears inside that section's text (any variant). For case 023, it checks the specific variant that holds the evidence.
-- Variants are never labelled with guessed versions (ADR-0003). When a case depends on one variant, the blueprint records `evidence_variant` by inventory number.
+- Quotes keep the original Markdown, including link markup such as `[text](url)`. So the EVAL-002 validator and the citation judge must match quotes against a chunk's `display_text`, which keeps links (ADR-0003 D5), after the same whitespace/line-ending normalization. They must not match against `embed_text`, where links are reduced to their text. A test checks that each quote appears inside that section's text (any variant), and, when a case sets `evidence_variant`, inside that variant.
+- Variants are never labelled with guessed versions (ADR-0003). When a case depends on one variant, the blueprint records `evidence_variant` by inventory number. No case does at present: 023 used it until the independent review showed that variants 2 and 3 state the .NET 10 behavior too, in other words.
 - Ground truth is written before any chunk or index exists (CLAUDE.md rule 9). Nothing here depends on retrieval results.
 
 ## 13. Answer quality
@@ -106,7 +106,7 @@ Latency is measured by the runner (EVAL-003), never estimated. Each case carries
 ## 16. Duplicate control
 No two blueprints share the same information need, evidence and retrieval challenge. Pairs that look close were kept on purpose:
 - 003/004 and 023 are both mixed-version cases in #13, but on different sections and facts.
-- 013/014 (#10, middleware constructor) and 017 (#11, comparing middleware kinds) touch the same topic with different evidence and levels.
+- 013/014 (#10, middleware constructor) and 017 (#11, comparing middleware kinds) touch the same topic with different evidence and levels. They overlap more than first written: #10 'Service lifetimes', the expected section of 013/014, also answers 017's P1 and P2, so it is listed as an alternate for 017, and #11 sections are alternates for 013/014.
 - 029 and 032 share one #10 section but use different sentences and different second documents.
 - The parallel pairs are intentional repeats (language effect).
 - The dev set uses no section that an evaluation case expects (test-checked).
@@ -119,7 +119,7 @@ No two blueprints share the same information need, evidence and retrieval challe
 
 ## 18. Schema
 Ground truth and generated output are kept in **separate files**, because one question set is run through two arms and each arm produces its own answer.
-- **Question file** (EVAL-002, `data/evaluation/questions/eval-v1.jsonl`, one line per case): `id`, `blueprint_id`, `split`, `question`, `language`, `parallel_group_id`, `scope`, `expected_answer` (short prose from the required points), `answer_points[{id,text,required}]`, `expected_sources[{source_id,heading_path,evidence_variant?}]`, `acceptable_alternate_sources`, `evidence[{source_id,heading_path,quote}]`, `acceptable_variations`, `must_not_claim`, `citation_criteria`, `cognitive_level`, `difficulty`, `size_class`, `failure_mode`, `retrieval_challenges`, `concepts`, `question_chars`. Insufficient cases have empty sources and points and `expected_behavior`.
+- **Question file** (EVAL-002, `data/evaluation/questions/eval-v1.jsonl`, one line per case): `id`, `blueprint_id`, `split`, `question`, `language`, `parallel_group_id`, `scope`, `expected_answer` (short prose from the required points), `answer_points[{id,text,required}]`, `expected_sources[{source_id,heading_path,evidence_variant?}]`, `acceptable_alternate_sources[{source_id,heading_path,stands_in_for?,note}]` (`stands_in_for` is required in cross-document cases: the expected source the alternate replaces under the "all expected sources" hit rule; proposed, test-checked), `evidence[{source_id,heading_path,quote}]`, `acceptable_variations`, `must_not_claim`, `citation_criteria`, `cognitive_level`, `difficulty`, `size_class`, `failure_mode`, `retrieval_challenges`, `concepts`, `question_chars`. Insufficient cases have empty sources and points and `expected_behavior`.
 - **Result file per arm** (EVAL-003/004, `data/evaluation/results/`): `case_id`, `arm`, `retrieved[{rank,chunk_id,source_id,heading_path,char_start,char_end,score}]`, `generated_answer`, `generated_citations[{chunk_id,source_id,heading_path,excerpt}]`, `latency_ms{embed_query,retrieve,generate}`, `model_used`, `retries`, `fallback_used`, `result`, `points_covered`, `citation_label`, `judge_notes`, `spot_checked`.
 - The brief's five fields per record (question, expected answer, expected source, generated answer, result) come from joining the two files by `id`, per arm.
 
@@ -157,7 +157,7 @@ Summary of all cases (`blueprint.yaml` is authoritative):
 | BP-EVAL-020 | vi | — | single-source | #16 Integer literals | analyze | hard | near_duplicate_topk |
 | BP-EVAL-021 | en | — | single-source | #20 File-based apps | recall | easy | link_list_noise |
 | BP-EVAL-022 | vi | — | single-source | #13 UseStatusCodePagesWithRedirects, #13 UseStatusCodePagesWithReExecute | compare | hard | near_duplicate_topk |
-| BP-EVAL-023 | en | — | single-source | #13 IExceptionHandler (variant 1) | explain | hard | mixed_version |
+| BP-EVAL-023 | en | — | single-source | #13 IExceptionHandler | explain | hard | mixed_version |
 | BP-EVAL-024 | vi | — | single-source | #17 Disable shadow copying | apply | medium | near_duplicate_topk |
 | BP-EVAL-025 | en | — | single-source | #23 Short-circuit middleware after routing | apply | medium | specific_heading |
 | BP-EVAL-026 | vi | — | single-source | #15 (Q&A thread, single section) | diagnose | hard | none |
@@ -179,8 +179,8 @@ Dev set (tuning only): BP-DEV-001 #07 static classes (en) · 002 #04 native-size
 |---|---|---|
 | Owner review of the 42 blueprints | **Required before EVAL-002** | EVAL-002 |
 | Citation-quality method (OD-12) and labels | Labels proposed in `evaluation-spec.md`; method open | EVAL-003 |
-| Source hit for cross-document cases (all vs any) | Proposed: "all" primary, "any" secondary | EVAL-003 |
-| Correct-variant check for mixed-version cases | Proposed: section hit@5 counts any variant (D8); failure analysis also reports whether the `evidence_variant` was retrieved | EVAL-003 / EPIC-06 |
+| Source hit for cross-document cases (all vs any) | Proposed: "all" primary, "any" secondary; an alternate counts for the expected source named in its `stands_in_for` | EVAL-003 |
+| Correct-variant check for mixed-version cases | Proposed: section hit@5 counts any variant (D8); failure analysis also reports whether the `evidence_variant` was retrieved when a case sets one (none does at present) | EVAL-003 / EPIC-06 |
 | Refusal rule for "insufficient information" (OD-9) | Open; dev set prepared for tuning it | EPIC-03 |
 | Vietnamese wording rule (identifiers stay English) | Proposed | EVAL-002 |
 | Questions may include short code taken from the page (016, 018) | Proposed | EVAL-002 |

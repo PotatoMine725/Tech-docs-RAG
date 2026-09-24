@@ -192,6 +192,16 @@ def test_answerable_cases_have_ground_truth_and_criteria():
             assert len({s["source_id"] for s in b["expected_sources"]}) >= 2, b["id"]
 
 
+def test_cross_document_alternates_name_the_source_they_stand_in_for():
+    """Under the "all expected sources in the top 5" rule, an alternate can count only if it says which source it replaces."""
+    for b in _blueprints():
+        if b["scope"] != "cross-document":
+            continue
+        expected = {s["source_id"] for s in b["expected_sources"]}
+        for alt in b["acceptable_alternate_sources"]:
+            assert alt.get("stands_in_for") in expected, (b["id"], alt["heading_path"])
+
+
 def test_every_required_point_is_supported_by_a_quote():
     for b in _blueprints():
         points = {p["id"]: p for p in b["ground_truth"]["answer_points"]}

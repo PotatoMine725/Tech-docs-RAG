@@ -76,7 +76,7 @@ blueprints:
     difficulty: easy
     size_class: tiny
     retrieval_target: 'The introduction of #22 (page H1 section).'
-    retrieval_challenges: [tiny_document, cross_lingual]
+    retrieval_challenges: [tiny_document, direct_semantic, cross_lingual]
     evaluation_target:
       capability: Cross-lingual retrieval (VI question, EN chunk) of a fact from a tiny document.
       failure_mode: tiny_doc_single_chunk
@@ -144,6 +144,10 @@ blueprints:
           quote: "Apps created using earlier templates, that is, by using [WebHost.CreateDefaultBuilder](/en-us/dotnet/api/microsoft.aspnetcore.webhost.createdefaultbuilder), can enable the developer exception page by calling"
           supports: [P2]
         - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > Developer exception page"
+          quote: "Don't enable the Developer Exception Page **unless the app is running in the `Development` environment**. Don't share detailed exception information publicly when the app runs in production."
+          supports: [P3]
+        - source_id: "13"
           heading_path: "Handle errors in ASP.NET Core > Developer Exception Page"
           quote: "The preceding code enables the Developer Exception Page ***only*** when the app runs in the `Development` environment."
           supports: [P3]
@@ -206,6 +210,9 @@ blueprints:
       - source_id: "02"
         heading_path: "Asynchronous programming scenarios > Explore the asynchronous programming model > I/O-bound example: Download data from web service"
         note: Partial support (await without Task.Run for I/O).
+      - source_id: "02"
+        heading_path: "Asynchronous programming scenarios > Explore the asynchronous programming model"
+        note: Partial support (two bullets state the split, Task for I/O-bound code and Task.Run for CPU-bound code; supports P2, P1 in part).
     objective: Choose the right async implementation for an I/O-bound task and for a CPU-bound task.
     concepts: [async, await, Task.Run, I/O-bound, CPU-bound, Task Parallel Library]
     cognitive_level: apply
@@ -387,8 +394,9 @@ blueprints:
     ground_truth: &pg005_gt
       answer_points:
         - {id: P1, required: true, text: "Include only one Act per test (for example a separate test per Act, or a parameterized test)."}
-        - {id: P2, required: true, text: "With multiple Acts you can't guarantee that all Asserts execute: after one Assert fails, the rest of the test is treated as failing, which can make working functionality look broken."}
+        - {id: P2, required: true, text: "Multiple Acts need to be asserted individually, and you can't guarantee that all Asserts execute."}
         - {id: P3, required: true, text: "At least one benefit of a single Act: you can see which Act fails, the test stays focused on one case, or you get a clear picture of why it fails."}
+        - {id: P4, required: false, text: "In most unit testing frameworks, after an Assert fails, all subsequent tests are considered failing, so working functionality can look broken."}
       evidence:
         - source_id: "03"
           heading_path: "Unit testing best practices for .NET > Best practices > Avoid multiple Act tasks"
@@ -398,6 +406,10 @@ blueprints:
           heading_path: "Unit testing best practices for .NET > Best practices > Avoid multiple Act tasks"
           quote: "Multiple Act tasks need to be individually asserted, and you can't guarantee that all Assert tasks execute."
           supports: [P2]
+        - source_id: "03"
+          heading_path: "Unit testing best practices for .NET > Best practices > Avoid multiple Act tasks"
+          quote: "In most unit testing frameworks, after an Assert task fails in a unit test, all subsequent tests are automatically considered as failing."
+          supports: [P4]
         - source_id: "03"
           heading_path: "Unit testing best practices for .NET > Best practices > Avoid multiple Act tasks"
           quote: "You can easily discern which Act task is failing if the test fails."
@@ -539,6 +551,15 @@ blueprints:
       - source_id: "11"
         heading_path: "Factory-based middleware activation in ASP.NET Core"
         note: Supports P3 only.
+      - source_id: "11"
+        heading_path: "Factory-based middleware activation in ASP.NET Core > Additional resources"
+        note: Supports P3 only (the intros of variants 2-3 are stored under this heading and repeat the per-request sentence).
+      - source_id: "11"
+        heading_path: "Factory-based middleware activation in ASP.NET Core > IMiddleware"
+        note: Supports P2 and P3 by example (conventional InvokeAsync parameter vs IMiddleware constructor).
+      - source_id: "10"
+        heading_path: "Dependency injection in ASP.NET Core > Lifetime and registration options"
+        note: Supports P2 only ("Scoped and transient services must be resolved in the `InvokeAsync` method.").
     objective: Diagnose a runtime exception when middleware takes a scoped service in its constructor, and name the fixes.
     concepts: [middleware, scoped lifetime, constructor injection, InvokeAsync, factory-based middleware]
     cognitive_level: diagnose
@@ -577,7 +598,7 @@ blueprints:
         - Register the service as a singleton to fix it.
         - Constructor injection of scoped services works in conventional middleware.
     citation_acceptance_criteria: &pg007_cit
-      - 'P1 and P2 must be supported by the #10 ''Service lifetimes'' chunk; P3 by #10 or #11.'
+      - 'P1 must be supported by the #10 ''Service lifetimes'' chunk; P2 by #10 (''Service lifetimes'' or ''Lifetime and registration options'') or #11 ''IMiddleware''; P3 by #10 or #11.'
     question_notes: Describe the symptom (exception at runtime when the middleware constructor takes a scoped service).
     reason_for_inclusion: Hard diagnose parallel case on a medium-large document.
 
@@ -676,7 +697,16 @@ blueprints:
     expected_sources:
       - source_id: "26"
         heading_path: "The C# type system > Value types and reference types"
-    acceptable_alternate_sources: []
+    acceptable_alternate_sources:
+      - source_id: "07"
+        heading_path: "C# classes"
+        note: Partial support for P1 (assigning a class variable copies the reference, so both variables point to the same object).
+      - source_id: "07"
+        heading_path: "C# classes > Create objects"
+        note: Partial support for P1 and P2 (reference sharing for classes; with structs, assignment copies the data).
+      - source_id: "20"
+        heading_path: "A tour of the C# language > Familiar C# features"
+        note: Partial support for P1 (collections are reference types).
     objective: Predict what happens after assigning a list variable to another and changing it through the second one.
     concepts: [value types, reference types, assignment semantics, List<T>]
     cognitive_level: apply
@@ -687,13 +717,13 @@ blueprints:
     evaluation_target:
       capability: Apply an explained rule to a code example.
       failure_mode: fixed_size_code_split
-      why_it_matters: The rule (prose) and the example (code) are in the same section; a fixed-size cut may separate them.
+      why_it_matters: The section (1,847 chars) is over the 1,600-char max, so both arms split it. Arm A splits at paragraph or sentence boundaries and keeps code blocks whole (ADR-0003 D4); Arm B cuts at fixed positions. The case shows where each arm separates the rule (prose) from the example (code).
       expected_behavior: The answer predicts 4 and explains it with reference semantics.
       rationale: 'Code plus explanation in one section; #04/#16 overlap on types.'
     ground_truth:
       answer_points:
         - {id: P1, required: true, text: "list1.Count is 4: List<int> is a reference type, so list1 and list2 point to the same object and the Add through list2 is visible through list1."}
-        - {id: P2, required: true, text: "Value types (structs such as the Coords record struct, enums, built-in numeric types) copy their data on assignment, so changing one variable doesn't affect the other."}
+        - {id: P2, required: false, text: "Value types (structs such as the Coords record struct, enums, built-in numeric types) copy their data on assignment, so changing one variable doesn't affect the other."}
         - {id: P3, required: false, text: "Classes, arrays, delegates and strings are reference types."}
       evidence:
         - source_id: "26"
@@ -712,7 +742,7 @@ blueprints:
         - List<T> is a value type.
     citation_acceptance_criteria:
       - The cited chunk contains the reference-type assignment rule.
-    question_notes: Include the list1/list2 snippet (it is short and taken from the page); ask for list1.Count and why.
+    question_notes: Include the list1/list2 snippet from the page but remove its output comments (e.g. `// 4 — same object`), which give the answer away; ask for list1.Count and why.
     reason_for_inclusion: Easy apply case, Vietnamese, code plus prose.
 
   - id: BP-EVAL-017
@@ -731,6 +761,9 @@ blueprints:
       - source_id: "11"
         heading_path: "Factory-based middleware activation in ASP.NET Core > Additional resources"
         note: The intros of variants 2 and 3 are stored under this heading (the variant has no own H1).
+      - source_id: "10"
+        heading_path: "Dependency injection in ASP.NET Core > Service lifetimes"
+        note: Partial support for P1 and P2 (inject into Invoke/InvokeAsync, or use factory-based middleware activated per request). Same sentences as PG-007.
     objective: Compare how conventional middleware and factory-activated (IMiddleware) middleware get a scoped service.
     concepts: [IMiddleware, IMiddlewareFactory, conventional middleware, scoped services, UseMiddleware]
     cognitive_level: compare
@@ -786,8 +819,8 @@ blueprints:
         heading_path: "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Logical patterns > Precedence and order of checking"
     acceptable_alternate_sources:
       - source_id: "21"
-        heading_path: "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Logical patterns"
-        note: Parent H2.
+        heading_path: "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Parenthesized pattern"
+        note: Partial support for P3 and P4 (parentheses emphasize or change precedence in logical patterns).
     objective: Diagnose why `c is not >= 'a' and <= 'z'` does not mean "not a lowercase letter", and fix it.
     concepts: [pattern matching, logical patterns, not, and, or, precedence]
     cognitive_level: diagnose
@@ -798,7 +831,7 @@ blueprints:
     evaluation_target:
       capability: Explain a precedence bug shown in code.
       failure_mode: fixed_size_code_split
-      why_it_matters: The explanation alternates with three short code blocks; a fixed-size cut can separate the bug from its fix.
+      why_it_matters: The section (1,842 chars) is over the 1,600-char max, so both arms split it. Arm A splits at paragraph boundaries and keeps its three short code blocks whole (ADR-0003 D4); Arm B cuts at fixed positions and can separate the bug from its fix.
       expected_behavior: The answer names the binding order and gives the parenthesized fix.
       rationale: Code/explanation interleaving is where the two chunkers differ most.
     ground_truth:
@@ -872,7 +905,7 @@ blueprints:
           supports: [P3]
     answer_acceptance_criteria:
       acceptable_variations:
-        - "\"range/slice `..`\""
+        - "\"slice\" for the `..` slice pattern (not \"range\": #20 uses \"range\" for a different construct)"
       must_not_claim:
         - A slice must match at least one element.
         - Several slice patterns are allowed in one list pattern.
@@ -1018,15 +1051,16 @@ blueprints:
     evaluation_target:
       capability: Retrieve both halves of a comparison when each half has 7 near-identical copies.
       failure_mode: near_duplicate_topk
-      why_it_matters: Copies of one method can fill all 5 slots and push out the other method.
+      why_it_matters: Copies of one method can fill all 5 slots and push out the other method. The copies also differ by version; variants 1-4 of the ReExecute H3 say the new pipeline may change the status code, while variants 5-6 and the older H2 only say the original code is returned, so that qualifier is an optional point.
       expected_behavior: Both methods appear in the top 5; the answer contrasts status code and address bar.
       rationale: Direct test of near-duplicate crowding in a huge document.
     ground_truth:
       answer_points:
         - {id: P1, required: true, text: "UseStatusCodePagesWithRedirects sends a 302 Found to the client and redirects it to the error endpoint (which typically returns 200); the original status code is not preserved."}
-        - {id: P2, required: true, text: "UseStatusCodePagesWithReExecute re-executes the request pipeline with an alternate path to generate the response body and does not alter the status code, so the original code is returned unless the new pipeline changes it."}
+        - {id: P2, required: true, text: "UseStatusCodePagesWithReExecute re-executes the request pipeline with an alternate path to generate the response body and does not alter the status code, so the original code is returned."}
         - {id: P3, required: true, text: "With redirects the browser address bar shows the error endpoint; with re-execute it shows the originally requested URL."}
         - {id: P4, required: false, text: "Both take a URL template with a {0} status-code placeholder; the re-execute template must start with '/'."}
+        - {id: P5, required: false, text: "Variants 1-4 add that the re-executed pipeline may change the status code; if it doesn't, the original code is sent."}
       evidence:
         - source_id: "13"
           heading_path: "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithRedirects"
@@ -1040,6 +1074,10 @@ blueprints:
           heading_path: "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithReExecute"
           quote: "Does not alter the status code before or after re-executing the pipeline."
           supports: [P2]
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithReExecute"
+          quote: "The new pipeline execution may alter the response's status code, as the new pipeline has full control of the status code. If the new pipeline does not alter the status code, the original status code will be sent to the client."
+          supports: [P5]
         - source_id: "13"
           heading_path: "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithRedirects"
           quote: "For web apps, the client's browser address bar reflects the redirected endpoint."
@@ -1069,24 +1107,23 @@ blueprints:
     expected_sources:
       - source_id: "13"
         heading_path: "Handle errors in ASP.NET Core > IExceptionHandler"
-        evidence_variant: 1
     acceptable_alternate_sources:
       - source_id: "13"
         heading_path: "Handle errors in ASP.NET Core > IExceptionHandler > SuppressDiagnosticsCallback"
-        note: Single copy; supports P3.
+        note: Single copy; supports P2 and P3.
     objective: Explain whether logs and metrics are emitted for exceptions an IExceptionHandler handles.
     concepts: [IExceptionHandler, TryHandleAsync, diagnostics, SuppressDiagnosticsCallback, .NET 10]
     cognitive_level: explain
     difficulty: hard
     size_class: huge
-    retrieval_target: "Variant 1 of #13 'IExceptionHandler' (the only variant with the .NET 10 statement)."
-    retrieval_challenges: [version_variants, variant_specific_evidence]
+    retrieval_target: "#13 'IExceptionHandler' (3 variants; each states both the .NET 8/9 and the .NET 10 behavior, in different words) or its single-copy subsection 'SuppressDiagnosticsCallback'."
+    retrieval_challenges: [version_variants]
     evaluation_target:
-      capability: Retrieve the one variant whose text states a version-specific behavior.
+      capability: Keep two version-specific behaviors apart when the retrieved text states both.
       failure_mode: mixed_version
-      why_it_matters: Variants 2-3 describe IExceptionHandler without the .NET 10 change, so retrieving them gives an outdated answer.
-      expected_behavior: Variant 1 is retrieved; the answer separates .NET 10 behavior from .NET 8/9 behavior.
-      rationale: Section hit@5 counts any variant (ADR-0003 D8); failure analysis checks whether variant 1 was retrieved.
+      why_it_matters: The answer depends on the .NET version. Every variant says .NET 8/9 always emit diagnostics and .NET 10 suppresses them by default; an answer that gives one behavior as the only truth is wrong for the other versions.
+      expected_behavior: An 'IExceptionHandler' chunk (any variant) or the 'SuppressDiagnosticsCallback' chunk is in the top 5; the answer separates .NET 10 behavior from .NET 8/9 behavior.
+      rationale: Section hit@5 counts any variant (ADR-0003 D8); the expected failure is a mixed-version answer, not a retrieval miss.
     ground_truth:
       answer_points:
         - {id: P1, required: true, text: "Starting in .NET 10, diagnostics such as logs and metrics are suppressed by default for handled exceptions (TryHandleAsync returns true)."}
@@ -1106,6 +1143,14 @@ blueprints:
           heading_path: "Handle errors in ASP.NET Core > IExceptionHandler"
           quote: "The default behavior can be changed by setting [SuppressDiagnosticsCallback](#suppressdiagnosticscallback)."
           supports: [P3]
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > IExceptionHandler"
+          quote: "Starting in .NET 10, diagnostics are suppressed by default for handled exceptions."
+          supports: [P1]
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > IExceptionHandler > SuppressDiagnosticsCallback"
+          quote: "To revert to the .NET 8 and 9 behavior where diagnostics are always emitted for handled exceptions, set the callback to always return `false`:"
+          supports: [P2, P3]
     answer_acceptance_criteria:
       acceptable_variations:
         - "\"telemetry\" for logs and metrics"
@@ -1113,9 +1158,9 @@ blueprints:
         - Diagnostics are always emitted for handled exceptions (stated as current behavior).
         - The behavior cannot be changed.
     citation_acceptance_criteria:
-      - P1/P2 must cite a chunk from variant 1 of 'IExceptionHandler'; a chunk from variants 2-3 = correct_source_wrong_evidence.
+      - Any variant of 'IExceptionHandler' or the 'SuppressDiagnosticsCallback' subsection can support P1-P3; the cited chunk must contain the version statement it is cited for.
     question_notes: Ask whether handled exceptions still produce logs and metrics, without naming a version.
-    reason_for_inclusion: Mixed-version case where only one variant holds the answer.
+    reason_for_inclusion: Mixed-version case where the correct answer depends on the .NET version and the text states both behaviors.
 
   - id: BP-EVAL-024
     split: eval
@@ -1143,12 +1188,12 @@ blueprints:
       rationale: Measures how many top-5 slots copies take in each arm.
     ground_truth:
       answer_points:
-        - {id: P1, required: true, text: "Shadow copying runs the tests in a different directory than the output directory, which breaks tests that load files relative to Assembly.Location."}
+        - {id: P1, required: true, text: "Shadow copying runs the tests in a different directory than the output directory; tests that load files relative to Assembly.Location may then run into issues, and disabling shadow copying is the fix."}
         - {id: P2, required: true, text: "With xUnit, add an xunit.runner.json file in the test project directory containing \"shadowCopy\": false."}
       evidence:
         - source_id: "17"
           heading_path: "Integration tests in ASP.NET Core > Disable shadow copying"
-          quote: "Shadow copying causes the tests to execute in a different directory than the output directory."
+          quote: "Shadow copying causes the tests to execute in a different directory than the output directory. If your tests rely on loading files relative to `Assembly.Location` and you encounter issues, you might have to disable shadow copying."
           supports: [P1]
         - source_id: "17"
           heading_path: "Integration tests in ASP.NET Core > Disable shadow copying"
@@ -1195,8 +1240,9 @@ blueprints:
     ground_truth:
       answer_points:
         - {id: P1, required: true, text: "Use `app.MapShortCircuit(404, \"robots.txt\", \"favicon.ico\");` to short-circuit several URL prefixes at once."}
-        - {id: P2, required: true, text: "Short-circuiting makes routing invoke the endpoint logic immediately and end the request, so the rest of the pipeline (e.g. authentication or CORS middleware) doesn't run."}
+        - {id: P2, required: true, text: "Short-circuiting makes routing invoke the endpoint logic immediately and end the request, so middleware that would run after routing (e.g. authentication or CORS) is skipped."}
         - {id: P3, required: false, text: "A single route can use `.ShortCircuit()` (optionally with a status code); MapShortCircuit returns IEndpointConventionBuilder, so constraints such as host filtering can be added."}
+        - {id: P4, required: false, text: "Caveat: it doesn't affect middleware placed before UseRouting, and endpoints with [Authorize] or [RequireCors] metadata fail with InvalidOperationException."}
       evidence:
         - source_id: "23"
           heading_path: "Routing in ASP.NET Core > Short-circuit middleware after routing"
@@ -1210,6 +1256,10 @@ blueprints:
           heading_path: "Routing in ASP.NET Core > Short-circuit middleware after routing"
           quote: "For example, a given route might not need to go through authentication or CORS middleware."
           supports: [P2]
+        - source_id: "23"
+          heading_path: "Routing in ASP.NET Core > Short-circuit middleware after routing"
+          quote: "The `ShortCircuit` and `MapShortCircuit` methods do not affect middleware placed before `UseRouting`. Trying to use these methods with endpoints that also have `[Authorize]` or `[RequireCors]` metadata will cause requests to fail with an `InvalidOperationException`."
+          supports: [P4]
     answer_acceptance_criteria:
       acceptable_variations:
         - The status code may be different if the answer explains it's the response code.
@@ -1283,7 +1333,10 @@ blueprints:
     expected_sources:
       - source_id: "12"
         heading_path: "Handle errors in ASP.NET Core APIs > Additional error handling features > Validation failure error response"
-    acceptable_alternate_sources: []
+    acceptable_alternate_sources:
+      - source_id: "12"
+        heading_path: "Handle errors in ASP.NET Core APIs > Additional error handling features > Key differences for controllers"
+        note: Partial support (automatic 400 responses on validation failure; override InvalidModelStateResponseFactory for custom formatting).
     objective: Recall what web API controllers return on model validation failure and how to customize it.
     concepts: [ValidationProblemDetails, InvalidModelStateResponseFactory, ConfigureApiBehaviorOptions, model validation]
     cognitive_level: recall
@@ -1318,11 +1371,12 @@ blueprints:
     answer_acceptance_criteria:
       acceptable_variations:
         - "\"400 validation problem response\" if ValidationProblemDetails is also named"
+        - "For the how-to-customize part, registering a custom ProblemDetailsFactory is also grounded (#12 'Implement `ProblemDetailsFactory`': it produces ValidationProblemDetails and is used for validation failure error responses)."
       must_not_claim:
         - The response is 500 or 404.
         - It is customized through UseExceptionHandler.
     citation_acceptance_criteria:
-      - 'The cited chunk is from #12 ''Validation failure error response''.'
+      - 'The cited chunk is from #12 ''Validation failure error response'' (or ''Key differences for controllers'' for P2; ''Implement `ProblemDetailsFactory`'' for the ProblemDetailsFactory route).'
     question_notes: Ask what a controller API sends back when a posted model is invalid and how to change that format.
     reason_for_inclusion: Large-vs-small document competition.
 
@@ -1413,6 +1467,7 @@ blueprints:
     answer_acceptance_criteria:
       acceptable_variations:
         - Any context variable name.
+        - "Loading by key with FindAsync (the corpus shows `_context.TodoItems.FindAsync(id)` in #23 'Routing with special characters') instead of SingleAsync."
       must_not_claim:
         - DbContext is registered as singleton or transient by default.
     citation_acceptance_criteria:
@@ -1479,7 +1534,7 @@ blueprints:
         - The name is missing the expected-behavior part.
     citation_acceptance_criteria:
       - One citation per premise; each from the matching document.
-    question_notes: Name the test method in the question; ask whether it follows the naming standard.
+    question_notes: "Don't give the full test method name (with the name in the question, #03 alone answers it). Ask whether the name of the test that the dotnet test + xUnit tutorial adds for IsPrime with values below 2 follows the unit-test naming standard, so #28 is needed to find the name."
     reason_for_inclusion: Cross-document analyze case, Vietnamese.
 
   - id: BP-EVAL-031
@@ -1494,7 +1549,11 @@ blueprints:
         heading_path: "Built-in types and literals > `default` expressions"
       - source_id: "26"
         heading_path: "The C# type system > Value types and reference types"
-    acceptable_alternate_sources: []
+    acceptable_alternate_sources:
+      - source_id: "20"
+        heading_path: "A tour of the C# language > Familiar C# features"
+        stands_in_for: "26"
+        note: States that string is a reference type ("reference types like `string`, arrays, and other collections").
     objective: Explain the default value of a string from the kind of type string is.
     concepts: [default expression, reference types, value types, string]
     cognitive_level: analyze
@@ -1505,13 +1564,13 @@ blueprints:
     evaluation_target:
       capability: Chain two facts from two type-system docs.
       failure_mode: none
-      why_it_matters: "#04, #16 and #26 overlap on types; both premises must be found."
+      why_it_matters: "#04, #16, #20 and #26 overlap on types. #04 alone gives the value (`string? defaultString = default;   // null`); the why (string is a reference type) needs #26 or #20."
       expected_behavior: Both sources in the top 5; the answer says null because string is a reference type.
       rationale: Each premise is stated independently in one document.
     ground_truth:
       answer_points:
         - {id: P1, required: true, text: "`default` produces null for a string, because string is a reference type and default is null for reference types."}
-        - {id: P2, required: true, text: "For value types default is a value, e.g. 0 for numeric types and false for bool."}
+        - {id: P2, required: false, text: "For value types default is a value, e.g. 0 for numeric types and false for bool."}
         - {id: P3, required: false, text: "Classes, arrays, delegates and strings are reference types; structs, enums and built-in numeric types are value types."}
       evidence:
         - source_id: "04"
@@ -1728,11 +1787,11 @@ blueprints:
       evidence: []
     answer_acceptance_criteria:
       acceptable_variations:
-        - 'The refusal may explain what #03 says about mocks in general.'
+        - 'The refusal may say what #03 does show (creating a `Mock<T>` and stubbing a return value with `.Setup(...).Returns(...)` in ''Handle stub static references with seams''), as long as it says that verifying how often a method was called is not covered.'
       must_not_claim:
-        - Any Moq API (setup/verify methods, call-count options) presented as from the documents.
+        - Any call-verification or call-count API (e.g. Verify, Times.Once) presented as from the documents.
     citation_acceptance_criteria:
-      - 'Citing #03 terminology as evidence for a Moq API = hallucination.'
+      - 'Citing #03 (terminology or the seams example) as evidence for a call-verification API = hallucination.'
     question_notes: Keep "Moq", "mock" in English.
     reason_for_inclusion: Testing near-miss (VI).
 
@@ -1793,7 +1852,13 @@ blueprints:
     expected_sources:
       - source_id: "04"
         heading_path: "Built-in types and literals > Numeric types > Native-sized integers"
-    acceptable_alternate_sources: []
+    acceptable_alternate_sources:
+      - source_id: "16"
+        heading_path: "Integral numeric types (C# reference) > Characteristics of the integral types"
+        note: Supports P1 (32-bit in a 32-bit process, 64-bit in a 64-bit process) and names interop uses.
+      - source_id: "16"
+        heading_path: "Integral numeric types (C# reference) > Native sized integers"
+        note: Partial support for P1 (storage matches the natural integer size of the machine).
     objective: Recall what nint and nuint are and when to use them.
     concepts: [nint, nuint, native-sized integers, interop]
     cognitive_level: recall
@@ -1825,7 +1890,7 @@ blueprints:
       must_not_claim:
         - nint is always 64 bits.
     citation_acceptance_criteria:
-      - "The cited chunk is from #04 'Native-sized integers' (#16 'Native sized integers' is acceptable if it states the same)."
+      - "The cited chunk is from #04 'Native-sized integers', or from a listed #16 alternate for the point it states."
     question_notes: Dev set.
     reason_for_inclusion: Dev set, VI answerable.
 
@@ -1839,7 +1904,10 @@ blueprints:
     expected_sources:
       - source_id: "06"
         heading_path: "C# keywords > Contextual keywords"
-    acceptable_alternate_sources: []
+    acceptable_alternate_sources:
+      - source_id: "06"
+        heading_path: "C# keywords"
+        note: Supports P1 ("Contextual keywords have special meaning only in a limited program context and can be used as identifiers outside that context.").
     objective: Explain what a contextual keyword is.
     concepts: [contextual keywords, reserved words]
     cognitive_level: explain
@@ -1867,7 +1935,7 @@ blueprints:
       must_not_claim:
         - Contextual keywords are reserved words.
     citation_acceptance_criteria:
-      - 'The cited chunk is from #06 ''Contextual keywords''.'
+      - 'The cited chunk is from #06 ''Contextual keywords'' or the #06 page introduction.'
     question_notes: Dev set.
     reason_for_inclusion: Dev set, EN answerable.
 
@@ -1981,9 +2049,11 @@ blueprints:
       answer_points: []
       evidence: []
     answer_acceptance_criteria:
-      acceptable_variations: []
+      acceptable_variations:
+        - 'The refusal may mention that #23 shows route groups (MapGroup) with a common prefix, as long as it says versioning itself is not covered.'
       must_not_claim:
         - Any API-versioning package or attribute presented as from the documents.
+        - MapGroup or a route prefix such as /v1 presented as the documents' way to version an API.
     citation_acceptance_criteria:
       - No citation is required.
     question_notes: Dev set.

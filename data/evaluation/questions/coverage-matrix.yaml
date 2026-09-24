@@ -41,7 +41,7 @@ eval:
     community_content: 1
     cross_lingual: 18
     cross_source_overlap: 11
-    direct_semantic: 2
+    direct_semantic: 3
     identical_copies: 1
     link_hub_distractor: 3
     link_only_section: 1
@@ -58,7 +58,6 @@ eval:
     tiny_document: 6
     two_sections_needed: 1
     two_sources_needed: 4
-    variant_specific_evidence: 1
     version_variants: 9
   parallel:
     groups: 7
@@ -171,7 +170,8 @@ eval:
       expected_by_language: {}
     '07':
       expected: []
-      alternate: []
+      alternate:
+      - BP-EVAL-016
       near_miss: []
       expected_by_language: {}
     '08':
@@ -190,7 +190,10 @@ eval:
       - BP-EVAL-014
       - BP-EVAL-029
       - BP-EVAL-032
-      alternate: []
+      alternate:
+      - BP-EVAL-013
+      - BP-EVAL-014
+      - BP-EVAL-017
       near_miss:
       - BP-EVAL-033
       - BP-EVAL-034
@@ -215,6 +218,7 @@ eval:
       alternate:
       - BP-EVAL-003
       - BP-EVAL-004
+      - BP-EVAL-027
       near_miss: []
       expected_by_language:
         en: 1
@@ -265,7 +269,9 @@ eval:
     '20':
       expected:
       - BP-EVAL-021
-      alternate: []
+      alternate:
+      - BP-EVAL-016
+      - BP-EVAL-031
       near_miss: []
       expected_by_language:
         en: 1
@@ -346,7 +352,7 @@ eval:
     share_recall: 0.167
     share_easy: 0.194
     share_huge_documents: 0.25
-    share_direct_semantic: 0.062
+    share_direct_semantic: 0.094
 dev:
   total: 6
   by_language:
