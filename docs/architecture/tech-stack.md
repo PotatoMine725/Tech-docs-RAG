@@ -3,15 +3,15 @@
 - PRIMARY LANGUAGE: Python
 - DESKTOP UI: PySide6
 - VECTOR DATABASE: ChromaDB
-- LLM PROVIDER: Google Gemini API (official `google-genai` SDK); concrete model TBD
+- LLM PROVIDER: Google Gemini API (official `google-genai` SDK); answer model + judge `gemini-3.5-flash-lite`, fallback `gemini-3.5-flash` (ADR-0004; names in config only)
 - LLM AUTHENTICATION: `GEMINI_API_KEY` environment variable (never committed; `.env` git-ignored; `.env.example` placeholders only)
 - TESTING: pytest (Gemini-dependent tests use the `gemini` marker and are deselected by default)
 - SOURCE FORMAT: current corpus = Markdown; architecture = format-independent
 - STRUCTURED DATA: JSON / JSONL
 - OPTIONAL FUTURE STORAGE: SQLite only if a concrete requirement appears
 - DOCUMENT CONVERSION: Microsoft MarkItDown (accepted, ADR-0002; not yet added to pyproject; infrastructure only)
-- CHUNKING: header-aware baseline; fixed-size as experiment comparison (ADR-0002)
-- EMBEDDING: abstracted behind `core.interfaces.embedding`; provider TBD
+- CHUNKING: header-aware baseline; fixed-size as experiment comparison (ADR-0002); parameters in ADR-0003
+- EMBEDDING: abstracted behind `core.interfaces.embedding`; `gemini-embedding-001` (ADR-0004); MUST be multilingual (EN + VI queries over an English corpus, ADR-0003 D9)
 - LLM: Gemini API through an abstraction/interface (`core.interfaces.llm`)
 - RERANKING: optional / experiment / bonus
 - PACKAGING: PyInstaller later if required

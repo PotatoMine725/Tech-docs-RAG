@@ -7,4 +7,6 @@ Status: skeleton. Undecided items are TBD / DECISION REQUIRED.
 - Conceptual fields: source_id, document_name, location_type, location, excerpt.
 
 ## Requirements
-TBD
+- Chunk citations use `location_type = heading` and the heading path (ADR-0003 D5/D6).
+- Excerpts stay in the original English, even when the answer is Vietnamese (ADR-0003 D9).
+- Everything else: TBD.

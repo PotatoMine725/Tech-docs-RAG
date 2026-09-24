@@ -20,4 +20,4 @@ Status: Accepted (user decision). Implementation not started.
 - The current 24 corpus files are already Markdown; MarkItDown is not required for them.
 
 ## Still open
-Size limits (min/max chunk, overlap), embedding provider, exact experiment parameters.
+None. Embedding model: ADR-0004. Size limits, overlap and experiment parameters: decided in ADR-0003.
