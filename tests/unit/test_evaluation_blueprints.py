@@ -31,6 +31,8 @@ ALLOWED = {
     "size_class": {"tiny", "medium", "huge", "mixed", "none"},
 }
 REFUSAL = "The assistant should explicitly state that the provided collection does not contain sufficient information."
+PROSE_FIELDS = ("objective", "retrieval_target", "question_notes", "reason_for_inclusion")
+TARGET_FIELDS = ("capability", "why_it_matters", "expected_behavior", "rationale")
 
 
 def _blueprints():
@@ -61,6 +63,15 @@ def _all_source_refs(b):
     refs += [s["source_id"] for s in b["expected_sources"] + b["acceptable_alternate_sources"]]
     refs += [e["source_id"] for e in b["ground_truth"]["evidence"]]
     return refs
+
+
+def _inline_comment_lines(path):
+    """Lines where a comment follows a value. In YAML, " #" ends an unquoted value, so "see #22" silently becomes "see"."""
+    text = path.read_text(encoding="utf-8")
+    lines = text.split("\n")
+    return [token.end_mark.line + 1 for token in yaml.scan(text)
+            if isinstance(token, yaml.ScalarToken)
+            and re.match(r"\s+#", lines[token.end_mark.line][token.end_mark.column:])]
 
 
 def _load_matrix_builder():
@@ -95,6 +106,24 @@ def test_ids_are_unique_and_prefixed_by_split():
     for b in _blueprints():
         prefix = "BP-EVAL-" if b["split"] == "eval" else "BP-DEV-"
         assert b["id"].startswith(prefix), b["id"]
+
+
+def test_no_value_is_cut_off_by_an_inline_comment():
+    for path in (BLUEPRINTS, EVIDENCE_MAP):
+        assert not _inline_comment_lines(path), (path.name, _inline_comment_lines(path))
+
+
+def test_text_fields_are_non_empty_strings():
+    """Catches values YAML reads as something else, e.g. an unquoted "a: b" becomes a mapping."""
+    for b in _blueprints():
+        texts = [b[f] for f in PROSE_FIELDS] + [b["evaluation_target"][f] for f in TARGET_FIELDS]
+        texts += [s["note"] for s in b["acceptable_alternate_sources"] if "note" in s]
+        texts += [p["text"] for p in b["ground_truth"]["answer_points"]]
+        texts += [e["quote"] for e in b["ground_truth"]["evidence"]]
+        criteria = b["answer_acceptance_criteria"]
+        texts += criteria["acceptable_variations"] + criteria["must_not_claim"] + b["citation_acceptance_criteria"]
+        for text in texts:
+            assert isinstance(text, str) and text.strip(), (b["id"], text)
 
 
 def test_fields_use_allowed_values():

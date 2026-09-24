@@ -6,7 +6,8 @@
 # Parallel pairs share expected_sources, ground_truth and acceptance criteria through YAML anchors.
 version: 1
 created: 2026-09-24
-status: proposed # the owner approves before EVAL-002 turns blueprints into questions
+# The owner approves the blueprints before EVAL-002 turns them into questions.
+status: proposed
 blueprints:
 
   # ---------------------------------------------------------------- PG-001 (#22, tiny)
@@ -26,13 +27,13 @@ blueprints:
     cognitive_level: recall
     difficulty: easy
     size_class: tiny
-    retrieval_target: The introduction of #22 (page H1 section, about 850 chars) stating that queries always run against the database.
+    retrieval_target: 'The introduction of #22 (page H1 section, about 850 chars) stating that queries always run against the database.'
     retrieval_challenges: [tiny_document, direct_semantic]
     evaluation_target:
       capability: Retrieve a fact from a tiny document that much larger documents could crowd out.
       failure_mode: tiny_doc_single_chunk
-      why_it_matters: ADR-0003 lists tiny docs (#09, #22, #29) as a failure mode; #22 becomes one or two chunks in either arm.
-      expected_behavior: A #22 chunk is in the top 5 and the answer says the query still goes to the database.
+      why_it_matters: 'ADR-0003 lists tiny docs (#09, #22, #29) as a failure mode; #22 becomes one or two chunks in either arm.'
+      expected_behavior: 'A #22 chunk is in the top 5 and the answer says the query still goes to the database.'
       rationale: Easy fact on a tiny document; paired with a VI case so the language effect is not mixed up with difficulty.
     ground_truth: &pg001_gt
       answer_points:
@@ -55,7 +56,7 @@ blueprints:
         - EF Core returns entities already in the context without querying the database.
         - Any EF Core API for changing tracking behavior (not in the corpus).
     citation_acceptance_criteria: &pg001_cit
-      - Cites #22; the cited chunk contains the "always executed against the database" sentence.
+      - 'Cites #22; the cited chunk contains the "always executed against the database" sentence.'
       - Citation excerpt stays in English.
     question_notes: Ask whether EF Core skips the database when the entities are already loaded; don't reuse the words "always executed".
     reason_for_inclusion: Tiny-document coverage with an easy, unambiguous fact.
@@ -74,7 +75,7 @@ blueprints:
     cognitive_level: recall
     difficulty: easy
     size_class: tiny
-    retrieval_target: The introduction of #22 (page H1 section).
+    retrieval_target: 'The introduction of #22 (page H1 section).'
     retrieval_challenges: [tiny_document, cross_lingual]
     evaluation_target:
       capability: Cross-lingual retrieval (VI question, EN chunk) of a fact from a tiny document.
@@ -105,7 +106,7 @@ blueprints:
         note: Older variants; they support P2 and P3 but not P1.
       - source_id: "12"
         heading_path: "Handle errors in ASP.NET Core APIs > Developer Exception Page"
-        note: Same default-on rule as #13 variants 1-5.
+        note: 'Same default-on rule as #13 variants 1-5.'
     objective: Explain when the developer exception page is on, where the page's version variants describe it differently.
     concepts: [developer exception page, Development environment, WebApplication.CreateBuilder, UseDeveloperExceptionPage]
     cognitive_level: explain
@@ -154,7 +155,7 @@ blueprints:
         - Every app must always call UseDeveloperExceptionPage (ignores the default for WebApplication.CreateBuilder apps).
         - Any specific ASP.NET Core version number for a variant (the page doesn't label its variants).
     citation_acceptance_criteria: &pg002_cit
-      - P1 must be supported by a chunk containing "by default when both" (#13 variants 1-5 or #12).
+      - 'P1 must be supported by a chunk containing "by default when both" (#13 variants 1-5 or #12).'
       - A chunk from an older variant supports only P2/P3; citing only such chunks for P1 = correct_source_wrong_evidence.
     question_notes: Ask how/when the page gets turned on in a new vs an older app; don't mention versions.
     reason_for_inclusion: Main mixed-version case on the largest error-handling doc, in both languages.
@@ -210,14 +211,14 @@ blueprints:
     cognitive_level: apply
     difficulty: medium
     size_class: medium
-    retrieval_target: The decision table in #02 'Recognize CPU-bound and I/O-bound scenarios'.
+    retrieval_target: 'The decision table in #02 ''Recognize CPU-bound and I/O-bound scenarios''.'
     retrieval_challenges: [table, cross_source_overlap, paraphrase]
     evaluation_target:
       capability: Apply guidance that is stored as a Markdown table.
       failure_mode: fixed_size_code_split
       why_it_matters: The answer sits in table rows. Arm A keeps tables whole (ADR-0003 D4); a fixed-size window can cut rows away from the header.
       expected_behavior: The table chunk is retrieved and both rows are used.
-      rationale: Table integrity is one place where the two chunkers behave differently; #01 overlaps the topic.
+      rationale: 'Table integrity is one place where the two chunkers behave differently; #01 overlaps the topic.'
     ground_truth: &pg003_gt
       answer_points:
         - {id: P1, required: true, text: "I/O-bound work (waiting for data, e.g. from a database or web service): use async and await without Task.Run."}
@@ -296,7 +297,7 @@ blueprints:
     cognitive_level: diagnose
     difficulty: medium
     size_class: huge
-    retrieval_target: The warning near the start of #23 'Route constraints' (4.7K section, 3 copies + 1 older copy).
+    retrieval_target: 'The warning near the start of #23 ''Route constraints'' (4.7K section, 3 copies + 1 older copy).'
     retrieval_challenges: [version_variants, long_section, subsection_evidence]
     evaluation_target:
       capability: Find a short warning inside a long, repeated section of the largest document.
@@ -380,7 +381,7 @@ blueprints:
     evaluation_target:
       capability: Pick the right H3 among siblings that all talk about Arrange/Act/Assert.
       failure_mode: specific_heading
-      why_it_matters: Sibling H3s ('Arrange your tests', 'Avoid coding logic in unit tests') and #17/#28 share the vocabulary.
+      why_it_matters: 'Sibling H3s (''Arrange your tests'', ''Avoid coding logic in unit tests'') and #17/#28 share the vocabulary.'
       expected_behavior: The 'Avoid multiple Act tasks' chunk is ranked in the top 5.
       rationale: Header-aware chunks carry the exact H3 path; fixed-size chunks carry the nearest preceding heading.
     ground_truth: &pg005_gt
@@ -467,7 +468,7 @@ blueprints:
       capability: Retrieve a tiny analyzer page against large ASP.NET Core pages with validation vocabulary.
       failure_mode: tiny_doc_single_chunk
       why_it_matters: Sections under 400 chars merge in Arm A (ADR-0003 D3); the whole page may be one chunk in either arm.
-      expected_behavior: A #29 chunk is in the top 5; the answer gives the cause and the public/internal fix.
+      expected_behavior: 'A #29 chunk is in the top 5; the answer gives the cause and the public/internal fix.'
       rationale: Tiny doc with a precise, checkable answer.
     ground_truth: &pg006_gt
       answer_points:
@@ -548,7 +549,7 @@ blueprints:
     evaluation_target:
       capability: Connect a symptom (runtime exception) to the lifetime rule and both fixes.
       failure_mode: specific_heading
-      why_it_matters: The rule sits in one short section of a long DI page; #11 overlaps on the fix.
+      why_it_matters: 'The rule sits in one short section of a long DI page; #11 overlaps on the fix.'
       expected_behavior: "#10 'Service lifetimes' is in the top 5; the answer gives the cause and both fixes."
       rationale: Hard diagnose case with an overlapping second document.
     ground_truth: &pg007_gt
@@ -576,7 +577,7 @@ blueprints:
         - Register the service as a singleton to fix it.
         - Constructor injection of scoped services works in conventional middleware.
     citation_acceptance_criteria: &pg007_cit
-      - P1 and P2 must be supported by the #10 'Service lifetimes' chunk; P3 by #10 or #11.
+      - 'P1 and P2 must be supported by the #10 ''Service lifetimes'' chunk; P3 by #10 or #11.'
     question_notes: Describe the symptom (exception at runtime when the middleware constructor takes a scoped service).
     reason_for_inclusion: Hard diagnose parallel case on a medium-large document.
 
@@ -688,7 +689,7 @@ blueprints:
       failure_mode: fixed_size_code_split
       why_it_matters: The rule (prose) and the example (code) are in the same section; a fixed-size cut may separate them.
       expected_behavior: The answer predicts 4 and explains it with reference semantics.
-      rationale: Code plus explanation in one section; #04/#16 overlap on types.
+      rationale: 'Code plus explanation in one section; #04/#16 overlap on types.'
     ground_truth:
       answer_points:
         - {id: P1, required: true, text: "list1.Count is 4: List<int> is a reference type, so list1 and list2 point to the same object and the Add through list2 is visible through list1."}
@@ -852,7 +853,7 @@ blueprints:
       capability: Retrieve a content section instead of hub links with the same words.
       failure_mode: link_list_noise
       why_it_matters: "#08 lists 'Pattern matching' links under 'Fundamentals > Concept' and 'Fundamentals > Tutorial' with no content."
-      expected_behavior: The #21 'List patterns' chunk outranks the #08 link lists.
+      expected_behavior: 'The #21 ''List patterns'' chunk outranks the #08 link lists.'
       rationale: Link-list sections are a named ADR-0003 failure mode.
     ground_truth:
       answer_points:
@@ -930,7 +931,7 @@ blueprints:
         - "`0xFF_FF_FF_FF` is an int with value -1."
         - Unsuffixed integer literals are always int.
     citation_acceptance_criteria:
-      - The cited chunk is from #16 and contains the no-suffix rule or the uint example; a #04 chunk = correct topic, wrong evidence.
+      - 'The cited chunk is from #16 and contains the no-suffix rule or the uint example; a #04 chunk = correct topic, wrong evidence.'
     question_notes: Ask (in Vietnamese) what type `var x = 0xFF_FF_FF_FF;` has and how to get -1 as an int.
     reason_for_inclusion: Hard analyze case with a cross-document near-duplicate.
 
@@ -956,7 +957,7 @@ blueprints:
       capability: Retrieve content, not the hub link with the same title.
       failure_mode: link_list_noise
       why_it_matters: "#08 'Fundamentals > Tutorial' has a 'Build file-based apps' link with no content."
-      expected_behavior: The #20 chunk outranks #08; the answer is grounded in #20.
+      expected_behavior: 'The #20 chunk outranks #08; the answer is grounded in #20.'
       rationale: Easy case where only link noise can make retrieval fail.
     ground_truth:
       answer_points:
@@ -984,7 +985,7 @@ blueprints:
         - A project file (.csproj) or `dotnet build` is required first.
         - File-based apps exist in versions earlier than C# 14 / .NET 10.
     citation_acceptance_criteria:
-      - The cited chunk is from #20 'File-based apps'; a #08 link-list chunk = unsupported_citation.
+      - 'The cited chunk is from #20 ''File-based apps''; a #08 link-list chunk = unsupported_citation.'
     question_notes: Ask how to run a one-file C# script without creating a project.
     reason_for_inclusion: Easy recall case with a link-list distractor.
 
@@ -1159,7 +1160,7 @@ blueprints:
           supports: [P2]
     answer_acceptance_criteria:
       acceptable_variations:
-        - The JSON may be shown as `{ "shadowCopy": false }`.
+        - 'The JSON may be shown as `{ "shadowCopy": false }`.'
       must_not_claim:
         - A .csproj property or command-line switch disables it (not in the corpus).
     citation_acceptance_criteria:
@@ -1270,7 +1271,7 @@ blueprints:
     citation_acceptance_criteria:
       - The cited chunk contains the NU1202 error text or the ".NET 5 is out of support" reply.
     question_notes: Quote the NU1202 message; ask what to do.
-    reason_for_inclusion: Long-section, noisy community page; the only #15 case.
+    reason_for_inclusion: 'Long-section, noisy community page; the only #15 case.'
 
   - id: BP-EVAL-027
     split: eval
@@ -1291,10 +1292,10 @@ blueprints:
     retrieval_target: "#12 H3 'Validation failure error response' (1.1K)."
     retrieval_challenges: [cross_source_overlap, terminology_sensitive]
     evaluation_target:
-      capability: Retrieve the medium API doc when the huge #13 shares the vocabulary.
+      capability: 'Retrieve the medium API doc when the huge #13 shares the vocabulary.'
       failure_mode: large_doc_outranks_small
       why_it_matters: "#13 has 7 link-only 'Model state errors' sections and 4 'Problem details' sections."
-      expected_behavior: The #12 chunk is in the top 5.
+      expected_behavior: 'The #12 chunk is in the top 5.'
       rationale: Named ADR-0003 failure mode (large docs outranking smaller correct docs).
     ground_truth:
       answer_points:
@@ -1321,7 +1322,7 @@ blueprints:
         - The response is 500 or 404.
         - It is customized through UseExceptionHandler.
     citation_acceptance_criteria:
-      - The cited chunk is from #12 'Validation failure error response'.
+      - 'The cited chunk is from #12 ''Validation failure error response''.'
     question_notes: Ask what a controller API sends back when a posted model is invalid and how to change that format.
     reason_for_inclusion: Large-vs-small document competition.
 
@@ -1364,7 +1365,7 @@ blueprints:
       must_not_claim:
         - C# was designed to match C or assembly performance.
     citation_acceptance_criteria:
-      - The cited chunk is from #18 and contains the performance design goal.
+      - 'The cited chunk is from #18 and contains the performance design goal.'
     question_notes: Ask in Vietnamese whether C# aimed to be as fast as C.
     reason_for_inclusion: Tiny-doc case, Vietnamese, not parallel.
 
@@ -1442,7 +1443,7 @@ blueprints:
     evaluation_target:
       capability: Combine a rule from one doc with an example from another.
       failure_mode: none
-      why_it_matters: Three testing docs (#03, #17, #28) share vocabulary.
+      why_it_matters: 'Three testing docs (#03, #17, #28) share vocabulary.'
       expected_behavior: Both sources in the top 5; the answer maps the three name parts.
       rationale: Each premise is stated independently; neither doc alone answers.
     ground_truth:
@@ -1584,7 +1585,7 @@ blueprints:
     citation_acceptance_criteria:
       - One citation per premise; each from the matching document.
     question_notes: Ask (in Vietnamese) whether injecting AppDbContext into a custom IExceptionHandler constructor is OK.
-    reason_for_inclusion: Hard cross-document analyze case. Shares the #10 section with BP-EVAL-029 on purpose (different premise used).
+    reason_for_inclusion: 'Hard cross-document analyze case. Shares the #10 section with BP-EVAL-029 on purpose (different premise used).'
 
   # ---------------------------------------------------------------- corpus-insufficient (near-miss)
   - id: BP-EVAL-033
@@ -1603,7 +1604,7 @@ blueprints:
     cognitive_level: recall
     difficulty: medium
     size_class: none
-    retrieval_target: Nothing answers it; #22 (EF querying) and #10 (EF contexts) are topically close.
+    retrieval_target: 'Nothing answers it; #22 (EF querying) and #10 (EF contexts) are topically close.'
     retrieval_challenges: [near_miss_topic]
     evaluation_target:
       capability: Refuse when related but insufficient chunks are retrieved.
@@ -1694,7 +1695,7 @@ blueprints:
       must_not_claim:
         - What scope validation checks, which exception it throws, or in which environment it is enabled, presented as from the documents.
     citation_acceptance_criteria:
-      - Citing the #10 'Scope validation' links as evidence for an answer = hallucination.
+      - 'Citing the #10 ''Scope validation'' links as evidence for an answer = hallucination.'
     question_notes: Ask directly; the heading words may appear in the question.
     reason_for_inclusion: Hardest refusal case (EN).
 
@@ -1727,11 +1728,11 @@ blueprints:
       evidence: []
     answer_acceptance_criteria:
       acceptable_variations:
-        - The refusal may explain what #03 says about mocks in general.
+        - 'The refusal may explain what #03 says about mocks in general.'
       must_not_claim:
         - Any Moq API (setup/verify methods, call-count options) presented as from the documents.
     citation_acceptance_criteria:
-      - Citing #03 terminology as evidence for a Moq API = hallucination.
+      - 'Citing #03 terminology as evidence for a Moq API = hallucination.'
     question_notes: Keep "Moq", "mock" in English.
     reason_for_inclusion: Testing near-miss (VI).
 
@@ -1778,7 +1779,7 @@ blueprints:
       must_not_claim:
         - Static classes can be inherited.
     citation_acceptance_criteria:
-      - The cited chunk is from #07 'Static classes'.
+      - 'The cited chunk is from #07 ''Static classes''.'
     question_notes: Dev set.
     reason_for_inclusion: Dev set, EN answerable.
 
@@ -1866,7 +1867,7 @@ blueprints:
       must_not_claim:
         - Contextual keywords are reserved words.
     citation_acceptance_criteria:
-      - The cited chunk is from #06 'Contextual keywords'.
+      - 'The cited chunk is from #06 ''Contextual keywords''.'
     question_notes: Dev set.
     reason_for_inclusion: Dev set, EN answerable.
 
