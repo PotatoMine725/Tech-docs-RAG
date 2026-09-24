@@ -36,7 +36,8 @@ class AnswerResult:
     answer: str                        # final text shown to the user (localized message if insufficient)
     insufficient: bool
     insufficient_reason: str | None    # "retrieval_gate" | "llm" | None
-    citations: tuple[Citation, ...]    # ordered by first marker in the answer
+    missing_information: str | None    # what the documents don't cover; kept when insufficient (owner decision D2, 2026-09-24)
+    citations: tuple[Citation, ...]    # ordered by first marker in the answer; when insufficient: optional related citations only (owner decision D2, 2026-09-24)
     retrieved: tuple[RetrievedChunk, ...]
     dropped_markers: tuple[int, ...]   # [n] markers that pointed outside 1..k
     uncited_sentences: int             # diagnostic: factual sentences without any marker
@@ -69,6 +70,8 @@ QUESTION: {question}
 ```
 Response schema: `{"insufficient": bool, "answer": string, "cited_passages": [int], "missing_information": string}` (all required).
 
+**Owner decision D2, 2026-09-24:** an insufficient answer may point to related content the documents do have, as long as it says the topic isn't covered and doesn't present that content as the answer. So when `insufficient` is true, keep `missing_information` and allow `cited_passages` as optional related citations. Adapt rule 2 of the template to this when you show it to the user.
+
 **OD-9 insufficient-information rule** — two layers:
 - (a) *retrieval gate*: if the top-1 score < `INSUFFICIENT_SCORE_THRESHOLD` → skip the LLM, `insufficient_reason="retrieval_gate"`.
 - (b) *LLM layer*: `"insufficient": true` → `insufficient_reason="llm"`.
@@ -87,7 +90,7 @@ Response schema: `{"insufficient": bool, "answer": string, "cited_passages": [in
    - markers: extract `[n]` from `answer`; keep n in 1..k, drop others (remove from text, record in `dropped_markers`); union with `cited_passages`;
    - build `Citation`s from the cited `RetrievedChunk`s: excerpt = first 300 chars of the chunk body (English, cut at a word boundary);
    - `uncited_sentences`: split answer into sentences, count those with ≥ 5 words and no marker;
-   - `insufficient=true` → `answer` = localized message; citations empty.
+   - `insufficient=true` → `answer` = localized message; keep `missing_information`; citations = optional related citations only, never presented as supporting an answer (owner decision D2, 2026-09-24).
 5. `application/citation/` holds marker parsing + citation building (pure functions).
 6. `infrastructure/llm/gemini/gemini_llm.py`: basic adapter implementing the new `LLM` (model from config `ANSWER_MODEL`, JSON mode with the schema via the installed `google-genai` API — inspect it, don't guess), fills token counts from usage metadata, measures latency. No retry yet (`retry_count=0`).
 7. Tests (offline, `FakeEmbedder` + in-memory store + `FakeLLM` returning scripted JSON):
@@ -95,6 +98,7 @@ Response schema: `{"insufficient": bool, "answer": string, "cited_passages": [in
    - gate fires below threshold (LLM not called), not above;
    - `[7]` with k=5 → dropped and recorded; `[2]` → citation for rank 2 with correct heading path/excerpt;
    - VI question → VI message when insufficient; EN → EN;
+   - insufficient → `missing_information` kept, and related citations kept when the LLM gives them (owner decision D2, 2026-09-24);
    - invalid JSON → `GenerationError`;
    - presentation/infra imports still forbidden in application (structure test green).
 8. Live (small, `@pytest.mark.gemini` or a script): the threshold-tuning run on the dev set (embeddings only) + 2 dev questions end-to-end to verify JSON mode works. Save outputs to `validation/generation/rag-002-dev-<date>.md`.

@@ -11,7 +11,7 @@ run_id, case_id, arm ("A"|"B"), mode ("retrieval"|"full"), status ("ok"|"error")
 question, language, parallel_group_id, answerable (bool), expected_answer, expected_source_ids, expected_heading_paths, evidence_quotes, tags {difficulty, cognitive_level, size_class, failure_mode, scope}
 # generated
 retrieved: [{rank, chunk_id, source_id, heading_path, char_start, char_end, score}],
-answer, insufficient, insufficient_reason, citations: [{marker, chunk_id, source_id, heading_path}], dropped_markers, uncited_sentences,
+answer, insufficient, insufficient_reason, missing_information (owner decision D2, 2026-09-24), citations: [{marker, chunk_id, source_id, heading_path}], dropped_markers, uncited_sentences,
 latency_ms {embed_query, retrieve, generate, total}, model_used, retry_count, fallback_used, prompt_tokens, output_tokens,
 prompt_version, started_at, finished_at
 ```

@@ -9,4 +9,5 @@ Status: skeleton. Undecided items are TBD / DECISION REQUIRED.
 ## Requirements
 - Chunk citations use `location_type = heading` and the heading path (ADR-0003 D5/D6).
 - Excerpts stay in the original English, even when the answer is Vietnamese (ADR-0003 D9).
+- On an insufficient answer, citations are optional and point only to related content; they must not be presented as supporting an answer (owner decision D2, 2026-09-24).
 - Everything else: TBD.

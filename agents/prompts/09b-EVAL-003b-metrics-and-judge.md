@@ -7,15 +7,16 @@ Entry: EVAL-003a done.
 ## Step 0 — OD-12 (ask user): citation quality = automatic span check + judge support check (recommended: both, reported separately).
 
 ## 1. Retrieval metrics (answerable cases only; k = 5) — `application/evaluation/metrics/retrieval.py`
-- **Expected section spans:** for each expected (source_id, heading path) the set of `[start, end)` spans in the normalized text (a heading path can occur in several version variants → several spans; any counts, ADR-0003 D8). Precompute once into `data/evaluation/questions/expected-spans-v1.json` from `normalized.jsonl`; test that every eval case has ≥ 1 span.
-- `source_hit@k` = 1 if any top-k chunk has an expected source_id. Cross-document cases: fraction of expected sources present (report separately).
-- `section_hit@k` = 1 if any top-k chunk from the expected source overlaps an expected span.
+- **Evidence slots (owner decision D1, 2026-09-24):** every expected and alternate source in the dataset has a `slot` (S1, S2, …). A hit needs every slot; any source within a slot counts. See `evaluation-spec.md` § Retrieval hit rule.
+- **Expected section spans:** for each expected and alternate (source_id, heading path), grouped by slot, the set of `[start, end)` spans in the normalized text (a heading path can occur in several version variants → several spans; any counts, ADR-0003 D8). Precompute once into `data/evaluation/questions/expected-spans-v1.json` from `normalized.jsonl`; test that every eval case has ≥ 1 span.
+- `source_hit@k` = 1 if every slot has at least one of its source_ids among the top-k chunks. Secondary: fraction of slots satisfied (report separately; it differs from the main value only for multi-slot cases: cross-document and BP-EVAL-022).
+- `section_hit@k` = 1 if every slot has a top-k chunk that overlaps a span of a section listed in that slot.
 - `evidence_hit@k` = 1 if any top-k chunk's text contains the evidence quote (whitespace-normalized) — the strictest check; shows when a chunk boundary cuts the evidence.
-- `MRR` (section level) = 1 / rank of the first section-hit chunk, 0 if none. Also `source MRR`.
+- `MRR` (section level) = 1 / rank of the first chunk that hits any slot's span, 0 if none. Also `source MRR`.
 - Also report @1 and @3 for the same metrics (cheap, shows ranking quality).
 
 ## 2. Judge — `application/evaluation/judge.py` + `config/prompts/judge_v1.md` + `scripts/evaluation/judge_run.py --run-id ID`
-Only for answerable cases where the system answered (see mapping). One call per record, temperature 0, `JUDGE_MODEL` from config, JSON schema:
+For answerable cases where the system answered, and for unanswerable cases where the system answered (refusal check, owner decision D2, 2026-09-24; see mapping). One call per record, temperature 0, `JUDGE_MODEL` from config, JSON schema:
 ```json
 {"required_points":[{"point":"...","covered":"yes|partial|no"}],
  "contradicts_ground_truth": false,
@@ -30,12 +31,13 @@ Judge input: question, expected answer + required points + must-not-claim list (
 | answerable | system | judge | `result` |
 |---|---|---|---|
 | no | insufficient | – (no call) | `correct_refusal` |
-| no | answered | – (no call) | `hallucination` |
+| no | answered | refusal check (owner decision D2, 2026-09-24) | `correct_refusal` if the answer says the topic isn't covered and presents no related content as the answer; otherwise `hallucination` |
 | yes | insufficient | – (no call) | `false_refusal` |
 | yes | answered | all required `yes`, no contradiction | `correct` |
 | yes | answered | ≥ 1 `yes`/`partial`, no contradiction | `partially_correct` |
 | yes | answered | otherwise | `incorrect` |
 Also `grounded` = no unsupported claims (separate metric: groundedness rate).
+The unanswerable-but-answered row is the one place where the judge's verdict picks the label (owner decision D2, 2026-09-24); design its judge output here and keep the mapping itself in code.
 
 ## 4. Other metrics
 - **Answer:** accuracy = correct / answerable; lenient accuracy = (correct + partial) / answerable; groundedness rate.
