@@ -1,0 +1,117 @@
+# EVAL-001 evidence map: why each "not in the documents" case is really unanswerable,
+# and which corpus sections are known distractors for the blueprints.
+# Search scope for every proof: corpus/sources/*.md (the 24 accepted documents only;
+# excluded documents 14, 19, 24, 27 are never searched or used; #25 never existed).
+# Method: case-insensitive fixed-string search, e.g.  grep -i -F -l -e "<term>" corpus/sources/*.md
+# Results were produced on 2026-09-24; tests/unit/test_evaluation_blueprints.py re-runs every search.
+version: 1
+created: 2026-09-24
+
+absence_proofs:
+  - id: ABS-001
+    blueprint: BP-EVAL-033
+    topic: EF Core queries without change tracking
+    zero_hit_terms: [AsNoTracking, no-tracking, NoTracking, change tracking, QueryTrackingBehavior]
+    result: 0 hits for every term in the 24 accepted documents.
+    closest_corpus_text: "#22 'Querying Data' covers LINQ queries and says queries always hit the database; nothing about turning tracking off."
+    substring_notes: "The bare word 'track' matches unrelated text only: #02 (compiler state machine) and #13 (a datatracker.ietf.org URL)."
+
+  - id: ABS-002
+    blueprint: BP-EVAL-034
+    topic: Rate limiting in ASP.NET Core
+    zero_hit_terms: [rate limit, ratelimit, RateLimiter, RequireRateLimiting, AddRateLimiter]
+    result: 0 hits for every term in the 24 accepted documents.
+    closest_corpus_text: "Middleware activation (#11), routing and short-circuiting (#23), DI (#10)."
+    substring_notes: "'limiter' alone matches only 'delimiter' in #23."
+
+  - id: ABS-003
+    blueprint: BP-EVAL-035
+    topic: What ASP.NET Core scope validation checks
+    zero_hit_terms: [ValidateScopes, root provider, root service provider]
+    allowed_hits:
+      - term: scope validation
+        source_id: "10"
+        heading_path: "Dependency injection in ASP.NET Core > Scope validation"
+        note: The only occurrences (4) are the heading, one sentence and two link texts in this section.
+    section_text: |
+      ## Scope validation
+
+      For guidance on scope validation, see the following resources:
+
+      - [.NET dependency injection: Scope validation](/en-us/dotnet/core/extensions/dependency-injection/overview#scope-validation)
+      - [ASP.NET Core Web Host: Scope validation](host/web-host?view=aspnetcore-10.0#scope-validation)
+    result: The corpus names the topic but holds no content about it (links only).
+
+  - id: ABS-004
+    blueprint: BP-EVAL-036
+    topic: Verifying calls with the Moq library
+    zero_hit_terms: [Moq, NSubstitute, Times.Once, "Verify(", mocking framework]
+    result: 0 hits for every term in the 24 accepted documents.
+    closest_corpus_text: "#03 'Unit testing terminology' defines fake, mock and stub with hand-written classes; no library."
+
+  - id: ABS-005
+    blueprint: BP-DEV-005
+    topic: JWT refresh tokens
+    zero_hit_terms: [refresh token, RefreshToken, refresh_token]
+    result: 0 hits for every term in the 24 accepted documents.
+    closest_corpus_text: "#15 shows JWT bearer setup and token generation only."
+
+  - id: ABS-006
+    blueprint: BP-DEV-006
+    topic: Web API versioning
+    zero_hit_terms: [API versioning, ApiVersion, Asp.Versioning, api-version]
+    result: 0 hits for every term in the 24 accepted documents.
+    closest_corpus_text: "#12 (API error handling) and #23 (routing)."
+
+# Sections that look relevant but should not be the answer source (used in failure analysis).
+distractors:
+  - source_id: "08"
+    heading_path: "C# documentation > Fundamentals > Concept"
+    kind: link_list
+    affects: [BP-EVAL-019]
+    note: "Links such as 'Pattern matching' with no content."
+  - source_id: "08"
+    heading_path: "C# documentation > Fundamentals > Tutorial"
+    kind: link_list
+    affects: [BP-EVAL-019, BP-EVAL-021]
+    note: "Links 'Build file-based apps' and 'Pattern matching'."
+  - source_id: "09"
+    heading_path: "C# language reference > C# language reference > Reference"
+    kind: link_list
+    affects: [BP-EVAL-028]
+    note: "Link to the C# language specification; #09 is links only."
+  - source_id: "05"
+    heading_path: "C# language documentation > Reference > Language specification"
+    kind: link_list
+    affects: [BP-EVAL-028]
+    note: "Hub entry for the language specification."
+  - source_id: "04"
+    heading_path: "Built-in types and literals > Literal syntax > Integer literals"
+    kind: near_duplicate_other_doc
+    affects: [BP-EVAL-020]
+    note: "Prefixes, suffixes and digit separators, but not the no-suffix type rule."
+  - source_id: "13"
+    heading_path: "Handle errors in ASP.NET Core > Model state errors"
+    kind: link_only_section
+    affects: [BP-EVAL-027]
+    note: "7 copies, each two links; shares vocabulary with #12 validation."
+  - source_id: "13"
+    heading_path: "Handle errors in ASP.NET Core > IExceptionHandler"
+    kind: outdated_variant
+    affects: [BP-EVAL-023]
+    note: "Variants 2 and 3 lack the .NET 10 diagnostics statement (only variant 1 has it)."
+  - source_id: "13"
+    heading_path: "Handle errors in ASP.NET Core > Developer Exception Page"
+    kind: outdated_variant
+    affects: [BP-EVAL-003, BP-EVAL-004]
+    note: "Older template code (UseDeveloperExceptionPage in Configure); no default-on rule."
+  - source_id: "11"
+    heading_path: "Factory-based middleware activation in ASP.NET Core > Additional resources"
+    kind: mislabelled_variant_intro
+    affects: [BP-EVAL-017]
+    note: "Variant 2 and 3 intros sit under the previous variant's 'Additional resources' heading."
+  - source_id: "10"
+    heading_path: "Dependency injection in ASP.NET Core > Scope validation"
+    kind: link_only_section
+    affects: [BP-EVAL-035]
+    note: "Exact heading match with no content (see ABS-003)."

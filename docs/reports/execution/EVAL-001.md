@@ -1,0 +1,63 @@
+# EVAL-001 execution report: design the evaluation dataset
+
+**Date:** 2026-09-24 · **Prompts:** [full prompt](../../prompt-log/claude-code/EVAL-001%20—%20Design%20Evaluation%20Dataset.md) + [addendum](../../prompt-log/claude-code/EVAL-001.md) · **Model:** Claude Opus 5.5 (Claude Code) · **Status:** done, awaiting owner review.
+
+## Files
+| File | Change |
+|---|---|
+| `docs/specs/evaluation-dataset-design.md` (new) | The design: all 20 required topics, schema, case table, open decisions |
+| `data/evaluation/questions/blueprint.yaml` (new) | 36 evaluation + 6 dev blueprints with verbatim evidence quotes |
+| `data/evaluation/questions/evidence-map.yaml` (new) | 6 absence proofs (search terms, zero hits) and 10 known distractor sections |
+| `data/evaluation/questions/coverage-matrix.yaml` (new, generated) | Counts, cross-tables, per-source use, dominance checks |
+| `scripts/evaluation/build_coverage_matrix.py` (new) | Generates the matrix from the blueprints (deterministic) |
+| `tests/unit/test_evaluation_blueprints.py` (new) | 13 offline checks (below) |
+| `docs/specs/evaluation-spec.md` | OD-4 mix and OD-5 labels (owner decisions); proposed metric details for EVAL-003; amendment log section |
+| `pyproject.toml`, `requirements.txt` | `PyYAML>=6.0,<7.0` declared (it was installed only through chromadb; the prompt requires YAML files and the tests read them) |
+| `docs/plans/master-plan.md`, `docs/plans/epics/EPIC-05-evaluation.md` | EVAL-001 status, OD-4/OD-5 decided, timeline |
+| `docs/prompt-log/claude-code/EVAL-001.md` (new), `docs/prompt-log/README.md` | Addendum prompt copy (verbatim, `cmp`) |
+| `AI_WORKLOG.md` | EVAL-001 entry |
+
+## Commands run (real output)
+- Owner decisions via AskUserQuestion: order HOUSE-001 → EVAL-001; OD-4 "32 answerable + 4 insufficient"; OD-5 "6 labels + points-covered score".
+- Corpus reading: section list from the inventory (all 24 docs); full reads of #09, #18, #22, #29; first 9 sections of #08; non-link lines of #05; every section used as evidence. The rest of the huge documents was not read line by line.
+- Absence searches (case-insensitive, fixed string, `corpus/sources/*.md` only): every term in `evidence-map.yaml` gives 0 hits. The one allowed term, "scope validation", hits 4 times, all inside #10's link-only section.
+- `.venv/Scripts/python.exe scripts/evaluation/build_coverage_matrix.py` twice → identical SHA-256 (deterministic).
+- `tests/unit/test_evaluation_blueprints.py` before the matrix script existed: 12 passed, 1 failed (`FileNotFoundError`, the expected red step). After: 13 passed.
+- `.venv/Scripts/python.exe -m pytest`: **41 passed**.
+
+## Exit-gate check (prompt §22)
+| Criterion | Result |
+|---|---|
+| CLAUDE.md consistent with the RAG project | Yes. The duplicate GitNexus block was removed in HOUSE-001; the count line is tool-generated and changes after each re-index |
+| 24 accepted / 4 excluded / #25 never existed | Yes (manifest + tests; no excluded ID or 25 in any blueprint, test-checked) |
+| Decisions traceable or marked proposed/TBD | Yes: OD-4/OD-5 owner-decided; other metric items marked proposed in `evaluation-spec.md` §"Proposed" and design §20 |
+| ≥ 30 final cases supported; ~36 slots | 36 eval slots, 32 answerable; 2 may be dropped |
+| EN and VI | 18 / 18 |
+| 6–8 parallel groups | 7 (test-checked identical ground truth) |
+| Small docs covered | #22 (3), #29 (2), #18 (1); hub docs #05/#08/#09 used as distractors (justified) |
+| #13/#17/#23 covered | 5 / 1 / 3 cases |
+| Failure modes represented | All 8 (test-checked) |
+| easy/medium/hard; all 6 cognitive levels | 7/17/12; recall 6, explain 6, apply 9, analyze 4, compare 3, diagnose 8 (test-checked) |
+| Single-source majority; limited cross-doc | 28 single, 4 cross-document, each premise from one document |
+| Ground truth has source_id + heading path | Yes; heading paths test-checked against the inventory |
+| Designed independently of retrieval | Yes; no chunks or indexes exist |
+| Citation and answer criteria per case | Yes (test-checked for every answerable case) |
+| No generated answers or results | None created |
+| No external knowledge as evidence | All answer points come from quoted corpus text (quotes test-checked verbatim) |
+| No excluded source used | Not opened, not searched, not referenced |
+| Coverage matrix without unexplained gaps | Gaps #05–#09 explained in design §5 |
+| Duplicate risks documented | Design §16 |
+| Unresolved decisions listed | Design §20 |
+
+## Deviations from the prompts
+1. **Order:** HOUSE-001 ran first, as the owner chose (the prompt table lists it as a prerequisite of EVAL-001).
+2. **Rubric:** the master plan said EVAL-001 writes the rubric into `evaluation-spec.md`; the EVAL-001 prompt says to propose metrics and mark them TBD. I followed the prompt: only the owner's OD-4/OD-5 answers are recorded as decided; citation labels, the cross-document hit rule and others are marked *proposed*. Master-plan wording updated.
+3. **Mix:** the addendum suggested ~26 single + ~4 cross + ~4–6 insufficient; the owner chose 28 + 4 + 4, so at least 30 answerable cases survive dropping two.
+4. **Schema:** the prompt's example keeps `generated_answer`, `result` etc. inside each case. The design keeps ground truth in the question file and generated fields in one results file per arm, because one question set is run through two arms (design §18).
+5. **Field names:** the prompt's `unacceptable_claims` and `must_not_claim` are merged into `must_not_claim`. `answer_points` carry a `required` flag instead of separate required/optional lists.
+6. **"Inspect all 24 documents":** met through the inventory structure plus full reads of the tiny docs and every target section, not a line-by-line read of the 1.2 M characters (stated in design §12).
+
+## Unverified
+- Statements about how each arm will cut a section (merges under 400 chars, exact-duplicate removal, table handling) follow the ADR-0003 rules. They are not measured, since no chunker exists yet (EPIC-02).
+- Whether each blueprint leads to a natural question: to be checked in EVAL-002 and by the owner's review.
+- `agents/` files (owner's prompt set, `verifier.md`) are still uncommitted: the owner is editing them; they were not touched.

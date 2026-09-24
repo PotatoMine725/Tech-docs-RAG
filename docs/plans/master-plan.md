@@ -26,7 +26,7 @@
 | Phase | Dates (target) | What happens (plain words) | Epics | Status |
 |---|---|---|---|---|
 | 0 Setup & decisions | 24 Sep | Folder structure, stack, chunking and model decisions | SETUP-001, ADR-0001…0004 | **Done** (commits `3d5a606`, `490068f`, `6f9e1d5`) |
-| 1 Know the data | 25–26 Sep | Understand the 24 documents; write the test questions and their correct answers **before** building anything that could bias them | EPIC-01, EPIC-05 stage A | In progress: EPIC-01 **done** 24 Sep |
+| 1 Know the data | 25–26 Sep | Understand the 24 documents; write the test questions and their correct answers **before** building anything that could bias them | EPIC-01, EPIC-05 stage A | In progress: EPIC-01 **done** 24 Sep; EVAL-001 design **done** 24 Sep (awaiting owner review) |
 | 2 Build the pipeline | 25–28 Sep | Read → clean → chunk → embed → store → retrieve → answer with citations | EPIC-02, EPIC-03 | Not started |
 | 3 Measure & prove | 28–30 Sep | Run the questions through both arms, score them, explain the differences; build the desktop window alongside | EPIC-05 stage B, EPIC-06, EPIC-04 | Not started |
 | 4 Finish & submit | 30 Sep–1 Oct | README, final checks against the brief, submit | EPIC-07 | Not started |
@@ -35,9 +35,9 @@
 
 | Date | Main work | Gate / milestone |
 |---|---|---|
-| Thu 24 Sep | This master plan. EPIC-01 done a day early. HOUSE-001 (line endings, submission requirements, `AI_WORKLOG.md`). | **G1** ✅ |
+| Thu 24 Sep | This master plan. EPIC-01 done a day early. HOUSE-001 (line endings, submission requirements, `AI_WORKLOG.md`). EVAL-001 design (OD-4/OD-5 decided). | **G1** ✅ |
 | Fri 25 Sep | Start EPIC-02 (core models, Markdown parser, normalization). Answer OD-1. | — |
-| Sat 26 Sep | EVAL-001: design the dataset (mix, coverage, rubric). Then EVAL-002: write the questions + ground truth, **committed to git**. Finish EPIC-02 chunkers + stats. | **M1 ground truth frozen**, **G2** |
+| Sat 26 Sep | EVAL-002: write the questions + ground truth from the approved EVAL-001 blueprints (EVAL-001 done 24 Sep), **committed to git**. Finish EPIC-02 chunkers + stats. | **M1 ground truth frozen**, **G2** |
 | Sun 27 Sep | EPIC-03. First check V-1 (how embedding requests are counted). Index Arm A before 14:00 and Arm B after 14:00 if quota needs it (two quota days in one calendar day). Then retrieval, generation, citations, "insufficient information", retry/fallback. | **M2 first end-to-end answer** |
 | Mon 28 Sep | Finish EPIC-03. EPIC-05 stage B: runner + metrics (offline tests). Retrieval-only metrics for both arms (embeddings only, cheap). Dry run of 3–5 questions after 14:00. Start EPIC-04 GUI. | **G3** |
 | Tue 29 Sep | Morning: full answer + judge run, both arms. After 14:00: fresh quota → re-run slot if needed. Judge spot-check. Finish GUI. Draft evaluation report. | **G4**, **G5B** |
@@ -163,7 +163,8 @@ Two stages, because the questions must be frozen before indexing, but scoring ne
 - **EVAL-002 Write and freeze the dataset:** write the ≥ 30 questions + ground truth following the EVAL-001 design, then commit (M1).
 
 Deliverables:
-- EVAL-001: dataset design. Coverage must include small docs (#09, #18, #22, #29) as well as #13/#17/#23 and both languages. Any "not in the documents" questions must never be built from excluded docs (CLAUDE.md rule 4). The answer-quality rubric and allowed "result" values are written into `docs/specs/evaluation-spec.md`.
+- EVAL-001: dataset design. Coverage must include small docs (#09, #18, #22, #29) as well as #13/#17/#23 and both languages. Any "not in the documents" questions must never be built from excluded docs (CLAUDE.md rule 4). The owner's OD-4 mix and OD-5 result labels are written into `docs/specs/evaluation-spec.md`; other metric details are recorded there as *proposed* for EVAL-003 (the EVAL-001 prompt says to propose, not decide, metrics).
+  ✅ Done 2026-09-24, awaiting owner review: [design](../specs/evaluation-dataset-design.md), `data/evaluation/questions/{blueprint,coverage-matrix,evidence-map}.yaml` (36 eval + 6 dev blueprints), [report](../reports/execution/EVAL-001.md).
 - EVAL-002: ≥ 30 cases → `data/evaluation/questions/` (JSONL). Each case: id, question, `language` (en/vi), expected answer (ground truth), expected `source_id`, expected heading path, EN/VI pair id for the parallel subset (ADR-0003 D8/D9).
 - EVAL-002: offline schema test for the question file.
 
@@ -265,8 +266,8 @@ This plan does **not** decide these. Each must be decided by the owner epic's la
 | OD-1 | Submission channel (where to send it, how the demo link is hosted) and time of day on 1 Oct. The package contents are known: see `assignment-requirements.md` § Submission | — | user | 25 Sep |
 | OD-2 | Corpus manifest format and location | `corpus/README.md` | EPIC-01 | ✅ Decided 24 Sep (user): `corpus/manifest.json` |
 | OD-3 | Why each excluded doc (14, 19, 24, 27) was dropped (owner knowledge) | `corpus/README.md` | EPIC-01 / user | ✅ Decided 24 Sep (user): all four are index pages (links to other pages, no useful content) |
-| OD-4 | Question mix: total (≥ 30), EN/VI split, parallel subset size, number of "not in the documents" cases | evaluation-spec, ADR-0003 D8/D9 | EVAL-001 | 26 Sep |
-| OD-5 | Answer-quality rubric and "result" values | evaluation-spec | EVAL-001 | 26 Sep |
+| OD-4 | Question mix: total (≥ 30), EN/VI split, parallel subset size, number of "not in the documents" cases | evaluation-spec, ADR-0003 D8/D9 | EVAL-001 | ✅ Decided 24 Sep (user): 36 = 28 single + 4 cross-doc + 4 insufficient; 18 EN / 18 VI; 7 parallel groups; + 6 dev |
+| OD-5 | Answer-quality rubric and "result" values | evaluation-spec | EVAL-001 | ✅ Decided 24 Sep (user): 6 labels + points-covered score |
 | OD-6 | PDF/HTML placeholders: delegate to MarkItDown or one adapter | ingestion-architecture | EPIC-02 | 26 Sep |
 | OD-7 | Canonical ChromaDB path (`D:\ChromaDB` vs `data/chroma/`) and whether vector data is committed | ADR-0001, tech-stack | EPIC-03 | 27 Sep (before indexing) |
 | OD-8 | Distance metric (held constant by D7, but not named) | ADR-0003 D7 | EPIC-03 | 27 Sep (before indexing) |

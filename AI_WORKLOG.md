@@ -47,10 +47,17 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 
 ### 2026-09-24 HOUSE-001
 - *AI did:* `.gitattributes` (LF everywhere), checked that the corpus content is unchanged, removed the duplicate GitNexus block, added the submission requirements to the specs and master plan, created this worklog.
-- *AI got wrong:* none observed.
-- *How found:* n/a.
-- *Fix:* n/a.
+- *AI got wrong:* the first two attempts to rewrite the working tree with LF silently did nothing. The first split file paths on spaces, and non-ASCII names such as the `—` in the EVAL-001 prompt file got quoted. The second ran `git checkout-index -f`, which skips files whose timestamps match the index.
+- *How found:* re-checking `git ls-files --eol` after each attempt (the counts had not changed).
+- *Fix:* NUL-separated paths (`-z`) in Python, and file times bumped before the checkout. Verified 0 CRLF files outside `agents/`, and the corpus hashes unchanged.
 - *Human decision:* run HOUSE-001 before EVAL-001.
+
+### 2026-09-24 EVAL-001
+- *AI did:* evaluation dataset design: 36 evaluation + 6 dev blueprints with verbatim evidence quotes, absence proofs for the "not in the documents" cases, a generated coverage matrix, the design document, and 13 offline tests ([report](docs/reports/execution/EVAL-001.md)).
+- *AI got wrong:* (1) The design draft said the hub pages #05/#08 were read completely and "made of links"; only part of #08 had been read and #05 not at all. (2) It said huge documents are the expected source in 25% of cases, ignoring one cross-document case (actually 8 only-source + 1 shared). (3) The master plan (written earlier by the AI) said EVAL-001 decides the rubric, but the owner's prompt says to only propose metrics.
+- *How found:* (1)(2) the AI's own check of every claim against the data before committing; (3) reading the prompt.
+- *Fix:* (1) measured the link share (#08: 48 of 50 content lines are links; #09: 13 of 15; #05 links + captions) and rewrote the text to say exactly what was read; (2) corrected the figure; (3) followed the prompt and fixed the plan wording.
+- *Human decision:* order HOUSE-001 → EVAL-001; OD-4 = 32 answerable + 4 insufficient, 18/18, 7 parallel groups, 6 dev; OD-5 = 6 labels + points-covered score.
 
 ## Summary: how AI helped
 

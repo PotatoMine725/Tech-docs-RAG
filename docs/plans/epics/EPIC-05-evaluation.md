@@ -1,6 +1,6 @@
 # EPIC-05-evaluation
 
-Status: not started.
+Status: stage A in progress. EVAL-001 (design) done 2026-09-24, awaiting owner review: [design](../../specs/evaluation-dataset-design.md), [report](../../reports/execution/EVAL-001.md). Next: EVAL-002 after approval.
 
 Target: stage A Sat 26 Sep 2026 (Phase 1); stage B Mon 28 – Tue 29 Sep 2026 (Phase 3). Deadline for the whole project: 2026-10-01.
 
