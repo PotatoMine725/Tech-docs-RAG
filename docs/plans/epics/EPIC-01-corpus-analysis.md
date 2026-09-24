@@ -1,6 +1,6 @@
 # EPIC-01-corpus-analysis
 
-Status: not started.
+Status: ✅ done 2026-09-24 (G1 passed). Report: [EPIC-01-corpus-analysis.md](../../reports/epics/EPIC-01-corpus-analysis.md). OD-3 closed the same day (excluded docs are index pages).
 
 Target: Fri 25 Sep 2026 (Phase 1). Deadline for the whole project: 2026-10-01.
 

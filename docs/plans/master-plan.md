@@ -26,7 +26,7 @@
 | Phase | Dates (target) | What happens (plain words) | Epics | Status |
 |---|---|---|---|---|
 | 0 Setup & decisions | 24 Sep | Folder structure, stack, chunking and model decisions | SETUP-001, ADR-0001…0004 | **Done** (commits `3d5a606`, `490068f`, `6f9e1d5`) |
-| 1 Know the data | 25–26 Sep | Understand the 24 documents; write the test questions and their correct answers **before** building anything that could bias them | EPIC-01, EPIC-05 stage A | Not started |
+| 1 Know the data | 25–26 Sep | Understand the 24 documents; write the test questions and their correct answers **before** building anything that could bias them | EPIC-01, EPIC-05 stage A | In progress: EPIC-01 **done** 24 Sep |
 | 2 Build the pipeline | 25–28 Sep | Read → clean → chunk → embed → store → retrieve → answer with citations | EPIC-02, EPIC-03 | Not started |
 | 3 Measure & prove | 28–30 Sep | Run the questions through both arms, score them, explain the differences; build the desktop window alongside | EPIC-05 stage B, EPIC-06, EPIC-04 | Not started |
 | 4 Finish & submit | 30 Sep–1 Oct | README, final checks against the brief, submit | EPIC-07 | Not started |
@@ -35,8 +35,8 @@
 
 | Date | Main work | Gate / milestone |
 |---|---|---|
-| Thu 24 Sep | This master plan | — |
-| Fri 25 Sep | EPIC-01 corpus analysis. Start EPIC-02 (core models, Markdown parser, normalization). Answer OD-1…OD-3. | **G1** |
+| Thu 24 Sep | This master plan. EPIC-01 done a day early. | **G1** ✅ |
+| Fri 25 Sep | Start EPIC-02 (core models, Markdown parser, normalization). Answer OD-1. | — |
 | Sat 26 Sep | EVAL-001: design the dataset (mix, coverage, rubric). Then EVAL-002: write the questions + ground truth, **committed to git**. Finish EPIC-02 chunkers + stats. | **M1 ground truth frozen**, **G2** |
 | Sun 27 Sep | EPIC-03. First check V-1 (how embedding requests are counted). Index Arm A before 14:00 and Arm B after 14:00 if quota needs it (two quota days in one calendar day). Then retrieval, generation, citations, "insufficient information", retry/fallback. | **M2 first end-to-end answer** |
 | Mon 28 Sep | Finish EPIC-03. EPIC-05 stage B: runner + metrics (offline tests). Retrieval-only metrics for both arms (embeddings only, cheap). Dry run of 3–5 questions after 14:00. Start EPIC-04 GUI. | **G3** |
@@ -80,6 +80,7 @@ EPIC-04 (GUI) is off the critical path: build it while evaluation runs or waits 
 ## 4. Epics
 
 ### EPIC-01 Corpus analysis
+**Status:** ✅ Done 2026-09-24, G1 passed — [report](../reports/epics/EPIC-01-corpus-analysis.md). OD-3 closed the same day.
 **When:** Fri 25 Sep · **Phase:** 1 · **Proposed task:** CORPUS-001 · **Roles:** corpus-analyst, knowledge-map-analyst
 **Goal:** know exactly what is in the 24 documents, so the test questions are good and the dataset can be described in the README.
 
@@ -91,11 +92,11 @@ Deliverables:
 - Epic report → `docs/reports/epics/`.
 
 Exit gate **G1**:
-- [ ] Manifest has exactly 24 IDs; none of 14, 19, 24, 27; no #25.
-- [ ] Checksums match `docs/snapshots/corpus/` (sources unmodified).
-- [ ] Section inventory covers all 24 docs.
-- [ ] README dataset-description draft exists.
-- [ ] `.venv/Scripts/python.exe -m pytest` passes.
+- [x] Manifest has exactly 24 IDs; none of 14, 19, 24, 27; no #25.
+- [x] Checksums match `docs/snapshots/corpus/` (sources unmodified).
+- [x] Section inventory covers all 24 docs.
+- [x] README dataset-description draft exists.
+- [x] `.venv/Scripts/python.exe -m pytest` passes.
 
 ### EPIC-02 Ingestion pipeline
 **When:** Fri 25 – Sat 26 Sep · **Phase:** 2 · **Proposed tasks:** INGEST-001 (models + parser + normalization), INGEST-002 (both chunkers + stats), INGEST-003 (MarkItDown adapter) · **Role:** ingestion-analyst
@@ -256,8 +257,8 @@ This plan does **not** decide these. Each must be decided by the owner epic's la
 | ID | Decision | Where it is open | Owner | Decide by |
 |---|---|---|---|---|
 | OD-1 | Submission channel/format and time of day on 1 Oct | — | user | 25 Sep |
-| OD-2 | Corpus manifest format and location | `corpus/README.md` | EPIC-01 | 25 Sep |
-| OD-3 | Why each excluded doc (14, 19, 24, 27) was dropped (owner knowledge) | `corpus/README.md` | EPIC-01 / user | 25 Sep |
+| OD-2 | Corpus manifest format and location | `corpus/README.md` | EPIC-01 | ✅ Decided 24 Sep (user): `corpus/manifest.json` |
+| OD-3 | Why each excluded doc (14, 19, 24, 27) was dropped (owner knowledge) | `corpus/README.md` | EPIC-01 / user | ✅ Decided 24 Sep (user): all four are index pages (links to other pages, no useful content) |
 | OD-4 | Question mix: total (≥ 30), EN/VI split, parallel subset size, number of "not in the documents" cases | evaluation-spec, ADR-0003 D8/D9 | EVAL-001 | 26 Sep |
 | OD-5 | Answer-quality rubric and "result" values | evaluation-spec | EVAL-001 | 26 Sep |
 | OD-6 | PDF/HTML placeholders: delegate to MarkItDown or one adapter | ingestion-architecture | EPIC-02 | 26 Sep |
@@ -305,8 +306,8 @@ Already in place:
 Gaps this plan covers:
 | Gap | Fixed in |
 |---|---|
-| No root `README.md` (brief requires dataset description) | EPIC-01 draft, EPIC-07 |
-| No corpus manifest | EPIC-01 |
+| No root `README.md` (brief requires dataset description) | EPIC-01 draft ✅, EPIC-07 |
+| No corpus manifest | EPIC-01 ✅ |
 | Core models are one-field stubs | EPIC-02 |
 | Retrieval, project and quality specs mostly TBD | EPIC-03, EPIC-05, EPIC-07 |
 | Agent role files are TBD | When each epic starts (optional) |
