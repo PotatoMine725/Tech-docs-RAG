@@ -41,14 +41,29 @@ Reranking, hybrid search, query rewriting, agentic RAG, automated evaluation, co
 ## Evaluation focus (grading emphasis)
 Experiment design; evaluation; failure analysis; data and retrieval understanding; ability to prove system improvements.
 
-## Status against this brief (2026-09-24)
+## Submission
+Added 2026-09-24 (HOUSE-001) from the owner's record of the brief; not in the first version of this file.
+- **Working product:** a prototype or demo link, and the GitHub repository.
+- **README** covering: the problem, the solution, architecture/workflow, AI usage, completed work, limitations, plus the dataset description (above).
+- **Demo video:** at most 5 minutes.
+- **`AI_WORKLOG.md`:** the AI tools used, how AI helped, incorrect AI outputs and how they were improved, and what would be improved with 7 more days.
+- **Originality:** the author must understand and be able to explain everything; no fake functionality.
+- **Quality:** a small system that works beats a large one that is not understood.
+
+## Status against this brief (updated 2026-09-24, HOUSE-001)
 | Requirement | Status |
 |---|---|
 | >= 20 documents | 24 accepted sources in `corpus/sources/` (met) |
-| README describing dataset | not yet written (root README missing) - TODO |
+| README describing dataset | draft dataset section in root `README.md` (EPIC-01); other README sections in EPIC-07 |
 | Pipeline, ingestion, retrieval, generation, citation, insufficient-info | not started (skeletons only) |
-| >= 30 eval questions with 5 fields | not started |
+| >= 30 eval questions with 5 fields | not started (design: EVAL-001) |
 | Report: quality / retrieval / citation / latency | not started |
-| >= 2-approach experiment | not started; approach TBD (DECISION REQUIRED) |
+| >= 2-approach experiment | approach decided (ADR-0003 D7: header-aware vs fixed-size chunking); not run |
+| Working product / demo link | not started |
+| GitHub repository | remote `origin` = github.com/PotatoMine725/Tech-docs-RAG; nothing pushed by the AI so far |
+| README: problem, solution, architecture/workflow, AI usage, completed work, limitations | not started (EPIC-07) |
+| Demo video <= 5 min | not started (EPIC-07 script; recorded by the owner) |
+| `AI_WORKLOG.md` | created (HOUSE-001); summary sections filled at QC-001 |
+| Originality / quality | ongoing: every task ends with an "Explain it back" section |
 
-Note: this brief contains no chunking requirements. Chunking strategy remains undecided; chunk size is only offered as an example experiment.
+Note: this brief contains no chunking requirements; chunk size is only offered as an example experiment. The chunking experiment was decided later in ADR-0003.

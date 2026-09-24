@@ -35,7 +35,7 @@
 
 | Date | Main work | Gate / milestone |
 |---|---|---|
-| Thu 24 Sep | This master plan. EPIC-01 done a day early. | **G1** ✅ |
+| Thu 24 Sep | This master plan. EPIC-01 done a day early. HOUSE-001 (line endings, submission requirements, `AI_WORKLOG.md`). | **G1** ✅ |
 | Fri 25 Sep | Start EPIC-02 (core models, Markdown parser, normalization). Answer OD-1. | — |
 | Sat 26 Sep | EVAL-001: design the dataset (mix, coverage, rubric). Then EVAL-002: write the questions + ground truth, **committed to git**. Finish EPIC-02 chunkers + stats. | **M1 ground truth frozen**, **G2** |
 | Sun 27 Sep | EPIC-03. First check V-1 (how embedding requests are counted). Index Arm A before 14:00 and Arm B after 14:00 if quota needs it (two quota days in one calendar day). Then retrieval, generation, citations, "insufficient information", retry/fallback. | **M2 first end-to-end answer** |
@@ -104,7 +104,7 @@ Exit gate **G1**:
 
 Deliverables:
 - Core models filled in per ADR-0003 D6 (`DocumentChunk` fields, `ParsedDocument` text + metadata); core stays free of Chroma/Gemini/format code.
-- Markdown parser via `ParserRegistry`; normalization step (ADR-0003 D1) in infrastructure.
+- Markdown parser via `ParserRegistry`; normalization step (ADR-0003 D1) in infrastructure. The normalizer MUST convert `\r\n` → `\n` **before** computing character offsets and hashes, so results don't depend on how a checkout stores line endings (HOUSE-001). The corpus snapshot hashes in `docs/snapshots/corpus/` are of the original CRLF bytes; `corpus/manifest.json` uses LF (`sha256_lf`).
 - Header-aware chunker (D2–D5) and fixed-size chunker (D7: 1,600 chars, 200 overlap), same metadata from both.
 - Chunk files per arm → `data/processed/chunks/`; per-arm stats (chunk count, size distribution, % chunks cutting a code fence; D8).
 - MarkItDown adapter for non-Markdown files (ADR-0002), scheduled **after** the chunkers because the current corpus is all Markdown; includes V-2 (Python 3.13 check) and adding it to `pyproject.toml`.
@@ -203,7 +203,11 @@ Exit gate **G6**:
 **When:** Wed 30 Sep – Thu 1 Oct · **Phase:** 4 · **Proposed task:** QC-001 · **Roles:** verifier, quality-controller
 
 Deliverables:
-- Root `README.md`: purpose, **dataset description** (required by the brief), architecture sketch, install/run (app, tests, evaluation), results summary with links to reports. Install instructions consistent (`requirements.txt` currently lacks PySide6; `pyproject.toml` has it).
+- Root `README.md` with the sections the submission requires: **problem, solution, architecture/workflow, AI usage, completed work, limitations**, plus the **dataset description**, install/run (app, tests, evaluation) and a results summary with links to reports. Install instructions consistent (`requirements.txt` currently lacks PySide6; `pyproject.toml` has it).
+- `AI_WORKLOG.md` completed: summary of how AI helped, incorrect AI outputs and how they were improved, "with 7 more days" (created in HOUSE-001; the log grows task by task).
+- Demo video script (≤ 5 minutes). The owner records the video.
+- Working product / demo link (how the app is shown to graders; OD-1).
+- Push to GitHub `origin` (github.com/PotatoMine725/Tech-docs-RAG). The push is the owner's call.
 - Brief traceability checklist (§9) with evidence links → `docs/reviews/milestones/`.
 - Final checks: full offline pytest, secret scan, excluded docs unused, source checksums unchanged, `gitnexus_detect_changes()` before the final commit.
 - Final report → `docs/reports/milestones/`.
@@ -211,6 +215,8 @@ Deliverables:
 Exit gate **G7**:
 - [ ] Every row of §9 is met, with an evidence link.
 - [ ] All checks above pass.
+- [ ] README has all required submission sections; `AI_WORKLOG.md` summary sections are filled.
+- [ ] Demo video (≤ 5 min) recorded; repo pushed to GitHub.
 - [ ] Submitted by 1 Oct (channel/time: OD-1).
 
 ## 5. Gemini quota plan (free tier, ADR-0004)
@@ -234,7 +240,7 @@ Cut in this order:
 3. MarkItDown adapter — only with the user's OK (OD-15); ADR-0002 stays accepted.
 4. The re-run slot.
 
-**Never cut:** ground truth frozen before indexing · ≥ 30 questions · both arms · all 4 metrics (answer, retrieval, citation, latency) · failure analysis · "insufficient information" handling · citations · README dataset description · minimal GUI.
+**Never cut:** ground truth frozen before indexing · ≥ 30 questions · both arms · all 4 metrics (answer, retrieval, citation, latency) · failure analysis · "insufficient information" handling · citations · README dataset description · minimal GUI · the submission package (README sections, `AI_WORKLOG.md`, demo video ≤ 5 min, GitHub push).
 
 **Stretch (only after M3, if time remains; choice = OD-16):** Vietnamese → English query rewriting before retrieval (ADR-0003 D9, brief bonus); ≤ 20-question answer-model comparison with `gemini-3.5-flash` (ADR-0004 D12); fixed-size 1,200 vs 3,200 chars follow-up (ADR-0003 D7); cost benchmarking.
 
@@ -256,7 +262,7 @@ This plan does **not** decide these. Each must be decided by the owner epic's la
 
 | ID | Decision | Where it is open | Owner | Decide by |
 |---|---|---|---|---|
-| OD-1 | Submission channel/format and time of day on 1 Oct | — | user | 25 Sep |
+| OD-1 | Submission channel (where to send it, how the demo link is hosted) and time of day on 1 Oct. The package contents are known: see `assignment-requirements.md` § Submission | — | user | 25 Sep |
 | OD-2 | Corpus manifest format and location | `corpus/README.md` | EPIC-01 | ✅ Decided 24 Sep (user): `corpus/manifest.json` |
 | OD-3 | Why each excluded doc (14, 19, 24, 27) was dropped (owner knowledge) | `corpus/README.md` | EPIC-01 / user | ✅ Decided 24 Sep (user): all four are index pages (links to other pages, no useful content) |
 | OD-4 | Question mix: total (≥ 30), EN/VI split, parallel subset size, number of "not in the documents" cases | evaluation-spec, ADR-0003 D8/D9 | EVAL-001 | 26 Sep |
@@ -295,6 +301,12 @@ Facts to verify (not decisions):
 | ≥ 2 approaches: what changed, how evaluated, results, why different, what learned | EPIC-06 | Experiment report |
 | Failure analysis (grading emphasis) | EPIC-06 | Experiment report |
 | Bonus (reranking, hybrid, query rewriting, agentic RAG, automated evaluation, cost) | Stretch (§6); the LLM judge is automated evaluation | Reports, if done |
+| **Submission:** working product / demo link | EPIC-04 (app), EPIC-07 | Link in README (OD-1) |
+| **Submission:** GitHub repository | EPIC-07 (push to `origin`) | github.com/PotatoMine725/Tech-docs-RAG |
+| **Submission:** README with problem, solution, architecture/workflow, AI usage, completed work, limitations | EPIC-07 (dataset part: EPIC-01) | `README.md` |
+| **Submission:** demo video ≤ 5 minutes | EPIC-07 script; owner records | Video link in README |
+| **Submission:** `AI_WORKLOG.md` (tools, how AI helped, incorrect outputs + fixes, 7 more days) | HOUSE-001 creates; every task appends; EPIC-07 summarizes | `AI_WORKLOG.md` |
+| **Submission:** originality (can explain everything, no fake functionality) and quality (small and working) | Every task ("Explain it back"); EPIC-07 check | Task reports, QC review |
 
 ## 10. Repo structure check (2026-09-24)
 
@@ -313,3 +325,6 @@ Gaps this plan covers:
 | Agent role files are TBD | When each epic starts (optional) |
 | MarkItDown not in `pyproject.toml` | EPIC-02 |
 | `requirements.txt` lacks PySide6 (pyproject has it) | EPIC-07 |
+| Working tree CRLF vs repo LF (line-ending noise in diffs) | HOUSE-001 ✅ (`.gitattributes`) |
+| Submission package missing from specs and plan; no `AI_WORKLOG.md` | HOUSE-001 ✅ |
+| Duplicate GitNexus block in `CLAUDE.md` | HOUSE-001 ✅ |

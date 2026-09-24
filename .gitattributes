@@ -1,0 +1,19 @@
+# Line endings (HOUSE-001): text files are stored and checked out with LF on every OS,
+# so diffs show only real changes. Overrides core.autocrlf.
+* text=auto eol=lf
+
+# Binary files: never convert.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.docx binary
+*.xlsx binary
+*.pptx binary
+*.zip binary
+*.sqlite3 binary
+*.bin binary
+*.parquet binary
+*.mp4 binary
