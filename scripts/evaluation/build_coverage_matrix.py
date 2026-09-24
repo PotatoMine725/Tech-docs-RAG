@@ -20,6 +20,17 @@ HEADER = (
 )
 
 
+class _Dumper(yaml.SafeDumper):
+    """Quotes digit-only strings such as source IDs "08", so no YAML reader turns them into numbers."""
+
+
+def _represent_str(dumper, value):
+    return dumper.represent_scalar("tag:yaml.org,2002:str", value, style="'" if value.isdigit() else None)
+
+
+_Dumper.add_representer(str, _represent_str)
+
+
 def _counts(values):
     return dict(sorted(Counter(values).items()))
 
@@ -107,7 +118,7 @@ def build_matrix(blueprints):
 
 def main():
     blueprints = yaml.safe_load(BLUEPRINTS.read_text(encoding="utf-8"))["blueprints"]
-    body = yaml.safe_dump(build_matrix(blueprints), sort_keys=False, allow_unicode=True, width=100)
+    body = yaml.dump(build_matrix(blueprints), Dumper=_Dumper, sort_keys=False, allow_unicode=True, width=100)
     MATRIX.write_text(HEADER + body, encoding="utf-8", newline="\n")
     print(f"wrote {MATRIX.relative_to(PROJECT_ROOT).as_posix()}")
 

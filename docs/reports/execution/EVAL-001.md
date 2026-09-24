@@ -10,7 +10,7 @@
 | `data/evaluation/questions/evidence-map.yaml` (new) | 6 absence proofs (search terms, zero hits) and 10 known distractor sections |
 | `data/evaluation/questions/coverage-matrix.yaml` (new, generated) | Counts, cross-tables, per-source use, dominance checks |
 | `scripts/evaluation/build_coverage_matrix.py` (new) | Generates the matrix from the blueprints (deterministic) |
-| `tests/unit/test_evaluation_blueprints.py` (new) | 13 offline checks (below) |
+| `tests/unit/test_evaluation_blueprints.py` (new) | 14 offline checks |
 | `docs/specs/evaluation-spec.md` | OD-4 mix and OD-5 labels (owner decisions); proposed metric details for EVAL-003; amendment log section |
 | `pyproject.toml`, `requirements.txt` | `PyYAML>=6.0,<7.0` declared (it was installed only through chromadb; the prompt requires YAML files and the tests read them) |
 | `docs/plans/master-plan.md`, `docs/plans/epics/EPIC-05-evaluation.md` | EVAL-001 status, OD-4/OD-5 decided, timeline |
@@ -23,7 +23,9 @@
 - Absence searches (case-insensitive, fixed string, `corpus/sources/*.md` only): every term in `evidence-map.yaml` gives 0 hits. The one allowed term, "scope validation", hits 4 times, all inside #10's link-only section.
 - `.venv/Scripts/python.exe scripts/evaluation/build_coverage_matrix.py` twice → identical SHA-256 (deterministic).
 - `tests/unit/test_evaluation_blueprints.py` before the matrix script existed: 12 passed, 1 failed (`FileNotFoundError`, the expected red step). After: 13 passed.
-- `.venv/Scripts/python.exe -m pytest`: **41 passed**.
+- `.venv/Scripts/python.exe -m pytest`: 41 passed at commit `585f434`.
+- Follow-up after review: five evidence quotes had been trimmed so far that they no longer contained the fact they were meant to prove (BP-EVAL-025, 026, 027, 029, BP-DEV-002). They were replaced with full sentences, and 17 missing supporting quotes were added (62 → 79 quotes). Every quote now lists the answer points it `supports`, and a new test fails if a required point has none: 1 failed before the edit, 14 passed after. Matrix: source IDs are quoted.
+- `.venv/Scripts/python.exe -m pytest` after the follow-up: **42 passed**.
 
 ## Exit-gate check (prompt §22)
 | Criterion | Result |

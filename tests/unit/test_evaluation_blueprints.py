@@ -163,6 +163,18 @@ def test_answerable_cases_have_ground_truth_and_criteria():
             assert len({s["source_id"] for s in b["expected_sources"]}) >= 2, b["id"]
 
 
+def test_every_required_point_is_supported_by_a_quote():
+    for b in _blueprints():
+        points = {p["id"]: p for p in b["ground_truth"]["answer_points"]}
+        supported = set()
+        for ev in b["ground_truth"]["evidence"]:
+            assert ev.get("supports"), (b["id"], ev["quote"][:40])
+            assert set(ev["supports"]) <= set(points), (b["id"], ev["supports"])
+            supported |= set(ev["supports"])
+        missing = {pid for pid, p in points.items() if p["required"]} - supported
+        assert not missing, (b["id"], missing)
+
+
 def test_insufficient_cases_expect_a_refusal_and_have_an_absence_proof():
     proofs = {p["id"]: p for p in yaml.safe_load(EVIDENCE_MAP.read_text(encoding="utf-8"))["absence_proofs"]}
     for b in _blueprints():

@@ -42,9 +42,11 @@ blueprints:
         - source_id: "22"
           heading_path: "Querying Data"
           quote: "Queries are always executed against the database even if the entities returned in the result already exist in the context."
+          supports: [P1]
         - source_id: "22"
           heading_path: "Querying Data"
           quote: "EF Core passes a representation of the LINQ query to the database provider. Database providers in turn translate it to database-specific query language (for example, SQL for a relational database)."
+          supports: [P2]
     answer_acceptance_criteria: &pg001_ans
       acceptable_variations:
         - "\"hits the database every time\" or \"doesn't return the tracked copy instead of querying\""
@@ -127,12 +129,23 @@ blueprints:
         - source_id: "13"
           heading_path: "Handle errors in ASP.NET Core > Developer exception page"
           quote: "ASP.NET Core apps enable the developer exception page by default when both:"
+          supports: [P1]
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > Developer exception page"
+          quote: "Running in the [`Development` environment](environments?view=aspnetcore-10.0)."
+          supports: [P1]
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > Developer exception page"
+          quote: "The app was created with the current templates, that is, by using [WebApplication.CreateBuilder](/en-us/dotnet/api/microsoft.aspnetcore.builder.webapplication.createbuilder)."
+          supports: [P1]
         - source_id: "13"
           heading_path: "Handle errors in ASP.NET Core > Developer exception page"
           quote: "Apps created using earlier templates, that is, by using [WebHost.CreateDefaultBuilder](/en-us/dotnet/api/microsoft.aspnetcore.webhost.createdefaultbuilder), can enable the developer exception page by calling"
+          supports: [P2]
         - source_id: "13"
           heading_path: "Handle errors in ASP.NET Core > Developer Exception Page"
           quote: "The preceding code enables the Developer Exception Page ***only*** when the app runs in the `Development` environment."
+          supports: [P3]
     answer_acceptance_criteria: &pg002_ans
       acceptable_variations:
         - "\"Development\" may be called the development environment or IsDevelopment()."
@@ -215,12 +228,15 @@ blueprints:
         - source_id: "02"
           heading_path: "Asynchronous programming scenarios > Recognize CPU-bound and I/O-bound scenarios"
           quote: "Use the `async` modifier and `await` expression *without* the `Task.Run` method."
+          supports: [P1]
         - source_id: "02"
           heading_path: "Asynchronous programming scenarios > Recognize CPU-bound and I/O-bound scenarios"
           quote: "Use the `async` modifier and `await` expression, but spawn off the work on another thread with the `Task.Run` method."
+          supports: [P2]
         - source_id: "02"
           heading_path: "Asynchronous programming scenarios > Recognize CPU-bound and I/O-bound scenarios"
           quote: "Always measure the execution of your code."
+          supports: [P4]
     answer_acceptance_criteria: &pg003_ans
       acceptable_variations:
         - "\"offload to a background/thread-pool thread with Task.Run\""
@@ -298,9 +314,11 @@ blueprints:
         - source_id: "23"
           heading_path: "Routing in ASP.NET Core > Route constraints"
           quote: "Don't use constraints for input validation. If constraints are used for input validation, invalid input results in a `404` Not Found response."
+          supports: [P1, P2]
         - source_id: "23"
           heading_path: "Routing in ASP.NET Core > Route constraints"
           quote: "Invalid input should produce a `400` Bad Request with an appropriate error message. Route constraints are used to disambiguate similar routes, not to validate the inputs for a particular route."
+          supports: [P2, P3]
     answer_acceptance_criteria: &pg004_ans
       acceptable_variations:
         - "\"used to tell similar routes apart\" for disambiguation"
@@ -374,9 +392,15 @@ blueprints:
         - source_id: "03"
           heading_path: "Unit testing best practices for .NET > Best practices > Avoid multiple Act tasks"
           quote: "When you write your tests, try to include only one Act task per test."
+          supports: [P1]
         - source_id: "03"
           heading_path: "Unit testing best practices for .NET > Best practices > Avoid multiple Act tasks"
           quote: "Multiple Act tasks need to be individually asserted, and you can't guarantee that all Assert tasks execute."
+          supports: [P2]
+        - source_id: "03"
+          heading_path: "Unit testing best practices for .NET > Best practices > Avoid multiple Act tasks"
+          quote: "You can easily discern which Act task is failing if the test fails."
+          supports: [P3]
     answer_acceptance_criteria: &pg005_ans
       acceptable_variations:
         - "\"one action/one behavior under test per test\""
@@ -455,9 +479,11 @@ blueprints:
         - source_id: "29"
           heading_path: "ASP0033: `[ValidatableType]` is applied to an inaccessible type > Rule description"
           quote: "The validation source generator emits code in a separate file. A validatable type and all of its containing types must be public or internal and can't be file-local. Otherwise, the generator silently skips validation for the type."
+          supports: [P1, P2]
         - source_id: "29"
           heading_path: "ASP0033: `[ValidatableType]` is applied to an inaccessible type > How to fix violations"
           quote: "Make the attributed type and each of its containing types public or internal."
+          supports: [P3]
     answer_acceptance_criteria: &pg006_ans
       acceptable_variations:
         - The fix may be shown as changing `file sealed class` to `internal sealed class`.
@@ -534,9 +560,15 @@ blueprints:
         - source_id: "10"
           heading_path: "Dependency injection in ASP.NET Core > Service lifetimes"
           quote: "Using [constructor injection](../mvc/controllers/dependency-injection?view=aspnetcore-10.0#constructor-injection) throws a runtime exception because it forces the scoped service to behave like a singleton."
+          supports: [P1]
+        - source_id: "10"
+          heading_path: "Dependency injection in ASP.NET Core > Service lifetimes"
+          quote: "Inject the service into the middleware's `Invoke` or `InvokeAsync` method."
+          supports: [P2]
         - source_id: "10"
           heading_path: "Dependency injection in ASP.NET Core > Service lifetimes"
           quote: "Middleware registered using this approach is activated per client request (connection), which allows scoped services to be injected into the middleware's constructor."
+          supports: [P3]
     answer_acceptance_criteria: &pg007_ans
       acceptable_variations:
         - "\"IMiddleware\" may be named for factory-based middleware."
@@ -614,9 +646,15 @@ blueprints:
         - source_id: "01"
           heading_path: "Asynchronous programming with async and await > Async/await vs ContinueWith > Why async/await is preferred"
           quote: "**Readability**: The code reads like synchronous code, making it easier to understand the flow of operations."
+          supports: [P1]
         - source_id: "01"
           heading_path: "Asynchronous programming with async and await > Async/await vs ContinueWith > Why async/await is preferred"
           quote: "**Error handling**: Exception handling with `try`/`catch` blocks works naturally, whereas `ContinueWith` requires careful handling of faulted tasks."
+          supports: [P2]
+        - source_id: "01"
+          heading_path: "Asynchronous programming with async and await > Async/await vs ContinueWith > Why async/await is preferred"
+          quote: "**Debugging**: The call stack and debugger experience is much better with `async`/`await`."
+          supports: [P3]
     answer_acceptance_criteria:
       acceptable_variations:
         - Advantages may be listed in any order.
@@ -660,9 +698,11 @@ blueprints:
         - source_id: "26"
           heading_path: "The C# type system > Value types and reference types"
           quote: "**Reference types** hold a reference to an object on the managed heap. When you assign a reference type to a new variable, both variables point to the same object."
+          supports: [P1]
         - source_id: "26"
           heading_path: "The C# type system > Value types and reference types"
           quote: "**Value types** hold their data directly. When you assign a value type to a new variable, the runtime copies the data."
+          supports: [P2]
     answer_acceptance_criteria:
       acceptable_variations:
         - "\"same instance\" for \"same object\""
@@ -713,12 +753,15 @@ blueprints:
         - source_id: "11"
           heading_path: "Factory-based middleware activation in ASP.NET Core"
           quote: "[IMiddleware](/en-us/dotnet/api/microsoft.aspnetcore.http.imiddleware) is activated per client request (connection), so scoped services can be injected into the middleware's constructor."
+          supports: [P2]
         - source_id: "11"
           heading_path: "Factory-based middleware activation in ASP.NET Core"
           quote: "The middleware is registered as a [scoped or transient service](../dependency-injection?view=aspnetcore-10.0#service-lifetimes) in the app's service container."
+          supports: [P3]
         - source_id: "11"
           heading_path: "Factory-based middleware activation in ASP.NET Core > IMiddleware"
           quote: "public async Task InvokeAsync(HttpContext context, SampleDbContext dbContext)"
+          supports: [P1]
     answer_acceptance_criteria:
       acceptable_variations:
         - "\"MiddlewareFactory\" (the default IMiddlewareFactory) may be named."
@@ -767,9 +810,15 @@ blueprints:
         - source_id: "21"
           heading_path: "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Logical patterns > Precedence and order of checking"
           quote: "The `not` pattern binds to its operand first. The `and` pattern binds after any `not` pattern expression binding."
+          supports: [P1]
+        - source_id: "21"
+          heading_path: "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Logical patterns > Precedence and order of checking"
+          quote: "static bool IsNotLowerCaseLetterDefaultBinding(char c) => c is ((not >= 'a') and <= 'z');"
+          supports: [P2]
         - source_id: "21"
           heading_path: "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Logical patterns > Precedence and order of checking"
           quote: "static bool IsNotLowerCaseLetterParentheses(char c) => c is not (>= 'a' and <= 'z');"
+          supports: [P3]
     answer_acceptance_criteria:
       acceptable_variations:
         - The fix may be written for any variable name.
@@ -815,9 +864,11 @@ blueprints:
         - source_id: "21"
           heading_path: "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > List patterns"
           quote: "A slice pattern matches zero or more elements. You can use at most one slice pattern in a list pattern. The slice pattern can only appear in a list pattern."
+          supports: [P1, P2]
         - source_id: "21"
           heading_path: "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > List patterns"
           quote: "Console.WriteLine(new[] { 2, 4 } is [.., 2, 4]);  // True"
+          supports: [P3]
     answer_acceptance_criteria:
       acceptable_variations:
         - "\"range/slice `..`\""
@@ -863,12 +914,15 @@ blueprints:
         - source_id: "16"
           heading_path: "Integral numeric types (C# reference) > Integer literals"
           quote: "If the literal has no suffix, the compiler assigns the type as the first of the following types in which its value can be represented: `int`, `uint`, `long`, `ulong`."
+          supports: [P1]
         - source_id: "16"
           heading_path: "Integral numeric types (C# reference) > Integer literals"
           quote: "For example, the literal `0xFF_FF_FF_FF` represents the number `4,294,967,295` of the `uint` type, though it has the same bit representation as the number `-1` of the `int` type."
+          supports: [P2]
         - source_id: "16"
           heading_path: "Integral numeric types (C# reference) > Integer literals"
           quote: "For example, `unchecked((int)0xFF_FF_FF_FF)` produces `-1`."
+          supports: [P3]
     answer_acceptance_criteria:
       acceptable_variations:
         - The value may be written as 4294967295 or 2^32 - 1.
@@ -914,9 +968,15 @@ blueprints:
         - source_id: "20"
           heading_path: "A tour of the C# language > File-based apps"
           quote: "Beginning with C# 14 and .NET 10, you can create *file-based apps*, which simplifies building and running C# programs."
+          supports: [P1]
         - source_id: "20"
           heading_path: "A tour of the C# language > File-based apps"
           quote: "The source for these programs must be a single file, but otherwise all C# syntax is valid."
+          supports: [P2]
+        - source_id: "20"
+          heading_path: "A tour of the C# language > File-based apps"
+          quote: "You use the `dotnet run` command to run a program contained in a single `*.cs` file."
+          supports: [P1]
     answer_acceptance_criteria:
       acceptable_variations:
         - "\"single-file program\""
@@ -970,12 +1030,23 @@ blueprints:
         - source_id: "13"
           heading_path: "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithRedirects"
           quote: "Sends a [302 - Found](https://developer.mozilla.org/docs/Web/HTTP/Status/302) status code to the client."
+          supports: [P1]
         - source_id: "13"
           heading_path: "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithReExecute"
           quote: "Generates the response body by re-executing the request pipeline using an alternate path."
+          supports: [P2]
         - source_id: "13"
           heading_path: "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithReExecute"
           quote: "Does not alter the status code before or after re-executing the pipeline."
+          supports: [P2]
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithRedirects"
+          quote: "For web apps, the client's browser address bar reflects the redirected endpoint."
+          supports: [P3]
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithReExecute"
+          quote: "For web apps, the client's browser address bar reflects the originally requested endpoint."
+          supports: [P3]
     answer_acceptance_criteria:
       acceptable_variations:
         - "\"HTTP 302\" / \"Found\" / \"redirect response\""
@@ -1025,9 +1096,15 @@ blueprints:
         - source_id: "13"
           heading_path: "Handle errors in ASP.NET Core > IExceptionHandler"
           quote: "Starting in .NET 10, the default behavior is to suppress emission of diagnostics such as logs and metrics for handled exceptions (when `TryHandleAsync` returns `true`)."
+          supports: [P1]
         - source_id: "13"
           heading_path: "Handle errors in ASP.NET Core > IExceptionHandler"
           quote: "This differs from earlier versions (.NET 8 and 9) where diagnostics were always emitted regardless of whether the exception was handled."
+          supports: [P2]
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > IExceptionHandler"
+          quote: "The default behavior can be changed by setting [SuppressDiagnosticsCallback](#suppressdiagnosticscallback)."
+          supports: [P3]
     answer_acceptance_criteria:
       acceptable_variations:
         - "\"telemetry\" for logs and metrics"
@@ -1071,9 +1148,15 @@ blueprints:
         - source_id: "17"
           heading_path: "Integration tests in ASP.NET Core > Disable shadow copying"
           quote: "Shadow copying causes the tests to execute in a different directory than the output directory."
+          supports: [P1]
         - source_id: "17"
           heading_path: "Integration tests in ASP.NET Core > Disable shadow copying"
           quote: "To disable shadow copying when using xUnit, create a `xunit.runner.json` file in your test project directory"
+          supports: [P2]
+        - source_id: "17"
+          heading_path: "Integration tests in ASP.NET Core > Disable shadow copying"
+          quote: "\"shadowCopy\": false"
+          supports: [P2]
     answer_acceptance_criteria:
       acceptable_variations:
         - The JSON may be shown as `{ "shadowCopy": false }`.
@@ -1117,9 +1200,15 @@ blueprints:
         - source_id: "23"
           heading_path: "Routing in ASP.NET Core > Short-circuit middleware after routing"
           quote: "app.MapShortCircuit(404, \"robots.txt\", \"favicon.ico\");"
+          supports: [P1]
         - source_id: "23"
           heading_path: "Routing in ASP.NET Core > Short-circuit middleware after routing"
-          quote: "extension method to cause routing to invoke the endpoint logic immediately and then end the request."
+          quote: "Use the [ShortCircuit](/en-us/dotnet/api/microsoft.aspnetcore.builder.routeshortcircuitendpointconventionbuilderextensions.shortcircuit) extension method to cause routing to invoke the endpoint logic immediately and then end the request."
+          supports: [P2]
+        - source_id: "23"
+          heading_path: "Routing in ASP.NET Core > Short-circuit middleware after routing"
+          quote: "For example, a given route might not need to go through authentication or CORS middleware."
+          supports: [P2]
     answer_acceptance_criteria:
       acceptable_variations:
         - The status code may be different if the answer explains it's the response code.
@@ -1163,12 +1252,15 @@ blueprints:
         - source_id: "15"
           heading_path: "How to create backend application using Asp.net C# Web API Core"
           quote: "NU1202: Package Microsoft.AspNetCore.Authentication.JwtBearer 8.0.5 is not compatible with net5.0"
+          supports: [P1]
         - source_id: "15"
           heading_path: "How to create backend application using Asp.net C# Web API Core"
           quote: ".NET 5 is out of support, I suggest you use .net 8 instead of 5"
+          supports: [P2]
         - source_id: "15"
           heading_path: "How to create backend application using Asp.net C# Web API Core"
-          quote: "it is deprecated, but it still could be used for testing"
+          quote: "the latest version for Microsoft.AspNetCore.Authentication.JwtBearer the is 5.0.17 as below image shows, it is deprecated, but it still could be used for testing"
+          supports: [P3]
     answer_acceptance_criteria:
       acceptable_variations:
         - The answer may call the source a Microsoft Q&A thread.
@@ -1212,10 +1304,16 @@ blueprints:
       evidence:
         - source_id: "12"
           heading_path: "Handle errors in ASP.NET Core APIs > Additional error handling features > Validation failure error response"
-          quote: "response type when model validation fails."
+          quote: "For web API controllers, MVC responds with a [ValidationProblemDetails](/en-us/dotnet/api/microsoft.aspnetcore.mvc.validationproblemdetails) response type when model validation fails."
+          supports: [P1]
+        - source_id: "12"
+          heading_path: "Handle errors in ASP.NET Core APIs > Additional error handling features > Validation failure error response"
+          quote: "MVC uses the results of [InvalidModelStateResponseFactory](/en-us/dotnet/api/microsoft.aspnetcore.mvc.apibehavioroptions.invalidmodelstateresponsefactory#microsoft-aspnetcore-mvc-apibehavioroptions-invalidmodelstateresponsefactory) to construct the error response for a validation failure."
+          supports: [P2]
         - source_id: "12"
           heading_path: "Handle errors in ASP.NET Core APIs > Additional error handling features > Validation failure error response"
           quote: "options.InvalidModelStateResponseFactory = context =>"
+          supports: [P2]
     answer_acceptance_criteria:
       acceptable_variations:
         - "\"400 validation problem response\" if ValidationProblemDetails is also named"
@@ -1259,6 +1357,7 @@ blueprints:
         - source_id: "18"
           heading_path: "Introduction"
           quote: "Although C# applications are intended to be economical with regard to memory and processing power requirements, the language was not intended to compete directly on performance and size with C or assembly language."
+          supports: [P1]
     answer_acceptance_criteria:
       acceptable_variations:
         - "\"not designed to beat C/assembly on speed or size\""
@@ -1304,10 +1403,12 @@ blueprints:
       evidence:
         - source_id: "10"
           heading_path: "Dependency injection in ASP.NET Core > Entity Framework contexts"
-          quote: "because web app database operations are normally scoped to the client request."
+          quote: "By default, Entity Framework contexts are added to the service container using the [scoped lifetime](#service-lifetimes) because web app database operations are normally scoped to the client request."
+          supports: [P1]
         - source_id: "22"
           heading_path: "Querying Data > Loading a single entity"
           quote: ".SingleAsync(b => b.BlogId == 1);"
+          supports: [P2]
     answer_acceptance_criteria:
       acceptable_variations:
         - Any context variable name.
@@ -1353,12 +1454,23 @@ blueprints:
         - source_id: "03"
           heading_path: "Unit testing best practices for .NET > Best practices > Follow test naming standards"
           quote: "The name of your test should consist of three parts:"
+          supports: [P1]
+        - source_id: "03"
+          heading_path: "Unit testing best practices for .NET > Best practices > Follow test naming standards"
+          quote: "Name of the method being tested"
+          supports: [P1]
+        - source_id: "03"
+          heading_path: "Unit testing best practices for .NET > Best practices > Follow test naming standards"
+          quote: "Scenario under which the method is being tested"
+          supports: [P1]
         - source_id: "03"
           heading_path: "Unit testing best practices for .NET > Best practices > Follow test naming standards"
           quote: "Expected behavior when the scenario is invoked"
+          supports: [P1]
         - source_id: "28"
           heading_path: "Unit testing C# in .NET using dotnet test and xUnit > Create a test > Add more tests"
           quote: "public void IsPrime_ValuesLessThan2_ReturnFalse(int value)"
+          supports: [P2]
     answer_acceptance_criteria:
       acceptable_variations:
         - The parts may be named "unit of work / state under test / expected behavior".
@@ -1404,9 +1516,11 @@ blueprints:
         - source_id: "04"
           heading_path: "Built-in types and literals > `default` expressions"
           quote: "The `default` expression produces the default value for a type: `0` for numeric types, `false` for `bool`, and `null` for reference types:"
+          supports: [P1, P2]
         - source_id: "26"
           heading_path: "The C# type system > Value types and reference types"
           quote: "Classes, arrays, delegates, and strings are reference types."
+          supports: [P1]
     answer_acceptance_criteria:
       acceptable_variations:
         - "\"string? s = default;\" shown as an example"
@@ -1452,9 +1566,15 @@ blueprints:
         - source_id: "13"
           heading_path: "Handle errors in ASP.NET Core > IExceptionHandler"
           quote: "The lifetime of an `IExceptionHandler` instance is singleton."
+          supports: [P1]
+        - source_id: "10"
+          heading_path: "Dependency injection in ASP.NET Core > Entity Framework contexts"
+          quote: "By default, Entity Framework contexts are added to the service container using the [scoped lifetime](#service-lifetimes) because web app database operations are normally scoped to the client request."
+          supports: [P2]
         - source_id: "10"
           heading_path: "Dependency injection in ASP.NET Core > Entity Framework contexts"
           quote: "Services of a given lifetime shouldn't use a database context with a lifetime that's shorter than the service's lifetime."
+          supports: [P3]
     answer_acceptance_criteria:
       acceptable_variations:
         - The answer may add that the corpus doesn't show a workaround.
@@ -1648,9 +1768,11 @@ blueprints:
         - source_id: "07"
           heading_path: "C# classes > Static classes"
           quote: "A `static` class can't be instantiated and contains only static members."
+          supports: [P1]
         - source_id: "07"
           heading_path: "C# classes > Static classes"
           quote: "A static class is implicitly sealed. You can't derive from it or instantiate it."
+          supports: [P2]
     answer_acceptance_criteria:
       acceptable_variations: []
       must_not_claim:
@@ -1691,10 +1813,12 @@ blueprints:
       evidence:
         - source_id: "04"
           heading_path: "Built-in types and literals > Numeric types > Native-sized integers"
-          quote: "represent integers whose size matches the platform's native pointer size: 32 bits on a 32-bit platform, 64 bits on a 64-bit platform:"
+          quote: "The `nint` and `nuint` types represent integers whose size matches the platform's native pointer size: 32 bits on a 32-bit platform, 64 bits on a 64-bit platform:"
+          supports: [P1]
         - source_id: "04"
           heading_path: "Built-in types and literals > Numeric types > Native-sized integers"
           quote: "Stick with `int` or `long` unless you have a specific reason to use native-sized types."
+          supports: [P2]
     answer_acceptance_criteria:
       acceptable_variations: []
       must_not_claim:
@@ -1736,6 +1860,7 @@ blueprints:
         - source_id: "06"
           heading_path: "C# keywords > Contextual keywords"
           quote: "A contextual keyword provides a specific meaning in the code, but it isn't a reserved word in C#."
+          supports: [P1]
     answer_acceptance_criteria:
       acceptable_variations: []
       must_not_claim:
@@ -1777,6 +1902,11 @@ blueprints:
         - source_id: "02"
           heading_path: "Asynchronous programming scenarios > Review considerations for asynchronous programming > Return 'async void' only from event handlers"
           quote: "Exceptions thrown in an `async void` method can't be caught outside of that method"
+          supports: [P2]
+        - source_id: "02"
+          heading_path: "Asynchronous programming scenarios > Review considerations for asynchronous programming > Return 'async void' only from event handlers"
+          quote: "When you write asynchronous event handlers, you need to use the `async` modifier on a `void` returning method for the handlers."
+          supports: [P1]
     answer_acceptance_criteria:
       acceptable_variations: []
       must_not_claim:

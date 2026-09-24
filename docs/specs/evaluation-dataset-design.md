@@ -88,7 +88,8 @@ Scoring: `correct_refusal` or `hallucination` (OD-5). They are left out of sourc
 
   That is how the task's "inspect all 24 documents" was met: the structure of every document from the inventory (headings, sizes, variant counts), and full reads where a case was considered. The rest of the huge documents was not read line by line.
 - Every answer point comes from the text of the cited section. No web search, no model memory, no outside best practice.
-- Every answerable case carries verbatim evidence quotes (≤ 300 chars) with `source_id` and a heading path that exists in the inventory. A test checks that each quote appears inside that section's text (any variant). For case 023, it checks the specific variant that holds the evidence.
+- Every answerable case carries verbatim evidence quotes (≤ 300 chars) with `source_id` and a heading path that exists in the inventory. Each quote lists the answer points it `supports`; a test fails if any required point has no supporting quote.
+- Quotes keep the original Markdown, including link markup such as `[text](url)`. So the EVAL-002 validator and the citation judge must match quotes against a chunk's `display_text`, which keeps links (ADR-0003 D5), after the same whitespace/line-ending normalization. They must not match against `embed_text`, where links are reduced to their text. A test checks that each quote appears inside that section's text (any variant). For case 023, it checks the specific variant that holds the evidence.
 - Variants are never labelled with guessed versions (ADR-0003). When a case depends on one variant, the blueprint records `evidence_variant` by inventory number.
 - Ground truth is written before any chunk or index exists (CLAUDE.md rule 9). Nothing here depends on retrieval results.
 
