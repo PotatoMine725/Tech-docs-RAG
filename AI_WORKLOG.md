@@ -74,6 +74,12 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 - *How found:* (1)(3) the independent review; (2) the authoring session while checking the review's findings against the YAML.
 - *Fix:* all 24 findings addressed (23 accepted, 1 partly accepted: 023 keeps `mixed_version`, because the answer still depends on the version). A new `stands_in_for` field lets an alternate count in cross-document cases. Three new tests: no inline YAML comments and prose fields are strings (both failed before the YAML fix), and cross-document alternates name the source they replace (written after the field existed; shown to fail with the field removed). 45 tests pass.
 - *Human decision:* the owner reviewed the blueprints and asked for an independent agent review. No case was added, dropped or re-scoped, so the OD-4 mix is unchanged.
+- *Verifier findings (99-VERIFY, [review](docs/reviews/evaluation/EVAL-001-verify.md)):* verdict ACCEPT WITH FIXES. The ground truth reproduces: all 107 evidence quotes are in their named sections, the absence proofs hold (a broader synonym search also gave 0 relevant hits), dev and eval are disjoint (including alternates), and the matrix is deterministic. Real defects, all stale values left after later edits:
+  - (1) Design §19 says plain semantic matches are 6%; the matrix says 9.4% since review fix #22.
+  - (2) The report's file table says "14 offline checks"; there are 17.
+  - (3) The master plan, EPIC-05 and design line 3 still say "awaiting owner review", while the report says the owner reviewed.
+  - (4) "23 accepted" findings is really 22 accepted, 1 partly accepted and 1 decided by the author (the DEV-006 scoring rule, not confirmed by the owner).
+  - Not evidenced: `gitnexus_detect_changes()` before the task commits.
 
 ## Summary: how AI helped
 
