@@ -1,6 +1,6 @@
 # EPIC-05-evaluation
 
-Status: stage A in progress. EVAL-001 (design) done 2026-09-24, awaiting owner review: [design](../../specs/evaluation-dataset-design.md), [report](../../reports/execution/EVAL-001.md). Next: EVAL-002 after approval.
+Status: stage A in progress. EVAL-001 (design) done 2026-09-24. Owner reviewed; independent review done; pending the owner's re-check of the cases whose ground truth changed (design §20): [design](../../specs/evaluation-dataset-design.md), [report](../../reports/execution/EVAL-001.md). Next: EVAL-002 after that re-check.
 
 Target: stage A Sat 26 Sep 2026 (Phase 1); stage B Mon 28 – Tue 29 Sep 2026 (Phase 3). Deadline for the whole project: 2026-10-01.
 

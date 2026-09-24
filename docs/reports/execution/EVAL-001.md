@@ -10,7 +10,7 @@
 | `data/evaluation/questions/evidence-map.yaml` (new) | 6 absence proofs (search terms, zero hits) and 10 known distractor sections |
 | `data/evaluation/questions/coverage-matrix.yaml` (new, generated) | Counts, cross-tables, per-source use, dominance checks |
 | `scripts/evaluation/build_coverage_matrix.py` (new) | Generates the matrix from the blueprints (deterministic) |
-| `tests/unit/test_evaluation_blueprints.py` (new) | 14 offline checks |
+| `tests/unit/test_evaluation_blueprints.py` (new) | 17 offline checks (85 evidence quotes in `blueprint.yaml`) |
 | `docs/specs/evaluation-spec.md` | OD-4 mix and OD-5 labels (owner decisions); proposed metric details for EVAL-003; amendment log section |
 | `pyproject.toml`, `requirements.txt` | `PyYAML>=6.0,<7.0` declared (it was installed only through chromadb; the prompt requires YAML files and the tests read them) |
 | `docs/plans/master-plan.md`, `docs/plans/epics/EPIC-05-evaluation.md` | EVAL-001 status, OD-4/OD-5 decided, timeline |
@@ -28,7 +28,7 @@
 - `.venv/Scripts/python.exe -m pytest` after the follow-up: **42 passed**.
 - Independent review (2026-09-24, after the owner's review): a separate read-only agent reported 24 findings (4 high, 9 medium, 11 low) in [`docs/reviews/evaluation/EVAL-001-blueprint-review.md`](../../reviews/evaluation/EVAL-001-blueprint-review.md). Each finding's corpus quote was re-checked by script (all found in the named sections).
   - While triaging, a YAML defect was found: 32 values cut off at " #" and one variation read as a mapping. It was fixed in `9e0ab15`, with 2 new tests that failed before the fix (44 passed after).
-  - Then all 24 findings were addressed (23 accepted, 1 partly accepted); the response table is section 5 of the review.
+  - Then all 24 findings were addressed (22 accepted, 1 partly accepted, 1 decided by the author: the DEV-006 scoring rule, since confirmed by the owner as D2); the response table is section 5 of the review.
   - A new test for `stands_in_for` failed with the field removed and passed with it. (The field was later replaced by `slot`, below.)
   - The evidence map now has 11 distractor sections (one wrong entry removed, two added).
   - `.venv/Scripts/python.exe -m pytest`: **45 passed**.

@@ -26,7 +26,7 @@
 | Phase | Dates (target) | What happens (plain words) | Epics | Status |
 |---|---|---|---|---|
 | 0 Setup & decisions | 24 Sep | Folder structure, stack, chunking and model decisions | SETUP-001, ADR-0001…0004 | **Done** (commits `3d5a606`, `490068f`, `6f9e1d5`) |
-| 1 Know the data | 25–26 Sep | Understand the 24 documents; write the test questions and their correct answers **before** building anything that could bias them | EPIC-01, EPIC-05 stage A | In progress: EPIC-01 **done** 24 Sep; EVAL-001 design **done** 24 Sep (awaiting owner review) |
+| 1 Know the data | 25–26 Sep | Understand the 24 documents; write the test questions and their correct answers **before** building anything that could bias them | EPIC-01, EPIC-05 stage A | In progress: EPIC-01 **done** 24 Sep; EVAL-001 design **done** 24 Sep (owner reviewed; independent review done; pending the owner's re-check of changed cases) |
 | 2 Build the pipeline | 25–28 Sep | Read → clean → chunk → embed → store → retrieve → answer with citations | EPIC-02, EPIC-03 | Not started |
 | 3 Measure & prove | 28–30 Sep | Run the questions through both arms, score them, explain the differences; build the desktop window alongside | EPIC-05 stage B, EPIC-06, EPIC-04 | Not started |
 | 4 Finish & submit | 30 Sep–1 Oct | README, final checks against the brief, submit | EPIC-07 | Not started |
@@ -164,7 +164,7 @@ Two stages, because the questions must be frozen before indexing, but scoring ne
 
 Deliverables:
 - EVAL-001: dataset design. Coverage must include small docs (#09, #18, #22, #29) as well as #13/#17/#23 and both languages. Any "not in the documents" questions must never be built from excluded docs (CLAUDE.md rule 4). The owner's OD-4 mix and OD-5 result labels are written into `docs/specs/evaluation-spec.md`; other metric details are recorded there as *proposed* for EVAL-003 (the EVAL-001 prompt says to propose, not decide, metrics).
-  ✅ Done 2026-09-24, awaiting owner review: [design](../specs/evaluation-dataset-design.md), `data/evaluation/questions/{blueprint,coverage-matrix,evidence-map}.yaml` (36 eval + 6 dev blueprints), [report](../reports/execution/EVAL-001.md).
+  ✅ Done 2026-09-24. Owner reviewed; independent review done; pending the owner's re-check of the cases whose ground truth changed (design §20): [design](../specs/evaluation-dataset-design.md), `data/evaluation/questions/{blueprint,coverage-matrix,evidence-map}.yaml` (36 eval + 6 dev blueprints), [report](../reports/execution/EVAL-001.md).
 - EVAL-002: ≥ 30 cases → `data/evaluation/questions/` (JSONL). Each case: id, question, `language` (en/vi), expected answer (ground truth), expected `source_id`, expected heading path, EN/VI pair id for the parallel subset (ADR-0003 D8/D9).
 - EVAL-002: offline schema test for the question file.
 
