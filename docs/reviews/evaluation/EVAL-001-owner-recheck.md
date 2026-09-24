@@ -26,7 +26,7 @@ Source: #26 "The C# type system > Value types and reference types". Review findi
 - **Old P2 (required) → New P2 (optional):** "Value types (structs such as the Coords record struct, enums, built-in numeric types) copy their data on assignment, so changing one variable doesn't affect the other."
 - **Unchanged P1 (required):** "list1.Count is 4: List<int> is a reference type, so list1 and list2 point to the same object and the Add through list2 is visible through list1."
 - **Alternates added:** #07 "C# classes"; #07 "C# classes > Create objects"; #20 "A tour of the C# language > Familiar C# features". Each gives partial support for P1, so retrieving one of them counts as a source hit.
-- **Supporting quote:** see `blueprint.yaml` BP-EVAL-016 evidence (unchanged for P1).
+- **Supporting quotes (unchanged):** P1 "**Reference types** hold a reference to an object on the managed heap. When you assign a reference type to a new variable, both variables point to the same object." · P2 "**Value types** hold their data directly. When you assign a value type to a new variable, the runtime copies the data."
 
 owner verdict: 
 
@@ -76,7 +76,8 @@ Sources: slot S1 #04 "Built-in types and literals > `default` expressions"; slot
 - **Unchanged P1 (required):** "`default` produces null for a string, because string is a reference type and default is null for reference types."
 - **Old citation rule:** "One citation per premise; each from the matching document."
 - **New citation rule:** "One citation per slot: S1 from #04 '`default` expressions'; S2 from #26 'Value types and reference types' or #20 'Familiar C# features'."
-- **#20 note (quote):** "reference types like `string`, arrays, and other collections".
+- **Supporting quotes (unchanged):** #04 (S1, P1 + P2) "The `default` expression produces the default value for a type: `0` for numeric types, `false` for `bool`, and `null` for reference types:" · #26 (S2, P1) "Classes, arrays, delegates, and strings are reference types."
+- **#20 alternate, note (quote):** "reference types like `string`, arrays, and other collections".
 
 owner verdict: 
 

@@ -2,7 +2,8 @@
 
 **Status:** plan only, written 2026-09-24. Nothing below is implemented. Dates are targets, not results.
 **Decisions:** taken from CLAUDE.md and ADR-0001…0004. This plan does not change any decision; anything still open is listed in [§8 Open decisions](#8-open-decisions-decision-required).
-**Keep it current:** when an epic finishes, update its status here and in its epic file. Results go in `docs/reports/`, not here (plans = WILL).
+**Keep it current:** task status lives only in the [task ledger](task-ledger.md); this plan links to it instead of repeating statuses. Gate checkboxes stay here. Results go in `docs/reports/`, not here (plans = WILL).
+**Workflow (synced to the prompt set by REORIENT-001, 2026-09-24):** every task is one prompt file in `agents/prompts/` (order: `agents/prompts/README.md`), and every task is followed by `99-VERIFY.md` in a fresh session. **A task starts only when its prerequisites are `verified` in the [ledger](task-ledger.md).**
 
 > 🔴 **CRITICAL DEADLINE: Thursday 2026-10-01 — final submission of the whole project.**
 > Internal target: **submission-ready by Wednesday 30 Sep, end of day**. 1 Oct is a buffer day for fixes only (no new features).
@@ -14,7 +15,8 @@
 |---|---|
 | Phase | A stage of the project (e.g. "build the pipeline"). A phase contains one or more epics. |
 | Epic | A big chunk of work with its own file in `docs/plans/epics/`. |
-| Task | One prompt-sized piece of an epic (e.g. `EVAL-001`). Task IDs below are *proposed*. |
+| Task | One prompt file in `agents/prompts/` (e.g. `01-EVAL-001-…` = EVAL-001). Task IDs below are the prompt files' IDs; status per task: [ledger](task-ledger.md). |
+| VERIFY | `99-VERIFY.md`, run after every task in a new session; its verdict sets the task to `verified` in the ledger. |
 | Exit gate (G1…G7) | A checklist that must pass before work that depends on this epic starts. |
 | Milestone (M1…M3) | A key moment on the timeline, e.g. "ground truth frozen". |
 | Arm | One side of the experiment: Arm A = header-aware chunking (baseline), Arm B = fixed-size chunking (ADR-0003 D7). |
@@ -26,22 +28,26 @@
 | Phase | Dates (target) | What happens (plain words) | Epics | Status |
 |---|---|---|---|---|
 | 0 Setup & decisions | 24 Sep | Folder structure, stack, chunking and model decisions | SETUP-001, ADR-0001…0004 | **Done** (commits `3d5a606`, `490068f`, `6f9e1d5`) |
-| 1 Know the data | 25–26 Sep | Understand the 24 documents; write the test questions and their correct answers **before** building anything that could bias them | EPIC-01, EPIC-05 stage A | In progress: EPIC-01 **done** 24 Sep; EVAL-001 design **done** 24 Sep (owner reviewed; independent review done; pending the owner's re-check of changed cases) |
-| 2 Build the pipeline | 25–28 Sep | Read → clean → chunk → embed → store → retrieve → answer with citations | EPIC-02, EPIC-03 | Not started |
-| 3 Measure & prove | 28–30 Sep | Run the questions through both arms, score them, explain the differences; build the desktop window alongside | EPIC-05 stage B, EPIC-06, EPIC-04 | Not started |
-| 4 Finish & submit | 30 Sep–1 Oct | README, final checks against the brief, submit | EPIC-07 | Not started |
+| 1 Know the data | 24–25 Sep | Understand the 24 documents; write the test questions and their correct answers **before** building anything that could bias them | CORPUS-001, HOUSE-001, REORIENT-001, EVAL-001, EVAL-002 | [ledger](task-ledger.md) |
+| 2 Build the pipeline | 25–27 Sep | Read → clean → chunk → embed → store → retrieve → answer with citations | INGEST-001…003, RAG-001a/b, RAG-002, RAG-003 | [ledger](task-ledger.md) |
+| 3 Measure & prove | 28–30 Sep | Run the questions through both arms, score them, explain the differences; build the desktop window alongside | EVAL-003a/b/c, EVAL-004, EXP-001, GUI-001 (BONUS-001 optional) | [ledger](task-ledger.md) |
+| 4 Finish & submit | 30 Sep–1 Oct | README, final checks against the brief, submit | QC-001 | [ledger](task-ledger.md) |
 
 ## 2. Day-by-day timeline (targets)
 
 | Date | Main work | Gate / milestone |
 |---|---|---|
-| Thu 24 Sep | This master plan. EPIC-01 done a day early. HOUSE-001 (line endings, submission requirements, `AI_WORKLOG.md`). EVAL-001 design (OD-4/OD-5 decided). | **G1** ✅ |
-| Fri 25 Sep | Start EPIC-02 (core models, Markdown parser, normalization). Answer OD-1. | — |
-| Sat 26 Sep | EVAL-002: write the questions + ground truth from the approved EVAL-001 blueprints (EVAL-001 done 24 Sep), **committed to git**. Finish EPIC-02 chunkers + stats. | **M1 ground truth frozen**, **G2** |
-| Sun 27 Sep | EPIC-03. First check V-1 (how embedding requests are counted). Index Arm A before 14:00 and Arm B after 14:00 if quota needs it (two quota days in one calendar day). Then retrieval, generation, citations, "insufficient information", retry/fallback. | **M2 first end-to-end answer** |
-| Mon 28 Sep | Finish EPIC-03. EPIC-05 stage B: runner + metrics (offline tests). Retrieval-only metrics for both arms (embeddings only, cheap). Dry run of 3–5 questions after 14:00. Start EPIC-04 GUI. | **G3** |
-| Tue 29 Sep | Morning: full answer + judge run, both arms. After 14:00: fresh quota → re-run slot if needed. Judge spot-check. Finish GUI. Draft evaluation report. | **G4**, **G5B** |
-| Wed 30 Sep | EPIC-06 experiment report + failure analysis. EPIC-07 README + QC checklist. After 14:00: last quota day for small fixes. | **G6**, **M3 submission-ready** |
+Real position (REORIENT-001, 2026-09-24): CORPUS-001, HOUSE-001 and EVAL-001 finished on 24 Sep. EVAL-001 was originally planned to end with the question freeze on 26 Sep, so the plan is about a day ahead. The rows below follow the target dates in `agents/prompts/README.md`. "VERIFY" = `99-VERIFY.md` for the task just finished. Actual status: [ledger](task-ledger.md).
+
+| Date | Main work (task IDs = prompt files) | Gate / milestone |
+|---|---|---|
+| Thu 24 Sep | Master plan. CORPUS-001 (EPIC-01), HOUSE-001 + VERIFY (ACCEPT), EVAL-001 + VERIFY (ACCEPT WITH FIXES) + fixes, REORIENT-001. | **G1** ✅ |
+| Fri 25 Sep | Owner fills the EVAL-001 re-check sheet; VERIFY EVAL-001 again; VERIFY REORIENT-001. Then EVAL-002 (write + freeze, tag `eval-freeze-v1`) and, in parallel, INGEST-001 (models, parser, normalization). Answer OD-1. | **M1 ground truth frozen** |
+| Sat 26 Sep | INGEST-002 (both chunkers + stats), INGEST-003 (MarkItDown, cuttable). RAG-001a (embedder + cache, V-1 probe, ADR-0005), then RAG-001b (Chroma; index Arm A before 14:00 and Arm B after 14:00 if quota needs two quota days). | **G2** |
+| Sun 27 Sep | Finish RAG-001b indexing. RAG-002 (retrieval, generation, citations, "insufficient information"; dev-set threshold). RAG-003 (retry/fallback, CLI, smoke checks). | **M2 first end-to-end answer**, **G3** |
+| Mon 28 Sep | EVAL-003a (runner), EVAL-003b (metrics + judge), EVAL-003c (tables + spot-check tools), offline tests. GUI-001 in parallel. EVAL-004 starts: retrieval-only metrics for both arms (embeddings only, cheap), dry run of 3 questions after 14:00. | **G4** |
+| Tue 29 Sep | EVAL-004: full answer + judge run, both arms; after 14:00 fresh quota → re-run slot if needed; judge spot-check; evaluation report. EXP-001 (experiment + failure analysis). | **G5B** |
+| Wed 30 Sep | Finish EXP-001. BONUS-001 only if time remains (after M3 rule). QC-001 (README, AI_WORKLOG, final checks, video script). After 14:00: last quota day for small fixes. | **G6**, **M3 submission-ready** |
 | Thu 1 Oct | 🔴 **DEADLINE.** QC fixes only, final commit, submit. | **G7** |
 
 ## 3. Dependencies
@@ -74,14 +80,14 @@ flowchart LR
   E07 --> D(("1 Oct deadline"))
 ```
 
-**Critical path** (a delay here delays the deadline): EPIC-01 → EVAL-001 design → EVAL-002 freeze (M1) → EPIC-03 indexing (also needs EPIC-02) → EPIC-05 stage B run → EPIC-06 → EPIC-07 → 1 Oct.
+**Critical path** (a delay here delays the deadline): CORPUS-001 → EVAL-001 → owner re-check + re-VERIFY → EVAL-002 freeze (M1) → RAG-001a/b indexing (also needs INGEST-002) → RAG-002 → RAG-003 → EVAL-003a/b/c → EVAL-004 → EXP-001 → QC-001 → 1 Oct. Each arrow includes the `99-VERIFY` of the task before it.
 EPIC-04 (GUI) is off the critical path: build it while evaluation runs or waits for quota.
 
 ## 4. Epics
 
 ### EPIC-01 Corpus analysis
-**Status:** ✅ Done 2026-09-24, G1 passed — [report](../reports/epics/EPIC-01-corpus-analysis.md). OD-3 closed the same day.
-**When:** Fri 25 Sep · **Phase:** 1 · **Proposed task:** CORPUS-001 · **Roles:** corpus-analyst, knowledge-map-analyst
+**Status:** [ledger](task-ledger.md) · G1 passed — [report](../reports/epics/EPIC-01-corpus-analysis.md). OD-3 closed the same day.
+**When:** Thu 24 Sep (done before the prompt set) · **Phase:** 1 · **Task:** CORPUS-001 (no prompt file) · **Roles:** corpus-analyst, knowledge-map-analyst
 **Goal:** know exactly what is in the 24 documents, so the test questions are good and the dataset can be described in the README.
 
 Deliverables:
@@ -99,7 +105,7 @@ Exit gate **G1**:
 - [x] `.venv/Scripts/python.exe -m pytest` passes.
 
 ### EPIC-02 Ingestion pipeline
-**When:** Fri 25 – Sat 26 Sep · **Phase:** 2 · **Proposed tasks:** INGEST-001 (models + parser + normalization), INGEST-002 (both chunkers + stats), INGEST-003 (MarkItDown adapter) · **Role:** ingestion-analyst
+**When:** Fri 25 – Sat 26 Sep · **Phase:** 2 · **Tasks:** INGEST-001 (`03`, models + parser + normalization), INGEST-002 (`04`, both chunkers + stats), INGEST-003 (`05`, MarkItDown adapter, cuttable) · **Role:** ingestion-analyst
 **Goal:** turn each document into clean, well-labelled chunks, in two ways (Arm A and Arm B).
 
 Deliverables:
@@ -119,7 +125,7 @@ Exit gate **G2**:
 - [ ] pytest passes, including `tests/unit/test_project_structure.py`.
 
 ### EPIC-03 RAG baseline
-**When:** Sun 27 – Mon 28 Sep · **Phase:** 2 · **Entry condition:** M1 committed · **Proposed tasks:** RAG-001 (embedder + ChromaDB + indexing), RAG-002 (retrieval + generation + citations), RAG-003 (retry/fallback + CLI) · **Role:** rag-analyst
+**When:** Sat 26 – Sun 27 Sep · **Phase:** 2 · **Entry condition:** M1 committed · **Tasks:** RAG-001a (`06a`, embedder + cache + ADR-0005), RAG-001b (`06b`, ChromaDB + indexing), RAG-002 (`07`, retrieval + generation + citations), RAG-003 (`08`, retry/fallback + CLI + smoke) · **Role:** rag-analyst
 **Goal:** ask a question, get a grounded answer with citations — or an honest "not enough information".
 
 Deliverables:
@@ -141,7 +147,7 @@ Exit gate **G3** (M2 is the first successful end-to-end answer):
 - [ ] Offline pytest passes; `-m gemini` tests pass when run on purpose.
 
 ### EPIC-04 Knowledge assistant (desktop GUI)
-**When:** Mon 28 – Tue 29 Sep · **Phase:** 3 · **Proposed task:** GUI-001
+**When:** Mon 28 – Tue 29 Sep · **Phase:** 3 · **Task:** GUI-001 (`10`)
 **Goal:** a simple PySide6 window a person can actually use. Minimal but required (the stack is locked in CLAUDE.md).
 
 Deliverables:
@@ -158,14 +164,14 @@ Exit gate **G4**:
 ### EPIC-05 Evaluation
 Two stages, because the questions must be frozen before indexing, but scoring needs the finished pipeline. **Role:** evaluation-designer.
 
-**Stage A — evaluation dataset.** **When:** Sat 26 Sep · **Phase:** 1 · **Proposed tasks:**
-- **EVAL-001 Design evaluation dataset** (prompt in `docs/prompt-log/claude-code/`): the design only. Question mix (OD-4), coverage plan, answer rubric and "result" values (OD-5). No final questions yet.
-- **EVAL-002 Write and freeze the dataset:** write the ≥ 30 questions + ground truth following the EVAL-001 design, then commit (M1).
+**Stage A — evaluation dataset.** **When:** Thu 24 – Fri 25 Sep · **Phase:** 1 · **Tasks:**
+- **EVAL-001 Design evaluation dataset** (`01` + the full prompt in `docs/prompt-log/claude-code/`): the design only. Question mix (OD-4), coverage plan, answer rubric and "result" values (OD-5). No final questions yet.
+- **EVAL-002 Write and freeze the dataset** (`02`): write the ≥ 30 questions + ground truth following the EVAL-001 design, then commit (M1).
 
 Deliverables:
-- EVAL-001: dataset design. Coverage must include small docs (#09, #18, #22, #29) as well as #13/#17/#23 and both languages. Any "not in the documents" questions must never be built from excluded docs (CLAUDE.md rule 4). The owner's OD-4 mix and OD-5 result labels are written into `docs/specs/evaluation-spec.md`; other metric details are recorded there as *proposed* for EVAL-003 (the EVAL-001 prompt says to propose, not decide, metrics).
-  ✅ Done 2026-09-24. Owner reviewed; independent review done; pending the owner's re-check of the cases whose ground truth changed (design §20): [design](../specs/evaluation-dataset-design.md), `data/evaluation/questions/{blueprint,coverage-matrix,evidence-map}.yaml` (36 eval + 6 dev blueprints), [report](../reports/execution/EVAL-001.md).
-- EVAL-002: ≥ 30 cases → `data/evaluation/questions/` (JSONL). Each case: id, question, `language` (en/vi), expected answer (ground truth), expected `source_id`, expected heading path, EN/VI pair id for the parallel subset (ADR-0003 D8/D9).
+- EVAL-001: dataset design. Coverage must include small docs (#09, #18, #22, #29) as well as #13/#17/#23 and both languages. Any "not in the documents" questions must never be built from excluded docs (CLAUDE.md rule 4). The owner's OD-4 mix and OD-5 result labels are written into `docs/specs/evaluation-spec.md`; other metric details are recorded there as *proposed* for EVAL-003b (the EVAL-001 prompt says to propose, not decide, metrics).
+  Status: [ledger](task-ledger.md) (owner re-check sheet: `docs/reviews/evaluation/EVAL-001-owner-recheck.md`). [design](../specs/evaluation-dataset-design.md), `data/evaluation/questions/{blueprint,coverage-matrix,evidence-map}.yaml` (36 eval + 6 dev blueprints), [report](../reports/execution/EVAL-001.md).
+- EVAL-002: ≥ 30 cases → `data/evaluation/questions/` (JSONL). Fields per `evaluation-dataset-design.md` §18: id, question, `language` (en/vi), expected answer (ground truth), answer points, expected and alternate sources (`source_id` + heading path + evidence slot), EN/VI pair id for the parallel subset (ADR-0003 D8/D9).
 - EVAL-002: offline schema test for the question file.
 
 Exit gate **G5A = M1 ground truth frozen**:
@@ -173,7 +179,7 @@ Exit gate **G5A = M1 ground truth frozen**:
 - [ ] File **committed to git before any ChromaDB index is built** — the commit time is the proof.
 - [ ] After the freeze, any change is a logged amendment (what, why, date), never a quiet edit.
 
-**Stage B — runner, metrics, runs, report.** **When:** Mon 28 – Tue 29 Sep · **Phase:** 3 · **Proposed tasks:** EVAL-003 (runner + metrics), EVAL-004 (runs + spot-check + report)
+**Stage B — runner, metrics, runs, report.** **When:** Mon 28 – Tue 29 Sep · **Phase:** 3 · **Tasks:** EVAL-003a (`09a`, runner), EVAL-003b (`09b`, metrics + judge), EVAL-003c (`09c`, tables + spot-check tools), EVAL-004 (`11`, runs + spot-check + report)
 Deliverables:
 - Resumable, checkpointed runner (can stop and continue without repeating paid calls) → `data/evaluation/results/`. One record per case per arm: generated answer, retrieved chunk IDs and ranks, citations, model used, retry/fallback count, latency per stage (embed query, retrieve, generate), judge verdict, result.
 - Metrics (ADR-0003 D8, ADR-0004 D12): source hit@5, section hit@5, MRR (retrieval-only, run first); answer quality by rubric using the `gemini-3.5-flash-lite` judge; citation quality (does the cited chunk contain the evidence; method OD-12); latency, with retried calls reported separately.
@@ -187,7 +193,7 @@ Exit gate **G5B**:
 - [ ] Judge spot-check done and reported.
 
 ### EPIC-06 Experiment
-**When:** Tue 29 – Wed 30 Sep · **Phase:** 3 · **Proposed task:** EXP-001 · **Role:** experiment-designer
+**When:** Tue 29 – Wed 30 Sep · **Phase:** 3 · **Task:** EXP-001 (`12`); optional follow-up BONUS-001 (`13`, OD-16) · **Role:** experiment-designer
 **Goal:** prove, with evidence, how Arm A and Arm B differ — not just claim one is better.
 
 Deliverables:
@@ -201,7 +207,7 @@ Exit gate **G6**:
 - [ ] No parameter changed after seeing results without a new ADR.
 
 ### EPIC-07 Final QC
-**When:** Wed 30 Sep – Thu 1 Oct · **Phase:** 4 · **Proposed task:** QC-001 · **Roles:** verifier, quality-controller
+**When:** Wed 30 Sep – Thu 1 Oct · **Phase:** 4 · **Task:** QC-001 (`14`) · **Roles:** verifier, quality-controller
 
 Deliverables:
 - Root `README.md` with the sections the submission requires: **problem, solution, architecture/workflow, AI usage, completed work, limitations**, plus the **dataset description**, install/run (app, tests, evaluation) and a results summary with links to reports. Install instructions consistent (`requirements.txt` currently lacks PySide6; `pyproject.toml` has it).
@@ -229,7 +235,7 @@ Exit gate **G7**:
 | `gemini-embedding-001` | chunks + questions | 100 requests, 30K tokens | 1,000 requests |
 
 - Limits reset at **14:00 UTC+7** (midnight Pacific; daylight time until 1 Nov 2026).
-- **Indexing:** roughly 200–300K tokens per arm (ADR-0004 estimate) → about 10+ minutes per arm at 30K tokens/minute (ADR-0004 estimate). Chunk counts are known only after EPIC-02. If each text counts as its own request (V-1), the two arms together may pass 1,000 requests → index Arm A before 14:00 and Arm B after 14:00 on 27 Sep.
+- **Indexing:** roughly 200–300K tokens per arm (ADR-0004 estimate) → about 10+ minutes per arm at 30K tokens/minute (ADR-0004 estimate). Chunk counts are known only after EPIC-02. If each text counts as its own request (V-1), the two arms together may pass 1,000 requests → index Arm A before 14:00 and Arm B after 14:00 (RAG-001b, target Sat 26 Sep; ADR-0005 decides whether two quota days are needed).
 - **Evaluation:** run retrieval-only metrics first (embeddings only). A question's embedding is the same for both arms, so embed it once. Then one full answer + judge run: about 240 of 500 Flash-Lite requests (ADR-0004 estimate; the real number depends on OD-4). Keep the next quota day free for a re-run.
 - Development testing uses the same quota — keep live calls light on run days. Save embeddings and answers to disk so no call is repeated.
 

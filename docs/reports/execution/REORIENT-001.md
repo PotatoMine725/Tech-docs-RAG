@@ -89,7 +89,7 @@ Checked without a conflict: 06a/06b vs ADR-0004 D10/D13 (retry schedule in the A
 
 ## detect_changes
 - Before `CHORE: …`: `risk_level: low`, 8 changed sections in 4 docs files, `affected_processes: []`. The GitNexus index is registered to the main checkout (last indexed `b58a50d`), so it reports that checkout's diff, which was identical to the owner's files copied here.
-- Before the second and third commits: see AI_WORKLOG (same limitation; only Markdown sections can appear).
+- Before the second commit (`scope: all`) and the third (`scope: compare, base_ref: main`): the same output both times, i.e. the main checkout's 4-file diff, `risk_level: low`, `affected_processes: []`. The tool cannot see this worktree's changes, so the scope was checked with git instead: `git diff --cached --name-only` for commit 2 listed 15 Markdown files and nothing under `src/`, `scripts/`, `tests/` or the three ground-truth YAML files; commit 3 changes `docs/plans/master-plan.md` (+ this line, corrected in the same commit).
 - `npx gitnexus analyze` was **not** run: it would rewrite the count lines just committed.
 
 ## Unverified
