@@ -1,6 +1,6 @@
 # Evaluation specification
 
-Status: dataset mix (OD-4), result labels (OD-5), the evidence-slot hit rule (D1) and the refusal rule (D2) decided by the owner 2026-09-24. Other metric details are **proposed** (marked) until EVAL-003 decides them. Undecided items are TBD / DECISION REQUIRED.
+Status: dataset mix (OD-4), result labels (OD-5), the evidence-slot hit rule (D1) and the refusal rule (D2) decided by the owner 2026-09-24; refusal routing, citation label names, the question-file schema and the points-covered formula settled by the owner the same day (REORIENT-001 C1–C4). Other metric details are **proposed** (marked) until EVAL-003 decides them. Undecided items are TBD / DECISION REQUIRED.
 
 ## Known facts
 - At least 30 questions; each case: question, expected answer/ground truth, expected source, generated answer, result.
@@ -37,9 +37,13 @@ Every generated answer gets exactly one `result`:
 | `correct_refusal` | corpus-insufficient | The system said the documents don't contain enough information and made no unsupported claim. It may mention related content from the documents if it says the topic isn't covered and doesn't present that content as the answer (D2). |
 | `hallucination` | corpus-insufficient | The system answered anyway: any substantive claim not supported by the documents, or related content presented as the answer (D2). |
 
-**Who labels unanswerable cases (D2, owner 2026-09-24):** if the system marks the answer insufficient, the result is `correct_refusal` (no judge call). If it doesn't, the LLM judge decides between `correct_refusal` and `hallucination` with the rule above; such answers are never auto-labelled `hallucination`. This needs the generation step to keep `missing_information` and allow optional related citations on insufficient answers (RAG-002).
+**Who labels unanswerable cases (D2, owner 2026-09-24; routing amended by the owner 2026-09-24, REORIENT-001 C1):**
+- The system marks the answer insufficient and gives a bare message (no related note in `missing_information`, no related citations) → `correct_refusal`, no judge call.
+- The system marks the answer insufficient but adds a related note or related citations → the LLM judge runs the refusal check: `correct_refusal` if nothing is presented as the answer, `hallucination` if related content or an inferred technique is presented as the documents' answer (e.g. "use `MapGroup("/v1")` to version").
+- The system doesn't mark the answer insufficient → the judge decides between `correct_refusal` and `hallucination` with the same rule; such answers are never auto-labelled `hallucination`.
+- This needs the generation step to keep `missing_information` and allow optional related citations on insufficient answers (RAG-002).
 
-Plus a **points-covered score** for answerable cases: required points present ÷ required points (e.g. 3/4 = 0.75). It gives finer comparisons between the two arms than the label alone. Optional points never lower the score.
+Plus a **points-covered score** for answerable cases: (required points judged `yes` + 0.5 × required points judged `partial`) ÷ required points (e.g. yes, partial, no → 1.5/3 = 0.50; owner decision 2026-09-24, REORIENT-001 C4). It gives finer comparisons between the two arms than the label alone. Optional points never count, so they never lower the score.
 
 ## Retrieval hit rule: evidence slots (D1, decided by the owner 2026-09-24)
 - Every expected and alternate source of an answerable case belongs to one **evidence slot** (`slot: S1`, `S2`, …; test-checked).
@@ -50,10 +54,10 @@ Plus a **points-covered score** for answerable cases: required points present ÷
 - Citations in cross-document cases: one per slot, from any source in that slot (e.g. BP-EVAL-031 slot S2 = #26 or #20).
 
 ## Proposed for EVAL-003 (not decided; marked `metric_decision: proposed`)
-- **Citation quality** (method is OD-12): one label per answer: `correct_evidence` (a cited chunk contains the evidence for the answer's claim), `correct_source_wrong_evidence` (right document, but the cited chunk doesn't support the claim), `unsupported_citation` (cited chunk from an unrelated place), `citation_missing`. Judge the chunk *text* against the evidence, not heading strings: Arm A may label a merged small section with the first section's heading path (ADR-0003 D3), and Arm B uses the nearest preceding heading (D5).
+- **Citation quality** (method is OD-12): one label per answer: `correct_evidence` (a cited chunk contains the evidence for the answer's claim), `correct_source_wrong_evidence` (right document, but the cited chunk doesn't support the claim), `unsupported_citation` (cited chunk from an unrelated place), `citation_missing`. These four names are the ones every prompt uses (owner, 2026-09-24, REORIENT-001 C2). Judge the chunk *text* against the evidence, not heading strings: Arm A may label a merged small section with the first section's heading path (ADR-0003 D3), and Arm B uses the nearest preceding heading (D5).
 - **Corpus-insufficient cases:** excluded from source hit@5, section hit@5 and MRR (no expected source). Scored only with `correct_refusal` / `hallucination` (who labels them: D2 above).
 - **Vietnamese questions:** API names and identifiers stay in their original form (e.g. `DbContext`, `UseExceptionHandler`), as a Vietnamese developer would type them.
-- **Record layout:** ground truth lives only in the question files (`data/evaluation/questions/`). Generated answer, citations, retrieved chunks, latency per stage, model used, retry count and `result` go into per-arm result files (`data/evaluation/results/`) keyed by case `id`, so one question set serves both arms.
+- **Record layout:** ground truth lives only in the question files (`data/evaluation/questions/`). Generated answer, citations, retrieved chunks, latency per stage, model used, retry count and `result` go into per-arm result files (`data/evaluation/results/`) keyed by case `id`, so one question set serves both arms. The question-file fields are the ones in `evaluation-dataset-design.md` §18 (answer points with a `required` flag, expected and alternate sources with their evidence `slot`, acceptable variations, `must_not_claim`, citation criteria); the EVAL-002 question file, the EVAL-003a run records and the EVAL-003b judge input use that schema, not flat source lists (owner, 2026-09-24, REORIENT-001 C3).
 
 ## Amendments after the freeze
 None yet. After `eval-freeze-v1` (EVAL-002), every change is logged here with what, why and date.

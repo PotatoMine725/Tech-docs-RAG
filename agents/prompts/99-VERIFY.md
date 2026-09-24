@@ -1,7 +1,7 @@
 # VERIFY — Independent check of a finished task (run in a NEW session after every task)
 
 Usage: `Execute agents/prompts/99-VERIFY.md for TASK-ID=<id>` (e.g. RAG-002).
-You are the **verifier**. You did not write this code and you do not trust the execution report. You MUST NOT edit source, tests, data or reports of the task. You may only create the review file and append to `AI_WORKLOG.md`.
+You are the **verifier**. You did not write this code and you do not trust the execution report. You MUST NOT edit source, tests, data or reports of the task. You may only create the review file, append to `AI_WORKLOG.md`, and update the task's row in `docs/plans/task-ledger.md` (status + verdict + open items).
 
 ## Inputs
 1. The task prompt: `agents/prompts/*<TASK-ID>*.md` and `agents/prompts/_common.md`.
@@ -22,5 +22,6 @@ G. **Explain-it-back** — are the bullets in the task's final report correct? C
 1. `docs/reviews/<area>/<TASK-ID>-verify.md` (area = code | corpus | evaluation | retrieval | epics): the table A–G, then **Verdict**: `ACCEPT` / `ACCEPT WITH FIXES` / `REJECT`.
 2. If not ACCEPT: a ready-to-paste **fix prompt** at the end of the review file (numbered fixes, each with file, expected behaviour, and the check that proves it), to run in a new session.
 3. Append to `AI_WORKLOG.md` under the task's entry: "Verifier findings" — every real defect found (this is evidence for the "incorrect AI outputs" section).
-4. Commit only the review file + worklog: `VERIFY <TASK-ID>: <verdict>`.
-5. Chat: verdict, count of FAIL/UNVERIFIED, top 3 issues. STOP.
+4. Ledger row: `ACCEPT` → status `verified`; `ACCEPT WITH FIXES` → `verified with fixes` (becomes `verified` only after the fixes are re-verified); `REJECT` → `in progress`.
+5. Commit only the review file + worklog + ledger: `VERIFY <TASK-ID>: <verdict>`.
+6. Chat: verdict, count of FAIL/UNVERIFIED, top 3 issues. STOP.

@@ -8,14 +8,15 @@ Entry: RAG-003 done (G3). Design principle: **generating answers and judging the
 ```
 run_id, case_id, arm ("A"|"B"), mode ("retrieval"|"full"), status ("ok"|"error"), error (str|null),
 # copied from the frozen dataset (ground truth — never modified)
-question, language, parallel_group_id, answerable (bool), expected_answer, expected_source_ids, expected_heading_paths, evidence_quotes, tags {difficulty, cognitive_level, size_class, failure_mode, scope}
+question, language, parallel_group_id, answerable (bool), expected_answer, answer_points [{id, text, required}], expected_sources [{source_id, heading_path, slot}], acceptable_alternate_sources [{source_id, heading_path, slot}], evidence [{source_id, heading_path, quote}], acceptable_variations, must_not_claim, citation_criteria, tags {difficulty, cognitive_level, size_class, failure_mode, scope}
+# (schema = evaluation-dataset-design.md §18; the evidence slots are needed for the D1 hit rule — owner 2026-09-24, REORIENT-001 C3)
 # generated
 retrieved: [{rank, chunk_id, source_id, heading_path, char_start, char_end, score}],
 answer, insufficient, insufficient_reason, missing_information (owner decision D2, 2026-09-24), citations: [{marker, chunk_id, source_id, heading_path}], dropped_markers, uncited_sentences,
 latency_ms {embed_query, retrieve, generate, total}, model_used, retry_count, fallback_used, prompt_tokens, output_tokens,
 prompt_version, started_at, finished_at
 ```
-`retrieval` mode fills only the retrieval fields (no LLM call). Field names for the brief's 5 columns must be obvious: `question`, `expected_answer`, `expected_source_ids`, `answer`, and `result` (added later by EVAL-003b).
+`retrieval` mode fills only the retrieval fields (no LLM call). Field names for the brief's 5 columns must be obvious: `question`, `expected_answer`, `expected_sources`, `answer`, and `result` (added later by EVAL-003b).
 
 ## Do
 1. `scripts/evaluation/run_eval.py --arm A|B --mode retrieval|full --split eval|dev [--run-id ID] [--max-llm-calls N] [--cases ID,ID]`

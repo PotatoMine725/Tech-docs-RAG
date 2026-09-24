@@ -83,6 +83,14 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - (3) The master plan, EPIC-05 and design line 3 still say "awaiting owner review", while the report says the owner reviewed.
   - (4) "23 accepted" findings is really 22 accepted, 1 partly accepted and 1 decided by the author (the DEV-006 scoring rule, not confirmed by the owner).
   - Not evidenced: `gitnexus_detect_changes()` before the task commits.
+  - *Accepted process gap (REORIENT-001, 2026-09-24):* `gitnexus_detect_changes()` was not recorded for any EVAL-001 commit (also CORPUS-001, HOUSE-001). It cannot be recreated after the fact; it is recorded in `docs/plans/task-ledger.md` and run before every commit from REORIENT-001 on.
+
+### 2026-09-24 REORIENT-001 (branch `reorient-001`)
+- *AI did:* task ledger (`docs/plans/task-ledger.md`); audit of CORPUS-001, HOUSE-001 and EVAL-001 against the current prompts ([report](docs/reports/execution/REORIENT-001.md)); prompt CHANGELOG; the EVAL-001 verify-fix → commit mapping; the owner re-check sheet for the 9 changed cases; ledger guard in `_common.md`; master plan synced to the prompt files. Docs only; 45 tests pass unchanged.
+- *AI got wrong:* (1) The first prompt set (and the AI that later carried owner decision D1 into it, `8d04044`) kept flat `expected_source_ids` in the EVAL-002 and EVAL-003a schemas while the design already had evidence slots, so EVAL-002 would have frozen a question file that can't score D1. (2) 09b and `evaluation-spec.md` used different citation label names, and 09b left out the points-covered score from OD-5. (3) `831d5a0` (D1–D3 blueprint and test changes) was committed after the EVAL-001 verification without a re-verify being scheduled.
+- *How found:* the REORIENT-001 spec↔prompt comparison and the ledger build (commit dates vs the verify commit `e5e27b1`).
+- *Fix:* C1–C4 settled by the owner and applied to the spec and prompts (CHANGELOG); the EVAL-001 re-verify now covers `831d5a0` too (ledger).
+- *Human decision:* C1 judge checks refusals that carry related content; C2 spec label names; C3 prompts follow design §18; C4 partial = 0.5 in the points-covered score.
 
 ## Summary: how AI helped
 

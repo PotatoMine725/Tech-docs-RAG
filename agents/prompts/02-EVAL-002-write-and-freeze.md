@@ -1,10 +1,10 @@
 # EVAL-002 — Write the questions + ground truth, then freeze (M1)
 
 Read `agents/prompts/_common.md` first and follow it.
-Entry: EVAL-001 done and approved by the user. No ChromaDB index exists yet (check `data/chroma/`).
+Entry: EVAL-001 done and approved by the user; every `owner verdict:` line in `docs/reviews/evaluation/EVAL-001-owner-recheck.md` is filled; EVAL-001 is `verified` in `docs/plans/task-ledger.md`. No ChromaDB index exists yet (check `data/chroma/`).
 
 ## Do
-1. Turn every approved blueprint into a final case in `data/evaluation/questions/eval-v1.jsonl` (and dev cases into `dev-v1.jsonl`). Schema from `evaluation-dataset-design.md`. Ground-truth fields and future generated fields are clearly separated (generated fields null). Every case MUST also carry the fields the runner and metrics need later (see `09a-EVAL-003a-runner.md` record schema): `answerable` (bool), `expected_source_ids` (list), `expected_heading_paths` (list), `evidence_quotes` (list), `required_points`, `must_not_claim`, `parallel_group_id`, and `tags` {difficulty, cognitive_level, size_class, failure_mode, scope}.
+1. Turn every approved blueprint into a final case in `data/evaluation/questions/eval-v1.jsonl` (and dev cases into `dev-v1.jsonl`). Schema from `evaluation-dataset-design.md`. Ground-truth fields and future generated fields are clearly separated (generated fields null). Every case MUST carry the design §18 fields the runner and metrics need later (see `09a-EVAL-003a-runner.md` record schema; owner 2026-09-24, REORIENT-001 C3): `answerable` (bool), `answer_points` [{id, text, required}] (optional points kept), `expected_sources` and `acceptable_alternate_sources` with their evidence `slot` (owner decision D1 — never flattened to a plain list), `evidence` [{source_id, heading_path, quote}], `acceptable_variations`, `must_not_claim`, `citation_criteria`, `parallel_group_id`, and `tags` {difficulty, cognitive_level, size_class, failure_mode, scope}.
 2. Vietnamese questions: natural phrasing a Vietnamese developer would type (technical terms may stay English, e.g. "middleware", "DbContext"). Not word-by-word translation.
 3. **Validator** `scripts/evaluation/validate_questions.py` + offline test `tests/unit/test_eval_dataset.py`:
    - schema valid, IDs unique, ≥ 30 eval cases, both languages, parallel pairs share source/heading/answer points;
