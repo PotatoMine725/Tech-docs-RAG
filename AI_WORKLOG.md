@@ -59,7 +59,7 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 - *Fix:* (1) measured the link share (#08: 48 of 50 content lines are links; #09: 13 of 15; #05 links + captions) and rewrote the text to say exactly what was read; (2) corrected the figure; (3) followed the prompt and fixed the plan wording. (4) full-sentence quotes, 17 added quotes, and a `supports` link from every quote to answer points, with a test that fails if a required point has no quote.
 - *Human decision:* order HOUSE-001 → EVAL-001; OD-4 = 32 answerable + 4 insufficient, 18/18, 7 parallel groups, 6 dev; OD-5 = 6 labels + points-covered score.
 
-### 2026-09-24 EVAL-001 independent blueprint review (commits `9e0ab15` and "EVAL-001: fixes from the independent blueprint review")
+### 2026-09-24 EVAL-001 independent blueprint review (commits `9e0ab15`, `ce04909`)
 - *AI did:* after the owner's own review, a separate Claude Code agent (fresh context, read-only) checked all 42 blueprints against the corpus ([review + response](docs/reviews/evaluation/EVAL-001-blueprint-review.md)). The authoring session verified every finding against the corpus, then fixed them.
 - *AI got wrong:*
   - (1) Case 023 claimed that only variant 1 of #13 "IExceptionHandler" states the .NET 10 diagnostics change, and marked citations of variants 2–3 as wrong evidence. All 3 variants state it, in different words. The same claim was in the evidence map and the design doc.
@@ -72,7 +72,7 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
     - a parent-section alternate in 018 with none of the answer;
     - smaller label and wording fixes.
 - *How found:* (1)(3) the independent review; (2) the authoring session while checking the review's findings against the YAML.
-- *Fix:* all 24 findings addressed (23 accepted, 1 partly accepted: 023 keeps `mixed_version`, because the answer still depends on the version). A new `stands_in_for` field lets an alternate count in cross-document cases. Three new tests: no inline YAML comments, prose fields are strings, and cross-document alternates name the source they replace. Each failed before its fix. 45 tests pass.
+- *Fix:* all 24 findings addressed (23 accepted, 1 partly accepted: 023 keeps `mixed_version`, because the answer still depends on the version). A new `stands_in_for` field lets an alternate count in cross-document cases. Three new tests: no inline YAML comments and prose fields are strings (both failed before the YAML fix), and cross-document alternates name the source they replace (written after the field existed; shown to fail with the field removed). 45 tests pass.
 - *Human decision:* the owner reviewed the blueprints and asked for an independent agent review. No case was added, dropped or re-scoped, so the OD-4 mix is unchanged.
 
 ## Summary: how AI helped

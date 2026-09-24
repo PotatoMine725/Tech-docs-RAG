@@ -1534,7 +1534,7 @@ blueprints:
         - The name is missing the expected-behavior part.
     citation_acceptance_criteria:
       - One citation per premise; each from the matching document.
-    question_notes: "Don't give the full test method name (with the name in the question, #03 alone answers it). Ask whether the name of the test that the dotnet test + xUnit tutorial adds for IsPrime with values below 2 follows the unit-test naming standard, so #28 is needed to find the name."
+    question_notes: "Don't give the full test method name (with the name in the question, #03 alone answers it). Ask whether the name of the [Theory] test that the dotnet test + xUnit tutorial adds for several IsPrime inputs below 2 follows the unit-test naming standard, so #28 is needed to find the name. Say [Theory]: the tutorial's earlier [Fact] test IsPrime_InputIs1_ReturnFalse also uses an input below 2."
     reason_for_inclusion: Cross-document analyze case, Vietnamese.
 
   - id: BP-EVAL-031

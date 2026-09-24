@@ -177,7 +177,7 @@ Dev set (tuning only): BP-DEV-001 #07 static classes (en) · 002 #04 native-size
 ## 20. Open decisions and blockers
 | Item | Status | Needed by |
 |---|---|---|
-| Owner review of the 42 blueprints | **Required before EVAL-002** | EVAL-002 |
+| Owner review of the 42 blueprints | Owner reviewed; independent review done (`docs/reviews/evaluation/EVAL-001-blueprint-review.md`). **Pending: the owner's re-check of the cases whose ground truth changed** (009/010, 016, 022, 023, 024, 025, 031, 036; review §5) | EVAL-002 |
 | Citation-quality method (OD-12) and labels | Labels proposed in `evaluation-spec.md`; method open | EVAL-003 |
 | Source hit for cross-document cases (all vs any) | Proposed: "all" primary, "any" secondary; an alternate counts for the expected source named in its `stands_in_for` | EVAL-003 |
 | Correct-variant check for mixed-version cases | Proposed: section hit@5 counts any variant (D8); failure analysis also reports whether the `evidence_variant` was retrieved when a case sets one (none does at present) | EVAL-003 / EPIC-06 |

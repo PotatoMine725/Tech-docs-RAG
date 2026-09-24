@@ -1,6 +1,6 @@
 # EVAL-001 execution report: design the evaluation dataset
 
-**Date:** 2026-09-24 · **Prompts:** [full prompt](../../prompt-log/claude-code/EVAL-001%20—%20Design%20Evaluation%20Dataset.md) + [addendum](../../prompt-log/claude-code/EVAL-001.md) · **Model:** Claude Opus 5.5 (Claude Code) · **Status:** done, awaiting owner review.
+**Date:** 2026-09-24 · **Prompts:** [full prompt](../../prompt-log/claude-code/EVAL-001%20—%20Design%20Evaluation%20Dataset.md) + [addendum](../../prompt-log/claude-code/EVAL-001.md) · **Model:** Claude Opus 5.5 (Claude Code) · **Status:** done. Owner reviewed; independent review done and addressed. Pending: the owner's re-check of the cases whose ground truth changed (review §5).
 
 ## Files
 | File | Change |
@@ -32,6 +32,8 @@
   - A new test for `stands_in_for` failed with the field removed and passed with it.
   - The evidence map now has 11 distractor sections (one wrong entry removed, two added).
   - `.venv/Scripts/python.exe -m pytest`: **45 passed**.
+  - After the alternates were added, a script compared the dev and eval sets on expected *and* alternate sections: no dev section matches any eval section. The disjointness test covers expected sources only.
+  - 030: #28 also has a `[Fact]` test `IsPrime_InputIs1_ReturnFalse` with an input below 2, so `question_notes` now name the `[Theory]` test.
 
 ## Exit-gate check (prompt §22)
 | Criterion | Result |
