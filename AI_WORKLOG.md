@@ -84,6 +84,21 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - (4) "23 accepted" findings is really 22 accepted, 1 partly accepted and 1 decided by the author (the DEV-006 scoring rule, not confirmed by the owner).
   - Not evidenced: `gitnexus_detect_changes()` before the task commits.
   - *Accepted process gap (REORIENT-001, 2026-09-24):* `gitnexus_detect_changes()` was not recorded for any EVAL-001 commit (also CORPUS-001, HOUSE-001). It cannot be recreated after the fact; it is recorded in `docs/plans/task-ledger.md` and run before every commit from REORIENT-001 on.
+- *Verifier findings (re-verify, [review](docs/reviews/evaluation/EVAL-001-reverify.md)):* verdict ACCEPT. Scope: the fix commit `629b931` and the owner-decision commit `831d5a0`, which had never been verified.
+  - Fixes 1–5 pass. The design says 9% and the matrix 0.094. There are 17 tests and 85 `quote:` lines. The status lines are corrected. The tally matches review §5 (22 accepted, 1 partly accepted, 1 decided). The DEV-006 open item is superseded by D2.
+  - `831d5a0` reproduces:
+    - every answerable source has a slot;
+    - the multi-slot cases are exactly 022 and 029–032;
+    - the new slot test fails on the old file and on 5 of 6 verifier mutations;
+    - the coverage matrix re-generates byte-identical (`bf9109d5…1481`);
+    - tests pass: 45 at each commit, 92 at HEAD;
+    - `gitnexus detect-changes` (compare, run after the fact): 0 processes, risk low for each commit.
+  - Real defects:
+    - (1) No test pins BP-EVAL-022's two slots: merging them into S1 still passes (low).
+    - (2) As committed in `831d5a0`, the D2 routing auto-labelled every insufficient answer `correct_refusal`, so a related note presented as the answer would never be checked. It was already fixed by the owner's REORIENT-001 C1 amendment (`evaluation-spec.md:40-44`).
+    - (3) Design §18 offers the owner a split of 017's slot, but the re-check sheet does not ask (low).
+  - Not evidenced: the owner's D1–D3 decision event; pytest and `detect_changes` before the two commits; the fix sessions' chat reports.
+  - EVAL-002 stays blocked until the owner fills the re-check sheet's verdict lines.
 
 ### 2026-09-24 REORIENT-001 (branch `reorient-001`)
 - *AI did:* task ledger (`docs/plans/task-ledger.md`); audit of CORPUS-001, HOUSE-001 and EVAL-001 against the current prompts ([report](docs/reports/execution/REORIENT-001.md)); prompt CHANGELOG; the EVAL-001 verify-fix → commit mapping; the owner re-check sheet for the 9 changed cases; ledger guard in `_common.md`; master plan synced to the prompt files. Docs only; 45 tests pass unchanged.
