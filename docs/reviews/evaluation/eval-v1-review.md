@@ -20,7 +20,7 @@ Automatic checks already passed (`scripts/evaluation/validate_questions.py`, `te
 ## (b) Look at these first (AI least sure)
 | Case | Why |
 |---|---|
-| Q-EVAL-024 (vi) | Names `Assembly.Location`, a word from the evidence sentence ("tests that load files relative to Assembly.Location"). It is the natural symptom, but it may make retrieval easier than intended. Alternative: "load file nằm cạnh file DLL của test". |
+| Q-EVAL-024 (vi) | Names `Assembly.Location`, a word from the evidence sentence ("tests that load files relative to Assembly.Location"). It is the natural symptom, but it may make retrieval easier than intended. Alternative: "load file nằm cạnh file DLL của test". The verifier adds: the clause "vì test không chạy trong thư mục output" gives away the cause half of P1; suggest dropping it. |
 | Q-EVAL-003 / 004 | Says "older templates" / "template cũ", which hints that older templates behave differently (P2). Without it the question can't ask for P2 without naming `UseDeveloperExceptionPage`. Also names the page (the heading) — unavoidable. |
 | Q-EVAL-017 | "what does the IMiddleware one need so the framework can create it" is meant to draw out P3 (registered as scoped/transient; IMiddlewareFactory). It may read as vague; P3 is required. |
 | Q-EVAL-028 (vi) | "chạy nhanh và gọn ngang ngửa C hay assembly" is close to the evidence ("compete directly on performance and size with C or assembly"). Is "gọn" (size) too leading, and is the phrasing natural? |

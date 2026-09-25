@@ -51,7 +51,11 @@ Result: questions + ground truth written and validated; **not frozen**. M1 is no
 | G1 | 011/012 `must_not_claim` | "The type must be public (internal is also allowed)." → "The type must be public (wrong: internal is also allowed)." | A judge could read the parenthesis as part of the forbidden claim. Meaning unchanged, but it is a ground-truth field, so yours to decide. |
 
 ## Verify verdict
-Pending (filled after the 99-VERIFY sub-agent run).
+**ACCEPT** ([EVAL-002-verify](../reviews/evaluation/EVAL-002-verify.md), fresh-context sub-agent, 2026-09-25). 0 FAIL; 2 UNVERIFIED (Windows run; GitNexus not available). No fix round needed.
+Non-blocking notes for you:
+1. Test gap: the eval/dev *expected-section* overlap check has no test of its own (mutation removing it leaves 19/19 green). Worth a one-test follow-up.
+2. Q-EVAL-024 (vi) also leaks the cause ("vì test không chạy trong thư mục output"); added to "Look at these first".
+3. Q-EVAL-028's quote matches only after whitespace collapsing (#18 line 29 has a no-break space). Citation matching in EVAL-003b must collapse whitespace the same way.
 
 ## Test results
 - Baseline `dev` `9ee70bd`: 121 passed (Linux, Python 3.11.15).
@@ -65,5 +69,6 @@ Pending (filled after the 99-VERIFY sub-agent run).
 | `4172e98` | Step 0: ledger row 02 ready; 017 note trimmed to P1 |
 | `459a902` | Question files, builder, validator, tests |
 | `80b83f7` | Review sheet |
-| (next) | Report, prompt log, worklog, plan status, this handoff |
-| (next) | Verify review + verdict |
+| `743f713` | Report, prompt log, worklog, plan status, this handoff |
+| `0eb6cfa` | VERIFY EVAL-002: ACCEPT |
+| (next) | Verifier notes into sheet + handoff |
