@@ -1,0 +1,2124 @@
+# EVAL-001 evaluation blueprints (design only: no final question wording, no generated answers).
+# Design and field meanings: docs/specs/evaluation-dataset-design.md
+# Mix (OD-4, owner 2026-09-24): 36 eval = 28 single-source + 4 cross-document + 4 corpus-insufficient;
+# 18 en / 18 vi; 7 parallel EN/VI groups; plus 6 dev blueprints (split: dev).
+# Ground truth comes only from corpus/sources (24 accepted docs). Quotes are verbatim (<= 300 chars).
+# Parallel pairs share expected_sources, ground_truth and acceptance criteria through YAML anchors.
+# Evidence slots (owner decision D1): a retrieval hit needs every slot; any source within a slot counts.
+version: 1
+created: 2026-09-24
+# The owner approves the blueprints before EVAL-002 turns them into questions.
+status: proposed
+blueprints:
+
+  # ---------------------------------------------------------------- PG-001 (#22, tiny)
+  - id: BP-EVAL-001
+    split: eval
+    status: proposed
+    language: en
+    parallel_group_id: PG-001
+    scope: single-source
+    source_ids: ["22"]
+    expected_sources: &pg001_src
+      - source_id: "22"
+        heading_path: "Querying Data"
+        slot: S1
+    acceptable_alternate_sources: []
+    objective: Recall whether EF Core skips the database when the requested entities are already loaded in the context.
+    concepts: [EF Core, LINQ query, DbContext, query execution]
+    cognitive_level: recall
+    difficulty: easy
+    size_class: tiny
+    retrieval_target: 'The introduction of #22 (page H1 section, about 850 chars) stating that queries always run against the database.'
+    retrieval_challenges: [tiny_document, direct_semantic]
+    evaluation_target:
+      capability: Retrieve a fact from a tiny document that much larger documents could crowd out.
+      failure_mode: tiny_doc_single_chunk
+      why_it_matters: 'ADR-0003 lists tiny docs (#09, #22, #29) as a failure mode; #22 becomes one or two chunks in either arm.'
+      expected_behavior: 'A #22 chunk is in the top 5 and the answer says the query still goes to the database.'
+      rationale: Easy fact on a tiny document; paired with a VI case so the language effect is not mixed up with difficulty.
+    ground_truth: &pg001_gt
+      answer_points:
+        - {id: P1, required: true, text: "No. EF Core always executes the query against the database, even if the entities returned by the query already exist in the context."}
+        - {id: P2, required: false, text: "EF Core uses LINQ; it passes a representation of the LINQ query to the database provider, which translates it to a database-specific query language such as SQL."}
+      evidence:
+        - source_id: "22"
+          heading_path: "Querying Data"
+          quote: "Queries are always executed against the database even if the entities returned in the result already exist in the context."
+          supports: [P1]
+        - source_id: "22"
+          heading_path: "Querying Data"
+          quote: "EF Core passes a representation of the LINQ query to the database provider. Database providers in turn translate it to database-specific query language (for example, SQL for a relational database)."
+          supports: [P2]
+    answer_acceptance_criteria: &pg001_ans
+      acceptable_variations:
+        - "\"hits the database every time\" or \"doesn't return the tracked copy instead of querying\""
+        - "\"DbContext\" used for \"context\""
+      must_not_claim:
+        - EF Core returns entities already in the context without querying the database.
+        - Any EF Core API for changing tracking behavior (not in the corpus).
+    citation_acceptance_criteria: &pg001_cit
+      - 'Cites #22; the cited chunk contains the "always executed against the database" sentence.'
+      - Citation excerpt stays in English.
+    question_notes: Ask whether EF Core skips the database when the entities are already loaded; don't reuse the words "always executed".
+    reason_for_inclusion: Tiny-document coverage with an easy, unambiguous fact.
+
+  - id: BP-EVAL-002
+    split: eval
+    status: proposed
+    language: vi
+    parallel_group_id: PG-001
+    scope: single-source
+    source_ids: ["22"]
+    expected_sources: *pg001_src
+    acceptable_alternate_sources: []
+    objective: Same information need as BP-EVAL-001, asked in Vietnamese.
+    concepts: [EF Core, LINQ query, DbContext, query execution]
+    cognitive_level: recall
+    difficulty: easy
+    size_class: tiny
+    retrieval_target: 'The introduction of #22 (page H1 section).'
+    retrieval_challenges: [tiny_document, direct_semantic, cross_lingual]
+    evaluation_target:
+      capability: Cross-lingual retrieval (VI question, EN chunk) of a fact from a tiny document.
+      failure_mode: tiny_doc_single_chunk
+      why_it_matters: Isolates the language effect on an easy tiny-doc case (compare with BP-EVAL-001).
+      expected_behavior: Same as BP-EVAL-001; the answer is in Vietnamese, the citation excerpt in English.
+      rationale: Parallel case for PG-001.
+    ground_truth: *pg001_gt
+    answer_acceptance_criteria: *pg001_ans
+    citation_acceptance_criteria: *pg001_cit
+    question_notes: Natural Vietnamese; keep "EF Core" and "DbContext" in English.
+    reason_for_inclusion: Parallel EN/VI group on an easy case.
+
+  # ---------------------------------------------------------------- PG-002 (#13, mixed versions)
+  - id: BP-EVAL-003
+    split: eval
+    status: proposed
+    language: en
+    parallel_group_id: PG-002
+    scope: single-source
+    source_ids: ["13"]
+    expected_sources: &pg002_src
+      - source_id: "13"
+        heading_path: "Handle errors in ASP.NET Core > Developer exception page"
+        slot: S1
+    acceptable_alternate_sources: &pg002_alt
+      - source_id: "13"
+        heading_path: "Handle errors in ASP.NET Core > Developer Exception Page"
+        slot: S1
+        note: Older variants; they support P2 and P3 but not P1.
+      - source_id: "12"
+        heading_path: "Handle errors in ASP.NET Core APIs > Developer Exception Page"
+        slot: S1
+        note: 'Same default-on rule as #13 variants 1-5.'
+    objective: Explain when the developer exception page is on, where the page's version variants describe it differently.
+    concepts: [developer exception page, Development environment, WebApplication.CreateBuilder, UseDeveloperExceptionPage]
+    cognitive_level: explain
+    difficulty: hard
+    size_class: huge
+    retrieval_target: "#13 'Developer exception page' (5 variants) and 'Developer Exception Page' (2 older variants); #12 has the same text."
+    retrieval_challenges: [version_variants, near_duplicate_sections, cross_source_overlap]
+    evaluation_target:
+      capability: Give the current rule without mixing it with older template code.
+      failure_mode: mixed_version
+      why_it_matters: Variants 1-5 say the page is on by default (Development + WebApplication.CreateBuilder); the 2 older variants show templates calling UseDeveloperExceptionPage in Configure. Mixing them gives a wrong rule.
+      expected_behavior: Answer states the default-on conditions, the earlier-template call, and "Development only".
+      rationale: Shows whether each arm's top 5 is filled by old variants or by the variant with the current rule.
+    ground_truth: &pg002_gt
+      answer_points:
+        - {id: P1, required: true, text: "It is enabled by default when both: the app runs in the Development environment, and the app was created with the current templates (WebApplication.CreateBuilder)."}
+        - {id: P2, required: true, text: "Apps created with earlier templates (WebHost.CreateDefaultBuilder) enable it by calling app.UseDeveloperExceptionPage."}
+        - {id: P3, required: true, text: "It should only be enabled in the Development environment; detailed exception information must not be shown publicly in production."}
+        - {id: P4, required: false, text: "It can show the stack trace, query string parameters, cookies and headers."}
+      evidence:
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > Developer exception page"
+          quote: "ASP.NET Core apps enable the developer exception page by default when both:"
+          supports: [P1]
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > Developer exception page"
+          quote: "Running in the [`Development` environment](environments?view=aspnetcore-10.0)."
+          supports: [P1]
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > Developer exception page"
+          quote: "The app was created with the current templates, that is, by using [WebApplication.CreateBuilder](/en-us/dotnet/api/microsoft.aspnetcore.builder.webapplication.createbuilder)."
+          supports: [P1]
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > Developer exception page"
+          quote: "Apps created using earlier templates, that is, by using [WebHost.CreateDefaultBuilder](/en-us/dotnet/api/microsoft.aspnetcore.webhost.createdefaultbuilder), can enable the developer exception page by calling"
+          supports: [P2]
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > Developer exception page"
+          quote: "Don't enable the Developer Exception Page **unless the app is running in the `Development` environment**. Don't share detailed exception information publicly when the app runs in production."
+          supports: [P3]
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > Developer Exception Page"
+          quote: "The preceding code enables the Developer Exception Page ***only*** when the app runs in the `Development` environment."
+          supports: [P3]
+    answer_acceptance_criteria: &pg002_ans
+      acceptable_variations:
+        - "\"Development\" may be called the development environment or IsDevelopment()."
+      must_not_claim:
+        - It is on by default in every environment, or in production.
+        - Every app must always call UseDeveloperExceptionPage (ignores the default for WebApplication.CreateBuilder apps).
+        - Any specific ASP.NET Core version number for a variant (the page doesn't label its variants).
+    citation_acceptance_criteria: &pg002_cit
+      - 'P1 must be supported by a chunk containing "by default when both" (#13 variants 1-5 or #12).'
+      - A chunk from an older variant supports only P2/P3; citing only such chunks for P1 = correct_source_wrong_evidence.
+    question_notes: Ask how/when the page gets turned on in a new vs an older app; don't mention versions.
+    reason_for_inclusion: Main mixed-version case on the largest error-handling doc, in both languages.
+
+  - id: BP-EVAL-004
+    split: eval
+    status: proposed
+    language: vi
+    parallel_group_id: PG-002
+    scope: single-source
+    source_ids: ["13"]
+    expected_sources: *pg002_src
+    acceptable_alternate_sources: *pg002_alt
+    objective: Same information need as BP-EVAL-003, asked in Vietnamese.
+    concepts: [developer exception page, Development environment, WebApplication.CreateBuilder, UseDeveloperExceptionPage]
+    cognitive_level: explain
+    difficulty: hard
+    size_class: huge
+    retrieval_target: Same as BP-EVAL-003.
+    retrieval_challenges: [version_variants, near_duplicate_sections, cross_source_overlap, cross_lingual]
+    evaluation_target:
+      capability: Cross-lingual retrieval on a version-heavy document.
+      failure_mode: mixed_version
+      why_it_matters: Tests whether a VI query lands on the same variants as the EN query.
+      expected_behavior: Same as BP-EVAL-003, answered in Vietnamese.
+      rationale: Parallel case for PG-002 (hard, huge doc).
+    ground_truth: *pg002_gt
+    answer_acceptance_criteria: *pg002_ans
+    citation_acceptance_criteria: *pg002_cit
+    question_notes: Keep "Developer Exception Page", "Development" and API names in English.
+    reason_for_inclusion: Parallel EN/VI group on a hard case.
+
+  # ---------------------------------------------------------------- PG-003 (#02, table)
+  - id: BP-EVAL-005
+    split: eval
+    status: proposed
+    language: en
+    parallel_group_id: PG-003
+    scope: single-source
+    source_ids: ["02"]
+    expected_sources: &pg003_src
+      - source_id: "02"
+        heading_path: "Asynchronous programming scenarios > Recognize CPU-bound and I/O-bound scenarios"
+        slot: S1
+    acceptable_alternate_sources: &pg003_alt
+      - source_id: "02"
+        heading_path: "Asynchronous programming scenarios > Explore the asynchronous programming model > CPU-bound example: Run game calculation"
+        slot: S1
+        note: Partial support (Task.Run for CPU-bound work).
+      - source_id: "02"
+        heading_path: "Asynchronous programming scenarios > Explore the asynchronous programming model > I/O-bound example: Download data from web service"
+        slot: S1
+        note: Partial support (await without Task.Run for I/O).
+      - source_id: "02"
+        heading_path: "Asynchronous programming scenarios > Explore the asynchronous programming model"
+        slot: S1
+        note: Partial support (two bullets state the split, Task for I/O-bound code and Task.Run for CPU-bound code; supports P2, P1 in part).
+    objective: Choose the right async implementation for an I/O-bound task and for a CPU-bound task.
+    concepts: [async, await, Task.Run, I/O-bound, CPU-bound, Task Parallel Library]
+    cognitive_level: apply
+    difficulty: medium
+    size_class: medium
+    retrieval_target: 'The decision table in #02 ''Recognize CPU-bound and I/O-bound scenarios''.'
+    retrieval_challenges: [table, cross_source_overlap, paraphrase]
+    evaluation_target:
+      capability: Apply guidance that is stored as a Markdown table.
+      failure_mode: fixed_size_code_split
+      why_it_matters: The answer sits in table rows. Arm A keeps tables whole (ADR-0003 D4); a fixed-size window can cut rows away from the header.
+      expected_behavior: The table chunk is retrieved and both rows are used.
+      rationale: 'Table integrity is one place where the two chunkers behave differently; #01 overlaps the topic.'
+    ground_truth: &pg003_gt
+      answer_points:
+        - {id: P1, required: true, text: "I/O-bound work (waiting for data, e.g. from a database or web service): use async and await without Task.Run."}
+        - {id: P2, required: true, text: "CPU-bound work (an expensive computation): use async and await, but run the work on another thread with Task.Run."}
+        - {id: P3, required: false, text: "For work suited to concurrency and parallelism, also consider the Task Parallel Library."}
+        - {id: P4, required: false, text: "Measure: CPU-bound work may not be costly enough to outweigh the overhead of context switches."}
+      evidence:
+        - source_id: "02"
+          heading_path: "Asynchronous programming scenarios > Recognize CPU-bound and I/O-bound scenarios"
+          quote: "Use the `async` modifier and `await` expression *without* the `Task.Run` method."
+          supports: [P1]
+        - source_id: "02"
+          heading_path: "Asynchronous programming scenarios > Recognize CPU-bound and I/O-bound scenarios"
+          quote: "Use the `async` modifier and `await` expression, but spawn off the work on another thread with the `Task.Run` method."
+          supports: [P2]
+        - source_id: "02"
+          heading_path: "Asynchronous programming scenarios > Recognize CPU-bound and I/O-bound scenarios"
+          quote: "Always measure the execution of your code."
+          supports: [P4]
+    answer_acceptance_criteria: &pg003_ans
+      acceptable_variations:
+        - "\"offload to a background/thread-pool thread with Task.Run\""
+      must_not_claim:
+        - Use Task.Run for I/O-bound work.
+        - Marking a CPU-bound method async (without Task.Run) moves the work off the calling thread.
+    citation_acceptance_criteria: &pg003_cit
+      - The cited chunk contains the table row(s) used for the claim (or the matching example section for a partial claim).
+    question_notes: Describe two concrete tasks (download a file; compute something heavy) instead of naming "CPU-bound/I/O-bound".
+    reason_for_inclusion: Apply-level case on table content, medium doc, both languages.
+
+  - id: BP-EVAL-006
+    split: eval
+    status: proposed
+    language: vi
+    parallel_group_id: PG-003
+    scope: single-source
+    source_ids: ["02"]
+    expected_sources: *pg003_src
+    acceptable_alternate_sources: *pg003_alt
+    objective: Same information need as BP-EVAL-005, asked in Vietnamese.
+    concepts: [async, await, Task.Run, I/O-bound, CPU-bound, Task Parallel Library]
+    cognitive_level: apply
+    difficulty: medium
+    size_class: medium
+    retrieval_target: Same as BP-EVAL-005.
+    retrieval_challenges: [table, cross_source_overlap, paraphrase, cross_lingual]
+    evaluation_target:
+      capability: Cross-lingual retrieval of table-based guidance.
+      failure_mode: fixed_size_code_split
+      why_it_matters: Same as BP-EVAL-005, plus the language effect.
+      expected_behavior: Same as BP-EVAL-005, answered in Vietnamese.
+      rationale: Parallel case for PG-003 (medium).
+    ground_truth: *pg003_gt
+    answer_acceptance_criteria: *pg003_ans
+    citation_acceptance_criteria: *pg003_cit
+    question_notes: Keep "async", "await", "Task.Run" in English.
+    reason_for_inclusion: Parallel EN/VI group on a medium case.
+
+  # ---------------------------------------------------------------- PG-004 (#23, repeated sections)
+  - id: BP-EVAL-007
+    split: eval
+    status: proposed
+    language: en
+    parallel_group_id: PG-004
+    scope: single-source
+    source_ids: ["23"]
+    expected_sources: &pg004_src
+      - source_id: "23"
+        heading_path: "Routing in ASP.NET Core > Route constraints"
+        slot: S1
+    acceptable_alternate_sources: &pg004_alt
+      - source_id: "23"
+        heading_path: "Routing in ASP.NET Core > Route constraint reference"
+        slot: S1
+        note: Older variant with the same warning.
+    objective: Diagnose why invalid input returns 404 when route constraints are used to validate it.
+    concepts: [route constraints, input validation, 404 Not Found, 400 Bad Request]
+    cognitive_level: diagnose
+    difficulty: medium
+    size_class: huge
+    retrieval_target: 'The warning near the start of #23 ''Route constraints'' (4.7K section, 3 copies + 1 older copy).'
+    retrieval_challenges: [version_variants, long_section, subsection_evidence]
+    evaluation_target:
+      capability: Find a short warning inside a long, repeated section of the largest document.
+      failure_mode: repeated_version_sections
+      why_it_matters: Four copies of the section and its long constraint table compete for the top 5.
+      expected_behavior: A chunk containing the warning is retrieved; the answer explains 404 vs 400 and the intended use.
+      rationale: The warning sits in the first part of a section that both arms must split.
+    ground_truth: &pg004_gt
+      answer_points:
+        - {id: P1, required: true, text: "Route constraints shouldn't be used for input validation."}
+        - {id: P2, required: true, text: "If they are, invalid input produces 404 Not Found; invalid input should instead produce 400 Bad Request with an appropriate error message."}
+        - {id: P3, required: true, text: "Route constraints are meant to disambiguate similar routes."}
+        - {id: P4, required: false, text: "Constraints run after the URL matched and was tokenized into route values; they make a true/false decision about a route value."}
+      evidence:
+        - source_id: "23"
+          heading_path: "Routing in ASP.NET Core > Route constraints"
+          quote: "Don't use constraints for input validation. If constraints are used for input validation, invalid input results in a `404` Not Found response."
+          supports: [P1, P2]
+        - source_id: "23"
+          heading_path: "Routing in ASP.NET Core > Route constraints"
+          quote: "Invalid input should produce a `400` Bad Request with an appropriate error message. Route constraints are used to disambiguate similar routes, not to validate the inputs for a particular route."
+          supports: [P2, P3]
+    answer_acceptance_criteria: &pg004_ans
+      acceptable_variations:
+        - "\"used to tell similar routes apart\" for disambiguation"
+      must_not_claim:
+        - Route constraints return 400 Bad Request for invalid values.
+        - Constraints such as {id:int} are the recommended way to validate input.
+    citation_acceptance_criteria: &pg004_cit
+      - The cited chunk contains the "Don't use constraints for input validation" warning (any variant).
+    question_notes: Describe the symptom (an API returns 404 for a malformed id) and ask why and what to do.
+    reason_for_inclusion: Diagnose-level case on the largest document, both languages.
+
+  - id: BP-EVAL-008
+    split: eval
+    status: proposed
+    language: vi
+    parallel_group_id: PG-004
+    scope: single-source
+    source_ids: ["23"]
+    expected_sources: *pg004_src
+    acceptable_alternate_sources: *pg004_alt
+    objective: Same information need as BP-EVAL-007, asked in Vietnamese.
+    concepts: [route constraints, input validation, 404 Not Found, 400 Bad Request]
+    cognitive_level: diagnose
+    difficulty: medium
+    size_class: huge
+    retrieval_target: Same as BP-EVAL-007.
+    retrieval_challenges: [version_variants, long_section, subsection_evidence, cross_lingual]
+    evaluation_target:
+      capability: Cross-lingual diagnosis on a huge, repeated document.
+      failure_mode: repeated_version_sections
+      why_it_matters: Same as BP-EVAL-007, plus the language effect.
+      expected_behavior: Same as BP-EVAL-007, answered in Vietnamese.
+      rationale: Parallel case for PG-004 (medium, huge doc).
+    ground_truth: *pg004_gt
+    answer_acceptance_criteria: *pg004_ans
+    citation_acceptance_criteria: *pg004_cit
+    question_notes: Keep "route constraint", "404", "400" as written.
+    reason_for_inclusion: Parallel EN/VI group on the largest document.
+
+  # ---------------------------------------------------------------- PG-005 (#03, specific heading)
+  - id: BP-EVAL-009
+    split: eval
+    status: proposed
+    language: en
+    parallel_group_id: PG-005
+    scope: single-source
+    source_ids: ["03"]
+    expected_sources: &pg005_src
+      - source_id: "03"
+        heading_path: "Unit testing best practices for .NET > Best practices > Avoid multiple Act tasks"
+        slot: S1
+    acceptable_alternate_sources: []
+    objective: Explain why a unit test should contain only one Act step.
+    concepts: [unit testing, Arrange-Act-Assert, single Act, parameterized tests]
+    cognitive_level: explain
+    difficulty: easy
+    size_class: medium
+    retrieval_target: "#03 H3 'Avoid multiple Act tasks' under 'Best practices'."
+    retrieval_challenges: [subsection_evidence, sibling_sections_share_vocabulary]
+    evaluation_target:
+      capability: Pick the right H3 among siblings that all talk about Arrange/Act/Assert.
+      failure_mode: specific_heading
+      why_it_matters: 'Sibling H3s (''Arrange your tests'', ''Avoid coding logic in unit tests'') and #17/#28 share the vocabulary.'
+      expected_behavior: The 'Avoid multiple Act tasks' chunk is ranked in the top 5.
+      rationale: Header-aware chunks carry the exact H3 path; fixed-size chunks carry the nearest preceding heading.
+    ground_truth: &pg005_gt
+      answer_points:
+        - {id: P1, required: true, text: "Include only one Act per test (for example a separate test per Act, or a parameterized test)."}
+        - {id: P2, required: true, text: "Multiple Acts need to be asserted individually, and you can't guarantee that all Asserts execute."}
+        - {id: P3, required: true, text: "At least one benefit of a single Act: you can see which Act fails, the test stays focused on one case, or you get a clear picture of why it fails."}
+        - {id: P4, required: false, text: "In most unit testing frameworks, after an Assert fails, all subsequent tests are considered failing, so working functionality can look broken."}
+      evidence:
+        - source_id: "03"
+          heading_path: "Unit testing best practices for .NET > Best practices > Avoid multiple Act tasks"
+          quote: "When you write your tests, try to include only one Act task per test."
+          supports: [P1]
+        - source_id: "03"
+          heading_path: "Unit testing best practices for .NET > Best practices > Avoid multiple Act tasks"
+          quote: "Multiple Act tasks need to be individually asserted, and you can't guarantee that all Assert tasks execute."
+          supports: [P2]
+        - source_id: "03"
+          heading_path: "Unit testing best practices for .NET > Best practices > Avoid multiple Act tasks"
+          quote: "In most unit testing frameworks, after an Assert task fails in a unit test, all subsequent tests are automatically considered as failing."
+          supports: [P4]
+        - source_id: "03"
+          heading_path: "Unit testing best practices for .NET > Best practices > Avoid multiple Act tasks"
+          quote: "You can easily discern which Act task is failing if the test fails."
+          supports: [P3]
+    answer_acceptance_criteria: &pg005_ans
+      acceptable_variations:
+        - "\"one action/one behavior under test per test\""
+      must_not_claim:
+        - Multiple Acts are fine as long as each has its own Assert.
+    citation_acceptance_criteria: &pg005_cit
+      - The cited chunk is from 'Avoid multiple Act tasks' and contains the single-Act rule or the Assert-execution reason.
+    question_notes: Present a test that calls the method twice with different inputs and asks what's wrong with it.
+    reason_for_inclusion: Easy/explain parallel case with a heading-precision challenge.
+
+  - id: BP-EVAL-010
+    split: eval
+    status: proposed
+    language: vi
+    parallel_group_id: PG-005
+    scope: single-source
+    source_ids: ["03"]
+    expected_sources: *pg005_src
+    acceptable_alternate_sources: []
+    objective: Same information need as BP-EVAL-009, asked in Vietnamese.
+    concepts: [unit testing, Arrange-Act-Assert, single Act, parameterized tests]
+    cognitive_level: explain
+    difficulty: easy
+    size_class: medium
+    retrieval_target: Same as BP-EVAL-009.
+    retrieval_challenges: [subsection_evidence, sibling_sections_share_vocabulary, cross_lingual]
+    evaluation_target:
+      capability: Cross-lingual retrieval of the right sibling H3.
+      failure_mode: specific_heading
+      why_it_matters: Same as BP-EVAL-009, plus the language effect.
+      expected_behavior: Same as BP-EVAL-009, answered in Vietnamese.
+      rationale: Parallel case for PG-005 (easy).
+    ground_truth: *pg005_gt
+    answer_acceptance_criteria: *pg005_ans
+    citation_acceptance_criteria: *pg005_cit
+    question_notes: Keep "Act", "Assert", "unit test" in English (common usage).
+    reason_for_inclusion: Parallel EN/VI group on an easy case.
+
+  # ---------------------------------------------------------------- PG-006 (#29, tiny)
+  - id: BP-EVAL-011
+    split: eval
+    status: proposed
+    language: en
+    parallel_group_id: PG-006
+    scope: single-source
+    source_ids: ["29"]
+    expected_sources: &pg006_src
+      - source_id: "29"
+        heading_path: "ASP0033: `[ValidatableType]` is applied to an inaccessible type > Rule description"
+        slot: S1
+      - source_id: "29"
+        heading_path: "ASP0033: `[ValidatableType]` is applied to an inaccessible type > How to fix violations"
+        slot: S1
+    acceptable_alternate_sources: &pg006_alt
+      - source_id: "29"
+        heading_path: "ASP0033: `[ValidatableType]` is applied to an inaccessible type > Cause"
+        slot: S1
+        note: Supports P1.
+    objective: Diagnose why validation is silently skipped for a file-local or private type marked [ValidatableType], and fix it.
+    concepts: [ASP0033, ValidatableType, validation source generator, accessibility]
+    cognitive_level: diagnose
+    difficulty: medium
+    size_class: tiny
+    retrieval_target: "#29 'Rule description' and 'How to fix violations' (1.7K doc)."
+    retrieval_challenges: [tiny_document, terminology_sensitive]
+    evaluation_target:
+      capability: Retrieve a tiny analyzer page against large ASP.NET Core pages with validation vocabulary.
+      failure_mode: tiny_doc_single_chunk
+      why_it_matters: Sections under 400 chars merge in Arm A (ADR-0003 D3); the whole page may be one chunk in either arm.
+      expected_behavior: 'A #29 chunk is in the top 5; the answer gives the cause and the public/internal fix.'
+      rationale: Tiny doc with a precise, checkable answer.
+    ground_truth: &pg006_gt
+      answer_points:
+        - {id: P1, required: true, text: "The validation source generator emits code in a separate file, so it can't access a type (or one of its containing types) that is private or file-local."}
+        - {id: P2, required: true, text: "In that case the generator silently skips validation for the type (diagnostic ASP0033)."}
+        - {id: P3, required: true, text: "Fix: make the attributed type and each of its containing types public or internal."}
+        - {id: P4, required: false, text: "ASP0033 is a Usage rule with severity Warning."}
+      evidence:
+        - source_id: "29"
+          heading_path: "ASP0033: `[ValidatableType]` is applied to an inaccessible type > Rule description"
+          quote: "The validation source generator emits code in a separate file. A validatable type and all of its containing types must be public or internal and can't be file-local. Otherwise, the generator silently skips validation for the type."
+          supports: [P1, P2]
+        - source_id: "29"
+          heading_path: "ASP0033: `[ValidatableType]` is applied to an inaccessible type > How to fix violations"
+          quote: "Make the attributed type and each of its containing types public or internal."
+          supports: [P3]
+    answer_acceptance_criteria: &pg006_ans
+      acceptable_variations:
+        - The fix may be shown as changing `file sealed class` to `internal sealed class`.
+      must_not_claim:
+        - The type must be public (internal is also allowed).
+        - ASP0033 is a build error.
+    citation_acceptance_criteria: &pg006_cit
+      - The cited chunk contains the "silently skips validation" sentence and/or the public-or-internal fix.
+    question_notes: Describe the symptom (validation doesn't run for a nested private model) without naming ASP0033.
+    reason_for_inclusion: Tiny-doc diagnose case, both languages.
+
+  - id: BP-EVAL-012
+    split: eval
+    status: proposed
+    language: vi
+    parallel_group_id: PG-006
+    scope: single-source
+    source_ids: ["29"]
+    expected_sources: *pg006_src
+    acceptable_alternate_sources: *pg006_alt
+    objective: Same information need as BP-EVAL-011, asked in Vietnamese.
+    concepts: [ASP0033, ValidatableType, validation source generator, accessibility]
+    cognitive_level: diagnose
+    difficulty: medium
+    size_class: tiny
+    retrieval_target: Same as BP-EVAL-011.
+    retrieval_challenges: [tiny_document, terminology_sensitive, cross_lingual]
+    evaluation_target:
+      capability: Cross-lingual retrieval of a tiny analyzer page.
+      failure_mode: tiny_doc_single_chunk
+      why_it_matters: Same as BP-EVAL-011, plus the language effect.
+      expected_behavior: Same as BP-EVAL-011, answered in Vietnamese.
+      rationale: Parallel case for PG-006 (medium, tiny doc).
+    ground_truth: *pg006_gt
+    answer_acceptance_criteria: *pg006_ans
+    citation_acceptance_criteria: *pg006_cit
+    question_notes: Keep `[ValidatableType]`, "private", "internal", "public" in English.
+    reason_for_inclusion: Parallel EN/VI group on a tiny doc.
+
+  # ---------------------------------------------------------------- PG-007 (#10, diagnose)
+  - id: BP-EVAL-013
+    split: eval
+    status: proposed
+    language: en
+    parallel_group_id: PG-007
+    scope: single-source
+    source_ids: ["10"]
+    expected_sources: &pg007_src
+      - source_id: "10"
+        heading_path: "Dependency injection in ASP.NET Core > Service lifetimes"
+        slot: S1
+    acceptable_alternate_sources: &pg007_alt
+      - source_id: "11"
+        heading_path: "Factory-based middleware activation in ASP.NET Core"
+        slot: S1
+        note: Supports P3 only.
+      - source_id: "11"
+        heading_path: "Factory-based middleware activation in ASP.NET Core > Additional resources"
+        slot: S1
+        note: Supports P3 only (the intros of variants 2-3 are stored under this heading and repeat the per-request sentence).
+      - source_id: "11"
+        heading_path: "Factory-based middleware activation in ASP.NET Core > IMiddleware"
+        slot: S1
+        note: Supports P2 and P3 by example (conventional InvokeAsync parameter vs IMiddleware constructor).
+      - source_id: "10"
+        heading_path: "Dependency injection in ASP.NET Core > Lifetime and registration options"
+        slot: S1
+        note: Supports P2 only ("Scoped and transient services must be resolved in the `InvokeAsync` method.").
+    objective: Diagnose a runtime exception when middleware takes a scoped service in its constructor, and name the fixes.
+    concepts: [middleware, scoped lifetime, constructor injection, InvokeAsync, factory-based middleware]
+    cognitive_level: diagnose
+    difficulty: hard
+    size_class: medium
+    retrieval_target: "#10 'Service lifetimes' (1.5K section in a 43K doc)."
+    retrieval_challenges: [subsection_evidence, cross_source_overlap, paraphrase]
+    evaluation_target:
+      capability: Connect a symptom (runtime exception) to the lifetime rule and both fixes.
+      failure_mode: specific_heading
+      why_it_matters: 'The rule sits in one short section of a long DI page; #11 overlaps on the fix.'
+      expected_behavior: "#10 'Service lifetimes' is in the top 5; the answer gives the cause and both fixes."
+      rationale: Hard diagnose case with an overlapping second document.
+    ground_truth: &pg007_gt
+      answer_points:
+        - {id: P1, required: true, text: "Injecting a scoped service through the (conventional) middleware's constructor throws a runtime exception, because it forces the scoped service to behave like a singleton."}
+        - {id: P2, required: true, text: "Fix 1: inject the scoped service into the middleware's Invoke or InvokeAsync method instead."}
+        - {id: P3, required: true, text: "Fix 2: use factory-based middleware, which is activated per client request, so scoped services can be injected into its constructor."}
+      evidence:
+        - source_id: "10"
+          heading_path: "Dependency injection in ASP.NET Core > Service lifetimes"
+          quote: "Using [constructor injection](../mvc/controllers/dependency-injection?view=aspnetcore-10.0#constructor-injection) throws a runtime exception because it forces the scoped service to behave like a singleton."
+          supports: [P1]
+        - source_id: "10"
+          heading_path: "Dependency injection in ASP.NET Core > Service lifetimes"
+          quote: "Inject the service into the middleware's `Invoke` or `InvokeAsync` method."
+          supports: [P2]
+        - source_id: "10"
+          heading_path: "Dependency injection in ASP.NET Core > Service lifetimes"
+          quote: "Middleware registered using this approach is activated per client request (connection), which allows scoped services to be injected into the middleware's constructor."
+          supports: [P3]
+    answer_acceptance_criteria: &pg007_ans
+      acceptable_variations:
+        - "\"IMiddleware\" may be named for factory-based middleware."
+      must_not_claim:
+        - Register the service as a singleton to fix it.
+        - Constructor injection of scoped services works in conventional middleware.
+    citation_acceptance_criteria: &pg007_cit
+      - 'P1 must be supported by the #10 ''Service lifetimes'' chunk; P2 by #10 (''Service lifetimes'' or ''Lifetime and registration options'') or #11 ''IMiddleware''; P3 by #10 or #11.'
+    question_notes: Describe the symptom (exception at runtime when the middleware constructor takes a scoped service).
+    reason_for_inclusion: Hard diagnose parallel case on a medium-large document.
+
+  - id: BP-EVAL-014
+    split: eval
+    status: proposed
+    language: vi
+    parallel_group_id: PG-007
+    scope: single-source
+    source_ids: ["10"]
+    expected_sources: *pg007_src
+    acceptable_alternate_sources: *pg007_alt
+    objective: Same information need as BP-EVAL-013, asked in Vietnamese.
+    concepts: [middleware, scoped lifetime, constructor injection, InvokeAsync, factory-based middleware]
+    cognitive_level: diagnose
+    difficulty: hard
+    size_class: medium
+    retrieval_target: Same as BP-EVAL-013.
+    retrieval_challenges: [subsection_evidence, cross_source_overlap, paraphrase, cross_lingual]
+    evaluation_target:
+      capability: Cross-lingual diagnosis.
+      failure_mode: specific_heading
+      why_it_matters: Same as BP-EVAL-013, plus the language effect.
+      expected_behavior: Same as BP-EVAL-013, answered in Vietnamese.
+      rationale: Parallel case for PG-007 (hard).
+    ground_truth: *pg007_gt
+    answer_acceptance_criteria: *pg007_ans
+    citation_acceptance_criteria: *pg007_cit
+    question_notes: Keep "middleware", "scoped", "constructor" and "InvokeAsync" in English.
+    reason_for_inclusion: Parallel EN/VI group on a hard case.
+
+  # ---------------------------------------------------------------- single-source, not parallel
+  - id: BP-EVAL-015
+    split: eval
+    status: proposed
+    language: en
+    parallel_group_id: null
+    scope: single-source
+    source_ids: ["01"]
+    expected_sources:
+      - source_id: "01"
+        heading_path: "Asynchronous programming with async and await > Async/await vs ContinueWith > Why async/await is preferred"
+        slot: S1
+    acceptable_alternate_sources:
+      - source_id: "01"
+        heading_path: "Asynchronous programming with async and await > Async/await vs ContinueWith"
+        slot: S1
+        note: Parent H2; introduces the comparison.
+    objective: Compare async/await with ContinueWith chains.
+    concepts: [async, await, ContinueWith, task continuation, exception handling]
+    cognitive_level: compare
+    difficulty: medium
+    size_class: medium
+    retrieval_target: "#01 H3 'Why async/await is preferred' (1.1K) under 'Async/await vs ContinueWith'."
+    retrieval_challenges: [subsection_evidence, sibling_sections_share_vocabulary]
+    evaluation_target:
+      capability: Retrieve the H3 that holds the reasons, not its code-only siblings.
+      failure_mode: specific_heading
+      why_it_matters: The siblings 'Using ContinueWith' and 'Using async/await' are mostly code with the same keywords.
+      expected_behavior: The 'Why async/await is preferred' chunk is retrieved; the answer lists the reasons.
+      rationale: Small sibling sections; both arms may place the reasons in different chunks.
+    ground_truth:
+      answer_points:
+        - {id: P1, required: true, text: "Readability: async/await code reads like synchronous code."}
+        - {id: P2, required: true, text: "Error handling: try/catch works naturally with await, while ContinueWith needs careful handling of faulted tasks."}
+        - {id: P3, required: true, text: "At least one more advantage: maintainability (adding/removing steps needs minimal changes), debugging (better call stack and debugger experience), or performance (more sophisticated compiler optimizations)."}
+        - {id: P4, required: false, text: "The benefit grows with the number of chained operations (3-4 or more)."}
+      evidence:
+        - source_id: "01"
+          heading_path: "Asynchronous programming with async and await > Async/await vs ContinueWith > Why async/await is preferred"
+          quote: "**Readability**: The code reads like synchronous code, making it easier to understand the flow of operations."
+          supports: [P1]
+        - source_id: "01"
+          heading_path: "Asynchronous programming with async and await > Async/await vs ContinueWith > Why async/await is preferred"
+          quote: "**Error handling**: Exception handling with `try`/`catch` blocks works naturally, whereas `ContinueWith` requires careful handling of faulted tasks."
+          supports: [P2]
+        - source_id: "01"
+          heading_path: "Asynchronous programming with async and await > Async/await vs ContinueWith > Why async/await is preferred"
+          quote: "**Debugging**: The call stack and debugger experience is much better with `async`/`await`."
+          supports: [P3]
+    answer_acceptance_criteria:
+      acceptable_variations:
+        - Advantages may be listed in any order.
+      must_not_claim:
+        - ContinueWith is preferred or faster than async/await.
+    citation_acceptance_criteria:
+      - The cited chunk contains the list of advantages.
+    question_notes: Ask why a team should replace ContinueWith chains with await.
+    reason_for_inclusion: Compare-level case on a medium doc.
+
+  - id: BP-EVAL-016
+    split: eval
+    status: proposed
+    language: vi
+    parallel_group_id: null
+    scope: single-source
+    source_ids: ["26"]
+    expected_sources:
+      - source_id: "26"
+        heading_path: "The C# type system > Value types and reference types"
+        slot: S1
+    acceptable_alternate_sources:
+      - source_id: "07"
+        heading_path: "C# classes"
+        slot: S1
+        note: Partial support for P1 (assigning a class variable copies the reference, so both variables point to the same object).
+      - source_id: "07"
+        heading_path: "C# classes > Create objects"
+        slot: S1
+        note: Partial support for P1 and P2 (reference sharing for classes; with structs, assignment copies the data).
+      - source_id: "20"
+        heading_path: "A tour of the C# language > Familiar C# features"
+        slot: S1
+        note: Partial support for P1 (collections are reference types).
+    objective: Predict what happens after assigning a list variable to another and changing it through the second one.
+    concepts: [value types, reference types, assignment semantics, List<T>]
+    cognitive_level: apply
+    difficulty: easy
+    size_class: medium
+    retrieval_target: "#26 'Value types and reference types' (1.8K, prose + code)."
+    retrieval_challenges: [code_heavy, cross_source_overlap, cross_lingual]
+    evaluation_target:
+      capability: Apply an explained rule to a code example.
+      failure_mode: fixed_size_code_split
+      why_it_matters: The section (1,847 chars) is over the 1,600-char max, so both arms split it. Arm A splits at paragraph or sentence boundaries and keeps code blocks whole (ADR-0003 D4); Arm B cuts at fixed positions. The case shows where each arm separates the rule (prose) from the example (code).
+      expected_behavior: The answer predicts 4 and explains it with reference semantics.
+      rationale: 'Code plus explanation in one section; #04/#16 overlap on types.'
+    ground_truth:
+      answer_points:
+        - {id: P1, required: true, text: "list1.Count is 4: List<int> is a reference type, so list1 and list2 point to the same object and the Add through list2 is visible through list1."}
+        - {id: P2, required: false, text: "Value types (structs such as the Coords record struct, enums, built-in numeric types) copy their data on assignment, so changing one variable doesn't affect the other."}
+        - {id: P3, required: false, text: "Classes, arrays, delegates and strings are reference types."}
+      evidence:
+        - source_id: "26"
+          heading_path: "The C# type system > Value types and reference types"
+          quote: "**Reference types** hold a reference to an object on the managed heap. When you assign a reference type to a new variable, both variables point to the same object."
+          supports: [P1]
+        - source_id: "26"
+          heading_path: "The C# type system > Value types and reference types"
+          quote: "**Value types** hold their data directly. When you assign a value type to a new variable, the runtime copies the data."
+          supports: [P2]
+    answer_acceptance_criteria:
+      acceptable_variations:
+        - "\"same instance\" for \"same object\""
+      must_not_claim:
+        - list1.Count is 3.
+        - List<T> is a value type.
+    citation_acceptance_criteria:
+      - The cited chunk contains the reference-type assignment rule.
+    question_notes: Include the list1/list2 snippet from the page but remove its output comments (e.g. `// 4 — same object`), which give the answer away; ask for list1.Count and why.
+    reason_for_inclusion: Easy apply case, Vietnamese, code plus prose.
+
+  - id: BP-EVAL-017
+    split: eval
+    status: proposed
+    language: en
+    parallel_group_id: null
+    scope: single-source
+    source_ids: ["11"]
+    expected_sources:
+      - source_id: "11"
+        heading_path: "Factory-based middleware activation in ASP.NET Core"
+        slot: S1
+      - source_id: "11"
+        heading_path: "Factory-based middleware activation in ASP.NET Core > IMiddleware"
+        slot: S1
+    acceptable_alternate_sources:
+      - source_id: "11"
+        heading_path: "Factory-based middleware activation in ASP.NET Core > Additional resources"
+        slot: S1
+        note: The intros of variants 2 and 3 are stored under this heading (the variant has no own H1).
+      - source_id: "10"
+        heading_path: "Dependency injection in ASP.NET Core > Service lifetimes"
+        slot: S1
+        note: Partial support for P1 and P2 (inject into Invoke/InvokeAsync, or use factory-based middleware activated per request). Same sentences as PG-007.
+    objective: Compare how conventional middleware and factory-activated (IMiddleware) middleware get a scoped service.
+    concepts: [IMiddleware, IMiddlewareFactory, conventional middleware, scoped services, UseMiddleware]
+    cognitive_level: compare
+    difficulty: hard
+    size_class: medium
+    retrieval_target: "#11 intro (H1 section) and 'IMiddleware' (3 copies)."
+    retrieval_challenges: [version_variants, code_heavy, mislabelled_variant_intro]
+    evaluation_target:
+      capability: Combine the intro rule with the two code examples.
+      failure_mode: repeated_version_sections
+      why_it_matters: Three copies of 'IMiddleware'; later variant intros sit under 'Additional resources', so correct text can carry a misleading heading.
+      expected_behavior: The answer contrasts InvokeAsync parameter injection with constructor injection and states the registration requirement.
+      rationale: Shows the effect of repeated sections and of the mislabelled variant intros on each arm.
+    ground_truth:
+      answer_points:
+        - {id: P1, required: true, text: "Conventional middleware receives the scoped service (SampleDbContext in the example) as a parameter of InvokeAsync."}
+        - {id: P2, required: true, text: "Factory-activated middleware implements IMiddleware and receives the scoped service through its constructor, because IMiddleware is activated per client request (connection)."}
+        - {id: P3, required: true, text: "The factory-activated middleware is registered as a scoped or transient service in the service container; UseMiddleware sees that the type implements IMiddleware and resolves it with the registered IMiddlewareFactory."}
+        - {id: P4, required: false, text: "Benefits: activation per client request (injection of scoped services) and strong typing."}
+      evidence:
+        - source_id: "11"
+          heading_path: "Factory-based middleware activation in ASP.NET Core"
+          quote: "[IMiddleware](/en-us/dotnet/api/microsoft.aspnetcore.http.imiddleware) is activated per client request (connection), so scoped services can be injected into the middleware's constructor."
+          supports: [P2]
+        - source_id: "11"
+          heading_path: "Factory-based middleware activation in ASP.NET Core"
+          quote: "The middleware is registered as a [scoped or transient service](../dependency-injection?view=aspnetcore-10.0#service-lifetimes) in the app's service container."
+          supports: [P3]
+        - source_id: "11"
+          heading_path: "Factory-based middleware activation in ASP.NET Core > IMiddleware"
+          quote: "public async Task InvokeAsync(HttpContext context, SampleDbContext dbContext)"
+          supports: [P1]
+    answer_acceptance_criteria:
+      acceptable_variations:
+        - "\"MiddlewareFactory\" (the default IMiddlewareFactory) may be named."
+      must_not_claim:
+        - Factory-activated middleware is registered as a singleton.
+        - Conventional middleware takes scoped services in its constructor.
+    citation_acceptance_criteria:
+      - P1 cites a chunk with the conventional InvokeAsync signature; P2/P3 cite the intro (any variant, including text under 'Additional resources').
+    question_notes: Ask for the difference in how each kind of middleware gets a DbContext.
+    reason_for_inclusion: Hard compare case with repeated sections and the mislabelled-intro quirk.
+
+  - id: BP-EVAL-018
+    split: eval
+    status: proposed
+    language: vi
+    parallel_group_id: null
+    scope: single-source
+    source_ids: ["21"]
+    expected_sources:
+      - source_id: "21"
+        heading_path: "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Logical patterns > Precedence and order of checking"
+        slot: S1
+    acceptable_alternate_sources:
+      - source_id: "21"
+        heading_path: "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Parenthesized pattern"
+        slot: S1
+        note: Partial support for P3 and P4 (parentheses emphasize or change precedence in logical patterns).
+    objective: Diagnose why `c is not >= 'a' and <= 'z'` does not mean "not a lowercase letter", and fix it.
+    concepts: [pattern matching, logical patterns, not, and, or, precedence]
+    cognitive_level: diagnose
+    difficulty: hard
+    size_class: medium
+    retrieval_target: "#21 H3 'Precedence and order of checking' (1.8K, code + prose)."
+    retrieval_challenges: [code_heavy, subsection_evidence, cross_lingual]
+    evaluation_target:
+      capability: Explain a precedence bug shown in code.
+      failure_mode: fixed_size_code_split
+      why_it_matters: The section (1,842 chars) is over the 1,600-char max, so both arms split it. Arm A splits at paragraph boundaries and keeps its three short code blocks whole (ADR-0003 D4); Arm B cuts at fixed positions and can separate the bug from its fix.
+      expected_behavior: The answer names the binding order and gives the parenthesized fix.
+      rationale: Code/explanation interleaving is where the two chunkers differ most.
+    ground_truth:
+      answer_points:
+        - {id: P1, required: true, text: "Pattern combinators bind in the order not, then and, then or; not binds to its operand first."}
+        - {id: P2, required: true, text: "So `c is not >= 'a' and <= 'z'` is parsed as `c is ((not >= 'a') and <= 'z')`, which is not \"not a lowercase letter\"."}
+        - {id: P3, required: true, text: "Fix: add parentheses, `c is not (>= 'a' and <= 'z')`."}
+        - {id: P4, required: false, text: "Use parentheses to make patterns clear; the order of checking patterns with the same binding order is undefined."}
+      evidence:
+        - source_id: "21"
+          heading_path: "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Logical patterns > Precedence and order of checking"
+          quote: "The `not` pattern binds to its operand first. The `and` pattern binds after any `not` pattern expression binding."
+          supports: [P1]
+        - source_id: "21"
+          heading_path: "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Logical patterns > Precedence and order of checking"
+          quote: "static bool IsNotLowerCaseLetterDefaultBinding(char c) => c is ((not >= 'a') and <= 'z');"
+          supports: [P2]
+        - source_id: "21"
+          heading_path: "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Logical patterns > Precedence and order of checking"
+          quote: "static bool IsNotLowerCaseLetterParentheses(char c) => c is not (>= 'a' and <= 'z');"
+          supports: [P3]
+    answer_acceptance_criteria:
+      acceptable_variations:
+        - The fix may be written for any variable name.
+      must_not_claim:
+        - and binds before not.
+        - The original pattern is correct.
+    citation_acceptance_criteria:
+      - The cited chunk contains the binding-order statement or the corrected pattern.
+    question_notes: Give the incorrect one-line pattern and ask (in Vietnamese) why it is wrong.
+    reason_for_inclusion: Hard diagnose case on code, Vietnamese.
+
+  - id: BP-EVAL-019
+    split: eval
+    status: proposed
+    language: en
+    parallel_group_id: null
+    scope: single-source
+    source_ids: ["21"]
+    expected_sources:
+      - source_id: "21"
+        heading_path: "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > List patterns"
+        slot: S1
+    acceptable_alternate_sources: []
+    objective: Apply the slice-pattern rules of C# list patterns.
+    concepts: [list patterns, slice pattern, pattern matching]
+    cognitive_level: apply
+    difficulty: medium
+    size_class: medium
+    retrieval_target: "#21 'List patterns' (2.9K, mostly code)."
+    retrieval_challenges: [code_heavy, link_hub_distractor]
+    evaluation_target:
+      capability: Retrieve a content section instead of hub links with the same words.
+      failure_mode: link_list_noise
+      why_it_matters: "#08 lists 'Pattern matching' links under 'Fundamentals > Concept' and 'Fundamentals > Tutorial' with no content."
+      expected_behavior: 'The #21 ''List patterns'' chunk outranks the #08 link lists.'
+      rationale: Link-list sections are a named ADR-0003 failure mode.
+    ground_truth:
+      answer_points:
+        - {id: P1, required: true, text: "The slice pattern `..` matches zero or more elements."}
+        - {id: P2, required: true, text: "At most one slice pattern can be used in a list pattern, and it can only appear inside a list pattern."}
+        - {id: P3, required: true, text: "`new[] { 2, 4 } is [.., 2, 4]` is true."}
+        - {id: P4, required: false, text: "A subpattern can be nested in a slice, e.g. `.. var s`."}
+      evidence:
+        - source_id: "21"
+          heading_path: "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > List patterns"
+          quote: "A slice pattern matches zero or more elements. You can use at most one slice pattern in a list pattern. The slice pattern can only appear in a list pattern."
+          supports: [P1, P2]
+        - source_id: "21"
+          heading_path: "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > List patterns"
+          quote: "Console.WriteLine(new[] { 2, 4 } is [.., 2, 4]);  // True"
+          supports: [P3]
+    answer_acceptance_criteria:
+      acceptable_variations:
+        - "\"slice\" for the `..` slice pattern (not \"range\": #20 uses \"range\" for a different construct)"
+      must_not_claim:
+        - A slice must match at least one element.
+        - Several slice patterns are allowed in one list pattern.
+    citation_acceptance_criteria:
+      - The cited chunk contains the slice-pattern rules.
+    question_notes: Ask what `..` means, how often it may appear, and whether `new[] { 2, 4 } is [.., 2, 4]` is true.
+    reason_for_inclusion: Apply-level case with a link-hub distractor.
+
+  - id: BP-EVAL-020
+    split: eval
+    status: proposed
+    language: vi
+    parallel_group_id: null
+    scope: single-source
+    source_ids: ["16"]
+    expected_sources:
+      - source_id: "16"
+        heading_path: "Integral numeric types (C# reference) > Integer literals"
+        slot: S1
+    acceptable_alternate_sources: []
+    objective: Work out the type and value of an unsuffixed hexadecimal literal.
+    concepts: [integer literals, literal suffix, uint, unchecked, hexadecimal]
+    cognitive_level: analyze
+    difficulty: hard
+    size_class: medium
+    retrieval_target: "#16 'Integer literals' (2.9K); #04 'Integer literals' is a near-duplicate that lacks the rule."
+    retrieval_challenges: [cross_source_overlap, terminology_sensitive, cross_lingual]
+    evaluation_target:
+      capability: Prefer the section that holds the rule over a near-duplicate section in another document.
+      failure_mode: near_duplicate_topk
+      why_it_matters: "#04 'Built-in types and literals > Literal syntax > Integer literals' repeats prefixes, suffixes and digit separators but not the no-suffix rule or the uint example."
+      expected_behavior: "#16 is retrieved; the answer explains uint and the unchecked cast."
+      rationale: Cross-document near-duplicates can fill the top 5 with incomplete evidence.
+    ground_truth:
+      answer_points:
+        - {id: P1, required: true, text: "Without a suffix, the literal's type is the first of int, uint, long, ulong that can represent the value."}
+        - {id: P2, required: true, text: "So `0xFF_FF_FF_FF` is the uint value 4,294,967,295, not int -1: literals are interpreted as positive values."}
+        - {id: P3, required: true, text: "To get -1 as int, cast in an unchecked context: `unchecked((int)0xFF_FF_FF_FF)`."}
+        - {id: P4, required: false, text: "U/u suffix: first of uint, ulong; L/l suffix: first of long, ulong."}
+      evidence:
+        - source_id: "16"
+          heading_path: "Integral numeric types (C# reference) > Integer literals"
+          quote: "If the literal has no suffix, the compiler assigns the type as the first of the following types in which its value can be represented: `int`, `uint`, `long`, `ulong`."
+          supports: [P1]
+        - source_id: "16"
+          heading_path: "Integral numeric types (C# reference) > Integer literals"
+          quote: "For example, the literal `0xFF_FF_FF_FF` represents the number `4,294,967,295` of the `uint` type, though it has the same bit representation as the number `-1` of the `int` type."
+          supports: [P2]
+        - source_id: "16"
+          heading_path: "Integral numeric types (C# reference) > Integer literals"
+          quote: "For example, `unchecked((int)0xFF_FF_FF_FF)` produces `-1`."
+          supports: [P3]
+    answer_acceptance_criteria:
+      acceptable_variations:
+        - The value may be written as 4294967295 or 2^32 - 1.
+      must_not_claim:
+        - "`0xFF_FF_FF_FF` is an int with value -1."
+        - Unsuffixed integer literals are always int.
+    citation_acceptance_criteria:
+      - 'The cited chunk is from #16 and contains the no-suffix rule or the uint example; a #04 chunk = correct topic, wrong evidence.'
+    question_notes: Ask (in Vietnamese) what type `var x = 0xFF_FF_FF_FF;` has and how to get -1 as an int.
+    reason_for_inclusion: Hard analyze case with a cross-document near-duplicate.
+
+  - id: BP-EVAL-021
+    split: eval
+    status: proposed
+    language: en
+    parallel_group_id: null
+    scope: single-source
+    source_ids: ["20"]
+    expected_sources:
+      - source_id: "20"
+        heading_path: "A tour of the C# language > File-based apps"
+        slot: S1
+    acceptable_alternate_sources: []
+    objective: Recall what file-based apps are and how to run one.
+    concepts: [file-based apps, dotnet run, shebang, C# 14, .NET 10]
+    cognitive_level: recall
+    difficulty: easy
+    size_class: medium
+    retrieval_target: "#20 'File-based apps' (1.5K)."
+    retrieval_challenges: [link_hub_distractor, direct_semantic]
+    evaluation_target:
+      capability: Retrieve content, not the hub link with the same title.
+      failure_mode: link_list_noise
+      why_it_matters: "#08 'Fundamentals > Tutorial' has a 'Build file-based apps' link with no content."
+      expected_behavior: 'The #20 chunk outranks #08; the answer is grounded in #20.'
+      rationale: Easy case where only link noise can make retrieval fail.
+    ground_truth:
+      answer_points:
+        - {id: P1, required: true, text: "Beginning with C# 14 and .NET 10, a program contained in a single .cs file can be run with `dotnet run <file>.cs` (e.g. `dotnet run hello-world.cs`)."}
+        - {id: P2, required: true, text: "The source must be a single file, but otherwise all C# syntax is valid."}
+        - {id: P3, required: false, text: "A `#!` (shebang) first line lets Unix run the file directly (e.g. `./hello-world.cs`) when it has execute permission."}
+        - {id: P4, required: false, text: "Useful for small command-line utilities, prototypes and experiments."}
+      evidence:
+        - source_id: "20"
+          heading_path: "A tour of the C# language > File-based apps"
+          quote: "Beginning with C# 14 and .NET 10, you can create *file-based apps*, which simplifies building and running C# programs."
+          supports: [P1]
+        - source_id: "20"
+          heading_path: "A tour of the C# language > File-based apps"
+          quote: "The source for these programs must be a single file, but otherwise all C# syntax is valid."
+          supports: [P2]
+        - source_id: "20"
+          heading_path: "A tour of the C# language > File-based apps"
+          quote: "You use the `dotnet run` command to run a program contained in a single `*.cs` file."
+          supports: [P1]
+    answer_acceptance_criteria:
+      acceptable_variations:
+        - "\"single-file program\""
+      must_not_claim:
+        - A project file (.csproj) or `dotnet build` is required first.
+        - File-based apps exist in versions earlier than C# 14 / .NET 10.
+    citation_acceptance_criteria:
+      - 'The cited chunk is from #20 ''File-based apps''; a #08 link-list chunk = unsupported_citation.'
+    question_notes: Ask how to run a one-file C# script without creating a project.
+    reason_for_inclusion: Easy recall case with a link-list distractor.
+
+  - id: BP-EVAL-022
+    split: eval
+    status: proposed
+    language: vi
+    parallel_group_id: null
+    scope: single-source
+    source_ids: ["13"]
+    expected_sources:
+      - source_id: "13"
+        heading_path: "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithRedirects"
+        slot: S1
+      - source_id: "13"
+        heading_path: "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithReExecute"
+        slot: S2
+    acceptable_alternate_sources:
+      - source_id: "13"
+        heading_path: "Handle errors in ASP.NET Core > UseStatusCodePagesWithRedirects"
+        slot: S1
+        note: Older variant (H2).
+      - source_id: "13"
+        heading_path: "Handle errors in ASP.NET Core > UseStatusCodePagesWithReExecute"
+        slot: S2
+        note: Older variant (H2).
+    objective: Compare UseStatusCodePagesWithRedirects and UseStatusCodePagesWithReExecute.
+    concepts: [status code pages, 302 redirect, re-execute pipeline, status code preservation]
+    cognitive_level: compare
+    difficulty: hard
+    size_class: huge
+    retrieval_target: "Two sibling H3s in #13, each repeated in 6 variants plus 1 older H2 copy."
+    retrieval_challenges: [version_variants, near_duplicate_sections, two_sections_needed, cross_lingual]
+    evaluation_target:
+      capability: Retrieve both halves of a comparison when each half has 7 near-identical copies.
+      failure_mode: near_duplicate_topk
+      why_it_matters: Copies of one method can fill all 5 slots and push out the other method. The copies also differ by version; variants 1-4 of the ReExecute H3 say the new pipeline may change the status code, while variants 5-6 and the older H2 only say the original code is returned, so that qualifier is an optional point.
+      expected_behavior: Both methods appear in the top 5; the answer contrasts status code and address bar.
+      rationale: Direct test of near-duplicate crowding in a huge document.
+    ground_truth:
+      answer_points:
+        - {id: P1, required: true, text: "UseStatusCodePagesWithRedirects sends a 302 Found to the client and redirects it to the error endpoint (which typically returns 200); the original status code is not preserved."}
+        - {id: P2, required: true, text: "UseStatusCodePagesWithReExecute re-executes the request pipeline with an alternate path to generate the response body and does not alter the status code, so the original code is returned."}
+        - {id: P3, required: true, text: "With redirects the browser address bar shows the error endpoint; with re-execute it shows the originally requested URL."}
+        - {id: P4, required: false, text: "Both take a URL template with a {0} status-code placeholder; the re-execute template must start with '/'."}
+        - {id: P5, required: false, text: "Variants 1-4 add that the re-executed pipeline may change the status code; if it doesn't, the original code is sent."}
+      evidence:
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithRedirects"
+          quote: "Sends a [302 - Found](https://developer.mozilla.org/docs/Web/HTTP/Status/302) status code to the client."
+          supports: [P1]
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithReExecute"
+          quote: "Generates the response body by re-executing the request pipeline using an alternate path."
+          supports: [P2]
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithReExecute"
+          quote: "Does not alter the status code before or after re-executing the pipeline."
+          supports: [P2]
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithReExecute"
+          quote: "The new pipeline execution may alter the response's status code, as the new pipeline has full control of the status code. If the new pipeline does not alter the status code, the original status code will be sent to the client."
+          supports: [P5]
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithRedirects"
+          quote: "For web apps, the client's browser address bar reflects the redirected endpoint."
+          supports: [P3]
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithReExecute"
+          quote: "For web apps, the client's browser address bar reflects the originally requested endpoint."
+          supports: [P3]
+    answer_acceptance_criteria:
+      acceptable_variations:
+        - "\"HTTP 302\" / \"Found\" / \"redirect response\""
+      must_not_claim:
+        - UseStatusCodePagesWithReExecute redirects the client.
+        - UseStatusCodePagesWithRedirects preserves the original status code.
+    citation_acceptance_criteria:
+      - At least one cited chunk for each method; each claim cited from the matching method's section (any variant).
+    question_notes: Ask which one keeps the original 404 and which one changes the browser URL; keep method names in English.
+    reason_for_inclusion: Hard compare case on near-duplicate sections, Vietnamese.
+
+  - id: BP-EVAL-023
+    split: eval
+    status: proposed
+    language: en
+    parallel_group_id: null
+    scope: single-source
+    source_ids: ["13"]
+    expected_sources:
+      - source_id: "13"
+        heading_path: "Handle errors in ASP.NET Core > IExceptionHandler"
+        slot: S1
+    acceptable_alternate_sources:
+      - source_id: "13"
+        heading_path: "Handle errors in ASP.NET Core > IExceptionHandler > SuppressDiagnosticsCallback"
+        slot: S1
+        note: Single copy; supports P2 and P3.
+    objective: Explain whether logs and metrics are emitted for exceptions an IExceptionHandler handles.
+    concepts: [IExceptionHandler, TryHandleAsync, diagnostics, SuppressDiagnosticsCallback, .NET 10]
+    cognitive_level: explain
+    difficulty: hard
+    size_class: huge
+    retrieval_target: "#13 'IExceptionHandler' (3 variants; each states both the .NET 8/9 and the .NET 10 behavior, in different words) or its single-copy subsection 'SuppressDiagnosticsCallback'."
+    retrieval_challenges: [version_variants]
+    evaluation_target:
+      capability: Keep two version-specific behaviors apart when the retrieved text states both.
+      failure_mode: mixed_version
+      why_it_matters: The answer depends on the .NET version. Every variant says .NET 8/9 always emit diagnostics and .NET 10 suppresses them by default; an answer that gives one behavior as the only truth is wrong for the other versions.
+      expected_behavior: An 'IExceptionHandler' chunk (any variant) or the 'SuppressDiagnosticsCallback' chunk is in the top 5; the answer separates .NET 10 behavior from .NET 8/9 behavior.
+      rationale: Section hit@5 counts any variant (ADR-0003 D8); the expected failure is a mixed-version answer, not a retrieval miss.
+    ground_truth:
+      answer_points:
+        - {id: P1, required: true, text: "Starting in .NET 10, diagnostics such as logs and metrics are suppressed by default for handled exceptions (TryHandleAsync returns true)."}
+        - {id: P2, required: true, text: "In .NET 8 and 9, diagnostics were always emitted, whether or not the exception was handled."}
+        - {id: P3, required: true, text: "The default can be changed with SuppressDiagnosticsCallback."}
+        - {id: P4, required: false, text: "Handlers run in registration order until one returns true; UseExceptionHandler must be called or no handler runs."}
+      evidence:
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > IExceptionHandler"
+          quote: "Starting in .NET 10, the default behavior is to suppress emission of diagnostics such as logs and metrics for handled exceptions (when `TryHandleAsync` returns `true`)."
+          supports: [P1]
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > IExceptionHandler"
+          quote: "This differs from earlier versions (.NET 8 and 9) where diagnostics were always emitted regardless of whether the exception was handled."
+          supports: [P2]
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > IExceptionHandler"
+          quote: "The default behavior can be changed by setting [SuppressDiagnosticsCallback](#suppressdiagnosticscallback)."
+          supports: [P3]
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > IExceptionHandler"
+          quote: "Starting in .NET 10, diagnostics are suppressed by default for handled exceptions."
+          supports: [P1]
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > IExceptionHandler > SuppressDiagnosticsCallback"
+          quote: "To revert to the .NET 8 and 9 behavior where diagnostics are always emitted for handled exceptions, set the callback to always return `false`:"
+          supports: [P2, P3]
+    answer_acceptance_criteria:
+      acceptable_variations:
+        - "\"telemetry\" for logs and metrics"
+      must_not_claim:
+        - Diagnostics are always emitted for handled exceptions (stated as current behavior).
+        - The behavior cannot be changed.
+    citation_acceptance_criteria:
+      - Any variant of 'IExceptionHandler' or the 'SuppressDiagnosticsCallback' subsection can support P1-P3; the cited chunk must contain the version statement it is cited for.
+    question_notes: Ask whether handled exceptions still produce logs and metrics, without naming a version.
+    reason_for_inclusion: Mixed-version case where the correct answer depends on the .NET version and the text states both behaviors.
+
+  - id: BP-EVAL-024
+    split: eval
+    status: proposed
+    language: vi
+    parallel_group_id: null
+    scope: single-source
+    source_ids: ["17"]
+    expected_sources:
+      - source_id: "17"
+        heading_path: "Integration tests in ASP.NET Core > Disable shadow copying"
+        slot: S1
+    acceptable_alternate_sources: []
+    objective: Explain the shadow-copying problem in xUnit integration tests and how to turn it off.
+    concepts: [shadow copying, xUnit, xunit.runner.json, Assembly.Location]
+    cognitive_level: apply
+    difficulty: medium
+    size_class: huge
+    retrieval_target: "#17 'Disable shadow copying' (501 chars; 5 identical copies)."
+    retrieval_challenges: [version_variants, identical_copies, cross_lingual]
+    evaluation_target:
+      capability: Retrieve a short section that exists in 5 identical copies.
+      failure_mode: near_duplicate_topk
+      why_it_matters: D1 drops chunks whose normalized text exactly matches an earlier chunk; whether the copies are removed depends on how each arm cuts the text.
+      expected_behavior: The section is retrieved; the answer names the cause and the JSON setting.
+      rationale: Measures how many top-5 slots copies take in each arm.
+    ground_truth:
+      answer_points:
+        - {id: P1, required: true, text: "Shadow copying runs the tests in a different directory than the output directory; tests that load files relative to Assembly.Location may then run into issues, and disabling shadow copying is the fix."}
+        - {id: P2, required: true, text: "With xUnit, add an xunit.runner.json file in the test project directory containing \"shadowCopy\": false."}
+      evidence:
+        - source_id: "17"
+          heading_path: "Integration tests in ASP.NET Core > Disable shadow copying"
+          quote: "Shadow copying causes the tests to execute in a different directory than the output directory. If your tests rely on loading files relative to `Assembly.Location` and you encounter issues, you might have to disable shadow copying."
+          supports: [P1]
+        - source_id: "17"
+          heading_path: "Integration tests in ASP.NET Core > Disable shadow copying"
+          quote: "To disable shadow copying when using xUnit, create a `xunit.runner.json` file in your test project directory"
+          supports: [P2]
+        - source_id: "17"
+          heading_path: "Integration tests in ASP.NET Core > Disable shadow copying"
+          quote: "\"shadowCopy\": false"
+          supports: [P2]
+    answer_acceptance_criteria:
+      acceptable_variations:
+        - 'The JSON may be shown as `{ "shadowCopy": false }`.'
+      must_not_claim:
+        - A .csproj property or command-line switch disables it (not in the corpus).
+    citation_acceptance_criteria:
+      - The cited chunk contains the xunit.runner.json instruction (any copy).
+    question_notes: Describe tests that can't find files next to the test assembly; keep "xUnit", "shadow copying" in English.
+    reason_for_inclusion: Identical-copy near-duplicate case, Vietnamese.
+
+  - id: BP-EVAL-025
+    split: eval
+    status: proposed
+    language: en
+    parallel_group_id: null
+    scope: single-source
+    source_ids: ["23"]
+    expected_sources:
+      - source_id: "23"
+        heading_path: "Routing in ASP.NET Core > Short-circuit middleware after routing"
+        slot: S1
+    acceptable_alternate_sources: []
+    objective: Stop requests for robots.txt and favicon.ico from running the whole middleware pipeline.
+    concepts: [short-circuit, MapShortCircuit, ShortCircuit, middleware pipeline]
+    cognitive_level: apply
+    difficulty: medium
+    size_class: huge
+    retrieval_target: "#23 'Short-circuit middleware after routing' (4.3K, single copy in a 381K doc)."
+    retrieval_challenges: [subsection_evidence, paraphrase]
+    evaluation_target:
+      capability: Find a single-copy section inside the largest document.
+      failure_mode: specific_heading
+      why_it_matters: "#23 has dozens of middleware/endpoint sections with similar words."
+      expected_behavior: The short-circuit chunk is in the top 5; the answer gives MapShortCircuit.
+      rationale: Unlike the repeated sections, this one exists once.
+    ground_truth:
+      answer_points:
+        - {id: P1, required: true, text: "Use `app.MapShortCircuit(404, \"robots.txt\", \"favicon.ico\");` to short-circuit several URL prefixes at once."}
+        - {id: P2, required: true, text: "Short-circuiting makes routing invoke the endpoint logic immediately and end the request, so middleware that would run after routing (e.g. authentication or CORS) is skipped."}
+        - {id: P3, required: false, text: "A single route can use `.ShortCircuit()` (optionally with a status code); MapShortCircuit returns IEndpointConventionBuilder, so constraints such as host filtering can be added."}
+        - {id: P4, required: false, text: "Caveat: it doesn't affect middleware placed before UseRouting, and endpoints with [Authorize] or [RequireCors] metadata fail with InvalidOperationException."}
+      evidence:
+        - source_id: "23"
+          heading_path: "Routing in ASP.NET Core > Short-circuit middleware after routing"
+          quote: "app.MapShortCircuit(404, \"robots.txt\", \"favicon.ico\");"
+          supports: [P1]
+        - source_id: "23"
+          heading_path: "Routing in ASP.NET Core > Short-circuit middleware after routing"
+          quote: "Use the [ShortCircuit](/en-us/dotnet/api/microsoft.aspnetcore.builder.routeshortcircuitendpointconventionbuilderextensions.shortcircuit) extension method to cause routing to invoke the endpoint logic immediately and then end the request."
+          supports: [P2]
+        - source_id: "23"
+          heading_path: "Routing in ASP.NET Core > Short-circuit middleware after routing"
+          quote: "For example, a given route might not need to go through authentication or CORS middleware."
+          supports: [P2]
+        - source_id: "23"
+          heading_path: "Routing in ASP.NET Core > Short-circuit middleware after routing"
+          quote: "The `ShortCircuit` and `MapShortCircuit` methods do not affect middleware placed before `UseRouting`. Trying to use these methods with endpoints that also have `[Authorize]` or `[RequireCors]` metadata will cause requests to fail with an `InvalidOperationException`."
+          supports: [P4]
+    answer_acceptance_criteria:
+      acceptable_variations:
+        - The status code may be different if the answer explains it's the response code.
+      must_not_claim:
+        - A custom middleware or static files are required.
+    citation_acceptance_criteria:
+      - The cited chunk contains MapShortCircuit or the ShortCircuit explanation.
+    question_notes: Describe bots probing robots.txt/favicon.ico on an app that has neither file.
+    reason_for_inclusion: Single-copy section in the huge routing doc.
+
+  - id: BP-EVAL-026
+    split: eval
+    status: proposed
+    language: vi
+    parallel_group_id: null
+    scope: single-source
+    source_ids: ["15"]
+    expected_sources:
+      - source_id: "15"
+        heading_path: "How to create backend application using Asp.net C# Web API Core"
+        slot: S1
+    acceptable_alternate_sources: []
+    objective: Diagnose the NU1202 error when installing JwtBearer 8.0.5 on a net5.0 project, using the Q&A thread.
+    concepts: [NU1202, Microsoft.AspNetCore.Authentication.JwtBearer, net5.0, .NET 8, package compatibility]
+    cognitive_level: diagnose
+    difficulty: hard
+    size_class: medium
+    retrieval_target: "Reply deep inside #15's single 17K section (community Q&A with inline SVG markup)."
+    retrieval_challenges: [long_section, noisy_markup, community_content, cross_lingual]
+    evaluation_target:
+      capability: Retrieve evidence from the middle of one very long section.
+      failure_mode: none
+      why_it_matters: Both arms must split the 17K section; where the reply lands decides retrieval.
+      expected_behavior: The chunk with the NU1202 reply is retrieved; the answer attributes it to the thread.
+      rationale: Long-section splitting affects both arms; not tied to one ADR-0003 failure mode.
+    ground_truth:
+      answer_points:
+        - {id: P1, required: true, text: "JwtBearer 8.0.5 is not compatible with net5.0, which causes NU1202."}
+        - {id: P2, required: true, text: "The answerer recommends moving to .NET 8 because .NET 5 is out of support."}
+        - {id: P3, required: false, text: "The latest JwtBearer for .NET 5 is 5.0.17; it is deprecated but can still be used for testing."}
+      evidence:
+        - source_id: "15"
+          heading_path: "How to create backend application using Asp.net C# Web API Core"
+          quote: "NU1202: Package Microsoft.AspNetCore.Authentication.JwtBearer 8.0.5 is not compatible with net5.0"
+          supports: [P1]
+        - source_id: "15"
+          heading_path: "How to create backend application using Asp.net C# Web API Core"
+          quote: ".NET 5 is out of support, I suggest you use .net 8 instead of 5"
+          supports: [P2]
+        - source_id: "15"
+          heading_path: "How to create backend application using Asp.net C# Web API Core"
+          quote: "the latest version for Microsoft.AspNetCore.Authentication.JwtBearer the is 5.0.17 as below image shows, it is deprecated, but it still could be used for testing"
+          supports: [P3]
+    answer_acceptance_criteria:
+      acceptable_variations:
+        - The answer may call the source a Microsoft Q&A thread.
+      must_not_claim:
+        - JwtBearer 8.x works on net5.0.
+        - The advice comes from official documentation.
+    citation_acceptance_criteria:
+      - The cited chunk contains the NU1202 error text or the ".NET 5 is out of support" reply.
+    question_notes: Quote the NU1202 message; ask what to do.
+    reason_for_inclusion: 'Long-section, noisy community page; the only #15 case.'
+
+  - id: BP-EVAL-027
+    split: eval
+    status: proposed
+    language: en
+    parallel_group_id: null
+    scope: single-source
+    source_ids: ["12"]
+    expected_sources:
+      - source_id: "12"
+        heading_path: "Handle errors in ASP.NET Core APIs > Additional error handling features > Validation failure error response"
+        slot: S1
+    acceptable_alternate_sources:
+      - source_id: "12"
+        heading_path: "Handle errors in ASP.NET Core APIs > Additional error handling features > Key differences for controllers"
+        slot: S1
+        note: Partial support (automatic 400 responses on validation failure; override InvalidModelStateResponseFactory for custom formatting).
+    objective: Recall what web API controllers return on model validation failure and how to customize it.
+    concepts: [ValidationProblemDetails, InvalidModelStateResponseFactory, ConfigureApiBehaviorOptions, model validation]
+    cognitive_level: recall
+    difficulty: medium
+    size_class: medium
+    retrieval_target: "#12 H3 'Validation failure error response' (1.1K)."
+    retrieval_challenges: [cross_source_overlap, terminology_sensitive]
+    evaluation_target:
+      capability: 'Retrieve the medium API doc when the huge #13 shares the vocabulary.'
+      failure_mode: large_doc_outranks_small
+      why_it_matters: "#13 has 7 link-only 'Model state errors' sections and 4 'Problem details' sections."
+      expected_behavior: 'The #12 chunk is in the top 5.'
+      rationale: Named ADR-0003 failure mode (large docs outranking smaller correct docs).
+    ground_truth:
+      answer_points:
+        - {id: P1, required: true, text: "For web API controllers, MVC responds with a ValidationProblemDetails response when model validation fails."}
+        - {id: P2, required: true, text: "MVC builds that response with InvalidModelStateResponseFactory; it can be replaced via ConfigureApiBehaviorOptions (options.InvalidModelStateResponseFactory = ...)."}
+        - {id: P3, required: false, text: "The example returns a BadRequestObjectResult with the ModelState and supports JSON and XML (AddXmlSerializerFormatters)."}
+      evidence:
+        - source_id: "12"
+          heading_path: "Handle errors in ASP.NET Core APIs > Additional error handling features > Validation failure error response"
+          quote: "For web API controllers, MVC responds with a [ValidationProblemDetails](/en-us/dotnet/api/microsoft.aspnetcore.mvc.validationproblemdetails) response type when model validation fails."
+          supports: [P1]
+        - source_id: "12"
+          heading_path: "Handle errors in ASP.NET Core APIs > Additional error handling features > Validation failure error response"
+          quote: "MVC uses the results of [InvalidModelStateResponseFactory](/en-us/dotnet/api/microsoft.aspnetcore.mvc.apibehavioroptions.invalidmodelstateresponsefactory#microsoft-aspnetcore-mvc-apibehavioroptions-invalidmodelstateresponsefactory) to construct the error response for a validation failure."
+          supports: [P2]
+        - source_id: "12"
+          heading_path: "Handle errors in ASP.NET Core APIs > Additional error handling features > Validation failure error response"
+          quote: "options.InvalidModelStateResponseFactory = context =>"
+          supports: [P2]
+    answer_acceptance_criteria:
+      acceptable_variations:
+        - "\"400 validation problem response\" if ValidationProblemDetails is also named"
+        - "For the how-to-customize part, registering a custom ProblemDetailsFactory is also grounded (#12 'Implement `ProblemDetailsFactory`': it produces ValidationProblemDetails and is used for validation failure error responses)."
+      must_not_claim:
+        - The response is 500 or 404.
+        - It is customized through UseExceptionHandler.
+    citation_acceptance_criteria:
+      - 'The cited chunk is from #12 ''Validation failure error response'' (or ''Key differences for controllers'' for P2; ''Implement `ProblemDetailsFactory`'' for the ProblemDetailsFactory route).'
+    question_notes: Ask what a controller API sends back when a posted model is invalid and how to change that format.
+    reason_for_inclusion: Large-vs-small document competition.
+
+  - id: BP-EVAL-028
+    split: eval
+    status: proposed
+    language: vi
+    parallel_group_id: null
+    scope: single-source
+    source_ids: ["18"]
+    expected_sources:
+      - source_id: "18"
+        heading_path: "Introduction"
+        slot: S1
+    acceptable_alternate_sources: []
+    objective: Recall whether C# was designed to compete with C or assembly on performance.
+    concepts: [C# design goals, language specification, performance]
+    cognitive_level: recall
+    difficulty: easy
+    size_class: tiny
+    retrieval_target: "#18, a single 2.4K section."
+    retrieval_challenges: [tiny_document, link_hub_distractor, cross_lingual]
+    evaluation_target:
+      capability: Retrieve a tiny document with a generic title ("Introduction").
+      failure_mode: tiny_doc_single_chunk
+      why_it_matters: "#18 is one or two chunks; hubs #05/#08/#09 link to the 'language specification' with no content."
+      expected_behavior: "#18 is in the top 5; the answer states the design goal."
+      rationale: Tiny doc with a clear, checkable statement.
+    ground_truth:
+      answer_points:
+        - {id: P1, required: true, text: "No. C# applications are meant to be economical with memory and processing power, but the language was not intended to compete directly on performance and size with C or assembly language."}
+        - {id: P2, required: false, text: "Other design goals: simple, modern, general-purpose, object-oriented; strong type checking, array bounds checking, detection of uninitialized variables, automatic garbage collection."}
+      evidence:
+        - source_id: "18"
+          heading_path: "Introduction"
+          quote: "Although C# applications are intended to be economical with regard to memory and processing power requirements, the language was not intended to compete directly on performance and size with C or assembly language."
+          supports: [P1]
+    answer_acceptance_criteria:
+      acceptable_variations:
+        - "\"not designed to beat C/assembly on speed or size\""
+      must_not_claim:
+        - C# was designed to match C or assembly performance.
+    citation_acceptance_criteria:
+      - 'The cited chunk is from #18 and contains the performance design goal.'
+    question_notes: Ask in Vietnamese whether C# aimed to be as fast as C.
+    reason_for_inclusion: Tiny-doc case, Vietnamese, not parallel.
+
+  # ---------------------------------------------------------------- cross-document
+  - id: BP-EVAL-029
+    split: eval
+    status: proposed
+    language: en
+    parallel_group_id: null
+    scope: cross-document
+    source_ids: ["10", "22"]
+    expected_sources:
+      - source_id: "10"
+        heading_path: "Dependency injection in ASP.NET Core > Entity Framework contexts"
+        slot: S1
+      - source_id: "22"
+        heading_path: "Querying Data > Loading a single entity"
+        slot: S2
+    acceptable_alternate_sources: []
+    objective: Combine the default DbContext lifetime (#10) with loading one entity (#22).
+    concepts: [DbContext lifetime, scoped, AddDbContext, SingleAsync]
+    cognitive_level: apply
+    difficulty: medium
+    size_class: mixed
+    retrieval_target: "#10 'Entity Framework contexts' (719 chars) + #22 'Loading a single entity' (161 chars)."
+    retrieval_challenges: [two_sources_needed, tiny_document]
+    evaluation_target:
+      capability: Retrieve both premises from different documents of very different size.
+      failure_mode: large_doc_outranks_small
+      why_it_matters: "#22's section is 161 chars (merged in Arm A, ADR-0003 D3); #10 is 43K."
+      expected_behavior: Both sources in the top 5; answer gives scoped + the SingleAsync query.
+      rationale: Each premise is stated independently in one document.
+    ground_truth:
+      answer_points:
+        - {id: P1, required: true, text: "By default, EF contexts are registered with the scoped lifetime, because web app database operations are normally scoped to the client request."}
+        - {id: P2, required: true, text: "Load one blog with `await context.Blogs.SingleAsync(b => b.BlogId == 1)`."}
+        - {id: P3, required: false, text: "A different lifetime can be set with an AddDbContext overload."}
+      evidence:
+        - source_id: "10"
+          heading_path: "Dependency injection in ASP.NET Core > Entity Framework contexts"
+          quote: "By default, Entity Framework contexts are added to the service container using the [scoped lifetime](#service-lifetimes) because web app database operations are normally scoped to the client request."
+          supports: [P1]
+        - source_id: "22"
+          heading_path: "Querying Data > Loading a single entity"
+          quote: ".SingleAsync(b => b.BlogId == 1);"
+          supports: [P2]
+    answer_acceptance_criteria:
+      acceptable_variations:
+        - Any context variable name.
+        - "Loading by key with FindAsync (the corpus shows `_context.TodoItems.FindAsync(id)` in #23 'Routing with special characters') instead of SingleAsync."
+      must_not_claim:
+        - DbContext is registered as singleton or transient by default.
+    citation_acceptance_criteria:
+      - One citation per premise; each from the matching document.
+    question_notes: Ask what lifetime the injected DbContext has and how to load the blog with id 1.
+    reason_for_inclusion: Cross-document case joining a huge-ish and a tiny doc.
+
+  - id: BP-EVAL-030
+    split: eval
+    status: proposed
+    language: vi
+    parallel_group_id: null
+    scope: cross-document
+    source_ids: ["03", "28"]
+    expected_sources:
+      - source_id: "03"
+        heading_path: "Unit testing best practices for .NET > Best practices > Follow test naming standards"
+        slot: S1
+      - source_id: "28"
+        heading_path: "Unit testing C# in .NET using dotnet test and xUnit > Create a test > Add more tests"
+        slot: S2
+    acceptable_alternate_sources: []
+    objective: Check the tutorial's test name (#28) against the naming standard (#03).
+    concepts: [test naming, method-scenario-expected behavior, xUnit Theory]
+    cognitive_level: analyze
+    difficulty: medium
+    size_class: medium
+    retrieval_target: "#03 'Follow test naming standards' + #28 'Add more tests'."
+    retrieval_challenges: [two_sources_needed, cross_source_overlap, cross_lingual]
+    evaluation_target:
+      capability: Combine a rule from one doc with an example from another.
+      failure_mode: none
+      why_it_matters: 'Three testing docs (#03, #17, #28) share vocabulary.'
+      expected_behavior: Both sources in the top 5; the answer maps the three name parts.
+      rationale: Each premise is stated independently; neither doc alone answers.
+    ground_truth:
+      answer_points:
+        - {id: P1, required: true, text: "A test name has three parts: the method being tested, the scenario, and the expected behavior."}
+        - {id: P2, required: true, text: "IsPrime_ValuesLessThan2_ReturnFalse follows it: IsPrime = method, ValuesLessThan2 = scenario, ReturnFalse = expected behavior."}
+        - {id: P3, required: false, text: "Good names document behavior and show which scenario fails."}
+      evidence:
+        - source_id: "03"
+          heading_path: "Unit testing best practices for .NET > Best practices > Follow test naming standards"
+          quote: "The name of your test should consist of three parts:"
+          supports: [P1]
+        - source_id: "03"
+          heading_path: "Unit testing best practices for .NET > Best practices > Follow test naming standards"
+          quote: "Name of the method being tested"
+          supports: [P1]
+        - source_id: "03"
+          heading_path: "Unit testing best practices for .NET > Best practices > Follow test naming standards"
+          quote: "Scenario under which the method is being tested"
+          supports: [P1]
+        - source_id: "03"
+          heading_path: "Unit testing best practices for .NET > Best practices > Follow test naming standards"
+          quote: "Expected behavior when the scenario is invoked"
+          supports: [P1]
+        - source_id: "28"
+          heading_path: "Unit testing C# in .NET using dotnet test and xUnit > Create a test > Add more tests"
+          quote: "public void IsPrime_ValuesLessThan2_ReturnFalse(int value)"
+          supports: [P2]
+    answer_acceptance_criteria:
+      acceptable_variations:
+        - The parts may be named "unit of work / state under test / expected behavior".
+      must_not_claim:
+        - The name is missing the expected-behavior part.
+    citation_acceptance_criteria:
+      - One citation per premise; each from the matching document.
+    question_notes: "Don't give the full test method name (with the name in the question, #03 alone answers it). Ask whether the name of the [Theory] test that the dotnet test + xUnit tutorial adds for several IsPrime inputs below 2 follows the unit-test naming standard, so #28 is needed to find the name. Say [Theory]: the tutorial's earlier [Fact] test IsPrime_InputIs1_ReturnFalse also uses an input below 2."
+    reason_for_inclusion: Cross-document analyze case, Vietnamese.
+
+  - id: BP-EVAL-031
+    split: eval
+    status: proposed
+    language: en
+    parallel_group_id: null
+    scope: cross-document
+    source_ids: ["04", "26"]
+    expected_sources:
+      - source_id: "04"
+        heading_path: "Built-in types and literals > `default` expressions"
+        slot: S1
+      - source_id: "26"
+        heading_path: "The C# type system > Value types and reference types"
+        slot: S2
+    acceptable_alternate_sources:
+      - source_id: "20"
+        heading_path: "A tour of the C# language > Familiar C# features"
+        slot: S2
+        note: States that string is a reference type ("reference types like `string`, arrays, and other collections").
+    objective: Explain the default value of a string from the kind of type string is.
+    concepts: [default expression, reference types, value types, string]
+    cognitive_level: analyze
+    difficulty: medium
+    size_class: medium
+    retrieval_target: "#04 '`default` expressions' + #26 'Value types and reference types'."
+    retrieval_challenges: [two_sources_needed, cross_source_overlap]
+    evaluation_target:
+      capability: Chain two facts from two type-system docs.
+      failure_mode: none
+      why_it_matters: "#04, #16, #20 and #26 overlap on types. #04 alone gives the value (`string? defaultString = default;   // null`); the why (string is a reference type) needs #26 or #20."
+      expected_behavior: Both sources in the top 5; the answer says null because string is a reference type.
+      rationale: Each premise is stated independently in one document.
+    ground_truth:
+      answer_points:
+        - {id: P1, required: true, text: "`default` produces null for a string, because string is a reference type and default is null for reference types."}
+        - {id: P2, required: false, text: "For value types default is a value, e.g. 0 for numeric types and false for bool."}
+        - {id: P3, required: false, text: "Classes, arrays, delegates and strings are reference types; structs, enums and built-in numeric types are value types."}
+      evidence:
+        - source_id: "04"
+          heading_path: "Built-in types and literals > `default` expressions"
+          quote: "The `default` expression produces the default value for a type: `0` for numeric types, `false` for `bool`, and `null` for reference types:"
+          supports: [P1, P2]
+        - source_id: "26"
+          heading_path: "The C# type system > Value types and reference types"
+          quote: "Classes, arrays, delegates, and strings are reference types."
+          supports: [P1]
+    answer_acceptance_criteria:
+      acceptable_variations:
+        - "\"string? s = default;\" shown as an example"
+      must_not_claim:
+        - default(string) is an empty string.
+    citation_acceptance_criteria:
+      - "One citation per slot: S1 from #04 '`default` expressions'; S2 from #26 'Value types and reference types' or #20 'Familiar C# features'."
+    question_notes: Ask what `string s = default;` holds and why.
+    reason_for_inclusion: Cross-document analyze case in the types cluster.
+
+  - id: BP-EVAL-032
+    split: eval
+    status: proposed
+    language: vi
+    parallel_group_id: null
+    scope: cross-document
+    source_ids: ["13", "10"]
+    expected_sources:
+      - source_id: "13"
+        heading_path: "Handle errors in ASP.NET Core > IExceptionHandler"
+        slot: S1
+      - source_id: "10"
+        heading_path: "Dependency injection in ASP.NET Core > Entity Framework contexts"
+        slot: S2
+    acceptable_alternate_sources: []
+    objective: Decide whether a custom IExceptionHandler should take the app's DbContext in its constructor, using both lifetimes.
+    concepts: [IExceptionHandler, singleton, DbContext, scoped, lifetime mismatch]
+    cognitive_level: analyze
+    difficulty: hard
+    size_class: mixed
+    retrieval_target: "#13 'IExceptionHandler' (any variant) + #10 'Entity Framework contexts'."
+    retrieval_challenges: [two_sources_needed, version_variants, cross_lingual]
+    evaluation_target:
+      capability: Combine a lifetime fact from a huge doc with a rule from a medium doc.
+      failure_mode: none
+      why_it_matters: Tests retrieval of two premises when one lives in a version-heavy doc.
+      expected_behavior: Both sources in the top 5; the answer says it shouldn't, and why.
+      rationale: The conclusion follows directly from two corpus statements; no outside fix is required.
+    ground_truth:
+      answer_points:
+        - {id: P1, required: true, text: "An IExceptionHandler instance has the singleton lifetime."}
+        - {id: P2, required: true, text: "EF contexts are registered as scoped by default."}
+        - {id: P3, required: true, text: "A service shouldn't use a database context whose lifetime is shorter than its own, so a singleton handler shouldn't take the scoped DbContext through its constructor."}
+      evidence:
+        - source_id: "13"
+          heading_path: "Handle errors in ASP.NET Core > IExceptionHandler"
+          quote: "The lifetime of an `IExceptionHandler` instance is singleton."
+          supports: [P1]
+        - source_id: "10"
+          heading_path: "Dependency injection in ASP.NET Core > Entity Framework contexts"
+          quote: "By default, Entity Framework contexts are added to the service container using the [scoped lifetime](#service-lifetimes) because web app database operations are normally scoped to the client request."
+          supports: [P2]
+        - source_id: "10"
+          heading_path: "Dependency injection in ASP.NET Core > Entity Framework contexts"
+          quote: "Services of a given lifetime shouldn't use a database context with a lifetime that's shorter than the service's lifetime."
+          supports: [P3]
+    answer_acceptance_criteria:
+      acceptable_variations:
+        - The answer may add that the corpus doesn't show a workaround.
+      must_not_claim:
+        - IExceptionHandler is scoped or transient.
+        - DbContext is a singleton by default.
+    citation_acceptance_criteria:
+      - One citation per premise; each from the matching document.
+    question_notes: Ask (in Vietnamese) whether injecting AppDbContext into a custom IExceptionHandler constructor is OK.
+    reason_for_inclusion: 'Hard cross-document analyze case. Shares the #10 section with BP-EVAL-029 on purpose (different premise used).'
+
+  # ---------------------------------------------------------------- corpus-insufficient (near-miss)
+  - id: BP-EVAL-033
+    split: eval
+    status: proposed
+    language: en
+    parallel_group_id: null
+    scope: corpus-insufficient
+    source_ids: []
+    expected_sources: []
+    acceptable_alternate_sources: []
+    near_miss_sources: ["22", "10"]
+    absence_proof: ABS-001
+    objective: Ask how to make an EF Core query not track the returned entities (read-only query).
+    concepts: [EF Core, change tracking, read-only queries]
+    cognitive_level: recall
+    difficulty: medium
+    size_class: none
+    retrieval_target: 'Nothing answers it; #22 (EF querying) and #10 (EF contexts) are topically close.'
+    retrieval_challenges: [near_miss_topic]
+    evaluation_target:
+      capability: Refuse when related but insufficient chunks are retrieved.
+      failure_mode: none
+      why_it_matters: "#22 talks about querying and the context, which invites a general-knowledge answer."
+      expected_behavior: "The assistant should explicitly state that the provided collection does not contain sufficient information."
+      rationale: Near-miss in the tiny EF Core doc's topic.
+    ground_truth:
+      answer_points: []
+      evidence: []
+    answer_acceptance_criteria:
+      acceptable_variations:
+        - The refusal may mention what the documents do cover (basic EF Core querying).
+      must_not_claim:
+        - Any API or option for turning off tracking (e.g. a no-tracking method), presented as from the documents.
+    citation_acceptance_criteria:
+      - No citation is required; any citation must not be presented as supporting an answer.
+    question_notes: Don't name the API in the question.
+    reason_for_inclusion: EF Core near-miss (EN).
+
+  - id: BP-EVAL-034
+    split: eval
+    status: proposed
+    language: vi
+    parallel_group_id: null
+    scope: corpus-insufficient
+    source_ids: []
+    expected_sources: []
+    acceptable_alternate_sources: []
+    near_miss_sources: ["11", "23", "10"]
+    absence_proof: ABS-002
+    objective: Ask how to add rate limiting (e.g. N requests per minute) to an ASP.NET Core endpoint.
+    concepts: [rate limiting, middleware, ASP.NET Core]
+    cognitive_level: apply
+    difficulty: medium
+    size_class: none
+    retrieval_target: Nothing answers it; middleware (#11), routing (#23) and DI (#10) are topically close.
+    retrieval_challenges: [near_miss_topic, cross_lingual]
+    evaluation_target:
+      capability: Refuse in Vietnamese when only related middleware content is retrieved.
+      failure_mode: none
+      why_it_matters: The corpus has lots of middleware and endpoint text, which invites a general-knowledge answer.
+      expected_behavior: "The assistant should explicitly state that the provided collection does not contain sufficient information."
+      rationale: Near-miss in the ASP.NET Core middleware topic.
+    ground_truth:
+      answer_points: []
+      evidence: []
+    answer_acceptance_criteria:
+      acceptable_variations:
+        - The refusal is written in Vietnamese.
+        - "Mentioning related content from the documents is fine if the refusal says the topic isn't covered and doesn't present that content as the answer (owner rule D2)."
+      must_not_claim:
+        - Any rate-limiting API, middleware name or policy option presented as from the documents.
+    citation_acceptance_criteria:
+      - No citation is required; any citation must not be presented as supporting an answer.
+    question_notes: Keep "rate limiting", "middleware", "endpoint" in English.
+    reason_for_inclusion: ASP.NET Core near-miss (VI).
+
+  - id: BP-EVAL-035
+    split: eval
+    status: proposed
+    language: en
+    parallel_group_id: null
+    scope: corpus-insufficient
+    source_ids: []
+    expected_sources: []
+    acceptable_alternate_sources: []
+    near_miss_sources: ["10"]
+    absence_proof: ABS-003
+    objective: Ask what ASP.NET Core scope validation checks and when it is on.
+    concepts: [scope validation, service lifetimes, dependency injection]
+    cognitive_level: explain
+    difficulty: hard
+    size_class: none
+    retrieval_target: "#10 'Scope validation' has the matching heading but only two links."
+    retrieval_challenges: [near_miss_topic, link_only_section]
+    evaluation_target:
+      capability: Refuse even though a chunk with the exact heading is retrieved.
+      failure_mode: link_list_noise
+      why_it_matters: A heading match with no content is the strongest temptation to answer from general knowledge.
+      expected_behavior: "The assistant should explicitly state that the provided collection does not contain sufficient information."
+      rationale: Link-only section (ADR-0003 link-list failure mode) used as a refusal test.
+    ground_truth:
+      answer_points: []
+      evidence: []
+    answer_acceptance_criteria:
+      acceptable_variations:
+        - The refusal may say the documents only link to other pages about it.
+      must_not_claim:
+        - What scope validation checks, which exception it throws, or in which environment it is enabled, presented as from the documents.
+    citation_acceptance_criteria:
+      - 'Citing the #10 ''Scope validation'' links as evidence for an answer = hallucination.'
+    question_notes: Ask directly; the heading words may appear in the question.
+    reason_for_inclusion: Hardest refusal case (EN).
+
+  - id: BP-EVAL-036
+    split: eval
+    status: proposed
+    language: vi
+    parallel_group_id: null
+    scope: corpus-insufficient
+    source_ids: []
+    expected_sources: []
+    acceptable_alternate_sources: []
+    near_miss_sources: ["03"]
+    absence_proof: ABS-004
+    objective: Ask how to verify with the Moq library that a mocked method was called exactly once.
+    concepts: [Moq, mocks, verification, unit testing]
+    cognitive_level: apply
+    difficulty: medium
+    size_class: none
+    retrieval_target: "Nothing answers it; #03 'Unit testing terminology' explains fakes/mocks/stubs without any library."
+    retrieval_challenges: [near_miss_topic, cross_lingual]
+    evaluation_target:
+      capability: Refuse when conceptual mock content is retrieved but the library API isn't there.
+      failure_mode: none
+      why_it_matters: "#03 discusses mocks, which invites a general-knowledge Moq answer."
+      expected_behavior: "The assistant should explicitly state that the provided collection does not contain sufficient information."
+      rationale: Near-miss in the testing topic.
+    ground_truth:
+      answer_points: []
+      evidence: []
+    answer_acceptance_criteria:
+      acceptable_variations:
+        - 'The refusal may say what #03 does show (creating a `Mock<T>` and stubbing a return value with `.Setup(...).Returns(...)` in ''Handle stub static references with seams''), as long as it says that verifying how often a method was called is not covered.'
+      must_not_claim:
+        - Any call-verification or call-count API (e.g. Verify, Times.Once) presented as from the documents.
+    citation_acceptance_criteria:
+      - 'Citing #03 (terminology or the seams example) as evidence for a call-verification API = hallucination.'
+    question_notes: Keep "Moq", "mock" in English.
+    reason_for_inclusion: Testing near-miss (VI).
+
+  # ---------------------------------------------------------------- dev set (tuning only; never reported)
+  - id: BP-DEV-001
+    split: dev
+    status: proposed
+    language: en
+    parallel_group_id: null
+    scope: single-source
+    source_ids: ["07"]
+    expected_sources:
+      - source_id: "07"
+        heading_path: "C# classes > Static classes"
+        slot: S1
+    acceptable_alternate_sources: []
+    objective: Recall what a static class is.
+    concepts: [static class, sealed]
+    cognitive_level: recall
+    difficulty: easy
+    size_class: medium
+    retrieval_target: "#07 'Static classes'."
+    retrieval_challenges: [direct_semantic]
+    evaluation_target:
+      capability: Prompt tuning on a plain factual case.
+      failure_mode: none
+      why_it_matters: Dev only.
+      expected_behavior: Correct, cited answer.
+      rationale: Dev set.
+    ground_truth:
+      answer_points:
+        - {id: P1, required: true, text: "A static class can't be instantiated and contains only static members."}
+        - {id: P2, required: true, text: "A static class is implicitly sealed, so you can't derive from it."}
+      evidence:
+        - source_id: "07"
+          heading_path: "C# classes > Static classes"
+          quote: "A `static` class can't be instantiated and contains only static members."
+          supports: [P1]
+        - source_id: "07"
+          heading_path: "C# classes > Static classes"
+          quote: "A static class is implicitly sealed. You can't derive from it or instantiate it."
+          supports: [P2]
+    answer_acceptance_criteria:
+      acceptable_variations: []
+      must_not_claim:
+        - Static classes can be inherited.
+    citation_acceptance_criteria:
+      - 'The cited chunk is from #07 ''Static classes''.'
+    question_notes: Dev set.
+    reason_for_inclusion: Dev set, EN answerable.
+
+  - id: BP-DEV-002
+    split: dev
+    status: proposed
+    language: vi
+    parallel_group_id: null
+    scope: single-source
+    source_ids: ["04"]
+    expected_sources:
+      - source_id: "04"
+        heading_path: "Built-in types and literals > Numeric types > Native-sized integers"
+        slot: S1
+    acceptable_alternate_sources:
+      - source_id: "16"
+        heading_path: "Integral numeric types (C# reference) > Characteristics of the integral types"
+        slot: S1
+        note: Supports P1 (32-bit in a 32-bit process, 64-bit in a 64-bit process) and names interop uses.
+      - source_id: "16"
+        heading_path: "Integral numeric types (C# reference) > Native sized integers"
+        slot: S1
+        note: Partial support for P1 (storage matches the natural integer size of the machine).
+    objective: Recall what nint and nuint are and when to use them.
+    concepts: [nint, nuint, native-sized integers, interop]
+    cognitive_level: recall
+    difficulty: easy
+    size_class: medium
+    retrieval_target: "#04 'Native-sized integers'."
+    retrieval_challenges: [cross_source_overlap, cross_lingual]
+    evaluation_target:
+      capability: Prompt tuning on a Vietnamese factual case.
+      failure_mode: none
+      why_it_matters: Dev only.
+      expected_behavior: Correct, cited answer in Vietnamese.
+      rationale: Dev set.
+    ground_truth:
+      answer_points:
+        - {id: P1, required: true, text: "nint and nuint are integers whose size matches the platform's native pointer size: 32 bits on a 32-bit platform, 64 bits on a 64-bit platform."}
+        - {id: P2, required: true, text: "They are for interop and low-level memory work; otherwise use int or long."}
+      evidence:
+        - source_id: "04"
+          heading_path: "Built-in types and literals > Numeric types > Native-sized integers"
+          quote: "The `nint` and `nuint` types represent integers whose size matches the platform's native pointer size: 32 bits on a 32-bit platform, 64 bits on a 64-bit platform:"
+          supports: [P1]
+        - source_id: "04"
+          heading_path: "Built-in types and literals > Numeric types > Native-sized integers"
+          quote: "Stick with `int` or `long` unless you have a specific reason to use native-sized types."
+          supports: [P2]
+    answer_acceptance_criteria:
+      acceptable_variations: []
+      must_not_claim:
+        - nint is always 64 bits.
+    citation_acceptance_criteria:
+      - "The cited chunk is from #04 'Native-sized integers', or from a listed #16 alternate for the point it states."
+    question_notes: Dev set.
+    reason_for_inclusion: Dev set, VI answerable.
+
+  - id: BP-DEV-003
+    split: dev
+    status: proposed
+    language: en
+    parallel_group_id: null
+    scope: single-source
+    source_ids: ["06"]
+    expected_sources:
+      - source_id: "06"
+        heading_path: "C# keywords > Contextual keywords"
+        slot: S1
+    acceptable_alternate_sources:
+      - source_id: "06"
+        heading_path: "C# keywords"
+        slot: S1
+        note: Supports P1 ("Contextual keywords have special meaning only in a limited program context and can be used as identifiers outside that context.").
+    objective: Explain what a contextual keyword is.
+    concepts: [contextual keywords, reserved words]
+    cognitive_level: explain
+    difficulty: easy
+    size_class: medium
+    retrieval_target: "#06 'Contextual keywords'."
+    retrieval_challenges: [direct_semantic]
+    evaluation_target:
+      capability: Prompt tuning on a definition case.
+      failure_mode: none
+      why_it_matters: Dev only.
+      expected_behavior: Correct, cited answer.
+      rationale: Dev set.
+    ground_truth:
+      answer_points:
+        - {id: P1, required: true, text: "A contextual keyword has a specific meaning in the code but isn't a reserved word in C#."}
+        - {id: P2, required: false, text: "Some, such as partial and where, have special meanings in two or more contexts."}
+      evidence:
+        - source_id: "06"
+          heading_path: "C# keywords > Contextual keywords"
+          quote: "A contextual keyword provides a specific meaning in the code, but it isn't a reserved word in C#."
+          supports: [P1]
+    answer_acceptance_criteria:
+      acceptable_variations: []
+      must_not_claim:
+        - Contextual keywords are reserved words.
+    citation_acceptance_criteria:
+      - 'The cited chunk is from #06 ''Contextual keywords'' or the #06 page introduction.'
+    question_notes: Dev set.
+    reason_for_inclusion: Dev set, EN answerable.
+
+  - id: BP-DEV-004
+    split: dev
+    status: proposed
+    language: vi
+    parallel_group_id: null
+    scope: single-source
+    source_ids: ["02"]
+    expected_sources:
+      - source_id: "02"
+        heading_path: "Asynchronous programming scenarios > Review considerations for asynchronous programming > Return 'async void' only from event handlers"
+        slot: S1
+    acceptable_alternate_sources: []
+    objective: Explain when async void is acceptable and why to avoid it elsewhere.
+    concepts: [async void, event handlers, exceptions]
+    cognitive_level: explain
+    difficulty: medium
+    size_class: medium
+    retrieval_target: "#02 H3 'Return 'async void' only from event handlers'."
+    retrieval_challenges: [subsection_evidence, cross_lingual]
+    evaluation_target:
+      capability: Prompt tuning on a Vietnamese explain case.
+      failure_mode: none
+      why_it_matters: Dev only.
+      expected_behavior: Correct, cited answer in Vietnamese.
+      rationale: Dev set.
+    ground_truth:
+      answer_points:
+        - {id: P1, required: true, text: "async void should only be used for event handlers, which must return void."}
+        - {id: P2, required: true, text: "Exceptions thrown in an async void method can't be caught outside that method; such methods are hard to test and can cause side effects if the caller doesn't expect them to be asynchronous."}
+      evidence:
+        - source_id: "02"
+          heading_path: "Asynchronous programming scenarios > Review considerations for asynchronous programming > Return 'async void' only from event handlers"
+          quote: "Exceptions thrown in an `async void` method can't be caught outside of that method"
+          supports: [P2]
+        - source_id: "02"
+          heading_path: "Asynchronous programming scenarios > Review considerations for asynchronous programming > Return 'async void' only from event handlers"
+          quote: "When you write asynchronous event handlers, you need to use the `async` modifier on a `void` returning method for the handlers."
+          supports: [P1]
+    answer_acceptance_criteria:
+      acceptable_variations: []
+      must_not_claim:
+        - async void is fine for any method.
+    citation_acceptance_criteria:
+      - The cited chunk is from the async void H3.
+    question_notes: Dev set.
+    reason_for_inclusion: Dev set, VI answerable.
+
+  - id: BP-DEV-005
+    split: dev
+    status: proposed
+    language: en
+    parallel_group_id: null
+    scope: corpus-insufficient
+    source_ids: []
+    expected_sources: []
+    acceptable_alternate_sources: []
+    near_miss_sources: ["15"]
+    absence_proof: ABS-005
+    objective: Ask how to issue and use refresh tokens with JWT authentication in ASP.NET Core.
+    concepts: [JWT, refresh tokens, authentication]
+    cognitive_level: apply
+    difficulty: medium
+    size_class: none
+    retrieval_target: "Nothing answers it; #15 covers JWT bearer setup only."
+    retrieval_challenges: [near_miss_topic]
+    evaluation_target:
+      capability: Tune the insufficient-information rule on a near-miss.
+      failure_mode: none
+      why_it_matters: Dev only.
+      expected_behavior: "The assistant should explicitly state that the provided collection does not contain sufficient information."
+      rationale: Dev set.
+    ground_truth:
+      answer_points: []
+      evidence: []
+    answer_acceptance_criteria:
+      acceptable_variations:
+        - "Mentioning related content from the documents is fine if the refusal says the topic isn't covered and doesn't present that content as the answer (owner rule D2)."
+      must_not_claim:
+        - Any refresh-token flow presented as from the documents.
+    citation_acceptance_criteria:
+      - No citation is required; any citation must not be presented as supporting an answer.
+    question_notes: Dev set.
+    reason_for_inclusion: Dev set, EN insufficient.
+
+  - id: BP-DEV-006
+    split: dev
+    status: proposed
+    language: vi
+    parallel_group_id: null
+    scope: corpus-insufficient
+    source_ids: []
+    expected_sources: []
+    acceptable_alternate_sources: []
+    near_miss_sources: ["12", "23"]
+    absence_proof: ABS-006
+    objective: Ask how to version a Web API (e.g. v1/v2) in ASP.NET Core.
+    concepts: [API versioning, Web API, routing]
+    cognitive_level: apply
+    difficulty: medium
+    size_class: none
+    retrieval_target: "Nothing answers it; #12 (APIs) and #23 (routing) are topically close."
+    retrieval_challenges: [near_miss_topic, cross_lingual]
+    evaluation_target:
+      capability: Tune the insufficient-information rule on a Vietnamese near-miss.
+      failure_mode: none
+      why_it_matters: Dev only.
+      expected_behavior: "The assistant should explicitly state that the provided collection does not contain sufficient information."
+      rationale: Dev set.
+    ground_truth:
+      answer_points: []
+      evidence: []
+    answer_acceptance_criteria:
+      acceptable_variations:
+        - 'The refusal may mention that #23 shows route groups (MapGroup) with a common prefix, as long as it says versioning itself is not covered.'
+      must_not_claim:
+        - Any API-versioning package or attribute presented as from the documents.
+        - MapGroup or a route prefix such as /v1 presented as the documents' way to version an API.
+    citation_acceptance_criteria:
+      - No citation is required; any citation must not be presented as supporting an answer.
+    question_notes: Dev set.
+    reason_for_inclusion: Dev set, VI insufficient.

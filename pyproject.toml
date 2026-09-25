@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "knowledge-assistant"
+version = "0.0.0"
+description = "Grounded Knowledge Assistant (RAG) over a curated document corpus"
+requires-python = ">=3.10"
+dependencies = [
+    "PySide6",
+    "chromadb>=1.4,<2.0",
+    "google-genai>=1.0,<2.0",
+    "python-dotenv>=1.0,<2.0",
+    "PyYAML>=6.0,<7.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-m 'not gemini'"
+markers = [
+    "gemini: requires a real Gemini API key and network access; excluded by default",
+]

@@ -1,0 +1,494 @@
+{
+  "description": "Accepted documents of the Knowledge Assistant corpus. Sources are read-only originals.",
+  "generated_by": "scripts/utilities/build_corpus_inventory.py",
+  "text_note": "chars, lines and sha256_lf use the file text with LF line endings (as stored in git). docs/snapshots/corpus/ holds SHA-256 of the original CRLF bytes.",
+  "section_inventory": "data/processed/documents/section-inventory.jsonl",
+  "counts": {
+    "original": 28,
+    "accepted": 24,
+    "excluded": 4
+  },
+  "never_existed_ids": [
+    "25"
+  ],
+  "excluded": [
+    {
+      "source_id": "14",
+      "file": "corpus/excluded/14-hello-world-introductory-tutorial-a-tour-of-c-microsoft-learn.md",
+      "reason": "Index page: links to other pages, no content useful to the assistant (stated by the project owner, 2026-09-24, OD-3)"
+    },
+    {
+      "source_id": "19",
+      "file": "corpus/excluded/19-order-unit-tests-net-microsoft-learn.md",
+      "reason": "Index page: links to other pages, no content useful to the assistant (stated by the project owner, 2026-09-24, OD-3)"
+    },
+    {
+      "source_id": "24",
+      "file": "corpus/excluded/24-sharing-services-added-with-dependencies-via-the-basic-view-microsoft-q-a.md",
+      "reason": "Index page: links to other pages, no content useful to the assistant (stated by the project owner, 2026-09-24, OD-3)"
+    },
+    {
+      "source_id": "27",
+      "file": "corpus/excluded/27-understanding-the-routing-mechanism-in-asp-net-core-multicode.md",
+      "reason": "Index page: links to other pages, no content useful to the assistant (stated by the project owner, 2026-09-24, OD-3)"
+    }
+  ],
+  "documents": [
+    {
+      "source_id": "01",
+      "file": "corpus/sources/01-asynchronous-programming-c-microsoft-learn.md",
+      "title": "Asynchronous programming with async and await",
+      "wrapper_title": "Asynchronous programming - C# | Microsoft Learn",
+      "source_url": "https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/",
+      "chars": 34379,
+      "lines": 647,
+      "sha256_lf": "a559784cb65f2551b5bd64f02deb50b7c22e8a234150ecca6006c003232337fd",
+      "preamble_chars": 326,
+      "headings": {
+        "h2": 8,
+        "h3": 4,
+        "h4_plus": 0
+      },
+      "sections": 13,
+      "distinct_heading_paths": 13,
+      "max_heading_path_repeats": 1
+    },
+    {
+      "source_id": "02",
+      "file": "corpus/sources/02-asynchronous-programming-scenarios-c-microsoft-learn.md",
+      "title": "Asynchronous programming scenarios",
+      "wrapper_title": "Asynchronous programming scenarios - C# | Microsoft Learn",
+      "source_url": "https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/async-scenarios",
+      "chars": 29225,
+      "lines": 610,
+      "sha256_lf": "174318b6ac8c7c8d4ae685f051189093f2de6b3b4d0720a1612c8180cf4ab178",
+      "preamble_chars": 351,
+      "headings": {
+        "h2": 7,
+        "h3": 14,
+        "h4_plus": 4
+      },
+      "sections": 22,
+      "distinct_heading_paths": 22,
+      "max_heading_path_repeats": 1
+    },
+    {
+      "source_id": "03",
+      "file": "corpus/sources/03-best-practices-for-writing-unit-tests-net-microsoft-learn.md",
+      "title": "Unit testing best practices for .NET",
+      "wrapper_title": "Best practices for writing unit tests - .NET - Microsoft Learn",
+      "source_url": "https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-best-practices",
+      "chars": 22597,
+      "lines": 574,
+      "sha256_lf": "484e9066c469467e36b844153f3556d2aefe5d44b1c1da5e42dc0b97f6ff2ef1",
+      "preamble_chars": 349,
+      "headings": {
+        "h2": 7,
+        "h3": 14,
+        "h4_plus": 0
+      },
+      "sections": 22,
+      "distinct_heading_paths": 22,
+      "max_heading_path_repeats": 1
+    },
+    {
+      "source_id": "04",
+      "file": "corpus/sources/04-built-in-types-and-literals-c-microsoft-learn.md",
+      "title": "Built-in types and literals",
+      "wrapper_title": "Built-in types and literals - C# | Microsoft Learn",
+      "source_url": "https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/built-in-types",
+      "chars": 10857,
+      "lines": 222,
+      "sha256_lf": "7a094c11a67e830c3d6a0f74017e46f86c7f0881a2b93a0bc3555c729cfcb3aa",
+      "preamble_chars": 337,
+      "headings": {
+        "h2": 9,
+        "h3": 5,
+        "h4_plus": 0
+      },
+      "sections": 15,
+      "distinct_heading_paths": 15,
+      "max_heading_path_repeats": 1
+    },
+    {
+      "source_id": "05",
+      "file": "corpus/sources/05-c-guide-net-managed-language-microsoft-learn.md",
+      "title": "C# language documentation",
+      "wrapper_title": "C# Guide - .NET managed language - Microsoft Learn",
+      "source_url": "https://learn.microsoft.com/en-us/dotnet/csharp/",
+      "chars": 7822,
+      "lines": 211,
+      "sha256_lf": "9c110e00fbef167da915808e423dce4e132f146d0061d5629ef23a1986803cd4",
+      "preamble_chars": 116,
+      "headings": {
+        "h2": 5,
+        "h3": 13,
+        "h4_plus": 0
+      },
+      "sections": 19,
+      "distinct_heading_paths": 18,
+      "max_heading_path_repeats": 2
+    },
+    {
+      "source_id": "06",
+      "file": "corpus/sources/06-c-keywords-and-contextual-keywords-c-reference-microsoft-learn.md",
+      "title": "C# keywords",
+      "wrapper_title": "C# Keywords and contextual keywords - C# reference - Microsoft Learn",
+      "source_url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/",
+      "chars": 7016,
+      "lines": 177,
+      "sha256_lf": "c12cf5ab930484ec9f8866189e456008489f1906db87798d199804ea3ea28f04",
+      "preamble_chars": 350,
+      "headings": {
+        "h2": 2,
+        "h3": 0,
+        "h4_plus": 0
+      },
+      "sections": 3,
+      "distinct_heading_paths": 3,
+      "max_heading_path_repeats": 1
+    },
+    {
+      "source_id": "07",
+      "file": "corpus/sources/07-c-classes-microsoft-learn.md",
+      "title": "C# classes",
+      "wrapper_title": "C# classes - Microsoft Learn",
+      "source_url": "https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/classes",
+      "chars": 8163,
+      "lines": 200,
+      "sha256_lf": "8c27b604f6ac4470c210986df7db31fe13913ae83ecba82fbbf2b25245354358",
+      "preamble_chars": 308,
+      "headings": {
+        "h2": 9,
+        "h3": 0,
+        "h4_plus": 0
+      },
+      "sections": 10,
+      "distinct_heading_paths": 10,
+      "max_heading_path_repeats": 1
+    },
+    {
+      "source_id": "08",
+      "file": "corpus/sources/08-c-docs-get-started-tutorials-reference-a-tour-of-c-microsoft-learn.md",
+      "title": "C# documentation",
+      "wrapper_title": "C# docs - get started, tutorials, reference. - A tour of C# | Microsoft Learn",
+      "source_url": "https://learn.microsoft.com/en-us/dotnet/csharp/tour-of-csharp/",
+      "chars": 3433,
+      "lines": 112,
+      "sha256_lf": "ab2cf659dd4e8344f732faee4033ff4814593222ffa2086dd16935ef74cefc75",
+      "preamble_chars": 158,
+      "headings": {
+        "h2": 6,
+        "h3": 14,
+        "h4_plus": 0
+      },
+      "sections": 21,
+      "distinct_heading_paths": 21,
+      "max_heading_path_repeats": 1
+    },
+    {
+      "source_id": "09",
+      "file": "corpus/sources/09-c-language-reference-microsoft-learn.md",
+      "title": "C# language reference",
+      "wrapper_title": "C# language reference - Microsoft Learn",
+      "source_url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/",
+      "chars": 1126,
+      "lines": 44,
+      "sha256_lf": "7c88139c9ea318fe00aa1e8ba60b42f589cb04b9974f4c7fb33477e16ebb58c8",
+      "preamble_chars": 124,
+      "headings": {
+        "h2": 3,
+        "h3": 5,
+        "h4_plus": 0
+      },
+      "sections": 9,
+      "distinct_heading_paths": 9,
+      "max_heading_path_repeats": 1
+    },
+    {
+      "source_id": "10",
+      "file": "corpus/sources/10-dependency-injection-in-asp-net-core-microsoft-learn.md",
+      "title": "Dependency injection in ASP.NET Core",
+      "wrapper_title": "Dependency injection in ASP.NET Core | Microsoft Learn",
+      "source_url": "https://learn.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-10.0",
+      "chars": 43644,
+      "lines": 1030,
+      "sha256_lf": "f7eb3d6e36b07424b50954e8923544d3546af4fb8b26565447a7e56d2dda1fb4",
+      "preamble_chars": 360,
+      "headings": {
+        "h2": 19,
+        "h3": 3,
+        "h4_plus": 0
+      },
+      "sections": 23,
+      "distinct_heading_paths": 22,
+      "max_heading_path_repeats": 2
+    },
+    {
+      "source_id": "11",
+      "file": "corpus/sources/11-factory-based-middleware-activation-in-asp-net-core-microsoft-learn.md",
+      "title": "Factory-based middleware activation in ASP.NET Core",
+      "wrapper_title": "Factory-based middleware activation in ASP.NET Core - Microsoft Learn",
+      "source_url": "https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/extensibility?view=aspnetcore-10.0",
+      "chars": 18251,
+      "lines": 483,
+      "sha256_lf": "6b6934d160fbea5fd12bb63beb5f116612ad83a93f50c514533b6bc1bee9eb7f",
+      "preamble_chars": 379,
+      "headings": {
+        "h2": 10,
+        "h3": 0,
+        "h4_plus": 0
+      },
+      "sections": 11,
+      "distinct_heading_paths": 4,
+      "max_heading_path_repeats": 4
+    },
+    {
+      "source_id": "12",
+      "file": "corpus/sources/12-handle-errors-in-asp-net-core-apis-microsoft-learn.md",
+      "title": "Handle errors in ASP.NET Core APIs",
+      "wrapper_title": "Handle errors in ASP.NET Core APIs - Microsoft Learn",
+      "source_url": "https://learn.microsoft.com/en-us/aspnet/core/fundamentals/error-handling-api?view=aspnetcore-10.0",
+      "chars": 26341,
+      "lines": 622,
+      "sha256_lf": "adefc338903656832c0a31f95599b2e3f513f64664024f04320c3806cfe3a35e",
+      "preamble_chars": 356,
+      "headings": {
+        "h2": 7,
+        "h3": 9,
+        "h4_plus": 1
+      },
+      "sections": 17,
+      "distinct_heading_paths": 16,
+      "max_heading_path_repeats": 2
+    },
+    {
+      "source_id": "13",
+      "file": "corpus/sources/13-handle-errors-in-asp-net-core-microsoft-learn.md",
+      "title": "Handle errors in ASP.NET Core",
+      "wrapper_title": "Handle errors in ASP.NET Core | Microsoft Learn",
+      "source_url": "https://learn.microsoft.com/en-us/aspnet/core/fundamentals/error-handling?view=aspnetcore-10.0",
+      "chars": 238805,
+      "lines": 5190,
+      "sha256_lf": "af72c17c0db89daa94fa2a1fae182f1c9e746c48e16bfd07b8de6b99d54fdd5c",
+      "preamble_chars": 347,
+      "headings": {
+        "h2": 100,
+        "h3": 46,
+        "h4_plus": 12
+      },
+      "sections": 147,
+      "distinct_heading_paths": 30,
+      "max_heading_path_repeats": 8
+    },
+    {
+      "source_id": "15",
+      "file": "corpus/sources/15-how-to-create-backend-application-using-asp-net-c-web-api-core-microsoft-learn.md",
+      "title": "How to create backend application using Asp.net C# Web API Core",
+      "wrapper_title": "How to create backend application using Asp.net C# Web API Core - Microsoft Learn",
+      "source_url": "https://learn.microsoft.com/en-gb/answers/questions/1679916/how-to-create-backend-application-using-asp-net-c",
+      "chars": 17550,
+      "lines": 432,
+      "sha256_lf": "c305d49114823e1c580d123f9d3424ad8c314579fb30ff62668ffea23a3be9f7",
+      "preamble_chars": 208,
+      "headings": {
+        "h2": 2,
+        "h3": 0,
+        "h4_plus": 0
+      },
+      "sections": 3,
+      "distinct_heading_paths": 3,
+      "max_heading_path_repeats": 1
+    },
+    {
+      "source_id": "16",
+      "file": "corpus/sources/16-integral-numeric-types-c-reference-microsoft-learn.md",
+      "title": "Integral numeric types (C# reference)",
+      "wrapper_title": "Integral numeric types (C# reference) - Microsoft Learn",
+      "source_url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/integral-numeric-types",
+      "chars": 10828,
+      "lines": 191,
+      "sha256_lf": "2e2fde69dcbeda1aee5bb40ecf86c1566ef2b4706ebdf17f168fb6621eec06c8",
+      "preamble_chars": 364,
+      "headings": {
+        "h2": 7,
+        "h3": 0,
+        "h4_plus": 0
+      },
+      "sections": 8,
+      "distinct_heading_paths": 8,
+      "max_heading_path_repeats": 1
+    },
+    {
+      "source_id": "17",
+      "file": "corpus/sources/17-integration-tests-in-asp-net-core-microsoft-learn.md",
+      "title": "Integration tests in ASP.NET Core",
+      "wrapper_title": "Integration tests in ASP.NET Core | Microsoft Learn",
+      "source_url": "https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-10.0",
+      "chars": 258392,
+      "lines": 5153,
+      "sha256_lf": "bacf75d666615dcf8669a370dfa6de4cfebbd5753b59a9724eef46690b6d8bcb",
+      "preamble_chars": 346,
+      "headings": {
+        "h2": 86,
+        "h3": 14,
+        "h4_plus": 0
+      },
+      "sections": 101,
+      "distinct_heading_paths": 22,
+      "max_heading_path_repeats": 6
+    },
+    {
+      "source_id": "18",
+      "file": "corpus/sources/18-introduction-c-language-specification-microsoft-learn.md",
+      "title": "Introduction",
+      "wrapper_title": "Introduction - C# language specification | Microsoft Learn",
+      "source_url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/introduction",
+      "chars": 2846,
+      "lines": 43,
+      "sha256_lf": "0661d8949b79c260d2f1a18f2b0bc82d58814e4b6c054810fce3f9b572e4a843",
+      "preamble_chars": 366,
+      "headings": {
+        "h2": 1,
+        "h3": 0,
+        "h4_plus": 0
+      },
+      "sections": 2,
+      "distinct_heading_paths": 2,
+      "max_heading_path_repeats": 1
+    },
+    {
+      "source_id": "20",
+      "file": "corpus/sources/20-overview-a-tour-of-c-microsoft-learn.md",
+      "title": "A tour of the C# language",
+      "wrapper_title": "Overview - A tour of C# | Microsoft Learn",
+      "source_url": "https://learn.microsoft.com/en-us/dotnet/csharp/tour-of-csharp/overview",
+      "chars": 16975,
+      "lines": 250,
+      "sha256_lf": "03199e8efeec5ee742ebf5f33a084efb30d439cd3918691a3904a5658b9b8ccb",
+      "preamble_chars": 318,
+      "headings": {
+        "h2": 6,
+        "h3": 0,
+        "h4_plus": 0
+      },
+      "sections": 7,
+      "distinct_heading_paths": 7,
+      "max_heading_path_repeats": 1
+    },
+    {
+      "source_id": "21",
+      "file": "corpus/sources/21-pattern-matching-using-the-is-and-switch-expressions-c-reference-microsoft-learn.md",
+      "title": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns",
+      "wrapper_title": "Pattern matching using the is and switch expressions. - C# reference - Microsoft Learn",
+      "source_url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/patterns",
+      "chars": 37307,
+      "lines": 835,
+      "sha256_lf": "1b032b3024eff6f4d77e52d4e5c67f33c5e1cd93236adcba39925a6dc8804eb1",
+      "preamble_chars": 377,
+      "headings": {
+        "h2": 15,
+        "h3": 2,
+        "h4_plus": 0
+      },
+      "sections": 18,
+      "distinct_heading_paths": 18,
+      "max_heading_path_repeats": 1
+    },
+    {
+      "source_id": "22",
+      "file": "corpus/sources/22-querying-data-ef-core-microsoft-learn.md",
+      "title": "Querying Data",
+      "wrapper_title": "Querying Data - EF Core - Microsoft Learn",
+      "source_url": "https://learn.microsoft.com/en-us/ef/core/querying/",
+      "chars": 1945,
+      "lines": 68,
+      "sha256_lf": "02dcc35971ab1c93a9045e6476c1d392c6366b684a8cabbd671828860230e9a8",
+      "preamble_chars": 298,
+      "headings": {
+        "h2": 5,
+        "h3": 0,
+        "h4_plus": 0
+      },
+      "sections": 6,
+      "distinct_heading_paths": 6,
+      "max_heading_path_repeats": 1
+    },
+    {
+      "source_id": "23",
+      "file": "corpus/sources/23-routing-in-asp-net-core-microsoft-learn.md",
+      "title": "Routing in ASP.NET Core",
+      "wrapper_title": "Routing in ASP.NET Core | Microsoft Learn",
+      "source_url": "https://learn.microsoft.com/en-us/aspnet/core/fundamentals/routing?view=aspnetcore-10.0",
+      "chars": 381188,
+      "lines": 6517,
+      "sha256_lf": "d47b98a4d8c737c71ff1d1273e3bd842d86dc9af769129ffd420fc0369c0c9b6",
+      "preamble_chars": 334,
+      "headings": {
+        "h2": 57,
+        "h3": 81,
+        "h4_plus": 6
+      },
+      "sections": 139,
+      "distinct_heading_paths": 47,
+      "max_heading_path_repeats": 4
+    },
+    {
+      "source_id": "26",
+      "file": "corpus/sources/26-the-c-type-system-microsoft-learn.md",
+      "title": "The C# type system",
+      "wrapper_title": "The C# type system - Microsoft Learn",
+      "source_url": "https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/",
+      "chars": 8410,
+      "lines": 161,
+      "sha256_lf": "15f5612dd0512de7cc9fdab0feda497ad91a0a441197877757b872310964cf06",
+      "preamble_chars": 309,
+      "headings": {
+        "h2": 8,
+        "h3": 0,
+        "h4_plus": 0
+      },
+      "sections": 9,
+      "distinct_heading_paths": 9,
+      "max_heading_path_repeats": 1
+    },
+    {
+      "source_id": "28",
+      "file": "corpus/sources/28-unit-testing-c-code-in-net-using-dotnet-test-and-xunit-net-microsoft-learn.md",
+      "title": "Unit testing C# in .NET using dotnet test and xUnit",
+      "wrapper_title": "Unit testing C# code in .NET using dotnet test and xUnit - .NET - Microsoft Learn",
+      "source_url": "https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-csharp-with-xunit",
+      "chars": 9101,
+      "lines": 253,
+      "sha256_lf": "66dbed0f49958cfacce98e2cfbb9a7fb41bee7cd60ce9b297b7108962d45bdab",
+      "preamble_chars": 371,
+      "headings": {
+        "h2": 3,
+        "h3": 3,
+        "h4_plus": 0
+      },
+      "sections": 7,
+      "distinct_heading_paths": 7,
+      "max_heading_path_repeats": 1
+    },
+    {
+      "source_id": "29",
+      "file": "corpus/sources/29-asp0033-md-aspnetcore-docs-github.md",
+      "title": "ASP0033: `[ValidatableType]` is applied to an inaccessible type",
+      "wrapper_title": "asp0033.md - AspNetCore.Docs - GitHub",
+      "source_url": "https://github.com/dotnet/AspNetCore.Docs/blob/main/aspnetcore/diagnostics/asp0033.md",
+      "chars": 1728,
+      "lines": 57,
+      "sha256_lf": "e3892fc0fa11b36fe0950a4dfde8dbca0ca4096c5e6ccf20b19039cfb0bca954",
+      "preamble_chars": 444,
+      "headings": {
+        "h2": 3,
+        "h3": 0,
+        "h4_plus": 0
+      },
+      "sections": 4,
+      "distinct_heading_paths": 4,
+      "max_heading_path_repeats": 1
+    }
+  ]
+}
