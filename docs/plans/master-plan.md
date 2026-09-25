@@ -170,7 +170,7 @@ Two stages, because the questions must be frozen before indexing, but scoring ne
 
 **Stage A — evaluation dataset.** **When:** Thu 24 – Fri 25 Sep · **Phase:** 1 · **Tasks:**
 - **EVAL-001 Design evaluation dataset** (`01` + the full prompt in `docs/prompt-log/claude-code/`): the design only. Question mix (OD-4), coverage plan, answer rubric and "result" values (OD-5). No final questions yet.
-- **EVAL-002 Write and freeze the dataset** (`02`): write the ≥ 30 questions + ground truth following the EVAL-001 design, then commit (M1).
+- **EVAL-002 Write and freeze the dataset** (`02`): write the ≥ 30 questions + ground truth following the EVAL-001 design, then commit (M1). *Status 2026-09-25: questions, validator and review sheet done (branch `eval-002`); waiting for the owner's review of `docs/reviews/evaluation/eval-v1-review.md`, then the owner tags `eval-freeze-v1`. M1 not reached.*
 
 Deliverables:
 - EVAL-001: dataset design. Coverage must include small docs (#09, #18, #22, #29) as well as #13/#17/#23 and both languages. Any "not in the documents" questions must never be built from excluded docs (CLAUDE.md rule 4). The owner's OD-4 mix and OD-5 result labels are written into `docs/specs/evaluation-spec.md`; other metric details are recorded there as *proposed* for EVAL-003b (the EVAL-001 prompt says to propose, not decide, metrics).
@@ -179,7 +179,7 @@ Deliverables:
 - EVAL-002: offline schema test for the question file.
 
 Exit gate **G5A = M1 ground truth frozen**:
-- [ ] ≥ 30 cases; schema test passes (every source_id is accepted, every heading path exists in the EPIC-01 inventory, no excluded doc referenced).
+- [x] ≥ 30 cases; schema test passes (every source_id is accepted, every heading path exists in the EPIC-01 inventory, no excluded doc referenced). *(EVAL-002 draft 2026-09-25: 36 eval + 6 dev, `validate_questions.py` OK, `test_eval_dataset.py`; not frozen yet.)*
 - [ ] File **committed to git before any ChromaDB index is built** — the commit time is the proof.
 - [ ] After the freeze, any change is a logged amendment (what, why, date), never a quiet edit.
 
