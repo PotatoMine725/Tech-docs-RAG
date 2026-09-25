@@ -11,7 +11,8 @@ Point-in-time note. The owner authorized this session to run the next prompts, v
    - **Dependency** `markitdown[pdf,docx]>=0.1.8,<0.2` added to `pyproject.toml` and `requirements.txt`. Its `onnxruntime` need is already required by `chromadb`, so the app gets no new ML runtime.
 3. **Your Windows venv:** run `.venv\Scripts\pip install -r requirements.txt`. Until you do, the new MarkItDown tests fail with `ModuleNotFoundError`. V-2 (MarkItDown on Python 3.13) was checked on Linux 3.13.12, not on your 3.13.3.
 4. **PR to `dev`:** see "Git" below. It is not merged into `main` (your call, CLAUDE.md rule 11).
-5. **Optional reviewer notes** (non-blocking, from the verifiers): EVAL-001 case 022 has no test guarding its two slots; the re-check sheet does not ask about splitting case 017's slot; 19 heading-only Arm A chunks (INGEST-002, needs an ADR-0003 amendment to change).
+5. **Left open on purpose (AI decision):** re-verify note N1: calling the converters directly skips MarkItDown's post-clean-up (trailing spaces per line, 3+ newlines collapsed; a PDF ends with a form-feed line). Chunk offsets stay exact and the corpus is unaffected. It is **not fixed**, because a fix would need another verify cycle for a format no evaluation uses. Do it before any converted format goes into evaluation, together with the spec's per-format spot-check (which also covers N2: binary content in a `.txt` is read as text).
+6. **Optional reviewer notes** (non-blocking, from the verifiers): EVAL-001 case 022 has no test guarding its two slots; the re-check sheet does not ask about splitting case 017's slot; 19 heading-only Arm A chunks (INGEST-002, needs an ADR-0003 amendment to change).
 
 ## What ran
 | Step | Result |
@@ -21,7 +22,7 @@ Point-in-time note. The owner authorized this session to run the next prompts, v
 | INGEST-003 (this session) | MarkItDown adapter, V-2, OD-6. [Report](../reports/execution/INGEST-003.md). Run because the project is not behind schedule, so OD-15 (cut) did not apply. |
 | INGEST-003 verify (sub-agent) | [INGEST-003-verify](../reviews/code/INGEST-003-verify.md) → **ACCEPT WITH FIXES** (3 FAIL: silent drop of empty conversions, incomplete signature check, non-hermetic lazy-import test). |
 | INGEST-003 fixes (this session) | All 6 fixes applied, each proven by a mutation; 113 tests pass (Python 3.13 and 3.11); corpus outputs byte-identical; G2 11/11. |
-| INGEST-003 re-verify (sub-agent) | _see Git / ledger row 05_ |
+| INGEST-003 re-verify (sub-agent) | [INGEST-003-reverify](../reviews/code/INGEST-003-reverify.md) → **ACCEPT** (0 FAIL, 1 UNVERIFIED: V-2 on your Windows venv). Ledger → `verified`. EPIC-02 tasks all verified. |
 
 Not run, and why:
 - **EVAL-002** is blocked by item 1 above.
@@ -30,4 +31,5 @@ Not run, and why:
 
 ## Git
 - Work branch: `claude/workflows-ingest-002-review-svn2dq` (from `dev` `443582a`), pushed. It contains the EVAL-001 re-verify, INGEST-003, its verify, its fixes and the re-verify.
+- A PR into `dev` was opened for this branch. It is not merged: merging is left to you, since no CI or review has run on it.
 - Local-only helpers (git-excluded, not committed): `.venv313/` (Python 3.13 venv), `.gitnexus/`.
