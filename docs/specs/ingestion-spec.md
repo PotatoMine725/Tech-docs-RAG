@@ -35,7 +35,8 @@ Status: decisions accepted (ADR-0002, ADR-0003). Parsing (Markdown) and normaliz
 - `display_text` is always the exact slice `normalized_text[char_start:char_end]` (leading/trailing whitespace trimmed), for both arms.
 - **Table split (owner decision 2026-09-25):** when a table longer than 1,600 chars is split by rows, the header row (+ separator row) is repeated in `embed_text` only, not in `display_text`, so the slice rule above holds for every chunk.
 - Interpretations of ADR-0003 (no parameter changed):
-  - D3 merge: a section under 400 chars merges with the *immediately following* section only if it is a sibling (same parent heading path and level) and the merged text is at most 1,600 chars; repeated while still under 400. A parent section followed by its own child never merges, so an H2 directly followed by H3s becomes a heading-only chunk (19 in Arm A).
+  - D3 merge: a section under 400 chars merges with the *immediately following* section only if it is a sibling (same parent heading path and level) and the merged text is at most 1,600 chars; repeated while still under 400. A parent section followed by its own child never merges, so an H2 directly followed by H3s becomes a heading-only chunk (19 in Arm A under INGEST-002). Since INGEST-004 these are dropped: see D3a below.
+  - **D3a (ADR-0003 amendment, owner 2026-09-25):** Arm A drops a chunk whose text is empty after removing heading lines (outside code fences) and blank lines, before IDs are numbered. The switch is `drop_heading_only` in `config/chunking.json`, on Arm A only. Arm B is unchanged.
   - D4 split: blocks = paragraphs, fenced code, tables, heading lines. Blocks up to 1,600 chars are never cut. A longer block is cut into sub-blocks of at most 1,400 chars (max − overlap) — code by lines, tables by rows, paragraphs by sentences, then at a space. A heading at the end of a piece moves to the next piece.
   - D4 overlap: up to 200 chars from the end of the previous piece of the same section, reduced so the piece stays ≤ 1,600; it starts at a word boundary, at a row start inside a table, and never inside a code fence.
   - D5: `embed_text` = heading path joined with " > " + blank line + chunk text with `[text](url)` / `![alt](url)` → `text` outside code fences.
@@ -46,5 +47,5 @@ Status: decisions accepted (ADR-0002, ADR-0003). Parsing (Markdown) and normaliz
 Embedding provider, vector store schema, retrieval (see retrieval-spec).
 
 ## Open
-- Heading-only / small Arm A chunks (19 heading-only, 79 under 400 chars): keep as ADR-0003 D3 says, or amend D3 to let a small parent merge into its first child. Needs an owner decision + ADR amendment; not changed by INGEST-002.
+- ~~Heading-only / small Arm A chunks~~: **resolved 2026-09-25 by ADR-0003 D3a** (owner). The heading-only chunks are dropped. Small chunks (60 under 400 chars after INGEST-004) are kept as D3 says.
 - Otherwise none for chunking. Query language = English + Vietnamese (ADR-0003 D9); it does not change chunking rules.

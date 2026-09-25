@@ -169,6 +169,14 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 - *Human decision:* all re-check verdicts, the 017 slot split, the strict + lenient reporting condition, and acceptance of OD-6 / D1-skip / per-format converters / `markitdown[pdf,docx]` (owner, 2026-09-25). Left open: which hit value is the headline number.
 - *Verifier findings* (99-VERIFY, 2026-09-25, Windows 3.13.3, [OWNER-001-verify](docs/reviews/evaluation/OWNER-001-verify.md) → ACCEPT): no defect in the owner's decisions as applied (parsed-YAML diff: only 016/017/024 changed; all quotes verbatim under their headings; new slot test fails on 4/4 mutations; 114 passed). Stale text: the line above ("Left open: which hit value is the headline number") was not updated when the owner decided it in `7aeb783`: headline = lenient, strict alongside (`evaluation-spec.md` § Retrieval hit rule). Unverified: the report's `detect_changes` result for the OWNER-001 range (the CLI reads the indexed main checkout, which is on `dev`). Observation: 017's #10 "Service lifetimes" alternate note still says "P1 and P2" although it now sits in slot S2 (P1).
 
+### 2026-09-25 INGEST-004 (branch `ingest-004`, PR into `dev`)
+- *AI did:* wrote the ADR-0003 **D3a** amendment and put it behind `drop_heading_only` in `config/chunking.json` (Arm A only). Before changing code, it measured the exact rule on the committed file: 19 chunks, the same set as the old stat. It rebuilt both arms: Arm A 752 → 733, Arm B byte-identical by SHA-256. It re-ran G2 (11/11) and wrote a re-runnable blueprint coverage check: all 54 expected/alternate sections keep ≥ 1 Arm A chunk, and the counts are identical to before D3a. It added 6 tests; 120 pass on Windows 3.13.3 ([report](docs/reports/execution/INGEST-004.md)).
+- *AI got wrong:*
+  - (1) The first fence test could not fail. A whole fenced block always contains its ``` lines, so a detector that ignores fences also passed it. Found by a mutation (fence-unaware detector → 0 failures). Fixed with a test where an oversized code block is split so that one piece holds only `# …` comment lines. The first version of that test still passed under the mutation because the piece kept one `echo` line; the block was made longer, and now the mutation fails it.
+  - (2) A shell heredoc mangled `\n` escapes while the test file was edited. That caused a SyntaxError at collection. The file was restored with `git checkout` and the edits were redone with the Edit tool.
+  - (3) The first draft of the INGEST-002 addendum gave the size range of the dropped chunks as "13–40 chars" without measuring it. It was checked before the commit (13–24) and corrected.
+- *Human decision:* D3a itself: drop heading-only Arm A chunks, decided 2026-09-25 before any index or result (owner).
+
 ## Summary: how AI helped
 
 To be filled at QC-001.

@@ -85,3 +85,27 @@ All 11 checks pass (`validation/ingestion/g2-check.md`): two fresh runs = commit
 7. The chunk file stores `heading_path` as the " > "-joined string (no heading contains " > "; checked over the 636 inventory rows).
 8. Extra stats beyond the prompt: `chunks_under_small_chunk_chars`, `heading_only_chunks`, per-document duplicates.
 9. Chunk files are committed (like `normalized.jsonl`); a test checks they equal a fresh run.
+
+## Addendum 2026-09-25: INGEST-004 (ADR-0003 D3a, heading-only chunks dropped)
+The tables above stay as INGEST-002 produced them. Deviation 2 (19 heading-only Arm A chunks, open for the owner) was decided by the owner on 2026-09-25. The decision, ADR-0003 **D3a**, was made before any index or result existed. Under D3a, Arm A drops chunks whose text is empty after removing heading lines. Details: [INGEST-004 report](INGEST-004.md).
+
+Arm A before → after (`data/processed/chunks/stats-arm-a.json`):
+
+| Stat | INGEST-002 | INGEST-004 | Why |
+|---|---|---|---|
+| Chunks | 752 | 733 | −19 heading-only chunks, the same 19 the `heading_only_chunks` stat counted (the exact D3a predicate finds the same set) |
+| Heading-only chunks | 19 | 0 | |
+| Size min / p50 / p90 / max | 13 / 1,157 / 1,526 / 1,600 | 89 / 1,178 / 1,527 / 1,600 | the 19 were the 19 smallest chunks (13–24 chars; next smallest is 89) |
+| Chunks < 400 chars | 79 | 60 | all 19 were < 400 |
+| Cutting a code fence | 24 (3.19 %) | 24 (3.27 %) | same chunks; smaller denominator |
+| Duplicates dropped | 447 | 447 | none of the 19 had an earlier duplicate in its document |
+| Per document | | −1: #06, #10, #12, #13, #16, #17, #18, #20, #26, #28; −6: #08; −3: #09 | |
+
+- The 733 remaining chunks are the old chunks with every field except `chunk_id` unchanged, in the same order.
+- **Renumbered IDs (11, only #08 and #09):**
+  - #08: `0002→0001`, `0003→0002`, `0005→0003`, `0006→0004`, `0008→0005`, `0010→0006`, `0012→0007`, `0014→0008`.
+  - #09: `0002→0001`, `0004→0002`, `0006→0003`.
+- **Stale ID reference:** `validation/ingestion/spot-check.md` row `09:header-1600:0001` describes the dropped heading-only chunk. That ID now names the former `0002`. A note was added there.
+- **Other IDs cited in docs:** `23:header-1600:0085`, `13:…:0005`, `10:…:0038`, `22:…:0000` and `02:…:0003` are unchanged.
+- **Arm B:** `arm-b.jsonl` and `stats-arm-b.json` are byte-identical. SHA-256 is the same before and after, `git diff` is empty.
+- **G2:** re-run, 11/11 PASS.

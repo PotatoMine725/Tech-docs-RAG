@@ -1,7 +1,7 @@
 # ADR-0003 Chunking parameters and chunking experiment
 
 Date: 2026-09-24
-Status: Accepted (user decision, D1-D9). Implementation not started.
+Status: Accepted (user decision, D1-D9). Amended 2026-09-25: D3a (owner decision, INGEST-004).
 Refines: ADR-0002. Context: `docs/plans/chunking-consultation-handoff.md`.
 
 ## Measured corpus facts behind this decision (2026-09-24, `corpus/sources/`, regex outside code fences, approximate)
@@ -23,6 +23,14 @@ Refines: ADR-0002. Context: `docs/plans/chunking-consultation-handoff.md`.
 **D3 Size unit and limits.** Characters (independent of the undecided embedding model; ~4 chars/token for English prose, fewer for code).
 - Max chunk 1,600 chars (~400 tokens). Min 400 chars.
 - Sections under the min merge with the next section under the same parent. The merged chunk records the first section's heading path.
+
+**D3a Heading-only chunks, Arm A (amendment, owner decision 2026-09-25, INGEST-004).** After chunking, Arm A drops every chunk whose display text is empty once heading lines (outside code fences) and blank lines are removed. The drop happens before chunk IDs are assigned, so IDs stay contiguous (D6). Arm B is unchanged. Config: `drop_heading_only: true` on Arm A in `config/chunking.json`.
+- *Why:* D3 merges a small section only with its next sibling, so an H2 followed directly by its H3 child stays alone as a chunk that holds only the heading line. INGEST-002 produced 19 such Arm A chunks.
+  - They add no content, because every child chunk already carries the heading path in its D5 header.
+  - They can crowd top-k.
+  - Their span lies inside the expected section, so section hit@5 would count them as hits. That is a false hit in Arm A's favour.
+- *When:* decided before any index, retrieval run or evaluation result existed. No result informed it.
+- *Effect (INGEST-004):* Arm A goes from 752 to 733 chunks and `heading_only_chunks` from 19 to 0. The other 733 chunks are unchanged except for renumbered IDs. Every blueprint expected/alternate section still has at least one overlapping Arm A chunk (`validation/ingestion/blueprint-coverage-arm-a.md`).
 
 **D4 Oversized sections.**
 - Split at paragraph boundaries first, then at sentence boundaries.
