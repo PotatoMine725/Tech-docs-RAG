@@ -16,12 +16,11 @@ Point-in-time note for the next Claude Code session. Task status is in [task-led
 | 05 INGEST-003 | ready (cuttable, OD-15) | needs 03 = verified ✔ |
 
 ## Open owner decisions (ask before building on them)
-1. **Footer removal** — INGEST-001 removes the page footer (`- Last updated on` + date + `---` before it, 19 docs), which goes beyond the ADR-0003 D1 list. Recorded in `ingestion-spec.md` § Normalization and the ledger. Recommendation: keep. Reverting changes `normalized.jsonl` and needs a test.
-2. **Known residue** — `---` before "## Additional resources" (20 docs) and #15's Q&A text ("Sign in to comment"). Recommendation: keep.
-3. **EVAL-001 owner re-check** — fill every `owner verdict:` line in [EVAL-001-owner-recheck.md](../reviews/evaluation/EVAL-001-owner-recheck.md) (8 case blocks + 1 line for the 18-case table).
+- ~~Footer removal~~ and ~~known residue~~: decided by the owner 2026-09-25 (keep footer removed, keep residue). Recorded in `ingestion-spec.md` and the ledger.
+1. **EVAL-001 owner re-check** — fill every `owner verdict:` line in [EVAL-001-owner-recheck.md](../reviews/evaluation/EVAL-001-owner-recheck.md) (8 case blocks + 1 line for the 18-case table).
 
 ## Next prompts, in order
-1. Owner: answer decisions 1–3 above.
+1. Owner: fill the EVAL-001 re-check verdicts (decision 1 above).
 2. `Execute agents/prompts/99-VERIFY.md for TASK-ID=EVAL-001` (fresh session; re-verify covering `629b931` and `831d5a0`).
 3. `Execute agents/prompts/04-INGEST-002-chunkers-and-stats.md` (can start now; parallel with steps 1–2). Then `99-VERIFY` for INGEST-002 → G2 (the Arm A half of the heading-path gate item is still open).
 4. After 1 + 2: `Execute agents/prompts/02-EVAL-002-write-and-freeze.md` → tag `eval-freeze-v1` (M1).
