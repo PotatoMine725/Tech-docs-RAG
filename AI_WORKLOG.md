@@ -120,6 +120,13 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - (1) Code comment `markdown_normalizer.py:28` and `ingestion-spec.md:19` place the tab-selector lists in "#12/#13". They occur only in #12 (`grep "tabpanel\|?tabs="`). Trivial, non-blocking.
   - Open for the owner: the footer-removal extension of ADR-0003 D1 has not been confirmed (no AskUserQuestion recorded) and the optional residue removal has not been decided. Still not evidenced: pre-edit `gitnexus impact`, chat "Explain it back".
 
+### 2026-09-25 INGEST-002 (branch `claude/inspiring-cray-fspsdh`)
+- *AI did:* Arm A header-aware and Arm B fixed-size chunkers sharing one span→chunk builder (D5 embed text, D6 IDs, per-document duplicate drop), parameters in `config/chunking.json`, D8 stats, chunk files for both arms, G2 check script (11/11 PASS), spot-check of 10 chunks, 29 offline tests ([report](docs/reports/execution/INGEST-002.md)). Arm A 752 chunks (447 duplicates dropped), Arm B 859; 92 tests pass.
+- *AI got wrong:* (1) the first "code block up to max is never cut" test used a 1,343-char block, which fits the 1,400-char sub-split limit anyway, so breaking atomicity did not make it fail; (2) four new tests first failed because they did not expect the separate `# Page` H1 chunk and the table test read the wrong chunk index; (3) the first overlap rule started table-continuation pieces mid-row (`|\n| row23`).
+- *How found:* (1) mutation check (atomicity threshold set to 500: 0 failures); (2) first pytest run; (3) printing the table pieces while debugging (2).
+- *Fix:* (1) test block made 1,400–1,600 chars, mutation now fails 1 test; (2) tests filter by heading path; (3) overlap inside a table starts at the next row, tested. The chunk files were regenerated after (3); the committed-file test caught the stale file.
+- *Human decision:* table split: header row repeated in `embed_text` only, so `display_text` stays the exact slice (owner, 2026-09-25). Open: 19 heading-only Arm A chunks (D3 merges only siblings).
+
 ## Summary: how AI helped
 
 To be filled at QC-001.

@@ -117,12 +117,14 @@ Deliverables:
 - Offline unit tests: deterministic IDs, size rules, code/table blocks kept whole, heading paths, no `markitdown` import in core/application.
 
 Exit gate **G2**:
-- [ ] Both chunkers run over all 24 docs; a second run gives identical chunk IDs and hashes.
-- [ ] Chunk IDs follow `{source_id}:{chunker_config}:{index:04d}`.
-- [ ] For all 24 docs: every heading path in the Arm A chunk file appears in the EPIC-01 section inventory, and every inventory heading path can be located in the normalized text (so its character span can be computed for section hit@5). This guarantees the frozen ground truth points at real sections. *(Second half met by INGEST-001: 636/636 inventory sections located, `test_every_inventory_heading_path_has_a_span_in_the_normalized_text`; the Arm A half waits for INGEST-002.)*
-- [ ] Stats file exists for each arm.
-- [ ] ~5 chunks per arm spot-checked by hand, notes in `validation/ingestion/`.
-- [ ] pytest passes, including `tests/unit/test_project_structure.py`.
+- [x] Both chunkers run over all 24 docs; a second run gives identical chunk IDs and hashes. *(INGEST-002, `validation/ingestion/g2-check.md`; not yet verified)*
+- [x] Chunk IDs follow `{source_id}:{chunker_config}:{index:04d}`. *(INGEST-002)*
+- [x] For all 24 docs: every heading path in the Arm A chunk file appears in the EPIC-01 section inventory, and every inventory heading path can be located in the normalized text (so its character span can be computed for section hit@5). This guarantees the frozen ground truth points at real sections. *(Second half met by INGEST-001: 636/636 inventory sections located, `test_every_inventory_heading_path_has_a_span_in_the_normalized_text`; Arm A half met by INGEST-002: `check_g2.py`, 752/752 chunks.)*
+- [x] Stats file exists for each arm. *(`data/processed/chunks/stats-arm-{a,b}.json`)*
+- [x] ~5 chunks per arm spot-checked by hand, notes in `validation/ingestion/`. *(`spot-check.md`)*
+- [x] pytest passes, including `tests/unit/test_project_structure.py`. *(92 passed, Linux)*
+
+G2 is not passed until `99-VERIFY` for INGEST-002 accepts it.
 
 ### EPIC-03 RAG baseline
 **When:** Sat 26 – Sun 27 Sep · **Phase:** 2 · **Entry condition:** M1 committed · **Tasks:** RAG-001a (`06a`, embedder + cache + ADR-0005), RAG-001b (`06b`, ChromaDB + indexing), RAG-002 (`07`, retrieval + generation + citations), RAG-003 (`08`, retry/fallback + CLI + smoke) · **Role:** rag-analyst

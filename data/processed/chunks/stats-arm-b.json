@@ -1,0 +1,50 @@
+{
+  "arm": "B",
+  "chunker_config": "fixed-1600",
+  "documents": 24,
+  "chunks_total": 859,
+  "chunks_per_document": {
+    "01": 25,
+    "02": 21,
+    "03": 16,
+    "04": 8,
+    "05": 6,
+    "06": 5,
+    "07": 6,
+    "08": 3,
+    "09": 1,
+    "10": 31,
+    "11": 13,
+    "12": 19,
+    "13": 170,
+    "15": 13,
+    "16": 8,
+    "17": 185,
+    "18": 2,
+    "20": 12,
+    "21": 27,
+    "22": 2,
+    "23": 272,
+    "26": 6,
+    "28": 7,
+    "29": 1
+  },
+  "size_chars": {
+    "min": 207,
+    "p50": 1600,
+    "p90": 1600,
+    "max": 1600,
+    "percentile_method": "nearest-rank"
+  },
+  "chunks_cutting_code_fence": 387,
+  "pct_chunks_cutting_code_fence": 45.05,
+  "documents_with_one_chunk": [
+    "09",
+    "29"
+  ],
+  "duplicates_dropped": 0,
+  "duplicates_dropped_per_document": {},
+  "chunks_under_small_chunk_chars": 4,
+  "small_chunk_chars": 400,
+  "heading_only_chunks": 0
+}
