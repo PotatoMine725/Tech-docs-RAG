@@ -101,3 +101,5 @@ Checked without a conflict: 06a/06b vs ADR-0004 D10/D13 (retry schedule in the A
 1. Work is on branch `reorient-001` in a worktree (background-session isolation), not directly on `main`. The owner merges.
 2. Extra prompt edits beyond the conflict fixes: 02 entry condition, 99-VERIFY ledger rights. Both logged in the CHANGELOG.
 3. The "CHORE" commit was made before the conflict questions (it is independent of them), which preserves the prompt's commit order.
+4. Commit 3 (`c867943`, "master plan synced") also carried corrections to files from commit 2 (ledger, CHANGELOG, report), so commit 3 is not master-plan-only as the prompt's commit list implies. (Added by the REORIENT-001 fixes, from the verify.)
+5. The ledger adds "REORIENT-001 `verified`" as an extra prerequisite for EVAL-002 and INGEST-001, beyond the README "Needs" column; the README "Needs" column now states it too (CHANGELOG). (Added by the REORIENT-001 fixes, from the verify.)

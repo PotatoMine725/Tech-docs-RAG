@@ -9,8 +9,8 @@ Every prompt reads `_common.md` first (shared rules + end-of-task steps: prompt-
 | 00 | HOUSE-001 repo hygiene + submission reqs | Thu 24 | — | none | clean git, AI_WORKLOG.md |
 | 00R | REORIENT-001 sync repo state with this prompt set (one-off) | Thu 24 | 00, 01 done | none | task ledger, prompt CHANGELOG |
 | 01 | EVAL-001 design dataset | Thu 24–Fri 25 | 00 | none | blueprints, OD-4/5 |
-| 02 | EVAL-002 write + freeze | Fri 25 | 01 + **your review** | none | tag `eval-freeze-v1` (M1) |
-| 03 | INGEST-001 models, parser, normalize | Fri 25 | 00 (parallel with 01/02) | none | normalized.jsonl |
+| 02 | EVAL-002 write + freeze | Fri 25 | 01 + **your review** + 00R verified | none | tag `eval-freeze-v1` (M1) |
+| 03 | INGEST-001 models, parser, normalize | Fri 25 | 00 + 00R verified (parallel with 01/02) | none | normalized.jsonl |
 | 04 | INGEST-002 chunkers + stats | Sat 26 | 03 | none | G2 |
 | 05 | INGEST-003 MarkItDown (cuttable) | Sat 26 | 03 | none | — |
 | 06a | RAG-001a embedder + cache + ADR-0005 | Sat 26 | **M1** + 04 | probe only | V-1 answered |
@@ -34,4 +34,4 @@ Human-only steps: answer OD questions, review ground truth (02), fill the judge 
 - Interactive (default for all tasks): `claude` → `Execute agents/prompts/<file>.` → review → `/clear`.
 - Plan first for big tasks (06a, 06b, 07, 09a, 09b, 12): `claude --permission-mode plan`.
 - VERIFY can run headless, read-only:
-  `claude -p "Execute agents/prompts/99-VERIFY.md for TASK-ID=RAG-002" --allowedTools "Read" "Grep" "Glob" "Bash(.venv/Scripts/python.exe -m pytest:*)" "Bash(git:*)" "Write(docs/reviews/**)" "Edit(AI_WORKLOG.md)"`
+  `claude -p "Execute agents/prompts/99-VERIFY.md for TASK-ID=RAG-002" --allowedTools "Read" "Grep" "Glob" "Bash(.venv/Scripts/python.exe -m pytest:*)" "Bash(git:*)" "Write(docs/reviews/**)" "Edit(AI_WORKLOG.md)" "Edit(docs/plans/task-ledger.md)"`
