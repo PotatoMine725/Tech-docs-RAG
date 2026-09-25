@@ -201,6 +201,7 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 - *How found:* (1) the first pytest run of the new file (1 failed); (2) reading the generated sheet.
 - *Fix:* (1) mutation uses 015 with its evidence emptied; (2) `<` escaped outside code spans.
 - *Human decision:* none yet. AI decisions to confirm and one ground-truth proposal (G1, not applied) are in the [review sheet](docs/reviews/evaluation/eval-v1-review.md) and the [handoff](docs/plans/session-handoff-2026-09-25-eval-002.md). GitNexus was unavailable in this container, so `detect_changes` was not run (no existing symbol edited).
+- *Verifier findings (99-VERIFY, 2026-09-25, [EVAL-002-verify](docs/reviews/evaluation/EVAL-002-verify.md) → ACCEPT):* no defect that fails a requirement. Ground truth in the JSONL equals `blueprint.yaml` except the owner-approved 017 note; rebuild byte-identical; 107/107 quotes re-found independently; 140 passed. Non-blocking: (1) test gap: disabling the eval/dev expected-section overlap check leaves all 19 new tests green; (2) Q-EVAL-024 (vi) also states the cause ("test không chạy trong thư mục output"), a bigger leak than the sheet flags; (3) Q-EVAL-028 quote matches only via whitespace collapse (source has a no-break space), undisclosed; (4) G5A box 1 ticked before the freeze (with a "not frozen" note); (5) blueprints still `status: proposed`. Unverified: Windows run, GitNexus.
 
 ## Summary: how AI helped
 
