@@ -25,7 +25,7 @@ from knowledge_assistant.infrastructure.chunking.markdown_structure import fence
 #   "ADR-0003"  = docs/architecture/decisions/0003-chunking-parameters-and-experiment.md, measured facts (line 11)
 #   "INGEST-001" = added in this task from a corpus scan (not in either source); see docs/specs/ingestion-spec.md
 # ADR-0003 also names "version-selector lines": searched for in INGEST-001, none exist in the 24 documents
-# (the tab-selector link lists in #12/#13 are content and are kept).
+# (the tab-selector link lists in #12 are content and are kept).
 #
 # A. Preamble (every line before the page's own H1; each line must match, else DocumentParseError):
 #    wrapper H1 -> metadata `wrapper_title` ....................................... EPIC-01, ADR-0003
