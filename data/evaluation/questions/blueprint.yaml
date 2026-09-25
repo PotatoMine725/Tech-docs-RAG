@@ -796,7 +796,7 @@ blueprints:
     difficulty: hard
     size_class: medium
     retrieval_target: "#11 intro (H1 section) and 'IMiddleware' (3 copies)."
-    retrieval_challenges: [version_variants, code_heavy, mislabelled_variant_intro]
+    retrieval_challenges: [version_variants, code_heavy, mislabelled_variant_intro, two_sections_needed]
     evaluation_target:
       capability: Combine the intro rule with the two code examples.
       failure_mode: repeated_version_sections

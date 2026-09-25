@@ -41,6 +41,11 @@ Not changed: the handoff note, past reviews and past execution reports (point-in
 - 017 now needs both sections in the top 5, like 022, but its `retrieval_challenges` does not contain `two_sections_needed` (022's does). Not added: that is a label change the owner did not ask for, and it would change coverage-matrix counts. Suggest the verifier or owner decide.
 - No GitNexus impact run: no existing function/class was edited (only a new test function added).
 
+## Owner follow-up (2026-09-25, commit "OWNER-001: headline rule + 017 label")
+- Headline retrieval number = lenient; strict always next to it in the same table; MRR and slot fraction lenient, plus a secondary strict MRR (09b §1, test case in §5); EXP-001 must report if the arm comparison flips between strict and lenient (`evaluation-spec.md` § Retrieval hit rule). CHANGELOG row added. Replaces the TBD in "Unverified / open".
+- BP-EVAL-017 `retrieval_challenges` += `two_sections_needed`. Regenerated matrix: `two_sections_needed: 1 → 2`, nothing else. `evaluation-dataset-design.md` states no count for this label, so it was not changed.
+- Full suite after the change: `114 passed` (Windows, Python 3.13.3).
+
 ## Deviations from the prompt
 - The new test also guards 017's two slots (the prompt asked for 022 only). Reason: the 017 split is an owner decision that nothing else checks.
 - The 09b test case names roles (04 and 26 expected, 20 alternate) and adds the {04, 26} case; the prompt's example is kept exactly (`{04, 20}` → lenient hit, strict miss).

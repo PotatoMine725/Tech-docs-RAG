@@ -56,7 +56,9 @@ Plus a **points-covered score** for answerable cases: (required points judged `y
   - **lenient** = the D1 rule above: every slot needs one of its expected **or alternate** sources/sections;
   - **strict** = the same rule with the alternates removed: every slot needs one of its **expected** sources/sections.
   - Example: slots S1 = {#04 expected}, S2 = {#26 expected, #20 alternate}; top-k {#04, #20} → lenient hit, strict miss.
-  - MRR and the fraction of slots satisfied stay on the D1 (lenient) rule; strict applies only to source and section hit. Which of the two hit values is the headline number in the report: **TBD / DECISION REQUIRED** (EVAL-003c/EVAL-004).
+  - **Headline = lenient** (owner, 2026-09-25, OWNER-001). Strict is always reported next to it, in the same table.
+  - MRR and the fraction of slots satisfied use the lenient rule. Strict MRR (the same formula over expected sections only) is reported as a secondary value.
+  - EXP-001 compares the two arms under both rules. If the conclusion flips between strict and lenient (e.g. Arm A wins lenient but loses strict), the report MUST say so.
 
 ## Proposed for EVAL-003 (not decided; marked `metric_decision: proposed`)
 - **Citation quality** (method is OD-12): one label per answer: `correct_evidence` (a cited chunk contains the evidence for the answer's claim), `correct_source_wrong_evidence` (right document, but the cited chunk doesn't support the claim), `unsupported_citation` (cited chunk from an unrelated place), `citation_missing`. These four names are the ones every prompt uses (owner, 2026-09-24, REORIENT-001 C2). Judge the chunk *text* against the evidence, not heading strings: Arm A may label a merged small section with the first section's heading path (ADR-0003 D3), and Arm B uses the nearest preceding heading (D5).
