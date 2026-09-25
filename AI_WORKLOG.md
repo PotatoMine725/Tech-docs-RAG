@@ -126,6 +126,7 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 - *How found:* (1) mutation check (atomicity threshold set to 500: 0 failures); (2) first pytest run; (3) printing the table pieces while debugging (2).
 - *Fix:* (1) test block made 1,400–1,600 chars, mutation now fails 1 test; (2) tests filter by heading path; (3) overlap inside a table starts at the next row, tested. The chunk files were regenerated after (3); the committed-file test caught the stale file.
 - *Human decision:* table split: header row repeated in `embed_text` only, so `display_text` stays the exact slice (owner, 2026-09-25). Open: 19 heading-only Arm A chunks (D3 merges only siblings).
+- *Verifier findings (99-VERIFY, [review](docs/reviews/code/INGEST-002-verify.md)):* verdict ACCEPT. All stats, G2 checks (11/11) and spot-check numbers reproduced from a fresh run; chunk files byte-identical; corpus checksums unchanged. Real defect found: (1) one Markdown link with a doubly nested `((…))` URL is not reduced to its text in `embed_text` of `23:header-1600:0085` (`_LINK` handles one nesting level; only occurrence in the corpus; minor). Mutation counts in the report (1/2/2 fails) differ from the verifier's own mutations (3/3) because the edits differ; the claim that tests can fail holds. GitNexus detect-changes output not re-checkable.
 
 ## Summary: how AI helped
 
