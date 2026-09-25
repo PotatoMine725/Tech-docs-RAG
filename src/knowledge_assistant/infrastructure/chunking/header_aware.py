@@ -11,13 +11,15 @@
 4. Consecutive pieces of one split section overlap by up to `overlap_chars`, never across sections (D4). The
    overlap starts at a word boundary, never inside a code fence, and is shortened so a piece stays within
    `max_chars`.
+5. With `drop_heading_only`, a span whose text is empty after removing heading lines is dropped before chunk IDs
+   are assigned, so IDs stay contiguous (D3a amendment). Heading lines inside code fences are text, not headings.
 """
 import re
 from dataclasses import dataclass
 
 from knowledge_assistant.core.models import DocumentChunk, ParsedDocument
 from knowledge_assistant.infrastructure.chunking.chunk_builder import ChunkingResult, Span, build_chunks, trim
-from knowledge_assistant.infrastructure.chunking.markdown_structure import fence_mask, fenced_ranges
+from knowledge_assistant.infrastructure.chunking.markdown_structure import HeadingLines, fence_mask, fenced_ranges
 
 _HEADING = re.compile(r"^ {0,3}#{1,6}(?:[ \t]|$)")
 _TABLE_SEPARATOR = re.compile(r"^\s*\|?\s*:?-{2,}")
@@ -30,6 +32,7 @@ class HeaderAwareConfig:
     max_chars: int
     min_chars: int
     overlap_chars: int
+    drop_heading_only: bool = False
 
     def __post_init__(self) -> None:
         if not 0 <= self.overlap_chars < self.max_chars or not 0 <= self.min_chars <= self.max_chars:
@@ -66,6 +69,9 @@ class HeaderAwareChunker:
                 spans.append(Span(start, end, path))
             else:
                 spans.extend(self._split(layout, start, end, path))
+        if self.config.drop_heading_only:
+            headings = HeadingLines(text)
+            spans = [span for span in spans if not headings.heading_only(span.start, span.end)]
         return spans
 
     # --- step 2: merge small sections with their next sibling ------------------------------------------------

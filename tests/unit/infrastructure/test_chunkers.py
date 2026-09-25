@@ -9,12 +9,13 @@ from knowledge_assistant.infrastructure.chunking.chunk_builder import build_chun
 from knowledge_assistant.infrastructure.chunking.factory import load_arm
 from knowledge_assistant.infrastructure.chunking.fixed_size import FixedSizeChunker, FixedSizeConfig
 from knowledge_assistant.infrastructure.chunking.header_aware import HeaderAwareChunker, HeaderAwareConfig
-from knowledge_assistant.infrastructure.chunking.markdown_structure import fenced_ranges
+from knowledge_assistant.infrastructure.chunking.markdown_structure import HeadingLines, fenced_ranges
 from knowledge_assistant.infrastructure.chunking.stats import chunk_stats, cuts_code_fence
 from knowledge_assistant.infrastructure.parsing.markdown_normalizer import section_spans
 
 ROOT = Path(__file__).resolve().parents[3]
-ARM_A = HeaderAwareConfig("header-1600", max_chars=1600, min_chars=400, overlap_chars=200)
+ARM_A = HeaderAwareConfig("header-1600", max_chars=1600, min_chars=400, overlap_chars=200, drop_heading_only=True)
+ARM_A_KEEP_HEADINGS = HeaderAwareConfig("header-1600", max_chars=1600, min_chars=400, overlap_chars=200)
 ARM_B = FixedSizeConfig("fixed-1600", size_chars=1600, overlap_chars=200)
 
 
@@ -66,6 +67,65 @@ def test_h4_stays_inside_its_h3_section():
     assert [c.heading_path for c in deep] == [("Page", "A", "B")]
 
 
+# --- Arm A: heading-only chunks (ADR-0003 D3a) ---------------------------------------------------------------------
+
+
+def test_heading_only_chunk_of_an_h2_followed_by_its_h3_is_dropped():
+    text = f"# Page\n\n{_para(80)}\n\n## Parent\n\n### Child\n\n{_para(80)}\n"
+    kept = HeaderAwareChunker(ARM_A_KEEP_HEADINGS).chunk(_doc(text))
+    assert [c.display_text for c in kept if c.heading_path == ("Page", "Parent")] == ["## Parent"]
+    dropped = HeaderAwareChunker(ARM_A).chunk(_doc(text))
+    assert [c.heading_path for c in dropped] == [("Page",), ("Page", "Parent", "Child")]
+
+
+def test_sibling_headings_without_body_are_dropped_together():
+    text = f"# Page\n\n{_para(80)}\n\n## A\n\n## B\n\n### B1\n\n{_para(80)}\n"
+    assert [c.display_text for c in _chunks_a(text, ("Page", "A"))] == []
+    assert [c.display_text for c in HeaderAwareChunker(ARM_A_KEEP_HEADINGS).chunk(_doc(text))][1] == "## A\n\n## B"
+
+
+def test_heading_with_body_is_kept():
+    text = f"# Page\n\n{_para(80)}\n\n## Parent\n\nOne short line of body.\n\n### Child\n\n{_para(80)}\n"
+    kept = [c.display_text for c in _chunks_a(text, ("Page", "Parent"))]
+    assert kept == ["## Parent\n\nOne short line of body."]
+
+
+def test_hash_lines_inside_a_code_fence_are_body_not_headings():
+    # a span strictly between the ``` lines must not count as heading-only; "## A" + "## B" must (control)
+    text = "```bash\n# install\n# run\n```\n\n## A\n\n## B\n"
+    headings = HeadingLines(text)
+    inside = text.index("# install"), text.index("\n```")
+    assert headings.heading_only(*inside) is False
+    assert headings.heading_only(text.index("## A"), len(text) - 1) is True
+
+
+def test_heading_only_stat_uses_the_d3a_definition():
+    # a merged "## A\n\n## B" chunk has a newline, so the old one-line "#" proxy counted 0; D3a counts it
+    text = f"# Page\n\n{_para(80)}\n\n## A\n\n## B\n\n### B1\n\n{_para(80)}\n"
+    document = _doc(text)
+    for config, expected in ((ARM_A_KEEP_HEADINGS, 1), (ARM_A, 0)):
+        result = HeaderAwareChunker(config).chunk_with_report(document)
+        assert chunk_stats([document], [result], "header-1600", 400)["heading_only_chunks"] == expected
+
+
+def test_a_split_code_piece_of_only_hash_comment_lines_is_kept():
+    body = "\n".join(
+        [f"echo step {i:03d}" for i in range(100)] + [f"# note {i:03d}" for i in range(400)] + ["echo done"]
+    )
+    text = f"# Page\n\n{_para(80)}\n\n## Script\n\n```bash\n{body}\n```\n"
+    chunks = _chunks_a(text, ("Page", "Script"))
+    assert any(all(line.startswith("# note") for line in c.display_text.split("\n")) for c in chunks)
+    assert {f"# note {i:03d}" for i in range(400)} <= {line for c in chunks for line in c.display_text.split("\n")}
+
+
+def test_ids_stay_deterministic_and_contiguous_after_heading_only_drops():
+    text = f"# Page\n\n{_para(80)}\n\n## A\n\n### A1\n\n{_para(80)}\n\n## B\n\n### B1\n\n{_para(80)}\n"
+    runs = [HeaderAwareChunker(ARM_A).chunk(_doc(text, "07")) for _ in range(2)]
+    ids = [c.chunk_id for c in runs[0]]
+    assert ids == [c.chunk_id for c in runs[1]] == [f"07:header-1600:{i:04d}" for i in range(len(ids))]
+    assert len(ids) == len(HeaderAwareChunker(ARM_A_KEEP_HEADINGS).chunk(_doc(text, "07"))) - 2
+
+
 def test_every_heading_path_is_a_section_of_the_document():
     text = f"# Page\n\n{_para(300)}\n\n## A\n\n{_para(300)}\n\n### B\n\n{_para(50)}\n"
     document = _doc(text)
@@ -80,7 +140,7 @@ def test_oversized_section_splits_within_max_at_paragraph_or_sentence_boundaries
     paragraphs = "\n\n".join(_para(60, f"p{n}w") for n in range(8))
     chunks = _chunks_a(f"# Page\n\n## Long\n\n{paragraphs}\n")
     long_pieces = [c for c in chunks if c.heading_path == ("Page", "Long")]
-    assert len(long_pieces) > 1 and len(chunks) == len(long_pieces) + 1  # + the "# Page" section
+    assert len(long_pieces) > 1 and len(chunks) == len(long_pieces)  # the bodiless "# Page" section is dropped (D3a)
     assert all(len(c.display_text) <= 1600 for c in chunks)
     assert all(c.display_text.endswith(".") for c in long_pieces)  # paragraph ends
 
@@ -260,5 +320,6 @@ def test_stats_report_counts_sizes_and_duplicates():
 def test_arms_come_from_the_configuration_file():
     a, b = load_arm(ROOT / "config" / "chunking.json", "A"), load_arm(ROOT / "config" / "chunking.json", "B")
     assert (a.config.max_chars, a.config.min_chars, a.config.overlap_chars) == (1600, 400, 200)
+    assert a.config.drop_heading_only is True  # ADR-0003 D3a, Arm A only
     assert (b.config.size_chars, b.config.overlap_chars) == (1600, 200)
     assert re.fullmatch(r"[^:]+", a.config.chunker_config) and a.config.chunker_config != b.config.chunker_config

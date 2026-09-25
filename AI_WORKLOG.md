@@ -169,6 +169,32 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 - *Human decision:* all re-check verdicts, the 017 slot split, the strict + lenient reporting condition, and acceptance of OD-6 / D1-skip / per-format converters / `markitdown[pdf,docx]` (owner, 2026-09-25). Left open: which hit value is the headline number.
 - *Verifier findings* (99-VERIFY, 2026-09-25, Windows 3.13.3, [OWNER-001-verify](docs/reviews/evaluation/OWNER-001-verify.md) → ACCEPT): no defect in the owner's decisions as applied (parsed-YAML diff: only 016/017/024 changed; all quotes verbatim under their headings; new slot test fails on 4/4 mutations; 114 passed). Stale text: the line above ("Left open: which hit value is the headline number") was not updated when the owner decided it in `7aeb783`: headline = lenient, strict alongside (`evaluation-spec.md` § Retrieval hit rule). Unverified: the report's `detect_changes` result for the OWNER-001 range (the CLI reads the indexed main checkout, which is on `dev`). Observation: 017's #10 "Service lifetimes" alternate note still says "P1 and P2" although it now sits in slot S2 (P1).
 
+### 2026-09-25 INGEST-004 (branch `ingest-004`, PR into `dev`)
+- *AI did:* wrote the ADR-0003 **D3a** amendment and put it behind `drop_heading_only` in `config/chunking.json` (Arm A only). Before changing code, it measured the exact rule on the committed file: 19 chunks, the same set as the old stat. It rebuilt both arms: Arm A 752 → 733, Arm B byte-identical by SHA-256. It re-ran G2 (11/11) and wrote a re-runnable blueprint coverage check: all 54 expected/alternate sections keep ≥ 1 Arm A chunk, and the counts are identical to before D3a. It added 6 tests; 120 pass on Windows 3.13.3 ([report](docs/reports/execution/INGEST-004.md)).
+- *AI got wrong:*
+  - (1) The first fence test could not fail. A whole fenced block always contains its ``` lines, so a detector that ignores fences also passed it. Found by a mutation (fence-unaware detector → 0 failures). Fixed with a test where an oversized code block is split so that one piece holds only `# …` comment lines. The first version of that test still passed under the mutation because the piece kept one `echo` line; the block was made longer, and now the mutation fails it.
+  - (2) A shell heredoc mangled `\n` escapes while the test file was edited. That caused a SyntaxError at collection. The file was restored with `git checkout` and the edits were redone with the Edit tool.
+  - (4) It ran `gitnexus_detect_changes` before the commit on a **stale index**, repeating the OWNER-001 slip. CLAUDE.md says to run `npx gitnexus analyze` when the index is stale. Found by the post-commit hook warning. Fixed by re-indexing and re-running as `compare` against `dev` (4 Arm A chunk flows, risk medium, as intended), with the report corrected in a follow-up commit.
+  - (3) The first draft of the INGEST-002 addendum gave the size range of the dropped chunks as "13–40 chars" without measuring it. It was checked before the commit (13–24) and corrected.
+- *Human decision:* D3a itself: drop heading-only Arm A chunks, decided 2026-09-25 before any index or result (owner).
+- *Verifier findings* (99-VERIFY, 2026-09-25, Windows 3.13.3, [INGEST-004-verify](docs/reviews/code/INGEST-004-verify.md) → ACCEPT): no defect in the D3a implementation. Evidence: 19 dropped chunks, each heading-only; 0 content characters lost by D3a in 24/24 docs; Arm B SHA-256 unchanged; fresh Arm A = committed; IDs contiguous; G2 11/11; blueprint coverage 54/54 with unchanged counts; the drop-disabled mutation fails 5 tests, the fence-unaware mutation fails 1; 120 passed. Minor: (1) the execution report's Files-changed table says "5 new tests", but there are 6 (stale after the sixth was added); (2) the `heading_only_chunks` stat is still a single-line `#` proxy, not the D3a predicate; (3) `test_hash_lines_inside_a_code_fence_are_body_not_headings` cannot fail under a fence-unaware detector (disclosed; the split-piece test covers it). Unverified: the chat-only "Explain it back" bullets. Note: the corpus has no ATX-like `#` line inside a fence, so the fence rule is proven only by unit test + mutation. The literal "no content lost" invariant has gaps on #11/#13/#17/#23, caused only by the pre-existing D1 duplicate drop.
+
+### 2026-09-25 INGEST-004 follow-up: fixes from verify (branch `ingest-004`, PR #7)
+- *AI did:* fixed the four non-blocking notes of [INGEST-004-verify](docs/reviews/code/INGEST-004-verify.md).
+  - One shared helper, `HeadingLines.heading_only` (`markdown_structure.py`), is now used by both the Arm A filter and the `heading_only_chunks` stat. A new test covers the case where the old proxy and D3a disagree.
+  - The fence test was rewritten so it can fail. Mutations: stat proxy → 1 failed; fence-unaware heading set → 2 failed. Restored by SHA-256.
+  - Both arms rebuilt: all four chunk/stats files are byte-identical to the verified versions.
+  - The report's test count was corrected. The content claim is now precise: 0 characters lost by D3a in 24/24 docs; the gaps in #11/#13/#17/#23 come from D1 duplicates. I re-measured this myself and it matches review X3.
+  - The Explain-it-back bullets are saved in the report. `_common.md` step 6 now requires that.
+  - 121 passed ([report](docs/reports/execution/INGEST-004.md#follow-up-after-verify-2026-09-25-ingest-004-follow-up-fixes-from-verify)).
+- *AI got wrong* (all found by 99-VERIFY, not by the AI):
+  - (1) "5 new tests" in the report table; there were 6.
+  - (2) The stat kept a single-line proxy instead of the D3a predicate, so filter and stat used two definitions.
+  - (3) A fence test that could never fail was kept, only disclosed.
+  - (4) The Explain-it-back bullets lived only in chat, so they could not be verified.
+  - During the fix itself, a `sed`-based mutation wrote a real newline into a string literal, causing a collection error rather than a test result. Found in the pytest output, restored from backup, and redone with a Python replacement.
+- *Human decision:* none new (the owner's follow-up prompt scoped the fixes).
+
 ## Summary: how AI helped
 
 To be filled at QC-001.

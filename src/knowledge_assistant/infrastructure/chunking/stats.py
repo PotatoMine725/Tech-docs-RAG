@@ -4,7 +4,7 @@ from collections.abc import Sequence
 
 from knowledge_assistant.core.models import DocumentChunk, ParsedDocument
 from knowledge_assistant.infrastructure.chunking.chunk_builder import ChunkingResult
-from knowledge_assistant.infrastructure.chunking.markdown_structure import fenced_ranges
+from knowledge_assistant.infrastructure.chunking.markdown_structure import HeadingLines, fenced_ranges
 
 
 def cuts_code_fence(chunk: DocumentChunk, fences: Sequence[tuple[int, int]]) -> bool:
@@ -32,12 +32,13 @@ def chunk_stats(
     cutting = heading_only = 0
     for document, result in zip(documents, results, strict=True):
         fences = fenced_ranges(document.text)
+        headings = HeadingLines(document.text)
         per_document[document.source_id] = len(result.chunks)
         duplicates[document.source_id] = result.duplicates_dropped
         for chunk in result.chunks:
             sizes.append(len(chunk.display_text))
             cutting += cuts_code_fence(chunk, fences)
-            heading_only += "\n" not in chunk.display_text and chunk.display_text.startswith("#")
+            heading_only += headings.heading_only(chunk.char_start, chunk.char_end)  # ADR-0003 D3a definition
     sizes.sort()
     total = len(sizes)
     return {

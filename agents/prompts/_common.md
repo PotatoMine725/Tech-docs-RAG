@@ -20,5 +20,5 @@
 3. Append an entry to `AI_WORKLOG.md` (format is in that file): what AI did, what the AI got wrong in this task and how it was found/fixed (only real events: failing tests, user corrections, wrong assumptions; write "none observed" if none).
 4. Update task/epic status and gate checkboxes in `docs/plans/master-plan.md` and the epic file, and update the task's row in `docs/plans/task-ledger.md`.
 5. Run `gitnexus_detect_changes()`, then commit: `<TASK-ID>: <summary>`. Do not push unless the task says so.
-6. Final chat report: files, tests, gate status, open decisions, and an **"Explain it back"** section — 3–5 bullets the user must be able to defend in an interview (why this design, what the alternative was).
+6. Final chat report: files, tests, gate status, open decisions, and an **"Explain it back"** section — 3–5 bullets the user must be able to defend in an interview (why this design, what the alternative was). Save the same bullets in the execution report (section "Explain it back") before the commit, so the verifier can check them; chat alone is not enough.
 7. STOP. Do not start the next task. The user will run `99-VERIFY.md` for this task in a fresh session.

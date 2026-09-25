@@ -119,12 +119,14 @@ Deliverables:
 Exit gate **G2**:
 - [x] Both chunkers run over all 24 docs; a second run gives identical chunk IDs and hashes. *(INGEST-002, `validation/ingestion/g2-check.md`; verified 2026-09-25)*
 - [x] Chunk IDs follow `{source_id}:{chunker_config}:{index:04d}`. *(INGEST-002)*
-- [x] For all 24 docs: every heading path in the Arm A chunk file appears in the EPIC-01 section inventory, and every inventory heading path can be located in the normalized text (so its character span can be computed for section hit@5). This guarantees the frozen ground truth points at real sections. *(Second half met by INGEST-001: 636/636 inventory sections located, `test_every_inventory_heading_path_has_a_span_in_the_normalized_text`; Arm A half met by INGEST-002: `check_g2.py`, 752/752 chunks.)*
+- [x] For all 24 docs: every heading path in the Arm A chunk file appears in the EPIC-01 section inventory, and every inventory heading path can be located in the normalized text (so its character span can be computed for section hit@5). This guarantees the frozen ground truth points at real sections. *(Second half met by INGEST-001: 636/636 inventory sections located, `test_every_inventory_heading_path_has_a_span_in_the_normalized_text`; Arm A half met by INGEST-002: `check_g2.py`, 752/752 chunks; re-run after INGEST-004 (ADR-0003 D3a): 733/733.)*
 - [x] Stats file exists for each arm. *(`data/processed/chunks/stats-arm-{a,b}.json`)*
 - [x] ~5 chunks per arm spot-checked by hand, notes in `validation/ingestion/`. *(`spot-check.md`)*
 - [x] pytest passes, including `tests/unit/test_project_structure.py`. *(92 passed, Linux)*
 
 G2 passed: `99-VERIFY` for INGEST-002 → ACCEPT (2026-09-25, [review](../reviews/code/INGEST-002-verify.md)).
+
+INGEST-004 (ADR-0003 D3a, owner 2026-09-25): Arm A drops heading-only chunks (752 → 733). Arm B is byte-identical. G2 was re-run and passes 11/11. Every blueprint expected/alternate section keeps ≥ 1 Arm A chunk. Status `done`; waiting for `99-VERIFY`. EVAL-002 waits for it ([ledger](task-ledger.md) rows 02, 04a).
 
 ### EPIC-03 RAG baseline
 **When:** Sat 26 – Sun 27 Sep · **Phase:** 2 · **Entry condition:** M1 committed · **Tasks:** RAG-001a (`06a`, embedder + cache + ADR-0005), RAG-001b (`06b`, ChromaDB + indexing), RAG-002 (`07`, retrieval + generation + citations), RAG-003 (`08`, retry/fallback + CLI + smoke) · **Role:** rag-analyst
