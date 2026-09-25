@@ -91,6 +91,11 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 - *How found:* the REORIENT-001 spec↔prompt comparison and the ledger build (commit dates vs the verify commit `e5e27b1`).
 - *Fix:* C1–C4 settled by the owner and applied to the spec and prompts (CHANGELOG); the EVAL-001 re-verify now covers `831d5a0` too (ledger).
 - *Human decision:* C1 judge checks refusals that carry related content; C2 spec label names; C3 prompts follow design §18; C4 partial = 0.5 in the points-covered score.
+- *Verifier findings (99-VERIFY, [review](docs/reviews/code/REORIENT-001-verify.md)):* verdict ACCEPT WITH FIXES. The ledger, CHANGELOG, `_common.md` guard, EVAL-001 fix mapping and master plan reproduce; 45 tests pass; no code or ground truth changed. Real defects:
+  - (1) The owner re-check sheet says "the only change to every case is the new `slot` field" and covers 9 cases. A parsed diff of `blueprint.yaml` (`9e0ab15` → HEAD, ignoring `slot`) shows 27 changed blueprints; alternate sources (005/006, 013/014, 017, 018, 027), an added evidence quote (003/004), citation criteria and acceptable variations (019, 027, 029, 034), 030's question notes and 4 dev cases changed without appearing on the sheet. The task copied the list from review §5 although the prompt said to verify it.
+  - (2) The spec↔prompt sweep missed a conflict: `evaluation-dataset-design.md` §18 result-file names (`generated_answer`, `retries`, …) vs the 09a record (`answer`, `retry_count`, `latency_ms.total`) and 09c CSV columns, although the task added "schema = §18" to 09a.
+  - (3) The `99-VERIFY.md` ledger-rights edit was not carried into the README's headless VERIFY `--allowedTools`, and still awaits owner confirmation.
+  - Not evidenced: `gitnexus_detect_changes()` covering the committed diff (the report says the tool saw the main checkout, not the worktree); the AskUserQuestion events for C1–C4.
 
 ## Summary: how AI helped
 
