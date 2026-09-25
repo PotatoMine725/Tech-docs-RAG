@@ -290,7 +290,7 @@ This plan does **not** decide these. Each must be decided by the owner epic's la
 
 Facts to verify (not decisions):
 - **V-1** Does one batched embedding request count as 1 or N requests against the daily limit? (ADR-0004) — first step of EPIC-03.
-- **V-2** Does MarkItDown install and work on Python 3.13? (`.venv` is 3.13.3; ADR-0002) — EPIC-02. ✅ Answered 25 Sep (INGEST-003): yes, `markitdown` 0.1.8 on Python 3.13.12 (Linux; the Windows 3.13.3 venv still needs `pip install -r requirements.txt`).
+- **V-2** Does MarkItDown install and work on Python 3.13? (`.venv` is 3.13.3; ADR-0002) — EPIC-02. ✅ Answered 25 Sep (INGEST-003): yes, `markitdown` 0.1.8 on Python 3.13.12 (Linux); also passed on the Windows 3.13.3 venv, 113 tests, 25 Sep.
 
 ## 9. Brief traceability (`docs/specs/assignment-requirements.md`)
 

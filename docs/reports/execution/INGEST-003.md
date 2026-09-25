@@ -63,7 +63,7 @@ Mutation checks (each restored from a scratch backup, full suite re-run after: 1
 4. **Extras `[pdf,docx]` and version pin `>=0.1.8,<0.2`.** MarkItDown 0.1.x is pre-1.0; the pin keeps API changes out.
 
 ## Deviations / unverified
-- V-2 checked on Linux Python 3.13.12, not on the owner's Windows 3.13.3 venv (unverified there).
+- V-2 checked on Linux Python 3.13.12 first. **V-2 = passed on Windows 3.13.3** (owner's venv, 2026-09-25): full suite 113 passed after one test fix. On Windows `test_converted_formats_chunk_like_the_same_markdown[A|B]` failed because the test helper `_write()` used `Path.write_text` without `newline="\n"` (CRLF on disk vs LF from the MarkItDown HTML path). Fixed in the helper only (`newline="\n"`); `MarkdownParser` is unchanged (it keeps line endings by design, ADR-0003 D1). The other `write_text`/`write_bytes` calls in `tests/` write single-line or byte-exact content, so no further change was needed.
 - MarkItDown depends on `magika`, which pulls in `onnxruntime` (CLAUDE.md rule 2: "ML/ONNX only when a concrete decision requires"). It is a transitive dependency of the tool ADR-0002 chose, not an ML feature; imported lazily so the Markdown pipeline never loads it. Flagged for the owner.
 - Conversion quality of real-world PDFs/tables not checked: there are no non-Markdown inputs in the corpus (the prompt forbids adding documents). `ingestion-spec.md` still requires a spot-check before a converted format is used in evaluation.
 - Headingless input (PDF, txt) gets chunks with an empty heading path and `location_type="heading"`; the `position` location type is not produced. Not needed for the corpus; open for a later task.

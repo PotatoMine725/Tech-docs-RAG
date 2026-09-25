@@ -228,5 +228,5 @@ def test_markitdown_is_imported_lazily():
 
 def _write(tmp_path: Path, name: str, text: str) -> Document:
     path = tmp_path / name
-    path.write_text(text, encoding="utf-8")
+    path.write_text(text, encoding="utf-8", newline="\n")  # EOL-explicit: Windows would write CRLF
     return Document("90", path.stem, str(path))
