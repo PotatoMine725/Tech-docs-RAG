@@ -789,7 +789,7 @@ blueprints:
       - source_id: "10"
         heading_path: "Dependency injection in ASP.NET Core > Service lifetimes"
         slot: S2
-        note: Partial support for P1 and P2 (inject into Invoke/InvokeAsync, or use factory-based middleware activated per request). Same sentences as PG-007.
+        note: Partial support for P1 (inject into Invoke/InvokeAsync, or use factory-based middleware activated per request). Same sentences as PG-007.
     objective: Compare how conventional middleware and factory-activated (IMiddleware) middleware get a scoped service.
     concepts: [IMiddleware, IMiddlewareFactory, conventional middleware, scoped services, UseMiddleware]
     cognitive_level: compare
