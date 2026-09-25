@@ -104,7 +104,7 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - Still not evidenced: the AskUserQuestion events for C1–C4; owner authorship of the pre-commit edits.
 
 ### 2026-09-25 INGEST-001 (branch `claude/sleepy-wright-vj962y`)
-- *AI did:* core models (`Document`, `SectionSpan`, `ParsedDocument`, D6 `DocumentChunk`, `Citation` defaulting to `heading`), Markdown parser + registry, the ADR-0003 D1 normalizer (CRLF first, preamble to metadata with unknown lines raising, boilerplate list from EPIC-01, blank-line collapse, section spans), the `NormalizeCorpus` use case and script, `normalized.jsonl`, 18 offline tests ([report](docs/reports/execution/INGEST-001.md)). 636/636 inventory heading paths located; all 107 evidence quotes survive normalization; 63 tests pass.
+- *AI did:* core models (`Document`, `SectionSpan`, `ParsedDocument`, D6 `DocumentChunk`, `Citation` defaulting to `heading`), Markdown parser + registry, the ADR-0003 D1 normalizer (CRLF first, preamble to metadata with unknown lines raising, boilerplate list from EPIC-01 + ADR-0003 plus a page-footer rule added in this task, blank-line collapse, section spans), the `NormalizeCorpus` use case and script, `normalized.jsonl`, 18 offline tests ([report](docs/reports/execution/INGEST-001.md)). 636/636 inventory heading paths located; all 107 evidence quotes survive normalization; 63 tests pass.
 - *AI got wrong:* during the mutation check (breaking code on purpose to prove tests fail), the AI restored the mutated use-case file with `git checkout`, which does nothing for an untracked file, so the excluded-document guard stayed replaced by `if False:`.
 - *How found:* the AI grepped the file after the restore step and saw the mutation still there, before any commit.
 - *Fix:* the line was restored by hand; the full suite (63 passed) and the script were re-run after the restore.
@@ -114,6 +114,8 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - (2) Commit message "gitnexus detect-changes: 0 processes, risk low": a compare-scope run against the parent gives 22 files, 5 affected processes, risk medium (all in new code). The default unstaged scope does not see new untracked files.
   - Not evidenced: the "3 tests fail" mutation count (the verifier's variant gave 7 failed + 4 errors); the pre-edit `gitnexus impact` results; the chat "Explain it back".
   - Observations (no fix required): a `---` before "## Additional resources" (20 docs) and #15's Q&A chrome stay in the text; the byline regex is broad enough to hit prose in a future corpus.
+- *Fixes (2026-09-25, "INGEST-001: fixes from verification"):* removal list gathered in one documented block with a source per item; the footer extension of D1 and the absent version-selector lines recorded in `ingestion-spec.md` and report Deviation 6; provenance wording corrected; the GitNexus claim replaced with the compare-scope result; known residue listed. `normalized.jsonl` unchanged (sha256 `a6db2f26…9ae95`), 63 tests pass.
+  - *AI got wrong (found by the verify):* (1) the removal list was credited to EPIC-01 although the footer rule is in neither EPIC-01 nor ADR-0003; (2) the commit message claimed "detect-changes: 0 processes, risk low" from the default scope, which ignores new untracked files (compare scope: 5 flows, risk medium, all new code).
 
 ## Summary: how AI helped
 

@@ -4,8 +4,8 @@ Steps, in order:
 1. `\\r\\n` / `\\r` -> `\\n` first, because offsets and hashes depend on it (a BOM is dropped too).
 2. Everything before the page's own H1 (wrapper H1, `Source:` URL, `---`, access notes, #29's YAML
    front matter) moves to metadata or is dropped. An unknown preamble line raises instead of being dropped.
-3. Known boilerplate lines are removed outside code fences (`BOILERPLATE_LINES`, from the EPIC-01 report and
-   ADR-0003 measured facts), with the admonition label or footer rule that belongs to them.
+3. Known boilerplate lines are removed outside code fences, with the admonition label or footer rule that
+   belongs to them. The complete list, with the source of each item, is the REMOVAL LIST block below.
 4. Runs of blank lines outside code fences collapse to one.
 Version variants are kept and numbered 1..n by repeated heading path; version labels are never inferred.
 """
@@ -19,20 +19,37 @@ from knowledge_assistant.core.exceptions import DocumentParseError
 from knowledge_assistant.core.models import ParsedDocument, SectionSpan
 from knowledge_assistant.infrastructure.chunking.markdown_structure import fence_mask, read_page_frame, split_sections
 
-# Whole lines (stripped) removed wherever they appear outside code fences. Source: EPIC-01 corpus report
-# ("Wrapper", boilerplate list) and ADR-0003 "Measured corpus facts"; counts are per document.
-BOILERPLATE_LINES = (
-    re.compile(r"^Access to this page requires authorization\. You can try .*changing directories\.$"),  # 19 docs
-    re.compile(r"^This isn't the latest version of this article\. "),  # #10 #11 #12 #13 #23
-    re.compile(r"^This version of ASP\.NET Core is no longer supported\. "),  # #10 #11 #12 #13 #23
-    re.compile(r"^By \[[^\]]+\]\([^)]*\)"),  # author bylines: #03 #10 #13 #17 #23
-)
-_LAST_UPDATED = re.compile(r"^- Last updated on\s*$")  # page footer, 19 docs; the next line is the date
-_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-_ADMONITION_LABEL = re.compile(r"^(Note|Warning|Important|Tip|Caution)$")
-_RULE = re.compile(r"^-{3,}$")
+# ---------------------------------------------------------------------------------------------------------------
+# REMOVAL LIST (ADR-0003 D1) — everything normalization removes, in one place, with its source.
+#   "EPIC-01"   = docs/reports/epics/EPIC-01-corpus-analysis.md, "Wrapper" and #29 bullets
+#   "ADR-0003"  = docs/architecture/decisions/0003-chunking-parameters-and-experiment.md, measured facts (line 11)
+#   "INGEST-001" = added in this task from a corpus scan (not in either source); see docs/specs/ingestion-spec.md
+# ADR-0003 also names "version-selector lines": searched for in INGEST-001, none exist in the 24 documents
+# (the tab-selector link lists in #12/#13 are content and are kept).
+#
+# A. Preamble (every line before the page's own H1; each line must match, else DocumentParseError):
+#    wrapper H1 -> metadata `wrapper_title` ....................................... EPIC-01, ADR-0003
+#    `Source: <url>` -> metadata `source_url` ..................................... EPIC-01, ADR-0003
+#    `---` rules; "Note" label; the two access lines (BOILERPLATE_LINES[0]) ....... EPIC-01, ADR-0003
+#    YAML front matter between `---` lines (#29) .................................. EPIC-01
 _SOURCE = re.compile(r"^Source:\s*\S+$")
+_RULE = re.compile(r"^-{3,}$")
 _FRONT_MATTER_KEY = re.compile(r"^[A-Za-z][\w.-]*:(\s|$)")
+# B. Body lines, outside code fences only (counts are per document):
+BOILERPLATE_LINES = (
+    re.compile(r"^Access to this page requires authorization\. You can try .*changing directories\.$"),  # 19 docs; EPIC-01, ADR-0003
+    re.compile(r"^This isn't the latest version of this article\. "),  # #10 #11 #12 #13 #23; ADR-0003
+    re.compile(r"^This version of ASP\.NET Core is no longer supported\. "),  # #10 #11 #12 #13 #23; ADR-0003
+    re.compile(r"^By \[[^\]]+\]\([^)]*\)"),  # author bylines, #03 #10 #13 #17 #23; ADR-0003
+)
+_LAST_UPDATED = re.compile(r"^- Last updated on\s*$")  # page footer, 19 docs; INGEST-001
+_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")  # the footer's date line, removed with it; INGEST-001
+# C. Lines removed only together with the line they introduce:
+_ADMONITION_LABEL = re.compile(r"^(Note|Warning|Important|Tip|Caution)$")  # label before a BOILERPLATE_LINES line
+#    `---` (_RULE) directly before the "- Last updated on" footer; INGEST-001
+# Kept on purpose (known residue): the `---` before "## Additional resources" (20 docs) and #15's Q&A page text
+# ("Sign in to comment", "No comments"); removing them would need an owner decision and a test.
+# ---------------------------------------------------------------------------------------------------------------
 
 
 class MarkdownNormalizer:

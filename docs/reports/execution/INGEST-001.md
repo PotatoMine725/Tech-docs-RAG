@@ -26,7 +26,7 @@ Ledger: HOUSE-001 `verified`; REORIENT-001 `verified` (re-verify `8104105`, afte
 
 ## Normalization rules (what is removed, and why it is safe)
 - **Preamble** (everything before the page's own H1): wrapper H1 and `Source:` URL go to metadata (`wrapper_title`, `source_url`); `---`, the "Note" label, both "Access to this page requires authorization…" lines and #29's YAML front matter are dropped. Every preamble line must match one of these patterns, otherwise `DocumentParseError`. All 24 documents pass.
-- **Body boilerplate** (outside code fences only), sourced from the EPIC-01 report and ADR-0003's measured facts: access notes; "This isn't the latest version of this article." and "This version of ASP.NET Core is no longer supported." (#10–#13, #23); author bylines `By [Name](url)…` (#03, #10, #13 ×5, #17, #23); the page footer `- Last updated on` + date (19 docs). An admonition label (`Note`/`Warning`/…) goes only when the line it introduces is removed; the `---` goes only when it introduces the footer. Real notes stay (tested).
+- **Body boilerplate** (outside code fences only). Sources per item (also in the REMOVAL LIST block of `markdown_normalizer.py`): access notes (EPIC-01, ADR-0003); "This isn't the latest version of this article." and "This version of ASP.NET Core is no longer supported." (#10–#13, #23); author bylines `By [Name](url)…` (#03, #10, #13 ×5, #17, #23) (ADR-0003); the page footer `- Last updated on` + date (19 docs) (**not in EPIC-01 or ADR-0003; added in this task**, see Deviation 6). An admonition label (`Note`/`Warning`/…) goes only when the line it introduces is removed; the `---` goes only when it introduces the footer. Real notes stay (tested).
 - **Blank lines:** runs collapse to one outside code fences.
 - **Kept:** version variants (numbered 1..n by repeated heading path, no version labels), tab-selector link lists, "Additional resources" sections, everything inside code fences.
 - **Safety check:** all 107 EVAL-001 evidence quotes are still found (whitespace-normalized) inside a span of their own heading path in the normalized text (`test_every_evidence_quote_survives_normalization_inside_its_section`).
@@ -41,11 +41,20 @@ inventory heading paths located: 636/636
 $ .venv/bin/python -m pytest -q
 63 passed in 4.69s        (45 before this task + 18 new)
 
+$ npx -y gitnexus detect-changes -s compare -b 3b7a9e2   (after the verify fixes; base = commit before this task)
+Changes: 23 files, 137 symbols
+Affected processes: 5
+Risk level: medium
+  Main → Normalize; Section_spans → _closes; Normalize → _is_boilerplate; Normalize → Next_content; Normalize → _closes
+  (all 5 flows are in code new in this task; no pre-existing flow is affected)
+
 $ npx -y gitnexus impact <symbol> --direction upstream   (before editing)
 ParsedDocument, DocumentChunk, Citation, Document: risk LOW (3 direct)
 DocumentParser: risk LOW (1 direct)
 ```
-**Tests can fail (mutation check, reverted afterwards):** without the CRLF step, 1 normalizer test fails; without the boilerplate removal, 3 tests fail; without the excluded-document guard, 1 use-case test fails.
+**Tests can fail (mutation check, reverted afterwards):** without the CRLF step, 1 normalizer test fails; with the body-line check `if _is_boilerplate(stripped):` replaced by `if False:` (preamble check untouched), 3 tests fail; without the excluded-document guard, 1 use-case test fails. (The verifier's own boilerplate mutation, a different edit, gave 7 failed + 4 errors.)
+
+**Correction (verify fix):** the commit message of `1858e27` says "gitnexus detect-changes: 0 processes, risk low". That came from the default scope, which only sees unstaged changes to tracked files and ignores new untracked files. The compare-scope run above is the correct one: 5 affected flows, risk medium, all in new code.
 
 ## Step 6: heading paths → character spans
 636/636 section-inventory rows (source_id, heading path, variant) have a span in the normalized text whose text starts with that heading line. None unlocated.
@@ -61,3 +70,5 @@ DocumentParser: risk LOW (1 direct)
 3. A `DocumentNormalizer` core interface was added (not named in the prompt) so the application layer stays on core interfaces only.
 4. `normalized.jsonl` is committed, like `section-inventory.jsonl` next to it; a test checks it equals a fresh run.
 5. The evidence-quote survival test goes beyond the prompt's test list; it guards the frozen ground truth against normalization.
+6. The removal list extends ADR-0003 D1: the page footer (`- Last updated on`, its date, and the `---` before it; 19 docs) is removed although neither EPIC-01 nor ADR-0003 lists it. ADR-0003's "version-selector lines" were searched for and none exist. Recorded in `ingestion-spec.md` § Normalization. (Added by the verify fixes.)
+7. Known residue kept: `---` before "## Additional resources" (20 docs) and #15's Q&A text ("Sign in to comment", "No comments"). Removing them would change `normalized.jsonl` and needs an owner decision.
