@@ -14,7 +14,7 @@ Date: 2026-09-25 · Branch: `ingest-004` (from `dev` `712f028`) · Prompt: [prom
 | `docs/architecture/decisions/0003-chunking-parameters-and-experiment.md` | New **D3a** amendment: rule, reason, "decided before results", effect. Status line notes the amendment. |
 | `src/.../infrastructure/chunking/header_aware.py` | `HeaderAwareConfig.drop_heading_only: bool = False`. With the flag on, `spans()` drops spans whose non-blank lines are all heading lines. Headings are found with `find_headings`, the same fence-aware detector the section splitter uses, so `# comment` lines inside a code fence are body. The drop happens before `build_chunks` numbers the IDs. |
 | `config/chunking.json` | Arm A: `"drop_heading_only": true`; `_comment` cites D3a. Arm B has no key and is unchanged. |
-| `tests/unit/infrastructure/test_chunkers.py` | 5 new tests (below). `test_arms_come_from_the_configuration_file` asserts that Arm A's flag is on. The `ARM_A` test config mirrors the real config (flag on), and `ARM_A_KEEP_HEADINGS` has it off. One existing assertion was changed (Deviation 2). |
+| `tests/unit/infrastructure/test_chunkers.py` | 6 new tests (below; corrected from "5" after verify). `test_arms_come_from_the_configuration_file` asserts that Arm A's flag is on. The `ARM_A` test config mirrors the real config (flag on), and `ARM_A_KEEP_HEADINGS` has it off. One existing assertion was changed (Deviation 2). |
 | `scripts/ingestion/check_blueprint_coverage.py` (new) | Step 4 check. For every expected and alternate (source_id, heading_path) in `blueprint.yaml` it counts the Arm A chunks that overlap the section's span, over any variant. It exits 1 when a count is 0 or the path is not a section. |
 | `validation/ingestion/blueprint-coverage-arm-a.md` (new) | Output of the step 4 check. |
 | `data/processed/chunks/arm-a.jsonl`, `stats-arm-a.json` | Regenerated. |
@@ -82,7 +82,7 @@ Other stat differences are all explained by the 19 drops:
 - `test_heading_only_chunk_of_an_h2_followed_by_its_h3_is_dropped`: with the flag off the chunk is `## Parent`; with it on it is gone.
 - `test_sibling_headings_without_body_are_dropped_together`: a merged `## A\n\n## B` chunk is dropped.
 - `test_heading_with_body_is_kept`.
-- `test_hash_lines_inside_a_code_fence_are_body_not_headings`: a whole fenced block with `# …` lines is kept.
+- `test_hash_lines_inside_a_code_fence_are_body_not_headings`: a whole fenced block with `# …` lines is kept. (This version could never fail; it was rewritten in the follow-up, see below.)
 - `test_a_split_code_piece_of_only_hash_comment_lines_is_kept`: an oversized code block is split by lines so that one piece holds only `# note …` lines, and that piece is kept.
 - `test_ids_stay_deterministic_and_contiguous_after_heading_only_drops`: IDs run 0000..n on two runs, with 2 fewer chunks than with the flag off.
 
@@ -119,3 +119,66 @@ Commit on branch `ingest-004`, pushed; PR into `dev` (link in the final chat rep
   - Changed code symbols: `HeaderAwareConfig`, `HeaderAwareChunker.spans`, the new `_heading_only`, the new `check_blueprint_coverage.py`, and tests. `_size` is listed only because its lines moved.
   - No fixed-size, builder, stats or normalizer flow is affected. This matches the intended scope.
 - `analyze` rewrote the index counts in `CLAUDE.md`/`AGENTS.md`. Those edits were reverted, not committed.
+
+## Explain it back (from the INGEST-004 final chat report, saved here after verify)
+- **Why the drop sits in the Arm A chunker (`spans()`), not in the shared builder.** The shared code that numbers and deduplicates chunks for both arms stays untouched. That is why Arm B can be proven unchanged by hash rather than only claimed.
+- **Why it is a config flag, not hard-coded.** ADR-0003 keeps chunk parameters in configuration. The flag also lets one test run both behaviours side by side (on vs off).
+- **Why "decided before any results" matters.** Nobody could pick the rule because it made Arm A score better. Heading-only chunks would have given Arm A free section hits, so dropping them makes the A/B comparison fairer.
+- **Why no blueprint case lost coverage.** Section spans are flat (an H2's span ends at its first H3). The 19 dropped chunks were "Additional resources" headings and the hub headings of #08/#09, which no blueprint case points at.
+- **Alternative not taken.** Letting a small parent merge into its first child would have changed the D3 merge rule and many other chunks, instead of removing only 19 empty ones.
+
+## Follow-up after verify (2026-09-25, "INGEST-004: follow-up fixes from verify")
+Prompt: [prompt-log](../../prompt-log/claude-code/INGEST-004-followup.md). Scope: the four non-blocking notes of [INGEST-004-verify](../../reviews/code/INGEST-004-verify.md) (verdict ACCEPT, commit `a142387`).
+
+**Files changed**
+| File | Change |
+|---|---|
+| `src/.../chunking/markdown_structure.py` | New `HeadingLines(text).heading_only(start, end)`: the one D3a definition. It is true when every non-blank line touching the span is a heading line, with headings from `find_headings` over the whole document, so `#` lines inside a fence are text. The diff only adds lines (0 removed). |
+| `src/.../chunking/header_aware.py` | The filter uses `HeadingLines`. The private `_heading_only` is removed, and so is the now-unused `find_headings` import. The behaviour is the same (same line range, same heading set). |
+| `src/.../chunking/stats.py` | `heading_only_chunks` counts `HeadingLines.heading_only(chunk.char_start, chunk.char_end)` instead of the old "one line starting with `#`" proxy. |
+| `tests/unit/infrastructure/test_chunkers.py` | `test_hash_lines_inside_a_code_fence_are_body_not_headings` rewritten: a span strictly between the ``` lines (`# install`, `# run`) must not be heading-only, and `## A` + `## B` must be (control). New `test_heading_only_stat_uses_the_d3a_definition`: a merged `## A\n\n## B` chunk (flag off) gives stat 1, where the old proxy gave 0 because of the newline; the flag-on run gives 0. |
+| This report, `agents/prompts/_common.md`, `agents/prompts/CHANGELOG.md`, ledger row 04a, `AI_WORKLOG.md`, prompt-log copy | Items 3–5. |
+
+**Pre-edit impact** (after `npx gitnexus analyze`):
+- `chunk_stats`: LOW. 0 indexed callers; the index misses its real callers, `scripts/ingestion/build_chunks.py` and one test.
+- `HeaderAwareChunker.spans`: LOW. 1 direct caller (`chunk_with_report`), process `chunk`.
+- `_heading_only`: LOW. 1 caller (`spans`).
+
+**Item 1: stat definition.** Rebuilt with `build_chunks.py --arm A` and `--arm B` (same console summary as above: 733 and 859 chunks). SHA-256 after the rebuild, all four equal to the verified versions at `8265d18`:
+```
+arm-a.jsonl       9c3bcc6c9428d0746c6dddc5509eab79b84d9a2c4ba35bcbcf9dc45f5fcf229f
+arm-b.jsonl       2bde1a0e3b42374f03d725f3a7c2b31225c0d6115aa5dc510f49c49a7edb7f2c
+stats-arm-a.json  26fab6bfefd59161319a71942ed661ba9161e5f369c85804da0e65730564d3d2
+stats-arm-b.json  01395880a947bb46ebfc4b77f51f1e83009dd57d93f2d78510049001cb77fa8b
+```
+`git diff --exit-code` on `data/processed/chunks`: clean, so the stats files did not change either. Under the D3a definition both arms still count 0 heading-only chunks, the same values the old proxy gave. A scratch run of Arm A with the flag off gives 19 under the new definition, the same 19 as before. Deviation 5 above still holds: Arm B's stats file stayed byte-identical and no key was added.
+
+**Item 2: fence test.** The old version could never fail, because a whole fenced block always contains its ``` lines. The rewrite tests the shared helper on a span inside the fence.
+
+**Mutations** (backup in the scratchpad, then restore; `sha256sum -c` OK for both source files):
+- **M1: the old one-line proxy put back in `stats.py`.** Result: **1 failed, 120 passed**. The failing test is `test_heading_only_stat_uses_the_d3a_definition`.
+- **M2: the `HeadingLines` heading set made fence-unaware** (ATX regex on every line). Result: **2 failed, 119 passed**. The failing tests are `test_hash_lines_inside_a_code_fence_are_body_not_headings` and `test_a_split_code_piece_of_only_hash_comment_lines_is_kept`.
+- **A failed first M1 attempt.** Using `sed` wrote a real newline into the string, which only caused a collection error. The file was restored, and the mutation was redone with a Python replacement. That second run is the one reported.
+
+**Item 3: "no content lost", precisely.** This report never said "no content lost" in those words; it said the remaining 733 chunks are unchanged. The loose form was the owner's check X3 in the verify. I re-measured it with a scratch script: non-whitespace characters on non-heading lines, with headings per `find_headings`. The numbers match review X3.
+- **D3a removes 0 content characters in all 24 docs.** Uncovered characters are identical with the flag on and off.
+- **Coverage gaps exist in #11, #13, #17 and #23**: 2,739, 108,542, 92,179 and 166,666 characters. They come from the pre-existing **D1 duplicate drop**, which removed 4, 135, 118 and 190 chunks as exact copies of an earlier chunk in the same document. The gaps are identical before and after D3a.
+- **Every gap is duplicate text.** Over the Arm A spans before the D1 drop, 0 characters are uncovered in every doc.
+
+**Item 4.** The "Explain it back" bullets are above. `_common.md` step 6 now requires them in the execution report as well as in chat, and a CHANGELOG row records the change.
+
+**Checks (step 5)**
+- **`npx gitnexus analyze`** → "Already up to date" (index at `a142387`). The CLAUDE.md/AGENTS.md count edits were reverted.
+- **`gitnexus_detect_changes(scope=all)`** → **risk high**: 5 files, 7 processes.
+  - Intended: four Arm A flows through `spans` (`Chunk → Line_index`, `Chunk → Line_end`, `Spans → _cut`, `Chunk → Trim`) and `Chunk_stats → _closes`.
+  - Not real: `Parse → _closes` (via `split_sections`) and `Normalize → _closes` (via `read_page_frame`). They appear only because the new class was inserted above those functions and moved their lines. The `markdown_structure.py` diff removes 0 lines, so those functions are byte-unchanged.
+  - Evidence that no behaviour moved: all four chunk/stats hashes are equal; `check_g2.py` → 11/11 PASS with `g2-check.md` unchanged; `check_blueprint_coverage.py --no-write` → PASS.
+- **`.venv/Scripts/python.exe -m pytest`** → `121 passed in 4.32s`: 120 plus 1 new stat test. The fence test was rewritten, not added.
+
+**Unverified:** the tests were not run on Linux.
+
+**Explain it back (follow-up)**
+- **One definition, one helper.** The filter and the stat call the same `HeadingLines.heading_only`, so they cannot drift apart again. A stat that disagreed with the filter would have hidden exactly the chunks D3a is about.
+- **Why the stat needs whole-document fence state.** A chunk cut from the middle of a long code block has no ``` line of its own. Only the document-level `find_headings` knows its `# …` lines are code.
+- **Why a test must be able to fail.** A test that passes even when the code is broken proves nothing. The mutation run (break the code on purpose, watch the test fail, restore) is the proof that the test guards the rule.
+- **"0 characters lost by D3a" vs "every character covered".** These are different claims. D3a loses nothing. The gaps in four docs come from D1 dropping duplicate chunks, a separate and older rule.

@@ -179,6 +179,22 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 - *Human decision:* D3a itself: drop heading-only Arm A chunks, decided 2026-09-25 before any index or result (owner).
 - *Verifier findings* (99-VERIFY, 2026-09-25, Windows 3.13.3, [INGEST-004-verify](docs/reviews/code/INGEST-004-verify.md) → ACCEPT): no defect in the D3a implementation. Evidence: 19 dropped chunks, each heading-only; 0 content characters lost by D3a in 24/24 docs; Arm B SHA-256 unchanged; fresh Arm A = committed; IDs contiguous; G2 11/11; blueprint coverage 54/54 with unchanged counts; the drop-disabled mutation fails 5 tests, the fence-unaware mutation fails 1; 120 passed. Minor: (1) the execution report's Files-changed table says "5 new tests", but there are 6 (stale after the sixth was added); (2) the `heading_only_chunks` stat is still a single-line `#` proxy, not the D3a predicate; (3) `test_hash_lines_inside_a_code_fence_are_body_not_headings` cannot fail under a fence-unaware detector (disclosed; the split-piece test covers it). Unverified: the chat-only "Explain it back" bullets. Note: the corpus has no ATX-like `#` line inside a fence, so the fence rule is proven only by unit test + mutation. The literal "no content lost" invariant has gaps on #11/#13/#17/#23, caused only by the pre-existing D1 duplicate drop.
 
+### 2026-09-25 INGEST-004 follow-up: fixes from verify (branch `ingest-004`, PR #7)
+- *AI did:* fixed the four non-blocking notes of [INGEST-004-verify](docs/reviews/code/INGEST-004-verify.md).
+  - One shared helper, `HeadingLines.heading_only` (`markdown_structure.py`), is now used by both the Arm A filter and the `heading_only_chunks` stat. A new test covers the case where the old proxy and D3a disagree.
+  - The fence test was rewritten so it can fail. Mutations: stat proxy → 1 failed; fence-unaware heading set → 2 failed. Restored by SHA-256.
+  - Both arms rebuilt: all four chunk/stats files are byte-identical to the verified versions.
+  - The report's test count was corrected. The content claim is now precise: 0 characters lost by D3a in 24/24 docs; the gaps in #11/#13/#17/#23 come from D1 duplicates. I re-measured this myself and it matches review X3.
+  - The Explain-it-back bullets are saved in the report. `_common.md` step 6 now requires that.
+  - 121 passed ([report](docs/reports/execution/INGEST-004.md#follow-up-after-verify-2026-09-25-ingest-004-follow-up-fixes-from-verify)).
+- *AI got wrong* (all found by 99-VERIFY, not by the AI):
+  - (1) "5 new tests" in the report table; there were 6.
+  - (2) The stat kept a single-line proxy instead of the D3a predicate, so filter and stat used two definitions.
+  - (3) A fence test that could never fail was kept, only disclosed.
+  - (4) The Explain-it-back bullets lived only in chat, so they could not be verified.
+  - During the fix itself, a `sed`-based mutation wrote a real newline into a string literal, causing a collection error rather than a test result. Found in the pytest output, restored from backup, and redone with a Python replacement.
+- *Human decision:* none new (the owner's follow-up prompt scoped the fixes).
+
 ## Summary: how AI helped
 
 To be filled at QC-001.

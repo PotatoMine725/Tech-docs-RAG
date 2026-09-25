@@ -19,7 +19,7 @@ from dataclasses import dataclass
 
 from knowledge_assistant.core.models import DocumentChunk, ParsedDocument
 from knowledge_assistant.infrastructure.chunking.chunk_builder import ChunkingResult, Span, build_chunks, trim
-from knowledge_assistant.infrastructure.chunking.markdown_structure import fence_mask, fenced_ranges, find_headings
+from knowledge_assistant.infrastructure.chunking.markdown_structure import HeadingLines, fence_mask, fenced_ranges
 
 _HEADING = re.compile(r"^ {0,3}#{1,6}(?:[ \t]|$)")
 _TABLE_SEPARATOR = re.compile(r"^\s*\|?\s*:?-{2,}")
@@ -70,8 +70,8 @@ class HeaderAwareChunker:
             else:
                 spans.extend(self._split(layout, start, end, path))
         if self.config.drop_heading_only:
-            heading_lines = {heading.line for heading in find_headings(layout.lines)}
-            spans = [span for span in spans if not _heading_only(layout, heading_lines, span)]
+            headings = HeadingLines(text)
+            spans = [span for span in spans if not headings.heading_only(span.start, span.end)]
         return spans
 
     # --- step 2: merge small sections with their next sibling ------------------------------------------------
@@ -235,12 +235,6 @@ class _Layout:
         while position < previous_end and text[position].isspace():
             position += 1
         return position
-
-
-def _heading_only(layout: _Layout, heading_lines: set[int], span: Span) -> bool:
-    """True when every non-blank line of the span is a heading line (D3a)."""
-    first, last = layout.line_index(span.start), layout.line_index(max(span.start, span.end - 1))
-    return all(index in heading_lines or not layout.lines[index].strip() for index in range(first, last + 1))
 
 
 def _size(text: str, start: int, end: int) -> int:

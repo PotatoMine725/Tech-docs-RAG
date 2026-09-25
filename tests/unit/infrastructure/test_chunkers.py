@@ -9,7 +9,7 @@ from knowledge_assistant.infrastructure.chunking.chunk_builder import build_chun
 from knowledge_assistant.infrastructure.chunking.factory import load_arm
 from knowledge_assistant.infrastructure.chunking.fixed_size import FixedSizeChunker, FixedSizeConfig
 from knowledge_assistant.infrastructure.chunking.header_aware import HeaderAwareChunker, HeaderAwareConfig
-from knowledge_assistant.infrastructure.chunking.markdown_structure import fenced_ranges
+from knowledge_assistant.infrastructure.chunking.markdown_structure import HeadingLines, fenced_ranges
 from knowledge_assistant.infrastructure.chunking.stats import chunk_stats, cuts_code_fence
 from knowledge_assistant.infrastructure.parsing.markdown_normalizer import section_spans
 
@@ -91,9 +91,21 @@ def test_heading_with_body_is_kept():
 
 
 def test_hash_lines_inside_a_code_fence_are_body_not_headings():
-    text = f"# Page\n\n{_para(80)}\n\n## Script\n\n```bash\n# install\n# run\n```\n\n### Next\n\n{_para(80)}\n"
-    kept = [c.display_text for c in _chunks_a(text, ("Page", "Script"))]
-    assert kept == ["## Script\n\n```bash\n# install\n# run\n```"]
+    # a span strictly between the ``` lines must not count as heading-only; "## A" + "## B" must (control)
+    text = "```bash\n# install\n# run\n```\n\n## A\n\n## B\n"
+    headings = HeadingLines(text)
+    inside = text.index("# install"), text.index("\n```")
+    assert headings.heading_only(*inside) is False
+    assert headings.heading_only(text.index("## A"), len(text) - 1) is True
+
+
+def test_heading_only_stat_uses_the_d3a_definition():
+    # a merged "## A\n\n## B" chunk has a newline, so the old one-line "#" proxy counted 0; D3a counts it
+    text = f"# Page\n\n{_para(80)}\n\n## A\n\n## B\n\n### B1\n\n{_para(80)}\n"
+    document = _doc(text)
+    for config, expected in ((ARM_A_KEEP_HEADINGS, 1), (ARM_A, 0)):
+        result = HeaderAwareChunker(config).chunk_with_report(document)
+        assert chunk_stats([document], [result], "header-1600", 400)["heading_only_chunks"] == expected
 
 
 def test_a_split_code_piece_of_only_hash_comment_lines_is_kept():
