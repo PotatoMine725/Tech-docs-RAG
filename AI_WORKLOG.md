@@ -109,6 +109,11 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 - *How found:* the AI grepped the file after the restore step and saw the mutation still there, before any commit.
 - *Fix:* the line was restored by hand; the full suite (63 passed) and the script were re-run after the restore.
 - *Human decision:* none in this task (entry was unblocked by the owner's REORIENT-001 decisions the same day).
+- *Verifier findings (99-VERIFY, [review](docs/reviews/code/INGEST-001-verify.md)):* verdict ACCEPT WITH FIXES. The code reproduces: 63 tests pass (45 + 18); the script gives 636/636 and a re-run leaves `normalized.jsonl` byte-identical; a raw-vs-normalized line diff over all 24 docs shows 0 added lines and only the intended boilerplate removed (no false positives for the byline pattern); spans are contiguous and the last one ends at `len(text)`; mutation checks make the new tests fail. Real defects (documentation/claims only):
+  - (1) The boilerplate list is attributed to the EPIC-01 report (worklog) / "EPIC-01 report and ADR-0003" (report). The `- Last updated on` + date footer and its `---` rule (19 docs) are in neither source: an unrecorded extension of the ADR-0003 D1 list, and the removal rules are spread over several constants although the prompt asked for one. ADR-0003's "version-selector lines" are not mentioned (none exist in the corpus).
+  - (2) Commit message "gitnexus detect-changes: 0 processes, risk low": a compare-scope run against the parent gives 22 files, 5 affected processes, risk medium (all in new code). The default unstaged scope does not see new untracked files.
+  - Not evidenced: the "3 tests fail" mutation count (the verifier's variant gave 7 failed + 4 errors); the pre-edit `gitnexus impact` results; the chat "Explain it back".
+  - Observations (no fix required): a `---` before "## Additional resources" (20 docs) and #15's Q&A chrome stay in the text; the byline regex is broad enough to hit prose in a future corpus.
 
 ## Summary: how AI helped
 
