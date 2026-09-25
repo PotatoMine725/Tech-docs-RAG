@@ -1,12 +1,13 @@
 # Ingestion specification
 
-Status: decisions accepted (ADR-0002, ADR-0003). Parsing (Markdown) and normalization implemented (INGEST-001); both chunkers implemented (INGEST-002).
+Status: decisions accepted (ADR-0002, ADR-0003). Parsing (Markdown) and normalization implemented (INGEST-001); both chunkers implemented (INGEST-002); MarkItDown adapter implemented (INGEST-003).
 
 ## Parsing
-- Inputs: Markdown (current corpus), and PDF, HTML, txt and other formats via MarkItDown.
+- Inputs: Markdown (current corpus), and PDF, HTML (`.html`/`.htm`), DOCX and txt via MarkItDown (INGEST-003; other MarkItDown formats need a registry entry and a test).
 - Non-Markdown inputs are converted to Markdown by a MarkItDown adapter in `infrastructure/parsing/`, selected through `ParserRegistry`. Markdown files may be read directly.
 - Output is a format-independent `ParsedDocument` (source_id, document_name, Markdown text, metadata). Nothing downstream may depend on the original format.
 - Conversion failures MUST raise a clear error and MUST NOT silently drop a document.
+- As implemented (INGEST-003): converted files are **not** passed through the ADR-0003 D1 normalizer (it is specific to the web-exported corpus pages and requires their page frame). The adapter itself unifies line endings and computes the H1–H3 sections. Each extension is converted by its own MarkItDown converter (no content guessing), so a damaged or mismatched `.pdf`/`.docx` raises `DocumentParseError` instead of being read as plain text; a conversion with no text also raises.
 - Conversion quality per format MUST be spot-checked before that format is used in evaluation.
 
 ## Normalization (ADR-0003 D1, both chunkers)

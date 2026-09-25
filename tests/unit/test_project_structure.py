@@ -4,7 +4,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 PKG = ROOT / "src" / "knowledge_assistant"
 EXCLUDED_IDS = {"14", "19", "24", "27"}
-FORBIDDEN_CORE = ("PySide6", "chromadb", "google")
+FORBIDDEN_CORE = ("PySide6", "chromadb", "google", "markitdown")
 FORBIDDEN_APP = FORBIDDEN_CORE
 
 
@@ -40,6 +40,19 @@ def test_core_and_application_do_not_import_outer_layers():
             text = py.read_text(encoding="utf-8")
             assert "knowledge_assistant.infrastructure" not in text, py
             assert "knowledge_assistant.presentation" not in text, py
+
+
+def test_markitdown_is_imported_only_by_its_adapter():
+    """ADR-0002: MarkItDown lives in one infrastructure/parsing module."""
+    importers = set()
+    for py in PKG.rglob("*.py"):
+        for node in ast.walk(ast.parse(py.read_text(encoding="utf-8"))):
+            names = [a.name for a in node.names] if isinstance(node, ast.Import) else []
+            if isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+                names = [node.module]
+            if any(name.split(".")[0] == "markitdown" for name in names):
+                importers.add(py.relative_to(PKG).as_posix())
+    assert importers == {"infrastructure/parsing/markitdown_parser.py"}
 
 
 def test_excluded_corpus_ids_are_exactly_14_19_24_27():

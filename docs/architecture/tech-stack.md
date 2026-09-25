@@ -9,7 +9,7 @@
 - SOURCE FORMAT: current corpus = Markdown; architecture = format-independent
 - STRUCTURED DATA: JSON / JSONL
 - OPTIONAL FUTURE STORAGE: SQLite only if a concrete requirement appears
-- DOCUMENT CONVERSION: Microsoft MarkItDown (accepted, ADR-0002; not yet added to pyproject; infrastructure only)
+- DOCUMENT CONVERSION: Microsoft MarkItDown `markitdown[pdf,docx]>=0.1.8,<0.2` (ADR-0002; added in INGEST-003; only `infrastructure/parsing/markitdown_parser.py`). Its `magika` dependency needs `onnxruntime`, which `chromadb` already requires (no new runtime; imported lazily).
 - CHUNKING: header-aware baseline; fixed-size as experiment comparison (ADR-0002); parameters in ADR-0003
 - EMBEDDING: abstracted behind `core.interfaces.embedding`; `gemini-embedding-001` (ADR-0004); MUST be multilingual (EN + VI queries over an English corpus, ADR-0003 D9)
 - LLM: Gemini API through an abstraction/interface (`core.interfaces.llm`)

@@ -1,4 +1,4 @@
-"""Maps document formats to parser adapters (skeleton)."""
+"""Maps document formats (file extensions) to parser adapters."""
 from knowledge_assistant.core.exceptions import ParserNotFoundError
 from knowledge_assistant.core.interfaces.parser import DocumentParser
 
@@ -18,10 +18,14 @@ class ParserRegistry:
 
 
 def default_registry() -> ParserRegistry:
-    """Parsers for the formats the pipeline reads today (Markdown; MarkItDown formats come with INGEST-003)."""
+    """Markdown is read directly; PDF, HTML, DOCX and txt go through one shared MarkItDown adapter (ADR-0002)."""
     from knowledge_assistant.infrastructure.parsing.markdown_parser import MarkdownParser
+    from knowledge_assistant.infrastructure.parsing.markitdown_parser import MARKITDOWN_EXTENSIONS, MarkItDownParser
 
     registry = ParserRegistry()
     for extension in (".md", ".markdown"):
         registry.register(extension, MarkdownParser())
+    converter = MarkItDownParser()
+    for extension in MARKITDOWN_EXTENSIONS:
+        registry.register(extension, converter)
     return registry

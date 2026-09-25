@@ -117,14 +117,14 @@ Deliverables:
 - Offline unit tests: deterministic IDs, size rules, code/table blocks kept whole, heading paths, no `markitdown` import in core/application.
 
 Exit gate **G2**:
-- [x] Both chunkers run over all 24 docs; a second run gives identical chunk IDs and hashes. *(INGEST-002, `validation/ingestion/g2-check.md`; not yet verified)*
+- [x] Both chunkers run over all 24 docs; a second run gives identical chunk IDs and hashes. *(INGEST-002, `validation/ingestion/g2-check.md`; verified 2026-09-25)*
 - [x] Chunk IDs follow `{source_id}:{chunker_config}:{index:04d}`. *(INGEST-002)*
 - [x] For all 24 docs: every heading path in the Arm A chunk file appears in the EPIC-01 section inventory, and every inventory heading path can be located in the normalized text (so its character span can be computed for section hit@5). This guarantees the frozen ground truth points at real sections. *(Second half met by INGEST-001: 636/636 inventory sections located, `test_every_inventory_heading_path_has_a_span_in_the_normalized_text`; Arm A half met by INGEST-002: `check_g2.py`, 752/752 chunks.)*
 - [x] Stats file exists for each arm. *(`data/processed/chunks/stats-arm-{a,b}.json`)*
 - [x] ~5 chunks per arm spot-checked by hand, notes in `validation/ingestion/`. *(`spot-check.md`)*
 - [x] pytest passes, including `tests/unit/test_project_structure.py`. *(92 passed, Linux)*
 
-G2 is not passed until `99-VERIFY` for INGEST-002 accepts it.
+G2 passed: `99-VERIFY` for INGEST-002 → ACCEPT (2026-09-25, [review](../reviews/code/INGEST-002-verify.md)).
 
 ### EPIC-03 RAG baseline
 **When:** Sat 26 – Sun 27 Sep · **Phase:** 2 · **Entry condition:** M1 committed · **Tasks:** RAG-001a (`06a`, embedder + cache + ADR-0005), RAG-001b (`06b`, ChromaDB + indexing), RAG-002 (`07`, retrieval + generation + citations), RAG-003 (`08`, retry/fallback + CLI + smoke) · **Role:** rag-analyst
@@ -276,7 +276,7 @@ This plan does **not** decide these. Each must be decided by the owner epic's la
 | OD-3 | Why each excluded doc (14, 19, 24, 27) was dropped (owner knowledge) | `corpus/README.md` | EPIC-01 / user | ✅ Decided 24 Sep (user): all four are index pages (links to other pages, no useful content) |
 | OD-4 | Question mix: total (≥ 30), EN/VI split, parallel subset size, number of "not in the documents" cases | evaluation-spec, ADR-0003 D8/D9 | EVAL-001 | ✅ Decided 24 Sep (user): 36 = 28 single + 4 cross-doc + 4 insufficient; 18 EN / 18 VI; 7 parallel groups; + 6 dev |
 | OD-5 | Answer-quality rubric and "result" values | evaluation-spec | EVAL-001 | ✅ Decided 24 Sep (user): 6 labels + points-covered score |
-| OD-6 | PDF/HTML placeholders: delegate to MarkItDown or one adapter | ingestion-architecture | EPIC-02 | 26 Sep |
+| OD-6 | PDF/HTML placeholders: delegate to MarkItDown or one adapter | ingestion-architecture | EPIC-02 | ✅ Decided 25 Sep (AI, owner away; flagged for owner review): one shared adapter, stubs deleted (INGEST-003) |
 | OD-7 | Canonical ChromaDB path (`D:\ChromaDB` vs `data/chroma/`) and whether vector data is committed | ADR-0001, tech-stack | EPIC-03 | 27 Sep (before indexing) |
 | OD-8 | Distance metric (held constant by D7, but not named) | ADR-0003 D7 | EPIC-03 | 27 Sep (before indexing) |
 | OD-9 | Rule for answering "insufficient information" | retrieval-spec | EPIC-03 | 27 Sep |
@@ -290,7 +290,7 @@ This plan does **not** decide these. Each must be decided by the owner epic's la
 
 Facts to verify (not decisions):
 - **V-1** Does one batched embedding request count as 1 or N requests against the daily limit? (ADR-0004) — first step of EPIC-03.
-- **V-2** Does MarkItDown install and work on Python 3.13? (`.venv` is 3.13.3; ADR-0002) — EPIC-02.
+- **V-2** Does MarkItDown install and work on Python 3.13? (`.venv` is 3.13.3; ADR-0002) — EPIC-02. ✅ Answered 25 Sep (INGEST-003): yes, `markitdown` 0.1.8 on Python 3.13.12 (Linux); also passed on the Windows 3.13.3 venv, 113 tests, 25 Sep.
 
 ## 9. Brief traceability (`docs/specs/assignment-requirements.md`)
 
@@ -332,7 +332,7 @@ Gaps this plan covers:
 | Core models are one-field stubs | EPIC-02 |
 | Retrieval, project and quality specs mostly TBD | EPIC-03, EPIC-05, EPIC-07 |
 | Agent role files are TBD | When each epic starts (optional) |
-| MarkItDown not in `pyproject.toml` | EPIC-02 |
+| MarkItDown not in `pyproject.toml` | EPIC-02 ✅ (INGEST-003) |
 | `requirements.txt` lacks PySide6 (pyproject has it) | EPIC-07 |
 | Working tree CRLF vs repo LF (line-ending noise in diffs) | HOUSE-001 ✅ (`.gitattributes`) |
 | Submission package missing from specs and plan; no `AI_WORKLOG.md` | HOUSE-001 ✅ |
