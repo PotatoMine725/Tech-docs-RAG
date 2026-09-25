@@ -3,7 +3,7 @@
 **For the owner to fill.** EVAL-002 MUST NOT start until every `owner verdict:` line below is filled (`agents/prompts/02-EVAL-002-write-and-freeze.md`, entry condition).
 
 - **Baseline ("old")**: `blueprint.yaml` at `9e0ab15`. That is after the YAML parsing fix and before the independent-review fixes (`ce04909`) and owner decisions D1–D3 (`831d5a0`), so it is the version you reviewed.
-- **"New"**: `blueprint.yaml` at `629b931` (current). Produced by a script that compares the parsed YAML of both versions. The only change to every case is the new `slot: S1/S2` field from owner decision D1; it is not repeated below.
+- **"New"**: `blueprint.yaml` at `629b931` (current). Produced by a script that compares the parsed YAML of both versions. Every case also got the new `slot: S1/S2` field from owner decision D1; it is not repeated below. The blocks below cover the cases whose answer points or core ground truth changed. A diff of the parsed YAML that ignores `slot` finds **27** changed blueprints; the other 18 are listed in "Other changes since your review" at the end (added by the REORIENT-001 fixes, after the REORIENT-001 verify found line 6 wrong).
 - **Why each case changed**: `docs/reviews/evaluation/EVAL-001-blueprint-review.md` §2 (finding #) and §5 (response).
 - Quotes are verbatim from the corpus (test-checked in `tests/unit/test_evaluation_blueprints.py`).
 - Suggested verdicts: `ok` / `change: <what>` / `drop` (dropping an answerable case: at most 2, evaluation-spec § Dataset mix).
@@ -93,3 +93,30 @@ Expected: refusal (corpus-insufficient). Review finding #3.
 - **Scoring note:** under the REORIENT-001 C1 decision, a refusal that mentions `Mock<T>`/`.Setup` as related content goes to the judge's refusal check.
 
 owner verdict: 
+
+---
+
+## Other changes since your review (owner to confirm)
+
+Found by the REORIENT-001 verify (`docs/reviews/code/REORIENT-001-verify.md`, FAIL 1). Same baseline (`9e0ab15`) and method (parsed YAML, `slot` ignored). None of these changes an answer point; they widen alternates, citation rules or accepted variations, or fix labels. Finding # = `EVAL-001-blueprint-review.md` §2.
+
+| Case | Field | Old → new (short) | Finding |
+|---|---|---|---|
+| BP-EVAL-002 (VI) | `retrieval_challenges` | `[tiny_document, cross_lingual]` → adds `direct_semantic` (same as its EN pair 001) | #22 |
+| BP-EVAL-003 / 004 | `ground_truth.evidence` | adds P3 quote from the expected section: "Don't enable the Developer Exception Page **unless the app is running in the `Development` environment**. …" | #14 |
+| BP-EVAL-005 / 006 | `acceptable_alternate_sources` | adds #02 "Explore the asynchronous programming model" (H2, partial: P2, P1 in part) | #5 |
+| BP-EVAL-013 / 014 | `acceptable_alternate_sources`, `citation_acceptance_criteria` | adds #11 "Additional resources" (P3), #11 "IMiddleware" (P2/P3), #10 "Lifetime and registration options" (P2); P2 may now be cited from these, not only #10 "Service lifetimes" | #6 |
+| BP-EVAL-017 | `acceptable_alternate_sources` | adds #10 "Service lifetimes" (partial P1, P2) | #7 |
+| BP-EVAL-018 | `acceptable_alternate_sources`, `evaluation_target.why_it_matters` | parent H2 "Logical patterns" removed → "Parenthesized pattern" added (P3/P4); `why_it_matters` says both arms split the 1,842-char section | #13, #21 |
+| BP-EVAL-019 | `acceptable_variations` | "range/slice `..`" → "slice" only ("range" is a different construct in #20) | #18 |
+| BP-EVAL-027 | alternates, variations, citation criteria | adds #12 "Key differences for controllers"; a custom `ProblemDetailsFactory` is an accepted route for "how to customize"; citation widened to both | #12 |
+| BP-EVAL-029 | `acceptable_variations` | adds loading by key with `FindAsync` (#23) instead of `SingleAsync` | #17 |
+| BP-EVAL-030 | `question_notes` | "Name the test method in the question" → don't give the name; ask about the [Theory] test for inputs below 2, so #28 is needed | #4, D3 |
+| BP-EVAL-034 (VI, refusal) | `acceptable_variations` | adds: mentioning related content is fine if the refusal says the topic isn't covered | D2 |
+| BP-DEV-002 (dev) | alternates, citation criteria | adds #16 "Characteristics of the integral types" and #16 "Native sized integers" | #23 |
+| BP-DEV-003 (dev) | alternates, citation criteria | adds #06 H1 "C# keywords"; citation may be the #06 page introduction | #23 |
+| BP-DEV-005 (dev, refusal) | variations, citation criteria | adds the D2 related-content rule; "any citation must not be presented as supporting an answer" | D2 |
+| BP-DEV-006 (dev, refusal) | variations, `must_not_claim`, citation criteria | mentioning `MapGroup` route groups OK if versioning is said to be uncovered; presenting `MapGroup`/`/v1` as versioning = must-not-claim | #24, D2 |
+
+owner verdict (all rows above; `ok`, or `change: <case>: <what>`): 
+

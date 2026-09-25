@@ -1,6 +1,6 @@
 # Ingestion specification
 
-Status: decisions accepted (ADR-0002, ADR-0003). Not implemented.
+Status: decisions accepted (ADR-0002, ADR-0003). Parsing (Markdown) and normalization implemented (INGEST-001); chunking not implemented.
 
 ## Parsing
 - Inputs: Markdown (current corpus), and PDF, HTML, txt and other formats via MarkItDown.
@@ -12,6 +12,12 @@ Status: decisions accepted (ADR-0002, ADR-0003). Not implemented.
 ## Normalization (ADR-0003 D1, both chunkers)
 - In-memory step between parsing and chunking; sources are never edited.
 - Wrapper H1 title and `Source:` URL move to metadata; wrapper lines and known boilerplate lines are removed.
+- Removal list as implemented (INGEST-001; the single list with sources is the REMOVAL LIST block in `infrastructure/parsing/markdown_normalizer.py`):
+  - preamble before the page H1: wrapper H1, `Source:`, `---`, "Note", the access lines (EPIC-01, ADR-0003), #29 YAML front matter (EPIC-01); an unknown preamble line raises an error;
+  - body, outside code fences: access lines (EPIC-01, ADR-0003); "This isn't the latest version…", "…no longer supported…", author bylines `By [Name](url)` (ADR-0003); the admonition label introducing one of these;
+  - **extension beyond ADR-0003 D1 (INGEST-001):** the page footer `- Last updated on` + its date line + the `---` before it (19 docs). It is page chrome (edit date), carries no content, and no evidence quote uses it.
+  - ADR-0003's "version-selector lines": searched for, none exist in the corpus (the tab-selector link lists in #12 are content and are kept).
+  - Known residue, kept: `---` before "## Additional resources" (20 docs); #15's Q&A page text ("Sign in to comment", "No comments").
 - Version variants inside a doc are kept (variant 1..n, no guessed version labels); exact-duplicate chunks within a doc (normalized-text hash) are dropped after chunking.
 
 ## Chunking (baseline: header-aware)

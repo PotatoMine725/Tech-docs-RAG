@@ -8,7 +8,12 @@ Format-independent. Parsers live in `infrastructure/parsing` (base, markdown_par
 - `markitdown` is imported only inside `infrastructure/`.
 
 ```
-file -> ParserRegistry -> (MarkItDown | Markdown reader) -> ParsedDocument -> Chunker -> DocumentChunk[]
+file -> ParserRegistry -> (MarkItDown | Markdown reader) -> ParsedDocument (raw) -> MarkdownNormalizer (D1) -> ParsedDocument (normalized) -> Chunker -> DocumentChunk[]
 ```
 
 Current corpus is Markdown, so MarkItDown is needed only once other formats are added.
+
+## Implemented (INGEST-001)
+- `infrastructure/parsing/markdown_parser.py` reads the file unchanged (line endings kept); `registry.default_registry()` maps `.md`/`.markdown` to it.
+- `infrastructure/parsing/markdown_normalizer.py` implements `core.interfaces.normalizer.DocumentNormalizer`: CRLF → LF first; everything before the page H1 goes to metadata or is dropped (unknown preamble lines raise `DocumentParseError`); `BOILERPLATE_LINES` removed outside code fences; blank-line runs collapsed; `SectionSpan`s computed with `markdown_structure.split_sections`.
+- `application/ingestion/normalize_corpus.py` (`NormalizeCorpus`, depends on core interfaces only) + `scripts/ingestion/normalize_corpus.py` → `data/processed/documents/normalized.jsonl` (one line per doc: `id`, `metadata` incl. section spans, `text`, `sha256`). The script exits 1 if any section-inventory heading path has no span.

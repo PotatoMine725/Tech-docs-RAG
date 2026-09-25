@@ -9,7 +9,7 @@ Entry: EVAL-003b done.
    - writes Markdown tables **between markers** in the target report: `<!-- AUTO:retrieval -->…<!-- /AUTO:retrieval -->` (also `answer`, `refusal`, `citation`, `latency`, `cost`, `per_language`, `parallel`, `per_case`). Text outside markers is never touched; missing markers → append a new section, don't fail;
    - each table caption states: run ids, n, and which records were excluded and why;
    - `data/evaluation/results/summary-<runA>-<runB>.json` with every number used;
-   - `data/evaluation/results/eval-table-<run>.csv` with at least the brief's 5 columns: `question, expected_answer, expected_source, generated_answer, result` (+ case_id, arm, language, citations, latency_total_ms).
+   - `data/evaluation/results/eval-table-<run>.csv` with at least the brief's 5 columns: `question, expected_answer, expected_source, generated_answer, result` (+ case_id, arm, language, citations, latency_total_ms). These are the brief's column names; map them from the run record as in `evaluation-dataset-design.md` §18 (`expected_source` ← `expected_sources`, `generated_answer` ← `answer`, `latency_total_ms` ← `latency_ms.total`; owner 2026-09-25, REORIENT-001 C5).
    - Deterministic: running twice gives byte-identical output (test it).
 2. **Judge spot-check tooling:**
    - `scripts/evaluation/make_spot_check.py --run RUN --fraction 0.2 --seed 42`: stratified sample by (`result`, language) → `docs/reviews/evaluation/judge-spot-check-<run>.md` with columns: case, question, expected answer, generated answer, cited excerpts, judge result, judge reason, **human_result** (blank), **human_note** (blank).
