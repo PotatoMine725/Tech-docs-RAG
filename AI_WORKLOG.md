@@ -99,6 +99,9 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - *AI got wrong (in the fix):* none observed.
   - *Human decision:* C5 prompt names win (spec updated); verifier may edit the ledger (confirmed 2026-09-25).
   - Not evidenced: `gitnexus_detect_changes()` covering the committed diff (the report says the tool saw the main checkout, not the worktree); the AskUserQuestion events for C1–C4.
+- *Verifier findings (re-verify, [review](docs/reviews/code/REORIENT-001-reverify.md)):* verdict ACCEPT. Fixes 1–5 pass their checks: a parsed-YAML diff (ignoring `slot`) gives exactly the 27 cases on the re-check sheet, and every `owner verdict:` line is still empty; §18 field names match 09a, and 09c/§18 map the CSV columns the same way; README grants ledger edit rights; EPIC-05 is updated. 45 tests pass; docs only. `gitnexus detect-changes` (compare, run after the fact) → 0 processes, risk low for both the fix commit and the whole task range. Real defects:
+  - (1) `docs/reports/execution/REORIENT-001.md` Deviation 4 says `c867943` corrected "ledger, CHANGELOG, report". `git show --stat c867943` shows AI_WORKLOG, ledger, report and the owner re-check sheet; CHANGELOG is not touched. So the fix's "AI got wrong (in the fix): none observed" is also inaccurate. Minor, non-blocking.
+  - Still not evidenced: the AskUserQuestion events for C1–C4; owner authorship of the pre-commit edits.
 
 ## Summary: how AI helped
 
