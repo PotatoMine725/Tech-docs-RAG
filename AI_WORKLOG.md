@@ -174,6 +174,7 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 - *AI got wrong:*
   - (1) The first fence test could not fail. A whole fenced block always contains its ``` lines, so a detector that ignores fences also passed it. Found by a mutation (fence-unaware detector → 0 failures). Fixed with a test where an oversized code block is split so that one piece holds only `# …` comment lines. The first version of that test still passed under the mutation because the piece kept one `echo` line; the block was made longer, and now the mutation fails it.
   - (2) A shell heredoc mangled `\n` escapes while the test file was edited. That caused a SyntaxError at collection. The file was restored with `git checkout` and the edits were redone with the Edit tool.
+  - (4) It ran `gitnexus_detect_changes` before the commit on a **stale index**, repeating the OWNER-001 slip. CLAUDE.md says to run `npx gitnexus analyze` when the index is stale. Found by the post-commit hook warning. Fixed by re-indexing and re-running as `compare` against `dev` (4 Arm A chunk flows, risk medium, as intended), with the report corrected in a follow-up commit.
   - (3) The first draft of the INGEST-002 addendum gave the size range of the dropped chunks as "13–40 chars" without measuring it. It was checked before the commit (13–24) and corrected.
 - *Human decision:* D3a itself: drop heading-only Arm A chunks, decided 2026-09-25 before any index or result (owner).
 

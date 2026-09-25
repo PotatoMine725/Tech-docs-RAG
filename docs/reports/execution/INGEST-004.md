@@ -112,8 +112,10 @@ Before the rebuild, the full suite failed only `test_committed_chunk_and_stats_f
 ## Commit / PR
 Commit on branch `ingest-004`, pushed; PR into `dev` (link in the final chat report).
 
-`gitnexus_detect_changes(scope=all)` before the commit:
-- Risk **medium**: 14 changed files, 1 affected process, `Chunk → Trim`. That is the Arm A chunk flow, as intended.
-- Changed code symbols are all in `header_aware.py` and `test_chunkers.py`.
-- Some neighbouring symbols (`_sentences`, `_groups`, `_TABLE_SEPARATOR`) are listed as "touched" only because their line numbers moved; their code is unchanged.
-- No other flow is affected (fixed-size, stats, builder, normalizer).
+`gitnexus_detect_changes`:
+- **First run, before the commit, on a stale index.** `scope=all` gave risk medium and 1 process (`Chunk → Trim`). The post-commit hook then reported the index was stale (last indexed `4ef58ed`), so that run is not valid evidence.
+- **Re-run after `npx gitnexus analyze`**, as `compare` against `dev`:
+  - Risk **medium**: 20 files, 4 affected processes, all of them Arm A header-aware chunk flows reached through `HeaderAwareChunker.spans`: `Chunk → Line_index`, `Chunk → Line_end`, `Spans → _cut`, `Chunk → Trim`.
+  - Changed code symbols: `HeaderAwareConfig`, `HeaderAwareChunker.spans`, the new `_heading_only`, the new `check_blueprint_coverage.py`, and tests. `_size` is listed only because its lines moved.
+  - No fixed-size, builder, stats or normalizer flow is affected. This matches the intended scope.
+- `analyze` rewrote the index counts in `CLAUDE.md`/`AGENTS.md`. Those edits were reverted, not committed.
