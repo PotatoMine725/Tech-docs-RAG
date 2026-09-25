@@ -126,7 +126,7 @@ Exit gate **G2**:
 
 G2 passed: `99-VERIFY` for INGEST-002 → ACCEPT (2026-09-25, [review](../reviews/code/INGEST-002-verify.md)).
 
-INGEST-004 (ADR-0003 D3a, owner 2026-09-25): Arm A drops heading-only chunks (752 → 733). Arm B is byte-identical. G2 was re-run and passes 11/11. Every blueprint expected/alternate section keeps ≥ 1 Arm A chunk. Status `done`; waiting for `99-VERIFY`. EVAL-002 waits for it ([ledger](task-ledger.md) rows 02, 04a).
+INGEST-004 (ADR-0003 D3a, owner 2026-09-25): Arm A drops heading-only chunks (752 → 733). Arm B is byte-identical. G2 was re-run and passes 11/11. Every blueprint expected/alternate section keeps ≥ 1 Arm A chunk. Status `verified` 2026-09-25 (ACCEPT; follow-up fixes `f456471`; merged into `dev` `5c2cace`). EVAL-002 is unblocked ([ledger](task-ledger.md) rows 02, 04a).
 
 ### EPIC-03 RAG baseline
 **When:** Sat 26 – Sun 27 Sep · **Phase:** 2 · **Entry condition:** M1 committed · **Tasks:** RAG-001a (`06a`, embedder + cache + ADR-0005), RAG-001b (`06b`, ChromaDB + indexing), RAG-002 (`07`, retrieval + generation + citations), RAG-003 (`08`, retry/fallback + CLI + smoke) · **Role:** rag-analyst
