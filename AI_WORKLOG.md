@@ -128,6 +128,13 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 - *Human decision:* table split: header row repeated in `embed_text` only, so `display_text` stays the exact slice (owner, 2026-09-25). Open: 19 heading-only Arm A chunks (D3 merges only siblings).
 - *Verifier findings (99-VERIFY, [review](docs/reviews/code/INGEST-002-verify.md)):* verdict ACCEPT. All stats, G2 checks (11/11) and spot-check numbers reproduced from a fresh run; chunk files byte-identical; corpus checksums unchanged. Real defect found: (1) one Markdown link with a doubly nested `((…))` URL is not reduced to its text in `embed_text` of `23:header-1600:0085` (`_LINK` handles one nesting level; only occurrence in the corpus; minor). Mutation counts in the report (1/2/2 fails) differ from the verifier's own mutations (3/3) because the edits differ; the claim that tests can fail holds. GitNexus detect-changes output not re-checkable.
 
+### 2026-09-25 INGEST-003 (branch `claude/workflows-ingest-002-review-svn2dq`)
+- *AI did:* MarkItDown adapter (`markitdown_parser.py`) for `.pdf .html .htm .docx .txt` behind `ParserRegistry`, lazy import, signature check for `.pdf`/`.docx`; V-2 answered (0.1.8 on Python 3.13.12, Linux); OD-6 resolved (one adapter, stubs deleted); 12 offline tests with PDF/DOCX fixtures built in the test; dependency added to `pyproject.toml` + `requirements.txt` ([report](docs/reports/execution/INGEST-003.md)). Corpus outputs unchanged (`normalized.jsonl` sha256 `a6db2f26…9ae95`, chunk files byte-identical, G2 11/11).
+- *AI got wrong:* the first "broken file raises" test expected MarkItDown to fail on a damaged `.docx`; it did not — MarkItDown guessed plain text from the content and returned the bytes as the document text.
+- *How found:* first pytest run (1 failed, `DID NOT RAISE DocumentParseError`), then converting the file by hand.
+- *Fix:* the adapter checks the `.pdf`/`.docx` file signature before converting; the test covers `.docx`, `.pdf` and a missing file; a mutation (check removed) makes it fail.
+- *Human decision:* none (owner away). AI decisions flagged for the owner: OD-6 (one adapter, stubs deleted); converted files skip the D1 normalizer; transitive `onnxruntime` via MarkItDown's `magika` ([autonomous-session note](docs/plans/session-handoff-2026-09-25-autonomous.md)).
+
 ## Summary: how AI helped
 
 To be filled at QC-001.

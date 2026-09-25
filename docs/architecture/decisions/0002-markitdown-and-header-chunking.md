@@ -1,7 +1,7 @@
 # ADR-0002 MarkItDown parsing and header-based chunking
 
 Date: 2026-09-24
-Status: Accepted (user decision). Implementation not started.
+Status: Accepted (user decision). MarkItDown adapter implemented in INGEST-003 (2026-09-25); chunkers in INGEST-002.
 
 ## Decision
 1. Use Microsoft **MarkItDown** (https://github.com/microsoft/markitdown) as the converter for non-Markdown inputs (PDF, HTML, txt, others). It lives only in `infrastructure/parsing/` as an adapter behind `ParserRegistry`, returning a normalized `ParsedDocument` whose text is Markdown.
@@ -15,7 +15,7 @@ Status: Accepted (user decision). Implementation not started.
 
 ## Consequences / risks
 - Conversion quality varies by format (tables, scanned PDFs, PDFs with few headings). Spot-check needed before trusting any converted format.
-- Licence: MarkItDown is MIT-licensed (confirmed by user). This project itself has no licence: individual, non-commercial, educational only. Python 3.13 compatibility must still be verified before adding the dependency. Not yet added to `pyproject.toml`.
+- Licence: MarkItDown is MIT-licensed (confirmed by user). This project itself has no licence: individual, non-commercial, educational only. Python 3.13: verified in INGEST-003 (V-2) — `markitdown` 0.1.8 installs and converts PDF/HTML/DOCX/txt on Python 3.13.12 (Linux). Added to `pyproject.toml` and `requirements.txt` as `markitdown[pdf,docx]>=0.1.8,<0.2`.
 - Core and application MUST NOT import `markitdown`; boundary tests must cover it when the adapter is added.
 - The current 24 corpus files are already Markdown; MarkItDown is not required for them.
 
