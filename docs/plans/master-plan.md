@@ -119,7 +119,7 @@ Deliverables:
 Exit gate **G2**:
 - [ ] Both chunkers run over all 24 docs; a second run gives identical chunk IDs and hashes.
 - [ ] Chunk IDs follow `{source_id}:{chunker_config}:{index:04d}`.
-- [ ] For all 24 docs: every heading path in the Arm A chunk file appears in the EPIC-01 section inventory, and every inventory heading path can be located in the normalized text (so its character span can be computed for section hit@5). This guarantees the frozen ground truth points at real sections.
+- [ ] For all 24 docs: every heading path in the Arm A chunk file appears in the EPIC-01 section inventory, and every inventory heading path can be located in the normalized text (so its character span can be computed for section hit@5). This guarantees the frozen ground truth points at real sections. *(Second half met by INGEST-001: 636/636 inventory sections located, `test_every_inventory_heading_path_has_a_span_in_the_normalized_text`; the Arm A half waits for INGEST-002.)*
 - [ ] Stats file exists for each arm.
 - [ ] ~5 chunks per arm spot-checked by hand, notes in `validation/ingestion/`.
 - [ ] pytest passes, including `tests/unit/test_project_structure.py`.

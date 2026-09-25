@@ -8,3 +8,7 @@ class ConfigurationError(KnowledgeAssistantError):
 
 class ParserNotFoundError(KnowledgeAssistantError):
     """No parser registered for a document format."""
+
+
+class DocumentParseError(KnowledgeAssistantError):
+    """A document could not be read or normalized; it is never dropped silently."""

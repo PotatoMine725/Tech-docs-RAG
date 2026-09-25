@@ -1,7 +1,7 @@
 from typing import Protocol
 
-from knowledge_assistant.core.models import ParsedDocument
+from knowledge_assistant.core.models import Document, ParsedDocument
 
 
 class DocumentParser(Protocol):
-    def parse(self, path: str) -> ParsedDocument: ...
+    def parse(self, document: Document) -> ParsedDocument: ...

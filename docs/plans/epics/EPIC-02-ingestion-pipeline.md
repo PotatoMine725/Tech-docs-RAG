@@ -1,6 +1,6 @@
 # EPIC-02-ingestion-pipeline
 
-Status: not started.
+Status: in progress. INGEST-001 (models, parser, normalization) done 2026-09-25, awaiting 99-VERIFY; INGEST-002/003 not started. Task status: [ledger](../task-ledger.md).
 
 Target: Fri 25 – Sat 26 Sep 2026 (Phase 2). Deadline for the whole project: 2026-10-01.
 

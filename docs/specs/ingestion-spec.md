@@ -1,6 +1,6 @@
 # Ingestion specification
 
-Status: decisions accepted (ADR-0002, ADR-0003). Not implemented.
+Status: decisions accepted (ADR-0002, ADR-0003). Parsing (Markdown) and normalization implemented (INGEST-001); chunking not implemented.
 
 ## Parsing
 - Inputs: Markdown (current corpus), and PDF, HTML, txt and other formats via MarkItDown.

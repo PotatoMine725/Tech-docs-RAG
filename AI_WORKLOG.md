@@ -103,6 +103,13 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - (1) `docs/reports/execution/REORIENT-001.md` Deviation 4 says `c867943` corrected "ledger, CHANGELOG, report". `git show --stat c867943` shows AI_WORKLOG, ledger, report and the owner re-check sheet; CHANGELOG is not touched. So the fix's "AI got wrong (in the fix): none observed" is also inaccurate. Minor, non-blocking.
   - Still not evidenced: the AskUserQuestion events for C1–C4; owner authorship of the pre-commit edits.
 
+### 2026-09-25 INGEST-001 (branch `claude/sleepy-wright-vj962y`)
+- *AI did:* core models (`Document`, `SectionSpan`, `ParsedDocument`, D6 `DocumentChunk`, `Citation` defaulting to `heading`), Markdown parser + registry, the ADR-0003 D1 normalizer (CRLF first, preamble to metadata with unknown lines raising, boilerplate list from EPIC-01, blank-line collapse, section spans), the `NormalizeCorpus` use case and script, `normalized.jsonl`, 18 offline tests ([report](docs/reports/execution/INGEST-001.md)). 636/636 inventory heading paths located; all 107 evidence quotes survive normalization; 63 tests pass.
+- *AI got wrong:* during the mutation check (breaking code on purpose to prove tests fail), the AI restored the mutated use-case file with `git checkout`, which does nothing for an untracked file, so the excluded-document guard stayed replaced by `if False:`.
+- *How found:* the AI grepped the file after the restore step and saw the mutation still there, before any commit.
+- *Fix:* the line was restored by hand; the full suite (63 passed) and the script were re-run after the restore.
+- *Human decision:* none in this task (entry was unblocked by the owner's REORIENT-001 decisions the same day).
+
 ## Summary: how AI helped
 
 To be filled at QC-001.

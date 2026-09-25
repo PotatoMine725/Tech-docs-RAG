@@ -91,3 +91,22 @@ def read_page_frame(lines: Sequence[str]) -> PageFrame:
             source_url = match.group(1)
             break
     return PageFrame(wrapper.text, source_url, page.text, page.line)
+
+
+def fence_mask(lines: Sequence[str]) -> list[bool]:
+    """True for every line that is a fence line or inside a fenced code block (same rules as `find_headings`)."""
+    mask: list[bool] = []
+    fence: str | None = None
+    for line in lines:
+        opener = _FENCE.match(line)
+        if fence is not None:
+            mask.append(True)
+            if opener and _closes(fence, line, opener.group(1)):
+                fence = None
+            continue
+        if opener:
+            fence = opener.group(1)
+            mask.append(True)
+            continue
+        mask.append(False)
+    return mask
