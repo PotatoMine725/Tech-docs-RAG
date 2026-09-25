@@ -210,6 +210,28 @@ def test_sources_are_grouped_in_evidence_slots():
             assert len(documents) == len(expected_by_slot) == len(set(documents)), (b["id"], expected_by_slot)
 
 
+def test_two_slot_single_source_cases_keep_their_slots():
+    """Owner, 2026-09-25 (OWNER-001): 022 needs both methods in the top 5; 017 needs the intro and IMiddleware."""
+    by_id = {b["id"]: b for b in _blueprints()}
+    expected_slots = {
+        "BP-EVAL-022": {"S1": "UseStatusCodePagesWithRedirects", "S2": "UseStatusCodePagesWithReExecute"},
+        "BP-EVAL-017": {"S1": ("Factory-based middleware activation in ASP.NET Core",
+                               "Factory-based middleware activation in ASP.NET Core > Additional resources"),
+                        "S2": ("Factory-based middleware activation in ASP.NET Core > IMiddleware",
+                               "Dependency injection in ASP.NET Core > Service lifetimes")},
+    }
+    for case_id, slots in expected_slots.items():
+        b = by_id[case_id]
+        entries = b["expected_sources"] + b["acceptable_alternate_sources"]
+        assert {e["slot"] for e in b["expected_sources"]} == set(slots), case_id
+        for e in entries:
+            wanted = slots[e["slot"]]
+            if isinstance(wanted, str):
+                assert e["heading_path"].endswith(" > " + wanted), (case_id, e["slot"], e["heading_path"])
+            else:
+                assert e["heading_path"] in wanted, (case_id, e["slot"], e["heading_path"])
+
+
 def test_every_required_point_is_supported_by_a_quote():
     for b in _blueprints():
         points = {p["id"]: p for p in b["ground_truth"]["answer_points"]}

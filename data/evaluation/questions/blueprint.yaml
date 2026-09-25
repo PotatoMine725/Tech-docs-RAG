@@ -729,10 +729,6 @@ blueprints:
         heading_path: "C# classes > Create objects"
         slot: S1
         note: Partial support for P1 and P2 (reference sharing for classes; with structs, assignment copies the data).
-      - source_id: "20"
-        heading_path: "A tour of the C# language > Familiar C# features"
-        slot: S1
-        note: Partial support for P1 (collections are reference types).
     objective: Predict what happens after assigning a list variable to another and changing it through the second one.
     concepts: [value types, reference types, assignment semantics, List<T>]
     cognitive_level: apply
@@ -784,7 +780,7 @@ blueprints:
         slot: S1
       - source_id: "11"
         heading_path: "Factory-based middleware activation in ASP.NET Core > IMiddleware"
-        slot: S1
+        slot: S2
     acceptable_alternate_sources:
       - source_id: "11"
         heading_path: "Factory-based middleware activation in ASP.NET Core > Additional resources"
@@ -792,7 +788,7 @@ blueprints:
         note: The intros of variants 2 and 3 are stored under this heading (the variant has no own H1).
       - source_id: "10"
         heading_path: "Dependency injection in ASP.NET Core > Service lifetimes"
-        slot: S1
+        slot: S2
         note: Partial support for P1 and P2 (inject into Invoke/InvokeAsync, or use factory-based middleware activated per request). Same sentences as PG-007.
     objective: Compare how conventional middleware and factory-activated (IMiddleware) middleware get a scoped service.
     concepts: [IMiddleware, IMiddlewareFactory, conventional middleware, scoped services, UseMiddleware]
@@ -833,7 +829,7 @@ blueprints:
         - Factory-activated middleware is registered as a singleton.
         - Conventional middleware takes scoped services in its constructor.
     citation_acceptance_criteria:
-      - P1 cites a chunk with the conventional InvokeAsync signature; P2/P3 cite the intro (any variant, including text under 'Additional resources').
+      - "One citation per slot: S1 from the #11 intro (any variant, including text under 'Additional resources') for P2/P3; S2 from #11 'IMiddleware' (the conventional InvokeAsync signature) or #10 'Service lifetimes' for P1."
     question_notes: Ask for the difference in how each kind of middleware gets a DbContext.
     reason_for_inclusion: Hard compare case with repeated sections and the mislabelled-intro quirk.
 
@@ -1230,7 +1226,7 @@ blueprints:
       rationale: Measures how many top-5 slots copies take in each arm.
     ground_truth:
       answer_points:
-        - {id: P1, required: true, text: "Shadow copying runs the tests in a different directory than the output directory; tests that load files relative to Assembly.Location may then run into issues, and disabling shadow copying is the fix."}
+        - {id: P1, required: true, text: "Shadow copying runs the tests in a different directory than the output directory; tests that load files relative to Assembly.Location may run into issues, and you might have to disable shadow copying."}
         - {id: P2, required: true, text: "With xUnit, add an xunit.runner.json file in the test project directory containing \"shadowCopy\": false."}
       evidence:
         - source_id: "17"

@@ -4,7 +4,7 @@ Format-independent. Parsers live in `infrastructure/parsing` (base, markdown_par
 
 ## Accepted design (ADR-0002; MarkItDown adapter implemented in INGEST-003)
 - A MarkItDown adapter converts PDF/HTML/DOCX/txt to Markdown; the registry picks the parser by file type.
-- **OD-6 resolved (INGEST-003, 2026-09-25, AI decision while the owner was away; see the INGEST-003 report):** one shared adapter, `markitdown_parser.py`, registered for every MarkItDown extension. The `pdf_parser.py` / `html_parser.py` stubs were deleted (empty skeletons, no importers). Reason: MarkItDown already dispatches by format, so per-format wrappers would be empty pass-throughs.
+- **OD-6 resolved (INGEST-003, 2026-09-25, AI decision while the owner was away; see the INGEST-003 report; **accepted by the owner 2026-09-25**, OWNER-001, together with skipping the D1 normalizer for converted files, per-format converters and the `markitdown[pdf,docx]` dependency):** one shared adapter, `markitdown_parser.py`, registered for every MarkItDown extension. The `pdf_parser.py` / `html_parser.py` stubs were deleted (empty skeletons, no importers). Reason: MarkItDown already dispatches by format, so per-format wrappers would be empty pass-throughs.
 - Chunkers in `infrastructure/chunking/`: header-aware (baseline) and fixed-size (experiment), both implementing `core.interfaces.chunker` (implemented in INGEST-002, see below).
 - `markitdown` is imported only by `infrastructure/parsing/markitdown_parser.py` (structure test).
 

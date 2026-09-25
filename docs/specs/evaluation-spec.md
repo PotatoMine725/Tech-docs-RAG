@@ -48,10 +48,15 @@ Plus a **points-covered score** for answerable cases: (required points judged `y
 ## Retrieval hit rule: evidence slots (D1, decided by the owner 2026-09-24)
 - Every expected and alternate source of an answerable case belongs to one **evidence slot** (`slot: S1`, `S2`, …; test-checked).
 - **All of the slots, any source within a slot.** source hit@5 = 1 when every slot has at least one of its sources among the top-5 chunks. section hit@5 = the same at section level (a top-5 chunk overlaps a span of a section listed in that slot; any variant counts, ADR-0003 D8). An alternate source counts only for its own slot.
-- Most cases have one slot, so any listed source or section counts. Several slots: the 4 cross-document cases (one slot per document) and BP-EVAL-022 (one slot per method, because its blueprint requires both in the top 5).
+- Most cases have one slot, so any listed source or section counts. Several slots: the 4 cross-document cases (one slot per document), BP-EVAL-022 (one slot per method, because its blueprint requires both in the top 5) and BP-EVAL-017 (S1 = the #11 intro, S2 = 'IMiddleware'; owner, 2026-09-25, OWNER-001).
 - Secondary, reported separately: fraction of slots satisfied.
 - MRR is unchanged: 1 / rank of the first chunk that hits any slot.
-- Citations in cross-document cases: one per slot, from any source in that slot (e.g. BP-EVAL-031 slot S2 = #26 or #20).
+- Citations in multi-slot cases: one per slot, from any source in that slot (e.g. BP-EVAL-031 slot S2 = #26 or #20).
+- **Strict and lenient hit (owner, 2026-09-25, OWNER-001; condition for accepting the widened alternates of the EVAL-001 re-check).** EVAL-003b reports source hit@k and section hit@k twice:
+  - **lenient** = the D1 rule above: every slot needs one of its expected **or alternate** sources/sections;
+  - **strict** = the same rule with the alternates removed: every slot needs one of its **expected** sources/sections.
+  - Example: slots S1 = {#04 expected}, S2 = {#26 expected, #20 alternate}; top-k {#04, #20} → lenient hit, strict miss.
+  - MRR and the fraction of slots satisfied stay on the D1 (lenient) rule; strict applies only to source and section hit. Which of the two hit values is the headline number in the report: **TBD / DECISION REQUIRED** (EVAL-003c/EVAL-004).
 
 ## Proposed for EVAL-003 (not decided; marked `metric_decision: proposed`)
 - **Citation quality** (method is OD-12): one label per answer: `correct_evidence` (a cited chunk contains the evidence for the answer's claim), `correct_source_wrong_evidence` (right document, but the cited chunk doesn't support the claim), `unsupported_citation` (cited chunk from an unrelated place), `citation_missing`. These four names are the ones every prompt uses (owner, 2026-09-24, REORIENT-001 C2). Judge the chunk *text* against the evidence, not heading strings: Arm A may label a merged small section with the first section's heading path (ADR-0003 D3), and Arm B uses the nearest preceding heading (D5).
