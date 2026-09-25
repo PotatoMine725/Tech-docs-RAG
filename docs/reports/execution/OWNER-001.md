@@ -34,7 +34,7 @@ Not changed: the handoff note, past reviews and past execution reports (point-in
   - 022 older-H2 ReExecute alternate slot S2 → S1: `1 failed`.
   - 017 #10 "Service lifetimes" alternate slot S2 → S1: `1 failed`.
 - Full suite, Windows, `Python 3.13.3`: `.venv/Scripts/python.exe -m pytest -q` → `114 passed in 3.88s`.
-- `gitnexus_detect_changes(scope=all)` before the commit: risk `low`, 15 files, 0 affected processes. Changed symbols: doc sections in the edited Markdown files, plus three existing test functions below the new test, flagged `touched` only because their line numbers shifted (their bodies are unchanged in `git diff`).
+- `gitnexus_detect_changes` for `4ef58ed`: the first run (`scope=all`) used a stale index (last indexed `b58a50d`), so its symbol mapping was wrong. I re-ran it after `npx gitnexus analyze` as `scope=compare, base_ref=dev`: risk `low`, 0 affected processes. Changed symbols: sections of the edited Markdown files, the new test `test_two_slot_single_source_cases_keep_their_slots` (+ its locals), and the next test `test_every_required_point_is_supported_by_a_quote`, flagged only because it sits right after the inserted lines (body unchanged in `git diff`). `analyze` also rewrote the GitNexus counts block in `CLAUDE.md`/`AGENTS.md`; left uncommitted, not part of OWNER-001.
 
 ## Unverified / open
 - Which hit value (strict or lenient) is the headline number: **TBD / DECISION REQUIRED** (EVAL-003c/EVAL-004). The owner's condition covers only source and section hit; this task did not extend strict to MRR or the slot fraction.
@@ -44,4 +44,5 @@ Not changed: the handoff note, past reviews and past execution reports (point-in
 ## Deviations from the prompt
 - The new test also guards 017's two slots (the prompt asked for 022 only). Reason: the 017 split is an owner decision that nothing else checks.
 - The 09b test case names roles (04 and 26 expected, 20 alternate) and adds the {04, 26} case; the prompt's example is kept exactly (`{04, 20}` → lenient hit, strict miss).
+- `evaluation-dataset-design.md` §18 (017 slot paragraph) and §20 (re-check row) changed although no count changed (the prompt says "only where counts change"). Reason: the old text would now be false ("017 has one slot; the owner can split it", "Pending: the owner's re-check").
 - "Limitations note for the final README": put in `EPIC-07-final-qc.md` (the epic that owns the README), because the root README has no Limitations section yet.

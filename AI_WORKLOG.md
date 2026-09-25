@@ -163,9 +163,9 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - *Lesson 2 (owner):* verify on the exact environment and OS of the owner's machine (Windows, Python 3.13.3 venv), not only on the AI's Linux sandbox.
 "`; `MarkdownParser` untouched (keeps line endings, ADR-0003 D1); other `write_text`/`write_bytes` calls in `tests/` checked (single-line or bytes), none needed changes.
 
-### 2026-09-25 OWNER-001 (branch `owner-001`, commit "OWNER-001: apply owner re-check verdicts and INGEST-003 decisions")
+### 2026-09-25 OWNER-001 (commit `4ef58ed`, branch `owner-001`, PR #6)
 - *AI did:* filled the EVAL-001 owner re-check sheet with the owner's verdicts, verbatim; applied the three blueprint changes (016 alternate removed, 024 P1 reworded, 017 split into slots S1 intro / S2 IMiddleware); added a slot test for 022 (and 017), shown to catch slot flips by two mutations; wrote the strict/lenient hit rule into `evaluation-spec.md` and 09b; marked the INGEST-003 AI decisions as owner-accepted; recorded N1/N2 as known limitations ([report](docs/reports/execution/OWNER-001.md)). 114 tests pass on Windows 3.13.3.
-- *AI got wrong:* none observed.
+- *AI got wrong:* `gitnexus_detect_changes` was first run on a stale index (CLAUDE.md says to run `npx gitnexus analyze` first); found by the post-commit hook warning; re-run after `analyze`, report corrected in a follow-up commit.
 - *Human decision:* all re-check verdicts, the 017 slot split, the strict + lenient reporting condition, and acceptance of OD-6 / D1-skip / per-format converters / `markitdown[pdf,docx]` (owner, 2026-09-25). Left open: which hit value is the headline number.
 
 ## Summary: how AI helped
