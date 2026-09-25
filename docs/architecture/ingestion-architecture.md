@@ -9,15 +9,17 @@ Format-independent. Parsers live in `infrastructure/parsing` (base, markdown_par
 - `markitdown` is imported only by `infrastructure/parsing/markitdown_parser.py` (structure test).
 
 ```
-file -> ParserRegistry -> (MarkItDown | Markdown reader) -> ParsedDocument (raw) -> MarkdownNormalizer (D1) -> ParsedDocument (normalized) -> Chunker -> DocumentChunk[]
+Markdown (corpus):  file -> ParserRegistry -> MarkdownParser -> ParsedDocument (raw) -> MarkdownNormalizer (D1) -> ParsedDocument (normalized) -> Chunker -> DocumentChunk[]
+PDF/HTML/DOCX/txt: file -> ParserRegistry -> MarkItDownParser -> ParsedDocument (raw, LF, sections) ----------------------------------------> Chunker -> DocumentChunk[]
 ```
 
 Current corpus is Markdown, so MarkItDown is needed only once other formats are added.
 
 ## Implemented (INGEST-003)
-- `infrastructure/parsing/markitdown_parser.py` (`MarkItDownParser`, `MARKITDOWN_EXTENSIONS` = `.pdf .html .htm .docx .txt`): `markitdown` is imported lazily on the first `parse`, so `default_registry()` does not load it (and its `magika`/`onnxruntime` dependencies) for the Markdown corpus.
+- `infrastructure/parsing/markitdown_parser.py` (`MarkItDownParser`, `MARKITDOWN_EXTENSIONS` = `.pdf .html .htm .docx .txt`): `markitdown` is imported lazily on the first `parse`, so `default_registry()` does not load it for the Markdown corpus. Each extension goes to its own converter class (`PdfConverter`, `HtmlConverter`, `DocxConverter`, `PlainTextConverter`), not the `MarkItDown` front end.
 - Output: raw `ParsedDocument` (`normalized=False`) with LF line endings, `document_name` = the converter's title (HTML `<title>`) or `Document.name`, and `sections` from `section_spans` (the same H1–H3 spans the normalizer computes). The ADR-0003 D1 `MarkdownNormalizer` is **not** applied: it requires the web-export page frame (wrapper H1 + page H1) and raises on anything else. So for converted files the flow is `file -> ParserRegistry -> MarkItDownParser -> ParsedDocument -> Chunker`.
-- `.pdf` and `.docx` are checked against their file signature before conversion: MarkItDown guesses the converter from the content and returned a damaged `.docx` as its raw bytes read as plain text. Any conversion failure raises `DocumentParseError`.
+- Why direct converters: the `MarkItDown` front end guesses the converter from the content and returned a damaged `.docx`, a zip renamed `.docx` and a header-only `.pdf` as plain text. The format's own converter raises instead.
+- `DocumentParseError` (with `#<source_id>`) for: unknown extension, missing file ("file not found"), directory ("not a file"), any converter error (also a missing `markitdown` install), and a conversion with no text ("no text extracted", e.g. a scanned PDF) so no document silently yields 0 chunks. A leading BOM is dropped; the title's whitespace is collapsed.
 - Known limits: plain PDF text has no Markdown headings, so it has no sections and chunks get an empty heading path (`location_type` stays `heading`; the `position` type of `Citation` is not produced yet). Conversion quality of real PDFs/tables is unchecked (no such inputs in the corpus).
 
 ## Implemented (INGEST-001)

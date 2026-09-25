@@ -1,55 +1,66 @@
 """MarkItDown adapter (ADR-0002): converts PDF, HTML, DOCX and plain-text files to Markdown.
 
 The only module that imports `markitdown` (guarded by `tests/unit/test_project_structure.py`). The import and
-the converter are created on the first `parse`, so building the default registry stays cheap for the Markdown
-corpus. The result is a raw `ParsedDocument` (`normalized=False`): the ADR-0003 D1 normalizer is specific to the
+the converters are created on the first `parse`, so building the default registry stays cheap for the Markdown
+corpus. Each extension is sent to its own MarkItDown converter: the `MarkItDown` front end guesses the format from
+the content and returned damaged or mismatched files (a zip renamed `.docx`, a header-only `.pdf`) as plain text.
+The result is a raw `ParsedDocument` (`normalized=False`): the ADR-0003 D1 normalizer is specific to the
 web-exported corpus pages and is not applied. Line endings are unified and the H1-H3 sections are computed the
 same way as for normalized text, so both chunkers can take the document as-is.
 """
-import zipfile
 from pathlib import Path
 
 from knowledge_assistant.core.exceptions import DocumentParseError
 from knowledge_assistant.core.models import Document, ParsedDocument
 from knowledge_assistant.infrastructure.parsing.markdown_normalizer import section_spans
 
-MARKITDOWN_EXTENSIONS = (".pdf", ".html", ".htm", ".docx", ".txt")
-# MarkItDown picks its converter from the content, so a damaged .docx silently comes back as plain text.
-# Binary formats are therefore checked against their file signature first.
-def _starts_like_pdf(path: Path) -> bool:
-    with path.open("rb") as handle:
-        return handle.read(5) == b"%PDF-"
-
-
-_SIGNATURES = {".pdf": _starts_like_pdf, ".docx": zipfile.is_zipfile}
+# extension -> name of the converter class in `markitdown.converters`
+_CONVERTERS = {
+    ".pdf": "PdfConverter",
+    ".html": "HtmlConverter",
+    ".htm": "HtmlConverter",
+    ".docx": "DocxConverter",
+    ".txt": "PlainTextConverter",
+}
+MARKITDOWN_EXTENSIONS = tuple(_CONVERTERS)
 
 
 class MarkItDownParser:
     def __init__(self) -> None:
-        self._converter = None
+        self._converters: dict[str, object] = {}
 
     def parse(self, document: Document) -> ParsedDocument:
         path = Path(document.path)
-        check = _SIGNATURES.get(path.suffix.lower())
+        extension = path.suffix.lower()
+        where = f"#{document.source_id} ({document.path})"
+        if extension not in _CONVERTERS:
+            raise DocumentParseError(f"cannot convert {where}: no MarkItDown converter for {extension!r}")
+        if not path.is_file():
+            raise DocumentParseError(f"cannot convert {where}: {'not a file' if path.exists() else 'file not found'}")
         try:
-            if check is not None and not check(path):
-                raise ValueError(f"content is not a valid {path.suffix.lower()} file")
-            result = self._markitdown().convert_local(document.path)
-        except Exception as error:  # MarkItDown raises format-specific errors; one clear error for callers
-            raise DocumentParseError(f"cannot convert #{document.source_id} ({document.path}): {error}") from error
-        text = result.text_content.replace("\r\n", "\n").replace("\r", "\n")
-        text = text.strip("\n") + "\n" if text.strip() else ""
+            from markitdown import StreamInfo
+
+            with path.open("rb") as stream:
+                info = StreamInfo(extension=extension, local_path=str(path), filename=path.name)
+                result = self._converter(extension).convert(stream, info)
+        except Exception as error:  # converters raise format-specific errors; one clear error for callers
+            raise DocumentParseError(f"cannot convert {where}: {error}") from error
+        text = result.markdown.removeprefix("\ufeff").replace("\r\n", "\n").replace("\r", "\n").strip("\n")
+        if not text.strip():  # e.g. a scanned PDF: an empty document must not vanish silently from the index
+            raise DocumentParseError(f"cannot convert {where}: no text extracted")
+        text += "\n"
         return ParsedDocument(
             document=document,
             text=text,
-            document_name=(result.title or "").strip() or document.name,
+            document_name=" ".join((result.title or "").split()) or document.name,
             source_url=document.source_url,
             sections=section_spans(text),
         )
 
-    def _markitdown(self):
-        if self._converter is None:
-            from markitdown import MarkItDown
+    def _converter(self, extension: str):
+        name = _CONVERTERS[extension]
+        if name not in self._converters:
+            from markitdown import converters
 
-            self._converter = MarkItDown(enable_plugins=False)
-        return self._converter
+            self._converters[name] = getattr(converters, name)()
+        return self._converters[name]

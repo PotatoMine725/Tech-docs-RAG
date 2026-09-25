@@ -69,3 +69,41 @@ Mutation checks (each restored from a scratch backup, full suite re-run after: 1
 - Headingless input (PDF, txt) gets chunks with an empty heading path and `location_type="heading"`; the `position` location type is not produced. Not needed for the corpus; open for a later task.
 - `requirements.txt` still lacks PySide6 (pre-existing gap, EPIC-07).
 - A separate `.venv313/` was used so the concurrent EVAL-001 verifier's `.venv` (3.11) was not disturbed; it is git-excluded locally.
+
+## Fixes from verification (2026-09-25, "INGEST-003: fixes from verification")
+Source: [INGEST-003-verify](../../reviews/code/INGEST-003-verify.md) → ACCEPT WITH FIXES (B1, F1, F2 + minor). The sections above are history and were not edited.
+
+| Fix | Change | Proof (mutation → result) |
+|---|---|---|
+| 1 (F1) empty conversion | `parse` raises `DocumentParseError` "no text extracted" | test: empty `.txt`, empty `.html`, textless PDF, empty DOCX; guard removed → 4 failed |
+| 2 (F2) content-guess fallback | each extension goes to its own converter class (`PdfConverter`, `HtmlConverter`, `DocxConverter`, `PlainTextConverter`) with `StreamInfo(extension=…)`; the signature helpers are gone; "file not found" / "not a file" checked first | test: non-zip `.docx`, zip-with-readme `.docx`, garbage `.pdf`, header-only `.pdf`; missing/directory messages; front end `convert_local` restored → 5 failed |
+| 3 (B1) hermetic lazy-import test | subprocess gets `cwd=ROOT` and `PYTHONPATH=<this checkout>/src` | eager `import markitdown` in a separate `git worktree` (editable install points at the main checkout) → 1 failed |
+| 4 minor | leading BOM dropped; title whitespace collapsed; `result.markdown` instead of the deprecated `text_content` | BOM strip removed → 1 failed (stub test); `.strip()` title → 1 failed |
+| 5 CRLF test | stub converter returns `"﻿a\r\nb\rc"` → text `"a\nb\nc\n"` | `replace()` calls removed → 1 failed |
+| 6 docs | ingestion-architecture flow shows both paths + error list; ADR-0002 D1 amendment line (AI decision, pending owner review); tech-stack + spec wording | — |
+
+Corrections to this report: `onnxruntime` is **not** new — `chromadb` already requires it (`pip show chromadb`: Requires … onnxruntime); a missing `markitdown` install surfaces as `DocumentParseError` (the import is inside the `try`).
+
+Commands (real output, Linux):
+```
+$ .venv313/bin/python -m pytest -q      # Python 3.13.12
+113 passed in 5.76s
+$ .venv/bin/python -m pytest -q         # Python 3.11.15
+113 passed in 5.72s
+$ normalize_corpus.py; build_chunks.py --arm A; --arm B; check_g2.py
+inventory heading paths located: 636/636
+**Overall: PASS** (11/11)
+$ git status --short data validation    # (empty: byte-identical)
+$ npx -y gitnexus impact MarkItDownParser --direction upstream
+impactedCount 1 (default_registry), risk LOW
+$ npx -y gitnexus detect-changes -s compare -b aa593b9   (staged)
+Changes: 6 files, 18 symbols / Affected processes: 1 (Parse → _closes, changed: parse) / Risk level: medium
+```
+The one affected flow is the adapter's own `parse`; the Markdown pipeline output is byte-identical.
+
+### Explain it back
+- **One adapter, per-format converters:** MarkItDown already has a converter per format, so per-format wrapper files would be empty; but its front end guesses the format from the content, which turned broken files into "text". Calling the format's own converter makes the extension the contract and failures loud.
+- **Why not the D1 normalizer:** D1 removes boilerplate of the web-exported corpus pages and requires their page frame; a PDF or DOCX has neither, so the adapter only does the generic part (LF, BOM, sections).
+- **Format independence proof:** the same content as `.md`, `.html` and `.docx` gives identical chunks in both arms, with no change to chunkers or core.
+- **Never drop silently:** an empty conversion (scanned PDF) would give 0 chunks and disappear from the index; it raises instead, as the ingestion spec requires.
+- **Lazy import:** the corpus scripts build the registry but never load MarkItDown.

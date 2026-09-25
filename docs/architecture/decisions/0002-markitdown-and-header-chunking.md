@@ -5,6 +5,7 @@ Status: Accepted (user decision). MarkItDown adapter implemented in INGEST-003 (
 
 ## Decision
 1. Use Microsoft **MarkItDown** (https://github.com/microsoft/markitdown) as the converter for non-Markdown inputs (PDF, HTML, txt, others). It lives only in `infrastructure/parsing/` as an adapter behind `ParserRegistry`, returning a normalized `ParsedDocument` whose text is Markdown.
+   - *Amendment (INGEST-003, 2026-09-25; AI decision while the owner was away, pending owner review):* "normalized" here means Markdown text with LF line endings and computed sections. Converted files are **not** passed through the ADR-0003 D1 normalizer, which is specific to the web-exported corpus pages (see `docs/specs/ingestion-spec.md` § Parsing).
 2. Baseline chunking strategy is **header-aware chunking**: split on Markdown headings, keep the heading path as chunk location, apply size limits (merge small sections, split oversized ones), and fall back to paragraph/size splitting for documents without headings.
 3. **Fixed-size chunking** (size TBD, e.g. 300 vs 800) is the comparison approach for the >= 2-approach experiment. The experiment design is defined in `docs/specs/evaluation-spec.md` and the plan for EPIC-06.
 

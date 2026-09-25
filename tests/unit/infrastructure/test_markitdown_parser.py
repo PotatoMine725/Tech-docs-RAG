@@ -1,5 +1,6 @@
 """INGEST-003: MarkItDown adapter. Fixtures are built in the test (no binary files in the repo)."""
 import io
+import os
 import subprocess
 import sys
 import zipfile
@@ -127,20 +128,75 @@ def test_pdf_text_is_extracted_without_headings(tmp_path):
     assert parsed.sections == ()  # plain PDF text has no Markdown headings
 
 
-def test_txt_keeps_text_and_unifies_line_endings(tmp_path):
-    parsed = _parse(tmp_path, "notes.txt", "Line one.\r\n\r\nLine two.\r\n")
+def test_txt_keeps_text(tmp_path):
+    parsed = _parse(tmp_path, "notes.txt", "Line one.\n\nLine two.\n")
     assert parsed.text == "Line one.\n\nLine two.\n"
     assert parsed.source_id == "90"
 
 
-@pytest.mark.parametrize("name", ["broken.docx", "broken.pdf", "missing.html"])
-def test_broken_or_missing_file_raises_a_clear_parse_error(tmp_path, name):
-    """A damaged .docx must not come back as its raw bytes read as plain text."""
-    parser = default_registry().get(Path(name).suffix)
-    if not name.startswith("missing"):
-        (tmp_path / name).write_bytes(b"not a real document")
+def test_adapter_unifies_line_endings_and_drops_a_bom_from_the_converter_output(tmp_path, monkeypatch):
+    """MarkItDown's own converters already emit LF and drop a BOM, so the adapter's own handling is tested with a stub."""
+
+    class Stub:
+        def convert(self, stream, info):
+            return type("Result", (), {"markdown": "\ufeffa\r\nb\rc", "title": None})()
+
+    parser = MarkItDownParser()
+    monkeypatch.setattr(parser, "_converter", lambda extension: Stub())
+    path = tmp_path / "notes.txt"
+    path.write_text("ignored", encoding="utf-8")
+    assert parser.parse(Document("90", "notes", str(path))).text == "a\nb\nc\n"
+
+
+def test_utf8_bom_does_not_hide_the_first_heading(tmp_path):
+    parsed = _parse(tmp_path, "notes.txt", "\ufeff# Title\n\nBody\n")
+    assert [s.heading_path for s in parsed.sections] == [("Title",)]
+
+
+def test_title_whitespace_is_collapsed(tmp_path):
+    parsed = _parse(tmp_path, "guide.html", HTML.replace("<title>Retry guide</title>", "<title>  Retry\n guide </title>"))
+    assert parsed.document_name == "Retry guide"
+
+
+def _zip(files: dict[str, str]) -> bytes:
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as package:
+        for name, data in files.items():
+            package.writestr(name, data)
+    return buffer.getvalue()
+
+
+@pytest.mark.parametrize(
+    "name, data",
+    [
+        ("broken.docx", b"not a zip file"),
+        ("readme.docx", _zip({"readme.txt": "a zip, but not a Word document"})),
+        ("broken.pdf", b"not a real document"),
+        ("header-only.pdf", b"%PDF-1.4\n"),
+    ],
+)
+def test_damaged_or_mismatched_file_raises_instead_of_being_read_as_text(tmp_path, name, data):
+    """MarkItDown's front end would return these as plain text; the adapter must fail loudly."""
     with pytest.raises(DocumentParseError, match="#91"):
-        parser.parse(Document("91", "broken", str(tmp_path / name)))
+        _parse(tmp_path, name, data, source_id="91")
+
+
+@pytest.mark.parametrize(
+    "name, data",
+    [("empty.txt", b""), ("empty.html", b"<html><body></body></html>"), ("scan.pdf", _pdf([])), ("empty.docx", _docx([]))],
+)
+def test_document_without_text_raises_instead_of_vanishing(tmp_path, name, data):
+    with pytest.raises(DocumentParseError, match="#92.*no text extracted"):
+        _parse(tmp_path, name, data, source_id="92")
+
+
+def test_missing_file_and_directory_get_their_own_message(tmp_path):
+    parser = MarkItDownParser()
+    with pytest.raises(DocumentParseError, match="#93.*file not found"):
+        parser.parse(Document("93", "missing", str(tmp_path / "missing.docx")))
+    (tmp_path / "folder.pdf").mkdir()
+    with pytest.raises(DocumentParseError, match="#93.*not a file"):
+        parser.parse(Document("93", "folder", str(tmp_path / "folder.pdf")))
 
 
 @pytest.mark.parametrize("arm", ["A", "B"])
@@ -164,7 +220,9 @@ def test_markitdown_is_imported_lazily():
         "import sys; from knowledge_assistant.infrastructure.parsing.registry import default_registry; "
         "default_registry(); print('markitdown' in sys.modules)"
     )
-    result = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=True)
+    # This checkout's src first: an editable install may point at another checkout (INGEST-003 verify, B1).
+    env = {**os.environ, "PYTHONPATH": os.pathsep.join([str(ROOT / "src"), os.environ.get("PYTHONPATH", "")])}
+    result = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=True, cwd=ROOT, env=env)
     assert result.stdout.strip() == "False"
 
 
