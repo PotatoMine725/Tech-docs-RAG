@@ -110,3 +110,21 @@ def fence_mask(lines: Sequence[str]) -> list[bool]:
             continue
         mask.append(False)
     return mask
+
+
+def fenced_ranges(text: str) -> list[tuple[int, int]]:
+    """Character spans `[start, end)` of fenced code blocks, fence lines included (same rules as `fence_mask`)."""
+    lines = text.split("\n")
+    ranges: list[tuple[int, int]] = []
+    offset = 0
+    block_start: int | None = None
+    for line, fenced in zip(lines, fence_mask(lines)):
+        if fenced and block_start is None:
+            block_start = offset
+        elif not fenced and block_start is not None:
+            ranges.append((block_start, offset - 1))
+            block_start = None
+        offset += len(line) + 1
+    if block_start is not None:
+        ranges.append((block_start, len(text)))
+    return ranges

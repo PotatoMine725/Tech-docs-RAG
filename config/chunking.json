@@ -1,0 +1,19 @@
+{
+  "_comment": "ADR-0003 D3/D4/D7 chunker parameters. Changing a value needs a new ADR or an amendment with evidence. The key of each arm is the chunker_config used in chunk IDs ({source_id}:{chunker_config}:{index:04d}). stats_small_chunk_chars = the D3 minimum, used by the stats of both arms to count small chunks.",
+  "stats_small_chunk_chars": 400,
+  "arms": {
+    "A": {
+      "chunker_config": "header-1600",
+      "type": "header_aware",
+      "max_chars": 1600,
+      "min_chars": 400,
+      "overlap_chars": 200
+    },
+    "B": {
+      "chunker_config": "fixed-1600",
+      "type": "fixed_size",
+      "size_chars": 1600,
+      "overlap_chars": 200
+    }
+  }
+}
