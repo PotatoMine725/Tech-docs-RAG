@@ -276,7 +276,7 @@ This plan does **not** decide these. Each must be decided by the owner epic's la
 | OD-3 | Why each excluded doc (14, 19, 24, 27) was dropped (owner knowledge) | `corpus/README.md` | EPIC-01 / user | ✅ Decided 24 Sep (user): all four are index pages (links to other pages, no useful content) |
 | OD-4 | Question mix: total (≥ 30), EN/VI split, parallel subset size, number of "not in the documents" cases | evaluation-spec, ADR-0003 D8/D9 | EVAL-001 | ✅ Decided 24 Sep (user): 36 = 28 single + 4 cross-doc + 4 insufficient; 18 EN / 18 VI; 7 parallel groups; + 6 dev |
 | OD-5 | Answer-quality rubric and "result" values | evaluation-spec | EVAL-001 | ✅ Decided 24 Sep (user): 6 labels + points-covered score |
-| OD-6 | PDF/HTML placeholders: delegate to MarkItDown or one adapter | ingestion-architecture | EPIC-02 | ✅ Decided 25 Sep (AI, owner away; flagged for owner review): one shared adapter, stubs deleted (INGEST-003) |
+| OD-6 | PDF/HTML placeholders: delegate to MarkItDown or one adapter | ingestion-architecture | EPIC-02 | ✅ Decided 25 Sep (AI, owner away; **accepted by the owner 25 Sep**, OWNER-001): one shared adapter, stubs deleted (INGEST-003) |
 | OD-7 | Canonical ChromaDB path (`D:\ChromaDB` vs `data/chroma/`) and whether vector data is committed | ADR-0001, tech-stack | EPIC-03 | 27 Sep (before indexing) |
 | OD-8 | Distance metric (held constant by D7, but not named) | ADR-0003 D7 | EPIC-03 | 27 Sep (before indexing) |
 | OD-9 | Rule for answering "insufficient information" | retrieval-spec | EPIC-03 | 27 Sep |

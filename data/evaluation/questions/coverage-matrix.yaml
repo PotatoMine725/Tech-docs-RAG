@@ -56,7 +56,7 @@ eval:
     table: 2
     terminology_sensitive: 4
     tiny_document: 6
-    two_sections_needed: 1
+    two_sections_needed: 2
     two_sources_needed: 4
     version_variants: 9
   parallel:
@@ -270,7 +270,6 @@ eval:
       expected:
       - BP-EVAL-021
       alternate:
-      - BP-EVAL-016
       - BP-EVAL-031
       near_miss: []
       expected_by_language:
