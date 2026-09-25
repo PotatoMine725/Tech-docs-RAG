@@ -159,6 +159,8 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 "`, so on Windows the Markdown side of `test_converted_formats_chunk_like_the_same_markdown` was CRLF while the MarkItDown HTML path yields LF: a platform-dependent test, missed because all verification ran only on Linux.
   - *How found:* owner ran the suite on Windows 3.13.3.
   - *Fix:* helper writes `newline="
+  - *Lesson 1 (owner):* tests must be independent of the OS; writing an OS-dependent test causes problems like this one (EOL, path separators, encodings: be explicit).
+  - *Lesson 2 (owner):* verify on the exact environment and OS of the owner's machine (Windows, Python 3.13.3 venv), not only on the AI's Linux sandbox.
 "`; `MarkdownParser` untouched (keeps line endings, ADR-0003 D1); other `write_text`/`write_bytes` calls in `tests/` checked (single-line or bytes), none needed changes.
 
 ## Summary: how AI helped
