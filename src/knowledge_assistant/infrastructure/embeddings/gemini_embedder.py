@@ -4,6 +4,7 @@ Batches texts, throttles to the per-minute limits, retries transient errors with
 stops at once when the daily quota is used up, and L2-normalizes vectors below the model's full size.
 """
 
+import json
 import logging
 import math
 import random
@@ -31,6 +32,7 @@ BACKOFF_BASE_S = 1.0  # 1, 2, 4, 8 ... seconds
 MAX_RETRY_WAIT_S = 120.0  # a server retry-after above this is cut, so a run never hangs silently
 DAILY_RESET = "14:00 UTC+7"  # free-tier daily quota reset (ADR-0005 D19)
 DAILY_QUOTA = re.compile(r"per[ _-]?day|daily", re.IGNORECASE)
+API_KEY_PATTERN = re.compile(r"AIza[0-9A-Za-z_\-]{35}")  # Google API key shape
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +49,21 @@ def _error_details(error: errors.APIError) -> list[dict]:
     body = error.details.get("error", error.details) if isinstance(error.details, dict) else {}
     details = body.get("details", []) if isinstance(body, dict) else []
     return [item for item in details if isinstance(item, dict)] if isinstance(details, list) else []
+
+
+def redact_key(text: str) -> str:
+    """Remove the configured key and anything shaped like a Google API key before text is logged."""
+    api_key = get_gemini_api_key()
+    if api_key:
+        text = text.replace(api_key, "[REDACTED]")
+    return API_KEY_PATTERN.sub("[REDACTED]", text)
+
+
+def _raw_body(error: errors.APIError) -> str:
+    try:
+        return json.dumps(error.details, ensure_ascii=False, sort_keys=True)
+    except (TypeError, ValueError):
+        return repr(error.details)
 
 
 def _retry_after_s(error: errors.APIError) -> float | None:
@@ -106,6 +123,7 @@ class GeminiEmbedder:
         self.api_requests = 0  # quota requests: V-1 showed every text in a call counts as one
         self.retries = 0
         self.estimated_tokens = 0
+        self._logged_first_429 = False  # the first 429's raw body is logged once (RAG-001b Step 0b)
 
     @property
     def model_id(self) -> str:
@@ -178,6 +196,10 @@ class GeminiEmbedder:
                 )
                 return self._validate(response, len(batch))
             except errors.APIError as error:
+                if error.code == 429 and not self._logged_first_429:
+                    # Logged before the daily-quota check so the classifier can be checked against a real body.
+                    self._logged_first_429 = True
+                    logger.warning("first HTTP 429 of this run, raw error body: %s", redact_key(_raw_body(error)))
                 quota_id = _daily_quota_id(error) if error.code == 429 else None
                 if quota_id:
                     raise QuotaExhaustedError(

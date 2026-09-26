@@ -1,7 +1,9 @@
+import inspect
+
 import pytest
 
 from knowledge_assistant.core.exceptions import EmbeddingError
-from knowledge_assistant.core.interfaces.embedding import EmbeddingTask
+from knowledge_assistant.core.interfaces.embedding import Embedder, EmbeddingTask
 from knowledge_assistant.infrastructure.persistence.embedding_cache import CachingEmbedder, cache_key
 from tests.fakes import FakeEmbedder
 
@@ -118,3 +120,39 @@ def test_an_inner_plan_that_drops_or_reorders_texts_is_rejected(db_path):
     with CachingEmbedder(BadPlan(), db_path) as cache:
         with pytest.raises(EmbeddingError, match="in order"):
             cache.embed(["a", "b"], DOC)
+
+
+def _protocol_members(protocol: type) -> dict[str, object]:
+    return {
+        name: value
+        for name, value in vars(protocol).items()
+        if not name.startswith("_") and (callable(value) or isinstance(value, property))
+    }
+
+
+def test_core_embedder_protocol_has_no_batching_detail():
+    """RAG-001b Step 0a: `plan_calls` is a provider batching detail and lives in infrastructure."""
+    assert set(_protocol_members(Embedder)) == {"model_id", "embed"}
+
+
+def test_caching_embedder_conforms_to_the_core_embedder_protocol(db_path):
+    """Every Embedder member exists on CachingEmbedder with the same kind and signature."""
+    for name, member in _protocol_members(Embedder).items():
+        own = inspect.getattr_static(CachingEmbedder, name)
+        if isinstance(member, property):
+            assert isinstance(own, property), name
+        else:
+            assert inspect.signature(own) == inspect.signature(member), name
+    with CachingEmbedder(FakeEmbedder(), db_path) as cache:
+        embedder: Embedder = cache  # what the application layer receives
+        assert embedder.model_id == "fake-embedder@8"
+        assert len(embedder.embed(["a", "b"], DOC)) == 2
+
+
+def test_missing_lists_unique_uncached_texts_without_calling_the_inner_embedder(db_path):
+    inner = FakeEmbedder()
+    with CachingEmbedder(inner, db_path) as cache:
+        cache.embed(["a"], DOC)
+        assert cache.missing(["a", "b", "b", "c"], DOC) == ["b", "c"]
+        assert cache.missing(["a"], QUERY) == ["a"]
+    assert inner.texts_embedded == 1
