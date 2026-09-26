@@ -110,11 +110,11 @@ def test_task_types_and_dim_are_sent_and_texts_are_batched():
     assert {c["model"] for c in models.calls} == {"test-embedding-model"}
 
 
-def test_batches_are_also_capped_by_tokens_per_minute():
+def test_batches_are_capped_at_half_the_tokens_per_minute():
     models = FakeModels()
     text = "x" * 400  # 100 estimated tokens
-    make_embedder(models, batch_size=10, tokens_per_minute=250).embed([text] * 5, EmbeddingTask.DOCUMENT)
-    assert [len(c["contents"]) for c in models.calls] == [2, 2, 1]
+    make_embedder(models, batch_size=10, tokens_per_minute=500).embed([text] * 5, EmbeddingTask.DOCUMENT)
+    assert [len(c["contents"]) for c in models.calls] == [2, 2, 1]  # 250-token cap per call
 
 
 # --- normalization and dimension -------------------------------------------
@@ -238,6 +238,43 @@ def test_every_text_in_a_batched_call_counts_as_one_quota_request():
     assert clock.now == pytest.approx(60.0)
     stats = embedder.stats()
     assert (stats["http_calls"], stats["api_requests"]) == (2, 6)
+
+
+def test_throttle_holds_two_worst_case_calls_to_the_token_budget_over_60s():
+    """Owner check: two raw 45-text calls of the largest chunk (~19.6K each, ~39K) exceed the 25K cap."""
+    clock = FakeClock()
+    throttle = SlidingWindowThrottle(90, 25_000, clock=clock, sleep=clock.sleep)
+    worst_call = 45 * estimate_tokens("x" * 1738)  # 45 x 435 = 19,575
+    assert throttle.acquire(worst_call, requests=45) == 0.0
+    clock.now = 1.0
+    assert throttle.acquire(worst_call, requests=45) == pytest.approx(59.0)  # waits until the first leaves
+
+
+def test_production_settings_keep_every_60s_window_under_the_token_budget():
+    """Real defaults (45 texts, 90 req, 25K tokens) on worst-case chunks: calls are split and spaced."""
+    clock = FakeClock()
+    models = FakeModels()
+    settings = get_embedding_settings()
+    embedder = make_embedder(
+        models,
+        clock,
+        batch_size=settings.batch_size,
+        requests_per_minute=settings.requests_per_minute,
+        tokens_per_minute=settings.tokens_per_minute,
+    )
+    sent: list[tuple[float, int]] = []
+    original = models.embed_content
+
+    def recording(**kwargs):
+        sent.append((clock.now, sum(estimate_tokens(t) for t in kwargs["contents"])))
+        return original(**kwargs)
+
+    models.embed_content = recording
+    embedder.embed(["x" * 1738] * 90, EmbeddingTask.DOCUMENT)
+    assert max(tokens for _, tokens in sent) <= settings.tokens_per_minute // 2
+    for start, _ in sent:
+        in_window = sum(tokens for t, tokens in sent if start <= t < start + 60)
+        assert in_window <= settings.tokens_per_minute
 
 
 def test_batches_never_exceed_the_per_minute_request_limit():

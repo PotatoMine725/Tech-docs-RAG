@@ -1,7 +1,7 @@
 # ADR-0005 Embedding and vector-store settings (dimension, batching, cache, Chroma path, distance)
 
 Date: 2026-09-26
-Status: Accepted (owner decisions D14, D16, D17 via AskUserQuestion, 2026-09-26; D15 and D19 follow from the V-1 measurement below).
+Status: Accepted (owner decisions D14, D16, D17 via AskUserQuestion; D15 batch size 45 confirmed by the owner; D19 quota plan set by the owner from V-1; all 2026-09-26).
 Task: RAG-001a. Refines: ADR-0004 D10 (embedding model), D13 (retries). Closes: OD-7, OD-8 (master-plan §8), fact V-1.
 Does not close: OD-11 (max retry attempts before the *answer-model* fallback; that belongs to RAG-003).
 
@@ -24,7 +24,12 @@ Other probe observations (saved in `data/cache/probe-v1.json`, git-ignored):
 - The Gemini API returned no `metadata` and no per-embedding `statistics` (no token counts), so tokens are estimated.
 - Token estimate check: chars / 4 (ceil) = 678 for the three texts vs ≈ 585 on the chart. The estimate is about 15% high on this sample, the safe direction for throttling. Kept as the estimator (`CHARS_PER_TOKEN = 4`). It is a 3-text sample, so code-heavy chunks could differ.
 
-Evidence limits: chart readings from owner screenshots, one probe. Consistent across two charts (RPM, RPD), so recorded as verified; re-check if a quota error contradicts it.
+Evidence limits:
+- Chart readings come from owner screenshots of one probe; no exact tooltip values were recorded.
+- The per-minute count (RPM 0 → 3) is clear.
+- The RPD chart shows a 3, but its day bins looked shifted relative to RPM, so the per-day count rests on that chart plus the same unit.
+- The owner accepted "every text counts 1 request" for both limits (2026-09-26). The plan (D19) is the conservative one: if the daily limit counted calls instead, the only cost is that Arm B could have run a day earlier. The cache makes a quota stop cheap either way.
+- Re-check if a quota error contradicts this.
 
 ## Decisions
 **D14 Output dimensionality: 768 (owner).** Both arms, one constant (`EMBEDDING_DIM`, default in `config.py`).
@@ -33,10 +38,25 @@ Evidence limits: chart readings from owner screenshots, one probe. Consistent ac
 - The embedder rejects any vector whose length is not the configured dimension (`EmbeddingError`).
 - Cache and collection key: `model_id = "<model>@<dim>"`, built from config, so a dimension change can never reuse old vectors.
 
-**D15 Batch size: 45 texts per call; throttle counts texts (from V-1).**
-- Limits are set a little under the free-tier values: 90 requests/min (limit 100), 25,000 estimated tokens/min (limit 30,000).
-- Because every text counts as a request (V-1), the throttle charges `len(batch)` requests per call. A single call can never exceed the per-minute limits: batches are capped at `min(batch_size, requests_per_minute)` texts and at one minute of estimated tokens.
-- 45 = two calls per 90-request window, so the window is used fully. The worst case, 45 × 435 est. tokens (largest chunk) = 19.6K, is under 25K.
+**D15 Batch size: up to 45 texts per call, and at most half the per-minute token budget per call; the throttle counts texts (owner confirmed 45; the rest follows from V-1).**
+- Limits are set a little under the free-tier values: 90 requests/min (limit 100) and 25,000 estimated tokens/min (limit 30,000).
+- Because every text counts as a request (V-1), the throttle charges `len(batch)` requests per call. Over a **sliding 60 s window** it admits a call only if the requests *and* estimated tokens already sent in the last 60 s, plus this call, stay within both limits. Otherwise it sleeps until enough old calls leave the window. It raises if one call alone could never fit.
+- 45 texts = two calls per 90-request window. A batch is also cut at **12,500 estimated tokens** (half of 25K), so two calls always fit one token window.
+  - Without that cut, two worst-case calls (45 × 435 = 19.6K each, ~39K together) exceed 25K. The throttle would still hold the budget by delaying the second call a full minute, but only one call per minute would get through.
+  - Tests: `test_throttle_holds_two_worst_case_calls_to_the_token_budget_over_60s` (the second worst-case call waits 59 s) and `test_production_settings_keep_every_60s_window_under_the_token_budget`, which runs the real defaults on worst-case chunks and checks every 60 s window is ≤ 25K.
+- **Expected throughput.** Offline simulation of `GeminiEmbedder` with the real unique `embed_text`s, a fake client and a fake clock. Call latency is not included.
+
+| | Arm A | Arm B |
+|---|---|---|
+| Avg est. tokens per text | 247 | 358 |
+| Calls / avg texts per call | 16 / 44.3 | 25 / 34.4 |
+| Binding limit | requests (90/min) | tokens (25K/min ≈ 70 texts/min) |
+| Last call starts at | 7.0 min | 12.0 min |
+| Same, if one call could use the full 25K | 7.0 min | 18.0 min |
+
+  - Throughput is request-bound for Arm A (≈ 90 texts/min; tokens alone would allow ≈ 101) and token-bound for Arm B (≈ 70 texts/min).
+  - Across both arms the average is 307 tokens per text, so a token-bound average of ≈ 81 texts/min.
+  - chars/4 overestimates real tokens by about 15% (V-1), so the real token use is a little below the budget.
 - Retries: exponential backoff 1-2-4-8 s + jitter (0-1 s), with any server `Retry-After` / `RetryInfo.retryDelay` honoured when longer. Retried: HTTP 429/500/503/504 and timeouts (explicit 60 s client timeout; the SDK default is none). The embedder's max attempts is **5** (config `EMBEDDING_MAX_ATTEMPTS`), then `EmbeddingError`. The SDK's own retry is off (its default), so retries are not doubled.
 
 **D16 OD-7 Chroma path: `data/chroma/` (owner).** Repo-local, git-ignored (already in `.gitignore`), and not committed. It is rebuilt by a script from the chunk files plus the embedding cache, so rebuilding costs no quota. `CHROMA_PATH` default in `config.py` and `.env.example` changed from `D:\ChromaDB`.
@@ -56,24 +76,23 @@ Evidence limits: chart readings from owner screenshots, one probe. Consistent ac
 - Duplicate texts inside one call are sent once (Arm A has 733 chunks but 709 unique `embed_text`s).
 - A miss returns the same float32-rounded values a later hit would, so results do not depend on cache state.
 
-**D19 Indexing needs two quota days (from V-1).**
+**D19 Quota plan: two quota days (owner, from V-1).**
+V-1: every text counts as 1 request. Both arms need 709 + 859 = 1,568 requests, more than 1,000 per day (the daily reset is 14:00 UTC+7).
 
 | | Arm A | Arm B |
 |---|---|---|
 | Chunks / unique embed texts | 733 / 709 | 859 / 859 |
 | Texts shared with the other arm | 0 | 0 |
 | Estimated tokens (chars/4, unique texts) | 174,842 | 307,285 |
-| Minutes at 90 req/min | 7.9 | 9.5 |
-| Minutes at 25K tokens/min | 7.0 | 12.3 |
-| Expected wall time (binding limit) | ≈ 8 min | ≈ 12–13 min |
+| Expected wall time (D15 simulation) | ≈ 8 min | ≈ 13 min |
 
-- Both arms need 1,568 requests, more than 1,000 per day. So: **Arm A in one quota day, Arm B in the next** (the daily reset is 14:00 UTC+7).
-- Already spent in the quota day that ends Sat 26 Sep 14:00: 6 requests (probe 3 + live test 3).
-- Plan for RAG-001b:
-  - Arm A (709) before 14:00 on Sat 26 Sep, if 06a is verified in time. That day then totals about 715 of 1,000.
-  - Arm B (859) after 14:00. That leaves about 141 for the 42 question embeddings (36 eval + 6 dev; one embedding per question serves both arms) and light dev testing.
-  - If Arm A slips past 14:00, the same split moves by one quota day.
-- Arm A is smaller than ADR-0004's 200–300K token guess (≈ 175K, measured by character count). Arm B is ≈ 307K.
+**Plan (RAG-001b):**
+- **Arm A before today's (Sat 26 Sep) 14:00 UTC+7 reset.** This quota day already has 6 requests spent (probe 3 + live test 3), so it ends at about 715 of 1,000.
+- **Arm B after the 14:00 reset,** in the next quota day: 859 of 1,000. That leaves about 141 for the 42 question embeddings (36 eval + 6 dev; one embedding per question serves both arms) and light dev testing.
+- RAG-001b needs 99-VERIFY of this task first. If Arm A cannot start before 14:00, the same split moves by one quota day: Arm A after 14:00 today, Arm B after 14:00 tomorrow.
+- The cache makes a quota stop mid-arm safe: the re-run sends only the missing texts.
+
+Arm A is smaller than ADR-0004's 200–300K token guess (≈ 175K by character count); Arm B is ≈ 307K.
 
 ## Consequences
 - The core `Embedder` protocol gains `model_id` and a provider-free `EmbeddingTask` (DOCUMENT / QUERY). Gemini task-type strings live only in `infrastructure/embeddings/gemini_embedder.py`. The new `EmbeddingError` is a core exception.

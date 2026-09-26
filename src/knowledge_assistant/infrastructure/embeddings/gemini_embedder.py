@@ -96,17 +96,19 @@ class GeminiEmbedder:
         return vectors
 
     def _batches(self, texts: list[str]) -> list[list[str]]:
-        """At most `batch_size` texts (and the per-minute request limit) and one minute of tokens per call."""
+        """At most `batch_size` texts (and the per-minute request limit) and half a minute of tokens per call.
+
+        The throttle admits whole calls, so a call over half the token budget would leave the rest of
+        the window unused (ADR-0005 D15): two 45-text Arm B calls (~32K) cannot share a 25K window.
+        """
         max_texts = min(self._settings.batch_size, self._settings.requests_per_minute)
+        max_tokens = max(1, self._settings.tokens_per_minute // 2)
         batches: list[list[str]] = []
         current: list[str] = []
         current_tokens = 0
         for text in texts:
             tokens = estimate_tokens(text)
-            if current and (
-                len(current) >= max_texts
-                or current_tokens + tokens > self._settings.tokens_per_minute
-            ):
+            if current and (len(current) >= max_texts or current_tokens + tokens > max_tokens):
                 batches.append(current)
                 current, current_tokens = [], 0
             current.append(text)

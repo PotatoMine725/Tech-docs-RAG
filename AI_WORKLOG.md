@@ -212,7 +212,8 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - (4) A shell command meant to measure the pre-task test count included `git checkout origin/dev -- .`, which would have overwritten uncommitted doc edits.
 - *How found:* (1) the owner's V-1 reading (AI Studio RPM 0 → 3 for one 3-text call); (2) the first pytest run (1 failed); (3) counting with `pytest --collect-only` before the commit; (4) blocked by the Claude Code auto-mode permission check before it ran. Nothing changed.
 - *Fix:* (1) commit `05ec4d6`: throttle charges `len(batch)` requests, batches are capped at the per-minute request limit, a test pins the V-1 behaviour, and a mutation (per-call counting) fails it. (2) The test now asks for 500 tokens. (3) Corrected to 21 before the commit. (4) The command was dropped. The baseline count was not needed, so the report states only the tests this task adds.
-- *Human decision:* dimension 768, OD-7 `data/chroma/`, OD-8 cosine (owner, AskUserQuestion). The owner read the AI Studio usage page for V-1.
+- *Human decision:* dimension 768, OD-7 `data/chroma/`, OD-8 cosine (owner, AskUserQuestion). The owner read the AI Studio usage page for V-1, confirmed batch size 45, and set the quota plan (Arm A before today's 14:00 UTC+7 reset, Arm B after it).
+- *Owner check → fix:* the owner asked for proof that the token budget holds over the sliding window and expected token-bound throughput. Re-checking showed a throughput gap the AI had missed: the throttle admits whole calls, so two 45-text Arm B calls (≈ 32K) could not share one 25K window, and Arm B would run at ≈ 45 texts/min. A simulation with the real texts put it at 18 min. Fix: each call is capped at half the per-minute token budget (simulated 12 min), and two tests were added: two worst-case calls in one window, and the real defaults on worst-case chunks. 173 passed.
 
 ## Summary: how AI helped
 
