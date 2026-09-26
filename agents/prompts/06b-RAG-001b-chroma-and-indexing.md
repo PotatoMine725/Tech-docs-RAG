@@ -4,6 +4,21 @@ Read `agents/prompts/_common.md` first and follow it.
 Read: ADR-0003 D6/D7, ADR-0005, RAG-001a execution report, `core/interfaces/vector_store.py`.
 Entry: RAG-001a done (ADR-0005 accepted, cache works).
 
+## Step 0 — carried over from the RAG-001a re-verify (offline, before any indexing)
+(a) `CachingEmbedder` must satisfy the core `Embedder` interface. Preferred: `plan_calls` is a Gemini batching detail —
+    remove it from `core/interfaces/embedding.py` and keep it in infrastructure; otherwise `CachingEmbedder` forwards it.
+    Add a test asserting `CachingEmbedder` conforms to `Embedder`.
+(b) On the first 429 of a run, log the raw error body (never the key) so the daily-quota classifier can be checked
+    against a real error.
+Accepted, not fixed here (record in the ledger): the daily-quota error format is untested against a real error;
+connection errors are not retried in the embedder (indexing is resumable; RAG-003 retries them for the LLM path);
+the per-minute counter resets on restart.
+Run every script from the repo root. Index Arm A now if it can finish before 14:00 UTC+7, else after the reset;
+Arm B after the reset (ADR-0005 quota plan).
+
+Git (do it yourself with git + gh; never force-push, never touch main): branch rag-001b from origin/dev; commit and push
+per milestone (tests green at every push); `gh pr create --base dev --head rag-001b`. Do not merge (the owner runs 99-VERIFY first).
+
 ## Interface change (core — impact-check first)
 ```python
 # core/models: new
