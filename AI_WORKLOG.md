@@ -322,6 +322,21 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - Dedup key `passage_hash`, `duplicate_chunk_ids`, and the eval-span overlap check: two eval cases touch a duplicate group, both on the doc 12/13 pair (list in the report). The proposed 09b overlap rule was recorded, not implemented.
   - `answer_v1` approved with 2 LLM calls; rule 2 is the owner's text. Two small wording additions (rules 3 and 4) were flagged and approved.
   - Threshold rule and live budget from the owner's addendum.
+- *Verifier findings* (99-VERIFY, 2026-09-26, Windows 3.13, 0 Gemini requests, [RAG-002-verify](docs/reviews/code/RAG-002-verify.md) → ACCEPT WITH FIXES):
+  - **F1 (defect):** the citation-marker regex `\[(\d+)\]` also matches code.
+    - Probe: `args[0]` → `args`, `values[7]` → `values`, both recorded in `dropped_markers`; `items[2]` in a fenced block → an invented citation to passage 2.
+    - It changes code shown to the user and the hallucination diagnostic. The prompt's "extract `[n]`" did not address code. Fix prompt in the review.
+  - Reproduced:
+    - 313 (dev `dfcfbd4`) vs 369 (+56);
+    - Arm A 13 groups / 26 extra copies, Arm B 0 (from Chroma);
+    - the eval-overlap list (Q-EVAL-003/004 S1 only);
+    - all 12 dev top-1 scores from the cache (0 misses), so threshold 0.686;
+    - the M1 and M3 mutations each fail 1 test.
+  - Firewall: 0 question texts; 0 eval IDs in `validation/generation` + `data/logs`. `AIza+35`: 0 in the diff and `validation/`.
+  - Notes:
+    - doc 15 bodies keep data-URI SVG links (chunker, pre-existing);
+    - GUI-pre fake inlines the messages;
+    - gate equality is only implied by `<`.
 
 ## Summary: how AI helped
 
