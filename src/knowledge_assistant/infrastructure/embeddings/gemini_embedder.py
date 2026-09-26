@@ -144,7 +144,9 @@ class GeminiEmbedder:
                         f"daily embedding quota exhausted ({failure.daily_quota_id}); "
                         f"resume after the {DAILY_RESET} reset"
                     ) from error
-                if not failure.retryable:
+                if not failure.retryable or failure.connection_error:
+                    # Connection errors are not retried here (ADR-0005 amendment 2, owner-accepted: indexing is
+                    # resumable), but they no longer escape as raw httpx exceptions (RAG-003).
                     raise EmbeddingError(f"embedding request failed: {failure.reason}") from error
                 last_error: Exception = error
             if attempt == attempts:

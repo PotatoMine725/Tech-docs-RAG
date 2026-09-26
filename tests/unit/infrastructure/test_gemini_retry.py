@@ -66,6 +66,28 @@ def test_timeouts_and_connection_errors_are_retryable_unavailable_failures(error
     assert failure.reason == type(error).__name__
 
 
+@pytest.mark.parametrize(
+    ("error", "connection"),
+    [
+        (httpx.ConnectError("refused"), True),
+        (httpx.ReadError("reset"), True),
+        (httpx.RemoteProtocolError("closed"), True),
+        (ConnectionResetError("reset"), True),
+        (httpx.ReadTimeout("slow"), False),
+        (httpx.ConnectTimeout("slow"), False),
+        (TimeoutError("timed out"), False),
+    ],
+    ids=lambda v: type(v).__name__ if not isinstance(v, bool) else str(v),
+)
+def test_connection_errors_are_told_apart_from_timeouts(error, connection):
+    """The embedder retries timeouts but, by owner decision (ADR-0005 amendment 2), not connection errors."""
+    assert classify_failure(error).connection_error is connection
+
+
+def test_an_api_error_is_never_a_connection_error():
+    assert classify_failure(api_error(503)).connection_error is False
+
+
 @pytest.mark.parametrize("error", [httpx.UnsupportedProtocol("no scheme"), errors.UnknownApiResponseError("not json")])
 def test_other_provider_side_exceptions_are_not_retryable(error):
     failure = classify_failure(error)

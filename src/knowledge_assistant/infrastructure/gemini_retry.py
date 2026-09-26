@@ -28,6 +28,8 @@ TRANSIENT_TRANSPORT = (
     TimeoutError,
     ConnectionError,
 )
+# The request never got a response: refused, reset or closed. A subset of TRANSIENT_TRANSPORT (timeouts are not in it).
+CONNECTION_ERRORS = (httpx.NetworkError, httpx.RemoteProtocolError, ConnectionError)
 # Every exception the SDK or its HTTP client can raise for a provider or transport problem.
 PROVIDER_ERRORS = (
     errors.APIError,
@@ -117,6 +119,7 @@ class Failure:
     daily_quota_id: str | None = None
     retry_after_s: float | None = None
     body: str | None = None  # raw error body with the key redacted, for logs; API errors only
+    connection_error: bool = False  # refused / reset / closed, as opposed to a timeout or an API error
 
 
 def classify_failure(error: Exception) -> Failure | None:
@@ -135,7 +138,12 @@ def classify_failure(error: Exception) -> Failure | None:
             body=redact_key(raw_body(error)),
         )
     if isinstance(error, TRANSIENT_TRANSPORT):
-        return Failure(kind="unavailable", retryable=True, reason=type(error).__name__)
+        return Failure(
+            kind="unavailable",
+            retryable=True,
+            reason=type(error).__name__,
+            connection_error=isinstance(error, CONNECTION_ERRORS),
+        )
     if isinstance(error, PROVIDER_ERRORS):
         return Failure(kind="other", retryable=False, reason=type(error).__name__)
     return None

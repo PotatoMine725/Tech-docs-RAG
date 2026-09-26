@@ -157,12 +157,6 @@ def run_smoke(cases, *, embedder, build_service, answer_llm, fallback_llm, emit,
         main_fn([questions["Q-DEV-005"], "--arm", "A", "--json"], factory=factory, out=step_json, err=io.StringIO())
         emit("\nSame question with `--json` (also 0 LLM requests):\n")
         emit(_block(step_json.getvalue()))
-        if refused and process_check is not None:
-            code, output = process_check(questions["Q-DEV-005"])
-            emit(f"\nThe same question as a real process (`python scripts/ask.py \"<question>\" --arm A --json`, "
-                 f"ANSWER_MAX_ATTEMPTS=1, ALLOW_FALLBACK=false), exit code {code}:\n")
-            emit(_block(output))
-
         code, text, spent = step("c", "Out-of-corpus question, gate off (diagnostic): the LLM's own insufficient path",
                                  "Q-DEV-005", ["--gate-off"])
         if code:
@@ -185,24 +179,33 @@ def run_smoke(cases, *, embedder, build_service, answer_llm, fallback_llm, emit,
             saved = ask.save_error_body(error)
             emit(f"- STOPPED: {error.kind}: {ask.redact_key(str(error))}; provider body saved: {saved}")
             return 2
-        except GenerationError as error:
+        except GenerationError as error:  # a finding, not a script failure: recorded, then the run goes on
             emit(f"- fallback output unusable: {error}\n- JSON valid: no\n"
                  f"- finish_reason: {getattr(fallback_llm, 'last_finish_reason', None)}; "
                  f"usage: {getattr(fallback_llm, 'last_usage', None)}\n- raw text: {error.raw_text!r}")
-            return 0
-        try:
-            data = parse_answer_json(response.text)
-            valid, note = "yes", f"insufficient={str(data['insufficient']).lower()}, cited_passages={data['cited_passages']}"
-        except GenerationError as error:
-            valid, note = "no", str(error)
-        emit(f"- model used: `{response.model_used}`; fallback_used={response.fallback_used}; retry_count={response.retry_count}\n"
-             f"- finish_reason: {getattr(fallback_llm, 'last_finish_reason', None)}\n"
-             f"- tokens: prompt {response.prompt_tokens}, output {response.output_tokens}, "
-             f"thoughts tokens {response.thoughts_tokens}\n"
-             f"- latency: {response.latency_ms:.0f} ms (one call; anecdotal)\n"
-             f"- JSON valid: {valid} (parsed and checked against the answer schema): {note}")
-        emit("\nRaw text from the fallback model:\n")
-        emit(_block(response.text))
+        else:
+            try:
+                data = parse_answer_json(response.text)
+                valid, note = "yes", f"insufficient={str(data['insufficient']).lower()}, cited_passages={data['cited_passages']}"
+            except GenerationError as error:
+                valid, note = "no", str(error)
+            emit(f"- model used: `{response.model_used}`; fallback_used={response.fallback_used}; retry_count={response.retry_count}\n"
+                 f"- finish_reason: {getattr(fallback_llm, 'last_finish_reason', None)}\n"
+                 f"- tokens: prompt {response.prompt_tokens}, output {response.output_tokens}, "
+                 f"thoughts tokens {response.thoughts_tokens}\n"
+                 f"- latency: {response.latency_ms:.0f} ms (one call; anecdotal)\n"
+                 f"- JSON valid: {valid} (parsed and checked against the answer schema): {note}")
+            emit("\nRaw text from the fallback model:\n")
+            emit(_block(response.text))
+
+        if refused and process_check is not None:
+            # Last, so a memory failure of this second Python process cannot affect a step that spent quota. The gate
+            # refused this question above, so the child makes no LLM request (and it has 1 attempt, no fallback).
+            code, output = process_check(questions["Q-DEV-005"])
+            emit("\n### e. The CLI as a real process (b's question; 0 LLM requests)\n")
+            emit(f"`python scripts/ask.py \"<question>\" --arm A --json` with ANSWER_MAX_ATTEMPTS=1, ALLOW_FALLBACK=false; "
+                 f"exit code {code}:\n")
+            emit(_block(output))
     except BudgetExceeded as error:
         emit(f"\nSTOPPED: {error}.")
         return 3
@@ -234,11 +237,12 @@ def main(argv=None) -> int:
     if args.out.exists():
         raise SystemExit(f"{args.out} exists; refusing to overwrite evidence (choose another --out)")
 
-    lines: list[str] = []
-
     def emit(text: str) -> None:
-        lines.append(text)
-        print(text)
+        """Print and append at once: if the process dies mid-run (memory limits), what was already spent is on disk."""
+        print(text, flush=True)
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        with args.out.open("a", encoding="utf-8", newline="\n") as handle:
+            handle.write(text + "\n")
 
     with open_embedder(max_attempts=1) as embedder:
         if not args.live:
@@ -262,8 +266,6 @@ def main(argv=None) -> int:
             process_check=run_cli_process,
             setup_lines=setup,
         )
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
     print(f"\nwrote {args.out} (exit code {code})")
     return code
 
