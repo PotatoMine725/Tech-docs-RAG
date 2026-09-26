@@ -516,7 +516,7 @@ blueprints:
       acceptable_variations:
         - The fix may be shown as changing `file sealed class` to `internal sealed class`.
       must_not_claim:
-        - The type must be public (internal is also allowed).
+        - "The type must be public (wrong: internal is also allowed)."
         - ASP0033 is a build error.
     citation_acceptance_criteria: &pg006_cit
       - The cited chunk contains the "silently skips validation" sentence and/or the public-or-internal fix.
@@ -789,7 +789,7 @@ blueprints:
       - source_id: "10"
         heading_path: "Dependency injection in ASP.NET Core > Service lifetimes"
         slot: S2
-        note: Partial support for P1 and P2 (inject into Invoke/InvokeAsync, or use factory-based middleware activated per request). Same sentences as PG-007.
+        note: Partial support for P1 (inject into Invoke/InvokeAsync, or use factory-based middleware activated per request). Same sentences as PG-007.
     objective: Compare how conventional middleware and factory-activated (IMiddleware) middleware get a scoped service.
     concepts: [IMiddleware, IMiddlewareFactory, conventional middleware, scoped services, UseMiddleware]
     cognitive_level: compare

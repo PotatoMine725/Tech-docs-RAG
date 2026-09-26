@@ -106,7 +106,7 @@ Latency is measured by the runner (EVAL-003), never estimated. Each case carries
 ## 16. Duplicate control
 No two blueprints share the same information need, evidence and retrieval challenge. Pairs that look close were kept on purpose:
 - 003/004 and 023 are both mixed-version cases in #13, but on different sections and facts.
-- 013/014 (#10, middleware constructor) and 017 (#11, comparing middleware kinds) touch the same topic with different evidence and levels. They overlap more than first written: #10 'Service lifetimes', the expected section of 013/014, also answers 017's P1 and P2, so it is listed as an alternate for 017, and #11 sections are alternates for 013/014.
+- 013/014 (#10, middleware constructor) and 017 (#11, comparing middleware kinds) touch the same topic with different evidence and levels. They overlap more than first written: #10 'Service lifetimes', the expected section of 013/014, also partly supports 017's P1, so it is listed as an alternate for 017 (slot S2), and #11 sections are alternates for 013/014.
 - 029 and 032 share one #10 section but use different sentences and different second documents.
 - The parallel pairs are intentional repeats (language effect).
 - The dev set uses no section that an evaluation case expects (test-checked).

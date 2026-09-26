@@ -195,6 +195,14 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - During the fix itself, a `sed`-based mutation wrote a real newline into a string literal, causing a collection error rather than a test result. Found in the pytest output, restored from backup, and redone with a Python replacement.
 - *Human decision:* none new (the owner's follow-up prompt scoped the fixes).
 
+### 2026-09-25 EVAL-002: questions + ground truth, freeze pending (branch `eval-002`, unattended cloud run)
+- *AI did:* Step 0 housekeeping (ledger row 02; 017 alternate note trimmed to "P1", owner-approved). Wrote the wording of 42 questions (18 EN / 18 VI eval + 6 dev) in `question-wording-v1.yaml`; built `eval-v1.jsonl` / `dev-v1.jsonl` by script from the approved blueprints; validator (`validate_questions.py`) + 19 offline tests including mutation cases; review sheet `eval-v1-review.md` with a checklist and a "look at these first" list. 140 passed on Linux 3.11.15 ([report](docs/reports/execution/EVAL-002.md)). No tag, no final snapshot, M1 not reached: owner review first.
+- *AI got wrong:* (1) One new mutation test assumed that removing the first evidence quote of 003 leaves P1 unsupported; 003 has three P1 quotes, so the validator (correctly) found no error and the test failed. (2) The first review-sheet generator left bare `List<int>` in table cells, which Markdown renders as an HTML tag.
+- *How found:* (1) the first pytest run of the new file (1 failed); (2) reading the generated sheet.
+- *Fix:* (1) mutation uses 015 with its evidence emptied; (2) `<` escaped outside code spans.
+- *Human decision:* none yet. AI decisions to confirm and one ground-truth proposal (G1, not applied) are in the [review sheet](docs/reviews/evaluation/eval-v1-review.md) and the [handoff](docs/plans/session-handoff-2026-09-25-eval-002.md). GitNexus was unavailable in this container, so `detect_changes` was not run (no existing symbol edited).
+- *Verifier findings (99-VERIFY, 2026-09-25, [EVAL-002-verify](docs/reviews/evaluation/EVAL-002-verify.md) → ACCEPT):* no defect that fails a requirement. Ground truth in the JSONL equals `blueprint.yaml` except the owner-approved 017 note; rebuild byte-identical; 107/107 quotes re-found independently; 140 passed. Non-blocking: (1) test gap: disabling the eval/dev expected-section overlap check leaves all 19 new tests green; (2) Q-EVAL-024 (vi) also states the cause ("test không chạy trong thư mục output"), a bigger leak than the sheet flags; (3) Q-EVAL-028 quote matches only via whitespace collapse (source has a no-break space), undisclosed; (4) G5A box 1 ticked before the freeze (with a "not frozen" note); (5) blueprints still `status: proposed`. Unverified: Windows run, GitNexus.
+
 ## Summary: how AI helped
 
 To be filled at QC-001.
