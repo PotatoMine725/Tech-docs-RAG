@@ -97,9 +97,15 @@ def test_the_real_dev_file_holds_the_three_smoke_cases_and_only_dev_cases():
     assert all(case["split"] == "dev" and case["id"].startswith("Q-DEV-") for case in cases.values())
 
 
-def test_a_case_from_another_split_is_refused(tmp_path):
+@pytest.mark.parametrize(
+    "case",
+    [{"id": "Q-DEV-009", "split": "held-out", "question": "x"}, {"id": "Q-OTHER-001", "split": "dev", "question": "x"}],
+    ids=["other-split", "other-id-prefix"],
+)
+def test_a_case_that_is_not_a_dev_case_is_refused(tmp_path, case):
+    """The eval-set firewall: only split=dev and a Q-DEV- id are ever read (fixtures here are made up)."""
     path = tmp_path / "questions.jsonl"
-    path.write_text(json.dumps({"id": "Q-EVAL-001", "split": "eval", "question": "x"}) + "\n", encoding="utf-8")
+    path.write_text(json.dumps(case) + "\n", encoding="utf-8")
     with pytest.raises(SystemExit, match="refusing"):
         smoke.load_dev_cases(path)
 

@@ -357,6 +357,17 @@ def test_the_key_is_redacted_from_error_text_provider_body_and_logs(monkeypatch,
     assert key not in caplog.text
 
 
+def test_a_key_echoed_inside_the_quota_id_is_redacted_from_the_error_message(monkeypatch):
+    """The message quotes the daily quota id from the provider body, so it goes through the same redaction."""
+    key = "AIza" + "q" * 35
+    monkeypatch.setenv("GEMINI_API_KEY", key)
+    echoing = api_error(429, quota_id=f"GenerateRequestsPerDay-{key}")
+    llm, _ = make_llm(ScriptedModels({PRIMARY: [echoing], FALLBACK: [echoing]}))
+    with pytest.raises(LLMQuotaError) as raised:
+        llm.generate(REQUEST)
+    assert key not in str(raised.value) and "[REDACTED]" in str(raised.value)
+
+
 def test_only_the_first_429_body_of_a_run_is_logged_raw(caplog):
     per_minute = api_error(429, retry_delay="1s", quota_id=PER_MINUTE)
     llm, _ = make_llm(ScriptedModels({PRIMARY: [per_minute] * 2}))

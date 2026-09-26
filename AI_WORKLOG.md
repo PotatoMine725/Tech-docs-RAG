@@ -8,9 +8,10 @@ A record of how AI tools were used in this project, required by the submission (
 |---|---|---|
 | Claude Code (CLI) | Claude Sonnet 5 (commit `3d5a606`, co-author trailer) | SETUP-001: project skeleton, specs, corpus migration |
 | Claude Code (CLI) | Claude Opus 5.5 (`claude-opus-5-5`; commits `490068f` onward) | ADR drafting, master plan, corpus analysis, repo hygiene, evaluation design |
+| Claude Code (CLI) | Claude Sonnet 5 (`claude-sonnet-5`; RAG-003 commits, co-author trailer) | RAG-003: retry/fallback adapter, error classification, CLI, smoke checks |
 | GitNexus (`npx gitnexus`) | local code index | Impact analysis before edits, change detection before commits |
 | Chunking consultation (`docs/plans/chunking-consultation-handoff.md`, cited as context by ADR-0003) | — | A handoff written by Claude Code so another agent could advise on chunking before ADR-0003 |
-| Google Gemini API | `gemini-embedding-001` (from RAG-001a, 2026-09-26); `gemini-3.5-flash-lite` (answers, from RAG-002, 2026-09-26); planned: `gemini-3.5-flash` fallback (ADR-0004) | Embeddings, answers (2 dev answers in RAG-002 so far), LLM judge (from EPIC-05) |
+| Google Gemini API | `gemini-embedding-001` (from RAG-001a, 2026-09-26); `gemini-3.5-flash-lite` (answers, from RAG-002, 2026-09-26); `gemini-3.5-flash` fallback (RAG-003 smoke check: 1 direct call; ADR-0004) | Embeddings, answers (2 dev answers in RAG-002, 3 in the RAG-003 smoke checks), LLM judge (from EPIC-05) |
 
 ## Log
 
@@ -346,6 +347,37 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - 369 → 384 passed (+15). Mutations: code skipping off → 7 fail; `[0]` rule off → 3 fail. Awaiting re-verify.
   - Backlog (not fixed): GUI fake hard-codes the insufficient messages → GUI-001 wiring (N2); doc 15 SVG links in
     chunks → QC-001 (N1).
+
+### 2026-09-26 RAG-003: retry/fallback, error classification, accounting, CLI, smoke checks (branch `rag-003`, PR into `dev`)
+- *AI did:*
+  - Recorded OD-11 (owner's addendum) as an ADR-0004 amendment; moved the embedder's retry / retry-after / quota / key-redaction helpers into `infrastructure/gemini_retry.py` and used them from both adapters.
+  - `GeminiLLM`: per-model throttle (13 / 4 RPM from config), 3 attempts with backoff + jitter + retry-after (cap 120 s), one fallback attempt, `ALLOW_FALLBACK`, classification into core `LLMQuotaError` / `LLMUnavailableError` / `LLMRequestError` (`kind` = the GUI's kinds), accounting (`model_used`, `retry_count`, `fallback_used`, tokens incl. thoughts, `retry_wait`, `throttle_wait`).
+  - `scripts/ask.py` (`--json`, `--gate-off` diagnostic), `composition.py`, `scripts/generation/smoke_check.py` (dev-only, budget of 5, stops at the first provider error).
+  - 162 new offline tests (546 passed); 10 mutations, all killed (one only after a new test).
+  - Live smoke checks on dev questions: 4 LLM requests, 0 embedding requests, 0 × 429 ([smoke file](validation/generation/smoke-2026-09-26.md)); `-m gemini` 1 passed on cached vectors.
+- *AI got wrong:*
+  - **Embedder behaviour.** The first commit made the embedder retry connection errors as a side effect of the shared classifier, against an owner-accepted item in ADR-0005 amendment 2 (no connection-error retry in the embedder).
+  - **Untested guard.** Mutation M9 (drop the key redaction from the error message) survived: the message never held provider text, so no test could see the guard.
+  - **Wrong CLI assumption.** I added an `--excerpt-chars` option; a failing test showed the citation builder already bounds excerpts at 300 characters.
+  - **Evidence written last.** The smoke script wrote its evidence file only at the end, so a killed process would have lost what was spent.
+  - **Quoting slip.** A patch script written through a shell heredoc turned `\n` inside f-strings into real newlines and broke `smoke_check.py`.
+  - **Eval-style ID in a test.** A test fixture used an eval-style ID, which the firewall scan flagged.
+- *How found:*
+  - Embedder: grepping the docs for RAG-003 before writing them (ADR-0005 line 127).
+  - M9: the mutation run.
+  - Excerpt: a failing test.
+  - Evidence file: the first live attempt was cut off by an OpenBLAS memory error at process start (0 requests sent, low free virtual memory).
+  - Quoting slip: `SyntaxError` at test collection.
+  - Fixture: the firewall scan.
+- *Fix:*
+  - Embedder: connection errors are wrapped into `EmbeddingError` but not retried (a `connection_error` flag on the shared `Failure`), tests changed, ADR notes added (`6b05922`).
+  - M9: a test where the key is echoed inside the quota id.
+  - Excerpt option removed.
+  - The smoke script appends line by line, and the real-process CLI check runs last.
+  - The block was rewritten through the file tool.
+  - The fixture uses made-up values.
+  - The first live attempt was re-run once with one BLAS thread, and one hung full `pytest` run (10 minutes, no CPU) was killed and re-run once (546 passed in 16 s); both logged in the report.
+- *Human decision:* the whole addendum: OD-11 policy, the 13 / 4 RPM throttle and limits, `ALLOW_FALLBACK` and the eval runner's use of it (ledger note for 09a), the smoke design and its budget (at most 5 LLM and 0 embedding requests), `--gate-off` as a diagnostic. Open for the owner at `99-VERIFY`: the choices listed in the [report](docs/reports/execution/RAG-003.md) ("Decisions and open choices").
 
 ## Summary: how AI helped
 
