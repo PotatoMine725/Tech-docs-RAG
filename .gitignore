@@ -222,10 +222,15 @@ __marimo__/
 # Real secrets never committed; .env.example is the tracked template.
 .env
 !.env.example
-# Generated vector-store data: policy TBD (DECISION REQUIRED). Ignored by default; .gitkeep tracked.
-data/chroma/*
-!data/chroma/.gitkeep
+# Generated vector-store data (ADR-0005 D16): never committed, rebuilt by script; only the root .gitkeep is tracked.
+# `**/` also covers a data/ folder created under another directory by a run from the wrong cwd.
+**/data/chroma/*
+!/data/chroma/.gitkeep
 output/reports/*
 output/exports/*
 !output/reports/.gitkeep
 !output/exports/.gitkeep
+# Embedding cache + probe output (RAG-001a, ADR-0005): paid vectors, local only, never committed.
+**/data/cache/
+# Run logs (indexing, evaluation).
+**/data/logs/

@@ -133,8 +133,8 @@ INGEST-004 (ADR-0003 D3a, owner 2026-09-25): Arm A drops heading-only chunks (75
 **Goal:** ask a question, get a grounded answer with citations — or an honest "not enough information".
 
 Deliverables:
-- **First step:** V-1 — check how a batched embedding request counts against the daily limit. This decides whether indexing takes one or two quota days.
-- Decide OD-7…OD-11 before building indexes.
+- **First step:** V-1 — check how a batched embedding request counts against the daily limit. This decides whether indexing takes one or two quota days. ✅ Answered 26 Sep (RAG-001a, ADR-0005): each text counts as one request → two quota days.
+- Decide OD-7…OD-11 before building indexes. (OD-7, OD-8 decided 26 Sep in ADR-0005.)
 - Embedder: `gemini-embedding-001`, task types `RETRIEVAL_DOCUMENT` (chunks) / `RETRIEVAL_QUERY` (questions), batched and throttled to the per-minute token limit; save embeddings to disk so quota is never spent twice on the same text.
 - ChromaDB adapter; one collection per arm; **both arms indexed now** (uses embedding quota early).
 - Retrieval use case (top-k = 5).
@@ -240,6 +240,7 @@ Exit gate **G7**:
 
 - Limits reset at **14:00 UTC+7** (midnight Pacific; daylight time until 1 Nov 2026).
 - **Indexing:** roughly 200–300K tokens per arm (ADR-0004 estimate) → about 10+ minutes per arm at 30K tokens/minute (ADR-0004 estimate). Chunk counts are known only after EPIC-02. If each text counts as its own request (V-1), the two arms together may pass 1,000 requests → index Arm A before 14:00 and Arm B after 14:00 (RAG-001b, target Sat 26 Sep; ADR-0005 decides whether two quota days are needed).
+  - ✅ ADR-0005 (26 Sep): V-1 = each text is one request. Arm A 709 unique texts (≈ 175K est. tokens, ≈ 8 min), Arm B 859 (≈ 307K, ≈ 12–13 min), 1,568 total → **two quota days**: Arm A in one, Arm B in the next (D19).
 - **Evaluation:** run retrieval-only metrics first (embeddings only). A question's embedding is the same for both arms, so embed it once. Then one full answer + judge run: about 240 of 500 Flash-Lite requests (ADR-0004 estimate; the real number depends on OD-4). Keep the next quota day free for a re-run.
 - Development testing uses the same quota — keep live calls light on run days. Save embeddings and answers to disk so no call is repeated.
 
@@ -279,8 +280,8 @@ This plan does **not** decide these. Each must be decided by the owner epic's la
 | OD-4 | Question mix: total (≥ 30), EN/VI split, parallel subset size, number of "not in the documents" cases | evaluation-spec, ADR-0003 D8/D9 | EVAL-001 | ✅ Decided 24 Sep (user): 36 = 28 single + 4 cross-doc + 4 insufficient; 18 EN / 18 VI; 7 parallel groups; + 6 dev |
 | OD-5 | Answer-quality rubric and "result" values | evaluation-spec | EVAL-001 | ✅ Decided 24 Sep (user): 6 labels + points-covered score |
 | OD-6 | PDF/HTML placeholders: delegate to MarkItDown or one adapter | ingestion-architecture | EPIC-02 | ✅ Decided 25 Sep (AI, owner away; **accepted by the owner 25 Sep**, OWNER-001): one shared adapter, stubs deleted (INGEST-003) |
-| OD-7 | Canonical ChromaDB path (`D:\ChromaDB` vs `data/chroma/`) and whether vector data is committed | ADR-0001, tech-stack | EPIC-03 | 27 Sep (before indexing) |
-| OD-8 | Distance metric (held constant by D7, but not named) | ADR-0003 D7 | EPIC-03 | 27 Sep (before indexing) |
+| OD-7 | Canonical ChromaDB path (`D:\ChromaDB` vs `data/chroma/`) and whether vector data is committed | ADR-0001, tech-stack | EPIC-03 | ✅ Decided 26 Sep (owner, RAG-001a): `data/chroma/`, git-ignored, not committed, rebuilt by script (ADR-0005 D16) |
+| OD-8 | Distance metric (held constant by D7, but not named) | ADR-0003 D7 | EPIC-03 | ✅ Decided 26 Sep (owner, RAG-001a): cosine, both arms (ADR-0005 D17) |
 | OD-9 | Rule for answering "insufficient information" | retrieval-spec | EPIC-03 | 27 Sep |
 | OD-10 | Prompt template / grounding instructions | generation-spec | EPIC-03 | 27 Sep |
 | OD-11 | Max retry attempts before fallback | ADR-0004 D13 | EPIC-03 | 27 Sep |
@@ -291,7 +292,7 @@ This plan does **not** decide these. Each must be decided by the owner epic's la
 | OD-16 | Which bonus items, if any | brief | user | 30 Sep (after M3) |
 
 Facts to verify (not decisions):
-- **V-1** Does one batched embedding request count as 1 or N requests against the daily limit? (ADR-0004) — first step of EPIC-03.
+- **V-1** Does one batched embedding request count as 1 or N requests against the daily limit? (ADR-0004) — first step of EPIC-03. ✅ Answered 26 Sep (RAG-001a): **N** — one call with 3 texts moved AI Studio RPM 0 → 3 (ADR-0005).
 - **V-2** Does MarkItDown install and work on Python 3.13? (`.venv` is 3.13.3; ADR-0002) — EPIC-02. ✅ Answered 25 Sep (INGEST-003): yes, `markitdown` 0.1.8 on Python 3.13.12 (Linux); also passed on the Windows 3.13.3 venv, 113 tests, 25 Sep.
 
 ## 9. Brief traceability (`docs/specs/assignment-requirements.md`)

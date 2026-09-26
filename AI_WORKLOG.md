@@ -10,7 +10,7 @@ A record of how AI tools were used in this project, required by the submission (
 | Claude Code (CLI) | Claude Opus 5.5 (`claude-opus-5-5`; commits `490068f` onward) | ADR drafting, master plan, corpus analysis, repo hygiene, evaluation design |
 | GitNexus (`npx gitnexus`) | local code index | Impact analysis before edits, change detection before commits |
 | Chunking consultation (`docs/plans/chunking-consultation-handoff.md`, cited as context by ADR-0003) | — | A handoff written by Claude Code so another agent could advise on chunking before ADR-0003 |
-| Google Gemini API | not used yet (planned: `gemini-embedding-001`, `gemini-3.5-flash-lite`, `gemini-3.5-flash`, ADR-0004) | Embeddings, answers, LLM judge (from EPIC-03) |
+| Google Gemini API | `gemini-embedding-001` (from RAG-001a, 2026-09-26); planned: `gemini-3.5-flash-lite`, `gemini-3.5-flash` (ADR-0004) | Embeddings (V-1 probe + 1 live test so far), answers, LLM judge (from EPIC-03) |
 
 ## Log
 
@@ -202,6 +202,41 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 - *Fix:* (1) mutation uses 015 with its evidence emptied; (2) `<` escaped outside code spans.
 - *Human decision:* none yet. AI decisions to confirm and one ground-truth proposal (G1, not applied) are in the [review sheet](docs/reviews/evaluation/eval-v1-review.md) and the [handoff](docs/plans/session-handoff-2026-09-25-eval-002.md). GitNexus was unavailable in this container, so `detect_changes` was not run (no existing symbol edited).
 - *Verifier findings (99-VERIFY, 2026-09-25, [EVAL-002-verify](docs/reviews/evaluation/EVAL-002-verify.md) → ACCEPT):* no defect that fails a requirement. Ground truth in the JSONL equals `blueprint.yaml` except the owner-approved 017 note; rebuild byte-identical; 107/107 quotes re-found independently; 140 passed. Non-blocking: (1) test gap: disabling the eval/dev expected-section overlap check leaves all 19 new tests green; (2) Q-EVAL-024 (vi) also states the cause ("test không chạy trong thư mục output"), a bigger leak than the sheet flags; (3) Q-EVAL-028 quote matches only via whitespace collapse (source has a no-break space), undisclosed; (4) G5A box 1 ticked before the freeze (with a "not frozen" note); (5) blueprints still `status: proposed`. Unverified: Windows run, GitNexus.
+
+### 2026-09-26 RAG-001a: Gemini embedder + embedding cache, V-1 probe (branch `rag-001a`)
+- *AI did:* core `EmbeddingTask` + `Embedder.model_id` + `EmbeddingError`; `GeminiEmbedder` (batching, sliding-window throttle, retry/backoff, L2 normalization, dimension check); SQLite `CachingEmbedder` (per-batch commit, resume, in-call dedup); `FakeEmbedder`; 32 offline tests + 1 live test; V-1 probe script; ADR-0005 ([report](docs/reports/execution/RAG-001a.md)). Asked the owner for dim / OD-7 / OD-8 (768, `data/chroma/`, cosine) and guided the before/after AI Studio reading. Live calls: probe (1 call, 3 texts) and the live test (1 call, 3 texts), each run once. 173 passed offline (after the owner check below); live test passed (cos EN–VI 0.9055 > EN–unrelated 0.6606).
+- *AI got wrong:*
+  - (1) The first code (commit `a8e4a2d`, written before the V-1 reading) charged the throttle 1 request per HTTP call. V-1 showed each text counts as a request, so a 40-text batch would have looked like 1 of 90 requests/min and run into 429s during indexing.
+  - (2) One new throttle test expected a wait where 600 + 400 tokens exactly meets the 1,000 limit, so no wait is correct.
+  - (3) The first draft of the execution report said the embedder test file has 24 tests; it has 21.
+  - (4) A shell command meant to measure the pre-task test count included `git checkout origin/dev -- .`, which would have overwritten uncommitted doc edits.
+  - (5) Found by the verifier (C1): the cache committed per 45-text slice while the embedder re-split slices into several HTTP calls, so a later failure could drop paid vectors; ADR-0005 D18 and the report claimed "never loses paid vectors".
+  - (6) Found by the verifier (C2): the throughput simulation modelled `GeminiEmbedder` alone, not the `CachingEmbedder(GeminiEmbedder)` pipeline, so the 12.0-min Arm B figure did not hold for indexing (real: 18.0 min).
+  - (7) In the fix session, the first version of the other-cwd path test compared the child process's paths only with the parent's; with cwd-relative paths both were equal, so the test could not fail.
+- *How found:* (1) the owner's V-1 reading (AI Studio RPM 0 → 3 for one 3-text call); (2) the first pytest run (1 failed); (3) counting with `pytest --collect-only` before the commit; (4) blocked by the Claude Code auto-mode permission check before it ran. Nothing changed.
+- *Fix:* (1) commit `05ec4d6`: throttle charges `len(batch)` requests, batches are capped at the per-minute request limit, a test pins the V-1 behaviour, and a mutation (per-call counting) fails it. (2) The test now asks for 500 tokens. (3) Corrected to 21 before the commit. (4) The command was dropped. The baseline count was not needed, so the report states only the tests this task adds.
+- *Human decision:* dimension 768, OD-7 `data/chroma/`, OD-8 cosine (owner, AskUserQuestion). The owner read the AI Studio usage page for V-1, confirmed batch size 45, and set the quota plan (Arm A before today's 14:00 UTC+7 reset, Arm B after it).
+- *Owner check → fix:* the owner asked for proof that the token budget holds over the sliding window and expected token-bound throughput. Re-checking showed a throughput gap the AI had missed: the throttle admits whole calls, so two 45-text Arm B calls (≈ 32K) could not share one 25K window, and Arm B would run at ≈ 45 texts/min. A simulation with the real texts put it at 18 min. Fix: each call is capped at half the per-minute token budget (simulated 12 min), and two tests were added: two worst-case calls in one window, and the real defaults on worst-case chunks. 173 passed.
+- *Verifier findings (99-VERIFY, 2026-09-26, Windows 3.13.3, 0 Gemini requests, [RAG-001a-verify](docs/reviews/code/RAG-001a-verify.md) → ACCEPT WITH FIXES):*
+  - (1) MEDIUM: paid vectors can be lost inside a cache slice. `CachingEmbedder` commits per 45-text slice, but `GeminiEmbedder` re-splits a slice over 12.5K est. tokens into several HTTP calls. If a later call fails, the earlier calls' paid vectors are dropped (repro: 85 quota requests charged, 0 rows stored). This contradicts ADR-0005 D18. Arm A: 4 of 16 slices split; Arm B: 19 of 20.
+  - (2) MEDIUM: the half-budget cap does not reach the production pipeline. Through `CachingEmbedder(GeminiEmbedder)` Arm B still takes 39 calls and its last call starts at 18.0 min, not the 12.0 min in ADR-0005 D15. The simulation modelled `GeminiEmbedder` alone. Arm A is unchanged at 7.0 min.
+  - (3) LOW: this entry's "30 offline tests" and "171 passed" are stale; the real numbers are 32 and 173.
+  - Confirmed risks, rated, not fixed (owner): uncapped server retry-after (a 36,000 s `retryDelay` → 40 h of silent sleeps, MEDIUM); relative default paths (running outside the repo root creates an empty cache there, and it is **not** git-ignored, MEDIUM).
+  - Checks that passed: mutations on the token check, the half-budget cap and the per-batch commit are each killed; live cosines recomputed from the cache (0.9055 / 0.6606 / 0.6172); no key in the repo, cache or reports; 173 passed.
+- *Fixes from verify (2026-09-26, 0 Gemini requests, commit "RAG-001a: fixes from verify"; [report addendum](docs/reports/execution/RAG-001a.md#addendum-2026-09-26-fixes-from-99-verify)):*
+  - F1: `Embedder.plan_calls` in the core protocol; the cache sends misses in the embedder's planned groups and commits each before the next call. Pipeline test: 2nd call always 503 → the 1st call's 35 rows are stored and a re-run pays only for the other 10.
+  - F2: re-simulated through `CachingEmbedder(GeminiEmbedder)` with all chunk texts: Arm A 16 calls / 7.0 min, Arm B 25 calls / 12.0 min (was 39 / 18.0); ADR-0005 D15/D18/D19 updated.
+  - Retry: daily-quota 429 → `QuotaExhaustedError` at once ("resume after the 14:00 UTC+7 reset"); other waits capped at 120 s and logged. The classifier is built from the documented error shape, not a real daily 429.
+  - Paths: data paths resolve from the repo root (relative env values too); `.gitignore` uses `**/data/...`.
+  - 186 passed. Mutations killed: count-only cache slicing (6 failed), no cap (1), daily retried (2), no log (1), cwd-relative paths (4, after fixing (7)).
+  - *How (7) was found:* the MP1 mutation left that test green. *Fix:* it now also asserts the absolute paths under the repo root.
+- *Verifier findings (re-verify)* (99-VERIFY of commit `94fdef2`, 2026-09-26, Windows, Python 3.13.3, 0 Gemini requests; [RAG-001a-verify § Re-verify](docs/reviews/code/RAG-001a-verify.md#re-verify-of-the-fix-commit-2026-09-26-0845-0900-utc7) → **ACCEPT**): no defect remains in F1, F2, retry or paths.
+  - F1: the first verify's repro now stores 35 of 45 rows (it stored 0 before the fix). Both the count-only slicing mutation and the deferred-commit mutation are killed.
+  - F2: my own simulation of the cached pipeline gives Arm A 16 calls / 7.0 min and Arm B 25 calls / 12.0 min, which matches the report.
+  - Retry: the 36000 s retry delay is now capped at 4 × 120 s. A daily 429 fails at once with no retry.
+  - Paths: files resolve from the repo root even when the process starts in another directory, and `**/data/...` ignore rules match there too.
+  - Tests: 186 passed.
+  - Non-blocking, all LOW: (1) `CachingEmbedder` has no `plan_calls`, so it no longer satisfies the core `Embedder` protocol; (2) the daily-429 classifier has not been tested on a real daily-quota response (disclosed); (3) `httpx.ConnectError` is still not wrapped; (4) the throttle's state lives in one process only.
 
 ## Summary: how AI helped
 
