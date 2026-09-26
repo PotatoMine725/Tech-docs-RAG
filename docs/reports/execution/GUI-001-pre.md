@@ -34,6 +34,13 @@ AnswerResult contract of prompt 07 §1, not the pipeline. Wiring to the real use
 - `AskQuestionError(kind, message)` is my invention for the error path; the real use case will raise other exceptions (`GenerationError`, `RetrievalError`, Gemini errors). Unknown exceptions already show "Something went wrong: …"; reconcile in GUI-001.
 - UI strings are English only.
 
+## Addendum — owner check of rows 7/8
+Owner reported rows 7 and 8 showed the same red banner. Not reproduced in an offscreen run of the real window (each
+message was different under the banner); the generic banner was however identical by design. Added per-kind banner
+titles (`Quota used up` / `Model service unavailable` / `Search index not found`), extended the widget smoke test
+(full suite 201 passed), tightened checklist rows 7/8. Owner then confirmed rows 7/8 are fine. Other rows: owner said
+"other tests passed" (self-reported, not independently verified).
+
 ## Explain it back
 - **Why a view-model with an injected executor?** Widgets stay dumb; the state machine is plain Python so it tests without Qt. Alternative: QObject/signals view-model — needs an event loop in tests and couples logic to Qt.
 - **Why one contracts file?** Presentation depends on a mirror of the result shape in one place; when RAG-002/003 land, only `contracts.py` (or an adapter) changes. Alternative: import core `AnswerResult` now — impossible, it doesn't exist yet.
