@@ -134,7 +134,7 @@ INGEST-004 (ADR-0003 D3a, owner 2026-09-25): Arm A drops heading-only chunks (75
 
 Deliverables:
 - **First step:** V-1 — check how a batched embedding request counts against the daily limit. This decides whether indexing takes one or two quota days. ✅ Answered 26 Sep (RAG-001a, ADR-0005): each text counts as one request → two quota days.
-- Decide OD-7…OD-11 before building indexes. (OD-7, OD-8 decided 26 Sep in ADR-0005.)
+- Decide OD-7…OD-11 before building indexes. (OD-7, OD-8 decided 26 Sep in ADR-0005; OD-9, OD-10 decided 26 Sep in RAG-002.)
 - Embedder: `gemini-embedding-001`, task types `RETRIEVAL_DOCUMENT` (chunks) / `RETRIEVAL_QUERY` (questions), batched and throttled to the per-minute token limit; save embeddings to disk so quota is never spent twice on the same text.
 - ChromaDB adapter; one collection per arm; **both arms indexed now** (uses embedding quota early).
 - Retrieval use case (top-k = 5).
@@ -282,8 +282,8 @@ This plan does **not** decide these. Each must be decided by the owner epic's la
 | OD-6 | PDF/HTML placeholders: delegate to MarkItDown or one adapter | ingestion-architecture | EPIC-02 | ✅ Decided 25 Sep (AI, owner away; **accepted by the owner 25 Sep**, OWNER-001): one shared adapter, stubs deleted (INGEST-003) |
 | OD-7 | Canonical ChromaDB path (`D:\ChromaDB` vs `data/chroma/`) and whether vector data is committed | ADR-0001, tech-stack | EPIC-03 | ✅ Decided 26 Sep (owner, RAG-001a): `data/chroma/`, git-ignored, not committed, rebuilt by script (ADR-0005 D16) |
 | OD-8 | Distance metric (held constant by D7, but not named) | ADR-0003 D7 | EPIC-03 | ✅ Decided 26 Sep (owner, RAG-001a): cosine, both arms (ADR-0005 D17) |
-| OD-9 | Rule for answering "insufficient information" | retrieval-spec | EPIC-03 | 27 Sep |
-| OD-10 | Prompt template / grounding instructions | generation-spec | EPIC-03 | 27 Sep |
+| OD-9 | Rule for answering "insufficient information" | retrieval-spec | EPIC-03 | ✅ Decided 26 Sep (RAG-002, rule from the prompt, owner addendum): retrieval gate top-1 < 0.686 (dev set, Arm A, one value) + LLM `insufficient` flag |
+| OD-10 | Prompt template / grounding instructions | generation-spec | EPIC-03 | ✅ Decided 26 Sep (owner, RAG-002): `config/prompts/answer_v1.md`, owner's rule 2, JSON mode |
 | OD-11 | Max retry attempts before fallback | ADR-0004 D13 | EPIC-03 | 27 Sep |
 | OD-12 | How citation quality is checked (by hand, judge, or both) | evaluation-spec | EPIC-05 B | 28 Sep |
 | OD-13 | Judge spot-check sample size | ADR-0004 D12 | EPIC-05 B | 29 Sep |

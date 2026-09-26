@@ -89,7 +89,8 @@ def get_answer_settings() -> AnswerSettings:
 
 @dataclass(frozen=True)
 class RetrievalSettings:
-    """top_k = 5 for both arms (ADR-0003 D7). The threshold is the OD-9 retrieval gate (retrieval-spec.md)."""
+    """top_k = 5 for both arms (ADR-0003 D7). The threshold is the OD-9 retrieval gate, tuned on the dev set, Arm A,
+    used for both arms (retrieval-spec.md; RAG-002, 2026-09-26)."""
 
     top_k: int
     overfetch: int  # extra hits fetched so same-content duplicates can be dropped (RAG-002 addendum 1)
@@ -100,5 +101,5 @@ def get_retrieval_settings() -> RetrievalSettings:
     return RetrievalSettings(
         top_k=int(os.getenv("TOP_K", "5")),
         overfetch=int(os.getenv("RETRIEVAL_OVERFETCH", "10")),
-        insufficient_score_threshold=float(os.getenv("INSUFFICIENT_SCORE_THRESHOLD", "0.0")),
+        insufficient_score_threshold=float(os.getenv("INSUFFICIENT_SCORE_THRESHOLD", "0.686")),
     )

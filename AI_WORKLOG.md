@@ -10,7 +10,7 @@ A record of how AI tools were used in this project, required by the submission (
 | Claude Code (CLI) | Claude Opus 5.5 (`claude-opus-5-5`; commits `490068f` onward) | ADR drafting, master plan, corpus analysis, repo hygiene, evaluation design |
 | GitNexus (`npx gitnexus`) | local code index | Impact analysis before edits, change detection before commits |
 | Chunking consultation (`docs/plans/chunking-consultation-handoff.md`, cited as context by ADR-0003) | — | A handoff written by Claude Code so another agent could advise on chunking before ADR-0003 |
-| Google Gemini API | `gemini-embedding-001` (from RAG-001a, 2026-09-26); planned: `gemini-3.5-flash-lite`, `gemini-3.5-flash` (ADR-0004) | Embeddings (V-1 probe + 1 live test so far), answers, LLM judge (from EPIC-03) |
+| Google Gemini API | `gemini-embedding-001` (from RAG-001a, 2026-09-26); `gemini-3.5-flash-lite` (answers, from RAG-002, 2026-09-26); planned: `gemini-3.5-flash` fallback (ADR-0004) | Embeddings, answers (2 dev answers in RAG-002 so far), LLM judge (from EPIC-05) |
 
 ## Log
 
@@ -294,6 +294,34 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
     - "Outside" also covers non-approved sections. On the current data there are none.
     - Only the "evidence_hit = 1" reading of "every hit point" gives the owner's 4 cases; the literal reading gives 7.
   - UNVERIFIED: the report's point-in-time memory figure (~1.5 GB free) and the historical truncated runs (not reproducible). None of my 4 full-suite runs was truncated.
+
+### 2026-09-26 RAG-002: retrieval, grounded generation, citations, "insufficient information" (branch `rag-002`, PR into `dev`)
+- *AI did:*
+  - Built the question path: `detect_language`, `Retriever` (over-fetch + dedup), `answer_v1` prompt builder, marker/citation resolution, `AnswerQuestion` with the retrieval gate and the LLM `insufficient` layer, and a basic `GeminiLLM` in JSON mode (`response_json_schema`).
+  - Core contracts: `LLMRequest`/`LLMResponse`, `AnswerResult`, `Citation` fields, `RetrievalError`/`GenerationError`.
+  - 56 offline tests (369 passed); 4 mutations, each killed.
+  - Dev-only live checks: 6 embed + 2 LLM requests, 0 × 429.
+  - OD-9 threshold 0.686 (dev set, Arm A); OD-10 prompt file. Specs filled.
+  - Checked compatibility with the EVAL-003b-pre metrics and the GUI-001-pre contract; mismatches listed ([report](docs/reports/execution/RAG-002.md)).
+- *AI got wrong:*
+  - (1) I first implemented dedup by `content_hash`, as the addendum said, and wrote in the docstring that the duplicates dropped at query time are "copies of one text in two documents". Both were wrong for this corpus. By `content_hash`, Arm A has only 2 extra copies. The verify note's 24 were identical `embed_text`: same-document repeats in doc 17/23/13 that differ only in link URLs.
+  - (2) A test sentence meant to count as an uncited fact had 4 words, below the 5-word rule.
+  - (3) A heredoc edit turned `\n` escapes into real newlines in `dev_check.py` (SyntaxError).
+  - (4) The GitNexus index was stale, so the first impact queries returned "not found".
+- *How found:*
+  - (1) the offline duplicate analysis run before any live call (2 groups vs the 24 expected), then a diff of the duplicate chunks;
+  - (2) the failing test;
+  - (3) the script run;
+  - (4) `npx gitnexus status`.
+- *Fix:*
+  - (1) the owner chose `passage_hash` (hash of the link-stripped body): Arm A 26 extra copies, Arm B 0. The kept hit carries `duplicate_chunk_ids`; the docstring was rewritten; a link-only-difference test was added (mutation M1 kills it).
+  - (2) the sentence was lengthened.
+  - (3) fixed with an exact edit.
+  - (4) `npx gitnexus analyze` (counts in CLAUDE.md/AGENTS.md committed as a chore).
+- *Human decision:*
+  - Dedup key `passage_hash`, `duplicate_chunk_ids`, and the eval-span overlap check: only Q-EVAL-003/004 touch a duplicate group (the doc 12/13 pair). The proposed 09b overlap rule was recorded, not implemented.
+  - `answer_v1` approved with 2 LLM calls; rule 2 is the owner's text. Two small wording additions (rules 3 and 4) were flagged and approved.
+  - Threshold rule and live budget from the owner's addendum.
 
 ## Summary: how AI helped
 
