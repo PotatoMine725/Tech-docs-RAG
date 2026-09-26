@@ -18,6 +18,12 @@ Status: decided for RAG-002 (2026-09-26). Code: `application/citation/citations.
 - **Markers.** The answer cites passage n with `[n]` (e.g. `[2]` or `[2][3]`), n = rank in the retrieved list (1..k).
   A marker or `cited_passages` number outside 1..k is removed from the text and recorded in
   `AnswerResult.dropped_markers`.
+- **What is not a marker (RAG-002 fix F1, owner decision 2026-09-26).** A `[n]` inside inline code (a backtick span)
+  or inside a fenced code block (``` or ~~~ fence) is never a marker, and neither is `[0]` anywhere, prose included
+  (markers are 1-based). Such text is left byte-identical and recorded nowhere (not a citation, not in
+  `dropped_markers`, and a sentence whose only `[n]` is in code counts as uncited). A plain-text `[n]` with n ≥ 1 is a
+  marker even right after a word or a closing backtick (`sealed[2].`, `` `x`[1] ``). A `0` in `cited_passages` is
+  still out of range and recorded in `dropped_markers`.
 - **Order.** Citations follow the first appearance of their marker in the answer, then any `cited_passages` number
   not marked in the text; each passage at most once.
 - **Excerpt.** The first 300 characters of the link-stripped chunk body, cut back to the last word boundary; a verbatim

@@ -28,7 +28,7 @@ def _service(llm, top_score=0.8, threshold=0.5, k=5):
     store.upsert(chunks, [[1.0, 0.0]] * len(chunks))
     ticks = iter(range(1000))
     return AnswerQuestion(
-        Retriever(FakeEmbedder(), store, top_k=k), llm, PromptBuilder.from_dir(ROOT / "config" / "prompts", "answer_v1"),
+        Retriever(FakeEmbedder(), store, top_k=k), llm, PromptBuilder.from_dir(ROOT / "config" / "prompts", "answer_v2"),
         MESSAGES, threshold, clock=lambda: next(ticks) / 1000,
     )
 
@@ -43,7 +43,7 @@ def test_answer_with_marker_builds_citation_for_that_rank():
     assert (citation.marker, citation.location, citation.excerpt) == (2, "Doc > Part 2", "Passage body 2.")
     assert result.uncited_sentences == 1  # the second sentence lost its only marker
     assert result.llm.model_used == "fake-llm"
-    assert result.prompt_version == "answer_v1"
+    assert result.prompt_version == "answer_v2"
     assert set(result.latency_ms) == {"embed_query", "retrieve", "generate", "total"}
 
 
@@ -111,3 +111,14 @@ def test_unusable_llm_output_raises_generation_error_with_raw_text(raw):
     with pytest.raises(GenerationError) as caught:
         _service(FakeLLM(raw)).ask("Question?")
     assert caught.value.raw_text == raw
+
+
+def test_code_block_indexer_in_the_llm_answer_is_kept_and_not_cited():
+    """RAG-002 fix F1: code in the answer comes back byte-identical and invents no citation."""
+    answer = "Read the first item with `args[0]` [1].\n```csharp\nvar x = items[2];\n```"
+    llm = FakeLLM(_reply(answer=answer, cited=[1]))
+    result = _service(llm).ask("How do I read the first item?")
+    assert result.answer == answer
+    assert [c.marker for c in result.citations] == [1]
+    assert result.dropped_markers == ()
+    assert result.uncited_sentences == 0

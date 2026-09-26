@@ -55,3 +55,11 @@ def test_template_without_placeholders_is_rejected(tmp_path):
     (tmp_path / "bad.md").write_text("no placeholders", encoding="utf-8")
     with pytest.raises(ValueError):
         load_template(tmp_path, "bad")
+
+
+def test_answer_v2_is_v1_plus_the_backtick_instruction():
+    v1 = load_template(PROMPTS_DIR, "answer_v1")
+    v2 = load_template(PROMPTS_DIR, "answer_v2")
+    old = "Keep code, identifiers, API and keyword names exactly as in the CONTEXT."
+    assert v2 == v1.replace(old, old + " Wrap code, identifiers and expressions in backticks.")
+    assert v2 != v1

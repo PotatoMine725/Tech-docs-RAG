@@ -337,6 +337,15 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
     - doc 15 bodies keep data-URI SVG links (chunker, pre-existing);
     - GUI-pre fake inlines the messages;
     - gate equality is only implied by `<`.
+- *Fix F1* (2026-09-26, branch `rag-002`, 0 Gemini requests, [report addendum 7](docs/reports/execution/RAG-002.md)):
+  - `[n]` inside inline code or fenced blocks, and `[0]` anywhere, are no longer markers (owner decision): left
+    byte-identical, not cited, not in `dropped_markers`; code-only sentences count as uncited. Verifier probe now
+    returns the answer unchanged, citations [1], dropped ().
+  - Prompt `answer_v2` (v1 + "Wrap code, identifiers and expressions in backticks.") is the configured default;
+    `answer_v1.md` unchanged. Spec sentence: score == threshold passes the gate (N3).
+  - 369 → 384 passed (+15). Mutations: code skipping off → 7 fail; `[0]` rule off → 3 fail. Awaiting re-verify.
+  - Backlog (not fixed): GUI fake hard-codes the insufficient messages → GUI-001 wiring (N2); doc 15 SVG links in
+    chunks → QC-001 (N1).
 
 ## Summary: how AI helped
 

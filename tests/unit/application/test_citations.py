@@ -75,3 +75,73 @@ def test_uncited_sentences_counts_long_sentences_without_markers():
 def test_passage_hash_ignores_the_heading_line_but_not_the_body():
     assert passage_hash(make_chunk("01", 0, "Same body.", ("A",))) == passage_hash(make_chunk("02", 0, "Same body.", ("B",)))
     assert passage_hash(make_chunk("01", 0, "Body one.")) != passage_hash(make_chunk("01", 0, "Body two."))
+
+
+# RAG-002 fix F1: `[n]` inside code and `[0]` are not markers (citation-spec.md, owner decision 2026-09-26).
+PROBE = "Use `args[0]` and `values[7]` like this [1].\n```csharp\nvar x = items[2];\n```"
+
+
+def test_verifier_probe_code_indexers_are_not_markers():
+    answer, citations, dropped = resolve_citations(PROBE, [1], _retrieved(5))
+    assert answer == PROBE
+    assert [c.marker for c in citations] == [1]
+    assert dropped == ()
+
+
+def test_inline_code_zero_index_is_left_alone():
+    text = "Read `args[0]` first [1]."
+    assert extract_markers(text) == [1]
+    assert resolve_citations(text, [], _retrieved(5))[0] == text
+
+
+def test_inline_code_out_of_range_index_is_not_dropped():
+    text = "Then `values[7]` holds it [2]."
+    answer, citations, dropped = resolve_citations(text, [], _retrieved(5))
+    assert (answer, [c.marker for c in citations], dropped) == (text, [2], ())
+
+
+def test_fenced_code_index_does_not_invent_a_citation():
+    for fence in ("```", "~~~"):
+        text = f"Example [1].\n{fence}csharp\nvar x = items[2];\nvar y = items[9];\n{fence}\nDone [3]."
+        answer, citations, dropped = resolve_citations(text, [], _retrieved(5))
+        assert (answer, [c.marker for c in citations], dropped) == (text, [1, 3], ())
+
+
+def test_unclosed_fence_runs_to_the_end():
+    text = "Example [1].\n```\nvar x = items[2];"
+    assert extract_markers(text) == [1]
+
+
+def test_zero_in_plain_text_is_not_a_marker_and_not_dropped():
+    text = "Index [0] is the first slot [1]."
+    answer, citations, dropped = resolve_citations(text, [], _retrieved(5))
+    assert (answer, [c.marker for c in citations], dropped) == (text, [1], ())
+    assert extract_markers(text) == [1]
+
+
+def test_zero_in_cited_passages_is_dropped_but_prose_zero_stays():
+    text = "Index [0] is the first slot [1]."
+    answer, _, dropped = resolve_citations(text, [0], _retrieved(5))
+    assert answer == text and dropped == (0,)
+
+
+def test_marker_directly_after_a_word_is_still_a_marker():
+    assert extract_markers("The class is sealed[2].") == [2]
+    assert resolve_citations("The class is sealed[7].", [], _retrieved(5))[0] == "The class is sealed."
+
+
+def test_marker_right_after_a_closing_backtick_is_a_marker():
+    assert extract_markers("Call `x`[1].") == [1]
+    assert extract_markers("Call ``a ` b``[2] and `y[3]`.") == [2]
+
+
+def test_regression_marker_order_and_prose_out_of_range_drop():
+    assert extract_markers("A [2][3]. B. [1]") == [2, 3, 1]
+    answer, _, dropped = resolve_citations("Fact [7] here.", [], _retrieved(5))
+    assert answer == "Fact here." and dropped == (7,)
+
+
+def test_sentence_whose_only_bracket_is_in_code_counts_as_uncited():
+    assert count_uncited_sentences("Always read the value through `args[1]` safely.") == 1
+    assert count_uncited_sentences("Always read the value through args safely [1].") == 0
+    assert count_uncited_sentences("The first slot is at index [0] in C#.") == 1

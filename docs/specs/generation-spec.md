@@ -19,6 +19,9 @@ a word with a letter shared with other languages (e.g. "café") → "vi".
 ## OD-10 prompt (decided 2026-09-26, owner-approved before the live run)
 - Template: `config/prompts/answer_v1.md`; the version string is the file name (`ANSWER_PROMPT_VERSION`, recorded in
   every `AnswerResult.prompt_version`). Prompts are never inlined in code. The file holds exactly the text sent.
+- Current version: `answer_v2` (RAG-002 fix F1, 2026-09-26) = `answer_v1` + rule 4 "Wrap code, identifiers and
+  expressions in backticks." so code indexers are not read as citation markers (citation-spec.md). `answer_v1.md` is
+  kept unchanged; the first live dev answers were produced with it.
 - Rule 2 is the owner's text (RAG-002 addendum 3). Two small additions, shown to and approved by the owner: rule 3 adds
   "and list every passage number you cite in "cited_passages""; rule 4 covers "answer" and "missing_information".
 - Passages: numbered 1..k in rank order, each `[n] {document_name} — {heading path}` + newline + the link-stripped

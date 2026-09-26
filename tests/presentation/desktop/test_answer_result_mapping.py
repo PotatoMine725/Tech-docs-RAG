@@ -38,7 +38,7 @@ def _ask(reply: dict) -> AnswerResult:
     store.upsert(chunks, [[1.0, 0.0]] * 5)
     service = AnswerQuestion(
         Retriever(FakeEmbedder(), store), FakeLLM(json.dumps(reply)),
-        PromptBuilder.from_dir(ROOT / "config" / "prompts", "answer_v1"),
+        PromptBuilder.from_dir(ROOT / "config" / "prompts", "answer_v2"),
         load_messages(ROOT / "config" / "messages.json"), threshold=0.0,
     )
     return service.ask("Question?")

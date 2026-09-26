@@ -32,7 +32,7 @@ Status: decided for RAG-002 (2026-09-26). Code: `application/retrieval/retrieve.
 ## OD-9 "insufficient information" rule (decided 2026-09-26, RAG-002)
 Two layers:
 - (a) **Retrieval gate:** if the top-1 score (after dedup) < `INSUFFICIENT_SCORE_THRESHOLD`, the LLM is not called;
-  `insufficient_reason = "retrieval_gate"`.
+  `insufficient_reason = "retrieval_gate"`. score == threshold passes the gate (strict <).
 - (b) **LLM layer:** the model answers `"insufficient": true` → `insufficient_reason = "llm"` (generation-spec.md).
 
 **Threshold = 0.686**, used for both arms. Tuned on the dev set only (`dev-v1.jsonl`, never the eval set), Arm A.

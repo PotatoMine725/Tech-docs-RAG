@@ -81,7 +81,7 @@ def get_answer_settings() -> AnswerSettings:
     return AnswerSettings(
         model=os.getenv("ANSWER_MODEL", "gemini-3.5-flash-lite"),
         timeout_s=float(os.getenv("ANSWER_TIMEOUT_S", "60")),
-        prompt_version=os.getenv("ANSWER_PROMPT_VERSION", "answer_v1"),
+        prompt_version=os.getenv("ANSWER_PROMPT_VERSION", "answer_v2"),
         prompts_dir=resolve_project_path(os.getenv("PROMPTS_DIR", "config/prompts")),
         messages_path=resolve_project_path(os.getenv("MESSAGES_PATH", "config/messages.json")),
     )
