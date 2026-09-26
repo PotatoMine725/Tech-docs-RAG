@@ -238,6 +238,35 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - Tests: 186 passed.
   - Non-blocking, all LOW: (1) `CachingEmbedder` has no `plan_calls`, so it no longer satisfies the core `Embedder` protocol; (2) the daily-429 classifier has not been tested on a real daily-quota response (disclosed); (3) `httpx.ConnectError` is still not wrapped; (4) the throttle's state lives in one process only.
 
+### 2026-09-26 RAG-001b: ChromaDB vector store + index both arms (branch `rag-001b`, PR #10)
+- *AI did:*
+  - Step 0: moved `plan_calls` out of the core `Embedder` into the infrastructure `PlannedEmbedder`, and added a conformance test for `CachingEmbedder`. The first 429 of a run now logs its raw body, key redacted, before the daily-quota check.
+  - Core: `RetrievedChunk` and the new `VectorStore` (`upsert`/`search`/`count`/`get_ids`).
+  - `ChromaVectorStore`: one cosine collection per arm, named from the chunker config and the model id, metadata checked on open.
+  - `IndexCorpus`: resume by chunk id, one `embed()` call, batched upserts.
+  - Scripts `build_index.py` (with `--dry-run`) and `peek_retrieval.py`.
+  - 25 offline tests (211 passed); 5 mutations, each killed. ADR-0005 amendment 2 ([report](docs/reports/execution/RAG-001b.md)).
+  - Live:
+    - Arm A: 733 = 733, 709 requests, 16 calls, 0 retries, 7.1 min. The re-run showed 0 new and 0 API requests.
+    - One sanity query: 1 request.
+    - Arm B (after the 14:00 UTC+7 reset, started by hand at 14:09 because the background waiter had been stopped for low memory): 859 = 859, 859 requests, 25 calls, 0 retries, 12.1 min (12.0 simulated), throttle wait 669 s. Re-run: 0 new, 0 API requests, 0.148 s. Arm A still 733 = 733.
+    - Both collections are in `D:\ChromaDB` (the owner's `.env`), not `data/chroma/` (ADR-0005 D16): owner decision required, see (4).
+- *AI got wrong:*
+  - (1) The first ledger edit named a commit hash, `33c5e3b`, that does not exist; I wrote it before looking up the real hash.
+  - (2) My first plan had `IndexCorpus` embed in 100-chunk slices. The embedder would then have planned calls per slice (e.g. 45 + 45 + 10), which breaks ADR-0005 D15's call plan and the 7.0 / 12.0 min figures the verifier accepted.
+  - (3) My first planned score test, "identical vector → score ≈ 1", could not tell cosine from inner product or squared L2.
+  - (4) I took the store path from ADR-0005 D16 and the code default (`data/chroma/`) without checking `.env`. The owner's `.env` still sets the old `CHROMA_PATH=D:\ChromaDB`, so both arms were indexed there. My morning key scan of `data/chroma/` therefore checked an empty folder, and the report named the wrong location.
+- *How found:*
+  - (1) my own `git log` check right after the edit, before any commit;
+  - (2) and (3) the advisor's review of the plan, before any code was written;
+  - (4) my own count check at 14:22: it skipped `load_dotenv` and saw 0 items, and a second check with `.env` loaded saw 733 and 859.
+- *Fix:*
+  - (1) Replaced it with the real `efc11e3` before committing.
+  - (2) One `embed()` call for all pending texts, with only the upsert batched. The dry-run and the live Arm A call counts (16) match D15.
+  - (3) An extra test: a query `[2,0,0]` against a stored `[1,0,0]` must score 1.0 (inner product would give 2, squared L2 would give 0). The `DISTANCE = "ip"` mutation fails it.
+  - (4) Re-ran the key scan on the real store (`D:\ChromaDB`, raw bytes): 0 matches. The report now gives the real path, with the morning scan marked as a correction. I did not edit `.env` or move the store; that is left to the owner.
+- *Human decision:* none new in this session. The quota plan (Arm A before 14:00, Arm B after) and the accepted open items come from the owner's prompt (ADR-0005 D19).
+
 ## Summary: how AI helped
 
 To be filled at QC-001.
