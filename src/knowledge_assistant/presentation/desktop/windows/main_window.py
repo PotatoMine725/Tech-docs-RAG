@@ -88,7 +88,7 @@ class MainWindow(QMainWindow):
         banner = _BANNERS.get(st)
         self.banner.setVisible(banner is not None)
         if banner:
-            self.banner.setText(banner[0])
+            self.banner.setText(vm.error_title if st is ViewState.ERROR else banner[0])
             self.banner.setStyleSheet(banner[1])
 
         if st is ViewState.ERROR:

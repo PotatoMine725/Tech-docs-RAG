@@ -63,5 +63,13 @@ def test_insufficient_and_error_look_different(app):
     win.question.setText("quota")
     win.question.returnPressed.emit()
     pump(app, lambda: vm.state is ViewState.ERROR)
-    assert "Could not get an answer" in win.banner.text()
+    assert "Quota used up" in win.banner.text()
     assert "quota" in win.answer.toPlainText() and win.citations.count() == 0
+
+    for q, title, text in (("503 please", "Model service unavailable", "temporarily unavailable"),
+                           ("noindex", "Search index not found", "index was not found")):
+        win.question.setText(q)
+        win.question.returnPressed.emit()
+        assert vm.state is ViewState.BUSY
+        pump(app, lambda: vm.state is ViewState.ERROR)
+        assert win.banner.text() == title and text in win.answer.toPlainText()

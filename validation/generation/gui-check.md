@@ -19,8 +19,8 @@ Trigger words in the question choose the fake scenario (case-insensitive). Vietn
 | 4 | Type `insufficient topic` | Amber banner "Not enough information in the documents", italic message, "Not covered: …"; NO citations list; Copy disabled | [ ] |
 | 5 | Type `related topic` | Same amber state, plus list titled "Related content (not an answer)"; the row ends with "(related, not an answer)"; clicking it shows "Related, not an answer." | [ ] |
 | 6 | Type `chủ đề insufficient` and `related ở đâu?` | Same as 4 / 5 with the Vietnamese message | [ ] |
-| 7 | Type `quota` | Red banner "Could not get an answer"; readable quota message, no raw `429`/`RESOURCE_EXHAUSTED` text | [ ] |
-| 8 | Type `503 please` and `noindex` | Readable "temporarily unavailable" / "index was not found" messages | [ ] |
+| 7 | Type `quota` (only that word) | Red banner "Quota used up"; message below "The Gemini quota is used up…", no raw `429`/`RESOURCE_EXHAUSTED` text | [ ] |
+| 8 | Type `503 please`, then `noindex` (each alone, no `quota` in the text) | Banner "Model service unavailable" + "…temporarily unavailable (503)…"; banner "Search index not found" + "…index was not found…" | [ ] |
 | 9 | Type `slow question`; while the 3 s delay runs, drag/resize/minimise the window | Window keeps moving and repainting; busy bar animates; Ask/input/arm disabled; answer appears after ~3 s | [ ] |
 | 10 | After an answer, click "Copy answer", paste into Notepad | Pasted text equals the answer text | [ ] |
 | 11 | Switch selector to Arm B, ask any answerable question | Answer begins `[Arm B]` (fake echoes the arm); back on Arm A → `[Arm A]` | [ ] |

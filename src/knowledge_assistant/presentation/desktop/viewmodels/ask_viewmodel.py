@@ -21,6 +21,13 @@ _ERROR_TEXT = {
 }
 
 
+_ERROR_TITLE = {
+    "quota": "Quota used up",
+    "unavailable": "Model service unavailable",
+    "no_index": "Search index not found",
+}
+
+
 class ViewState(Enum):
     IDLE = "idle"
     BUSY = "busy"
@@ -37,6 +44,7 @@ class AskViewModel:
         self.state = ViewState.IDLE
         self.arm = ARMS[0]
         self.result: AnswerResult | None = None
+        self.error_title = ""
         self.error_message = ""
         self.selected: Citation | None = None
 
@@ -80,6 +88,7 @@ class AskViewModel:
 
     def _on_err(self, exc: Exception) -> None:
         kind = exc.kind if isinstance(exc, AskQuestionError) else "other"
+        self.error_title = _ERROR_TITLE.get(kind, "Could not get an answer")
         self.error_message = _ERROR_TEXT.get(kind) or f"Something went wrong: {exc}"
         self.state = ViewState.ERROR
         self._notify()
