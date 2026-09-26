@@ -319,7 +319,7 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - (3) fixed with an exact edit.
   - (4) `npx gitnexus analyze` (counts in CLAUDE.md/AGENTS.md committed as a chore).
 - *Human decision:*
-  - Dedup key `passage_hash`, `duplicate_chunk_ids`, and the eval-span overlap check: only Q-EVAL-003/004 touch a duplicate group (the doc 12/13 pair). The proposed 09b overlap rule was recorded, not implemented.
+  - Dedup key `passage_hash`, `duplicate_chunk_ids`, and the eval-span overlap check: two eval cases touch a duplicate group, both on the doc 12/13 pair (list in the report). The proposed 09b overlap rule was recorded, not implemented.
   - `answer_v1` approved with 2 LLM calls; rule 2 is the owner's text. Two small wording additions (rules 3 and 4) were flagged and approved.
   - Threshold rule and live budget from the owner's addendum.
 
