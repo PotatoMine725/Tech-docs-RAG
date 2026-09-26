@@ -70,6 +70,7 @@ class RetrievedChunk:
     chunk: DocumentChunk
     rank: int  # 1-based
     score: float
+    duplicate_chunk_ids: tuple[str, ...] = ()  # same-passage hits this one replaced in dedup (RAG-002, owner 2026-09-26)
 
 
 @dataclass(frozen=True)

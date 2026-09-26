@@ -2,10 +2,10 @@ from knowledge_assistant.application.citation.citations import (
     count_uncited_sentences,
     excerpt,
     extract_markers,
-    passage_body,
     resolve_citations,
     split_sentences,
 )
+from knowledge_assistant.application.common.passage import passage_body, passage_hash
 from knowledge_assistant.core.models import RetrievedChunk
 from tests.fakes import make_chunk
 
@@ -70,3 +70,8 @@ def test_sentence_split_keeps_trailing_markers_with_their_sentence():
 def test_uncited_sentences_counts_long_sentences_without_markers():
     answer = "This long sentence has no marker at all. This one is cited properly here [1]. Too short.\n- a list item"
     assert count_uncited_sentences(answer) == 1
+
+
+def test_passage_hash_ignores_the_heading_line_but_not_the_body():
+    assert passage_hash(make_chunk("01", 0, "Same body.", ("A",))) == passage_hash(make_chunk("02", 0, "Same body.", ("B",)))
+    assert passage_hash(make_chunk("01", 0, "Body one.")) != passage_hash(make_chunk("01", 0, "Body two."))

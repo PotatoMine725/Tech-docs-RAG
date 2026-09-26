@@ -1,5 +1,7 @@
-"""Retriever: query embedding, over-fetch + content-hash dedup (RAG-002 addendum 1), and the fields the
+"""Retriever: query embedding, over-fetch + passage-hash dedup (RAG-002 addendum 1, owner 2026-09-26), and the fields the
 EVAL-003b-pre metric code needs (addendum 2). Synthetic data only; no eval-set question or span is used."""
+from dataclasses import replace
+
 import pytest
 
 from knowledge_assistant.application.evaluation.metrics.retrieval import (
@@ -10,7 +12,7 @@ from knowledge_assistant.application.evaluation.metrics.retrieval import (
     source_hit_at_k,
 )
 from knowledge_assistant.application.evaluation.metrics.spans import EXPECTED, ExpectedSpan
-from knowledge_assistant.application.retrieval.retrieve import Retriever, dedupe_by_content
+from knowledge_assistant.application.retrieval.retrieve import Retriever, dedupe_by_passage
 from knowledge_assistant.core.exceptions import RetrievalError
 from knowledge_assistant.core.interfaces.embedding import EmbeddingTask
 from knowledge_assistant.core.models import RetrievedChunk
@@ -43,10 +45,11 @@ def test_no_duplicates_gives_unchanged_result():
     assert result.duplicates_dropped == 0
 
 
-def test_duplicated_text_takes_exactly_one_top_k_slot():
+def test_duplicates_across_documents_collapse_to_one_slot_with_duplicate_ids():
     same = "Repeated paragraph copied into three documents."
     chunks = [
-        make_chunk("17", 0, same), make_chunk("23", 4, same), make_chunk("13", 2, same),
+        make_chunk("17", 0, same, ("A", "One")), make_chunk("23", 4, same, ("B", "Two")),
+        make_chunk("13", 2, same, ("C", "Three")),
         make_chunk("01", 0, "a"), make_chunk("02", 0, "b"), make_chunk("03", 0, "c"), make_chunk("04", 0, "d"),
     ]
     scores = {"17:header-1600:0000": 0.90, "23:header-1600:0004": 0.89, "13:header-1600:0002": 0.88,
@@ -56,15 +59,29 @@ def test_duplicated_text_takes_exactly_one_top_k_slot():
     ids = [hit.chunk.chunk_id for hit in result.chunks]
     assert ids == ["17:header-1600:0000", "01:header-1600:0000", "02:header-1600:0000",
                    "03:header-1600:0000", "04:header-1600:0000"]
-    assert [hit.chunk.content_hash for hit in result.chunks].count(chunks[0].content_hash) == 1
+    assert result.chunks[0].duplicate_chunk_ids == ("23:header-1600:0004", "13:header-1600:0002")
+    assert all(hit.duplicate_chunk_ids == () for hit in result.chunks[1:])
     assert [hit.rank for hit in result.chunks] == [1, 2, 3, 4, 5]  # re-numbered after the drop
     assert result.duplicates_dropped == 2
+
+
+def test_link_only_difference_is_a_duplicate_although_content_hash_differs():
+    """Doc 17's case: display_text differs only in a link URL, so content_hash differs, but the passage is the same."""
+    first = make_chunk("17", 6, "See the guide for version 10.")
+    second = replace(make_chunk("17", 92, "See the guide for version 10."),
+                     display_text="See the [guide](https://x.invalid/v7) for version 10.", content_hash="other")
+    assert first.content_hash != second.content_hash
+    result = Retriever(FakeEmbedder(), _store([first, second, make_chunk("01", 0, "z")],
+                                              {first.chunk_id: 0.8, second.chunk_id: 0.8}), top_k=5).retrieve("q")
+    assert [hit.chunk.chunk_id for hit in result.chunks][0] == "17:header-1600:0006"
+    assert result.chunks[0].duplicate_chunk_ids == ("17:header-1600:0092",)
+    assert result.duplicates_dropped == 1
 
 
 def test_duplicate_keeps_highest_score_even_if_store_order_differs():
     low, high = make_chunk("05", 0, "dup"), make_chunk("09", 0, "dup")
     hits = [RetrievedChunk(low, 1, 0.70), RetrievedChunk(high, 2, 0.75)]  # store order is not trusted
-    kept, dropped = dedupe_by_content(hits, 5)
+    kept, dropped = dedupe_by_passage(hits, 5)
     assert [hit.chunk.chunk_id for hit in kept] == [high.chunk_id]
     assert kept[0].rank == 1 and kept[0].score == 0.75 and dropped == 1
 
@@ -76,6 +93,7 @@ def test_equal_scores_break_ties_by_chunk_id_and_are_stable():
         store = _store(order, {a.chunk_id: 0.8, b.chunk_id: 0.8, other.chunk_id: 0.8})
         result = Retriever(FakeEmbedder(), store, top_k=5).retrieve("q")
         assert [hit.chunk.chunk_id for hit in result.chunks] == ["02:header-1600:0000", "17:header-1600:0000"]
+        assert result.chunks[1].duplicate_chunk_ids == ("23:header-1600:0000",)
         assert result.duplicates_dropped == 1
 
 

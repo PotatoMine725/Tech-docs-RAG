@@ -6,7 +6,7 @@ Placeholders are replaced by one regex pass (not `str.format`), so braces in pas
 import re
 from pathlib import Path
 
-from knowledge_assistant.application.citation.citations import passage_body
+from knowledge_assistant.application.common.passage import passage_body
 from knowledge_assistant.application.common.language import LANGUAGE_NAMES
 from knowledge_assistant.core.models import HEADING_PATH_SEPARATOR, RetrievedChunk
 

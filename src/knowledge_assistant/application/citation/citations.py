@@ -4,7 +4,8 @@ Passages are numbered 1..k in rank order in the prompt; the answer cites them wi
 """
 import re
 
-from knowledge_assistant.core.models import HEADING_PATH_SEPARATOR, Citation, DocumentChunk, RetrievedChunk
+from knowledge_assistant.application.common.passage import passage_body
+from knowledge_assistant.core.models import HEADING_PATH_SEPARATOR, Citation, RetrievedChunk
 
 EXCERPT_CHARS = 300
 MIN_WORDS_FOR_FACT = 5  # shorter sentences are not counted by `count_uncited_sentences`
@@ -14,15 +15,6 @@ _MARKER_WITH_SPACE = re.compile(r"[ \t]*\[(\d+)\]")
 # A sentence ends at . ! or ? (plus any markers right after it) before whitespace or the end, or at a line break.
 _SENTENCE_END = re.compile(r"[.!?]+(?:[ \t]*\[\d+\])*(?=\s|$)|\n+")
 _WORD = re.compile(r"\w+")
-
-
-def passage_body(chunk: DocumentChunk) -> str:
-    """The chunk text with Markdown links reduced to their text: `embed_text` without its contextual heading line
-    (ADR-0003 D5 puts "heading path + blank line" first; the passage header already shows the heading path)."""
-    header = HEADING_PATH_SEPARATOR.join(chunk.heading_path) + "\n\n"
-    if chunk.heading_path and chunk.embed_text.startswith(header):
-        return chunk.embed_text[len(header):]
-    return chunk.embed_text
 
 
 def excerpt(text: str, limit: int = EXCERPT_CHARS) -> str:

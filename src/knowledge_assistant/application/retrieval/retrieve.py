@@ -1,15 +1,18 @@
 """Query → ranked chunks (RAG-002). Embeds the question as a QUERY (the composition root passes a cached embedder),
 searches one arm's store, and drops same-content duplicates.
 
-Dedup (RAG-002 addendum 1, both arms alike): fetch `top_k + overfetch` hits, order them by (score desc, chunk_id),
-keep the first hit of each `content_hash`, cut to `top_k` and number the ranks 1..k again. Same-document duplicates
-are already dropped at chunking (ADR-0003 D1), so the ones dropped here are copies of one text in two documents.
-`duplicates_dropped` counts the over-fetched hits dropped this way.
+Dedup (RAG-002 addendum 1 + owner decision 2026-09-26, both arms alike): fetch `top_k + overfetch` hits, order them
+by (score desc, chunk_id), keep the first hit of each `passage_hash` (the link-stripped text the LLM sees), cut to
+`top_k` and number the ranks 1..k again. The kept hit lists the chunk IDs it replaced in `duplicate_chunk_ids`.
+`content_hash` is not used: chunks whose text differs only in a link URL (e.g. doc 17's repeated sections) have
+different content hashes but the same passage and the same vector. `duplicates_dropped` counts the over-fetched
+hits dropped this way.
 """
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
 
+from knowledge_assistant.application.common.passage import passage_hash
 from knowledge_assistant.core.exceptions import RetrievalError
 from knowledge_assistant.core.interfaces.embedding import Embedder, EmbeddingTask
 from knowledge_assistant.core.interfaces.vector_store import VectorStore
@@ -23,20 +26,22 @@ class RetrievalResult:
     latency_ms: dict[str, float]  # embed_query, retrieve
 
 
-def dedupe_by_content(hits: list[RetrievedChunk], top_k: int) -> tuple[list[RetrievedChunk], int]:
-    """(the top_k unique-content hits re-ranked 1..k, number of duplicate hits dropped among `hits`)."""
+def dedupe_by_passage(hits: list[RetrievedChunk], top_k: int) -> tuple[list[RetrievedChunk], int]:
+    """(the top_k unique-passage hits re-ranked 1..k with `duplicate_chunk_ids`, duplicate hits dropped in `hits`)."""
     ordered = sorted(hits, key=lambda hit: (-hit.score, hit.chunk.chunk_id))
-    seen: set[str] = set()
-    unique: list[RetrievedChunk] = []
+    kept: dict[str, RetrievedChunk] = {}  # passage_hash -> first (best) hit, in rank order
+    replaced: dict[str, list[str]] = {}
     for hit in ordered:
-        if hit.chunk.content_hash in seen:
-            continue
-        seen.add(hit.chunk.content_hash)
-        unique.append(hit)
-    dropped = len(ordered) - len(unique)
+        key = passage_hash(hit.chunk)
+        if key in kept:
+            replaced[key].append(hit.chunk.chunk_id)
+        else:
+            kept[key] = hit
+            replaced[key] = []
+    dropped = len(ordered) - len(kept)
     return [
-        RetrievedChunk(chunk=hit.chunk, rank=rank, score=hit.score)
-        for rank, hit in enumerate(unique[:top_k], start=1)
+        RetrievedChunk(chunk=hit.chunk, rank=rank, score=hit.score, duplicate_chunk_ids=tuple(replaced[key]))
+        for rank, (key, hit) in enumerate(list(kept.items())[:top_k], start=1)
     ], dropped
 
 
@@ -67,7 +72,7 @@ class Retriever:
         searched = self._clock()
         if not hits:
             raise RetrievalError("the vector store returned no chunks (is the collection indexed?)")
-        chunks, dropped = dedupe_by_content(hits, self.top_k)
+        chunks, dropped = dedupe_by_passage(hits, self.top_k)
         return RetrievalResult(
             chunks=tuple(chunks),
             duplicates_dropped=dropped,
