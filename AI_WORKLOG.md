@@ -362,6 +362,7 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - **Evidence written last.** The smoke script wrote its evidence file only at the end, so a killed process would have lost what was spent.
   - **Quoting slip.** A patch script written through a shell heredoc turned `\n` inside f-strings into real newlines and broke `smoke_check.py`.
   - **Eval-style ID in a test.** A test fixture used an eval-style ID, which the firewall scan flagged.
+  - **Overstated test-first.** The first version of the report said the CLI and smoke tests were seen failing before the code; their first run was in the same step that wrote the code, and the composition tests (which were seen failing) were described the other way round.
 - *How found:*
   - Embedder: grepping the docs for RAG-003 before writing them (ADR-0005 line 127).
   - M9: the mutation run.
@@ -369,6 +370,7 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - Evidence file: the first live attempt was cut off by an OpenBLAS memory error at process start (0 requests sent, low free virtual memory).
   - Quoting slip: `SyntaxError` at test collection.
   - Fixture: the firewall scan.
+  - Test-first claim: the advisor review compared the report with the session transcript.
 - *Fix:*
   - Embedder: connection errors are wrapped into `EmbeddingError` but not retried (a `connection_error` flag on the shared `Failure`), tests changed, ADR notes added (`6b05922`).
   - M9: a test where the key is echoed inside the quota id.
@@ -376,6 +378,7 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - The smoke script appends line by line, and the real-process CLI check runs last.
   - The block was rewritten through the file tool.
   - The fixture uses made-up values.
+  - The report now lists what was seen failing and what was only seen passing; no red run was staged after the fact.
   - The first live attempt was re-run once with one BLAS thread, and one hung full `pytest` run (10 minutes, no CPU) was killed and re-run once (546 passed in 16 s); both logged in the report.
 - *Human decision:* the whole addendum: OD-11 policy, the 13 / 4 RPM throttle and limits, `ALLOW_FALLBACK` and the eval runner's use of it (ledger note for 09a), the smoke design and its budget (at most 5 LLM and 0 embedding requests), `--gate-off` as a diagnostic. Open for the owner at `99-VERIFY`: the choices listed in the [report](docs/reports/execution/RAG-003.md) ("Decisions and open choices").
 
