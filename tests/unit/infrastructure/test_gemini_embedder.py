@@ -236,6 +236,23 @@ def test_non_retryable_error_fails_immediately():
     assert len(models.calls) == 1
 
 
+@pytest.mark.parametrize("error", [httpx.ConnectError("refused"), httpx.ReadError("reset"), httpx.RemoteProtocolError("closed")],
+                         ids=lambda e: type(e).__name__)
+def test_connection_errors_are_retried_like_timeouts(error):
+    """RAG-003: the shared classifier retries connection errors too; before, httpx.ConnectError escaped raw."""
+    models = FakeModels(script=[error])
+    make_embedder(models).embed(["a"], EmbeddingTask.DOCUMENT)
+    assert len(models.calls) == 2
+
+
+def test_a_persistent_connection_error_is_wrapped_after_max_attempts():
+    models = FakeModels(script=[httpx.ConnectError("refused")] * 10)
+    with pytest.raises(EmbeddingError, match="after 3 attempts") as raised:
+        make_embedder(models, max_attempts=3).embed(["a"], EmbeddingTask.DOCUMENT)
+    assert not isinstance(raised.value, httpx.HTTPError) and isinstance(raised.value.__cause__, httpx.ConnectError)
+    assert len(models.calls) == 3
+
+
 # --- throttle ----------------------------------------------------------------
 
 

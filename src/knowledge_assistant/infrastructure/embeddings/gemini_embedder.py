@@ -4,35 +4,32 @@ Batches texts, throttles to the per-minute limits, retries transient errors with
 stops at once when the daily quota is used up, and L2-normalizes vectors below the model's full size.
 """
 
-import json
 import logging
 import math
 import random
-import re
 import time
 from collections.abc import Callable
 from typing import Any
 
-import httpx
 from google import genai
-from google.genai import errors, types
+from google.genai import types
 
 from knowledge_assistant.config import EmbeddingSettings, get_embedding_settings, get_gemini_api_key
 from knowledge_assistant.core.exceptions import ConfigurationError, EmbeddingError, QuotaExhaustedError
 from knowledge_assistant.core.interfaces.embedding import EmbeddingTask
 from knowledge_assistant.infrastructure.embeddings.throttle import SlidingWindowThrottle, estimate_tokens
+from knowledge_assistant.infrastructure.gemini_retry import (
+    DAILY_RESET,
+    PROVIDER_ERRORS,
+    backoff_wait_s,
+    classify_failure,
+)
 
 TASK_TYPES = {
     EmbeddingTask.DOCUMENT: "RETRIEVAL_DOCUMENT",
     EmbeddingTask.QUERY: "RETRIEVAL_QUERY",
 }
 FULL_DIM = 3072  # only full-size vectors come back normalized
-RETRYABLE_STATUS = {429, 500, 503, 504}
-BACKOFF_BASE_S = 1.0  # 1, 2, 4, 8 ... seconds
-MAX_RETRY_WAIT_S = 120.0  # a server retry-after above this is cut, so a run never hangs silently
-DAILY_RESET = "14:00 UTC+7"  # free-tier daily quota reset (ADR-0005 D19)
-DAILY_QUOTA = re.compile(r"per[ _-]?day|daily", re.IGNORECASE)
-API_KEY_PATTERN = re.compile(r"AIza[0-9A-Za-z_\-]{35}")  # Google API key shape
 
 logger = logging.getLogger(__name__)
 
@@ -42,65 +39,6 @@ def l2_normalize(vector: list[float]) -> list[float]:
     if norm == 0.0:
         raise EmbeddingError("provider returned a zero vector")
     return [v / norm for v in vector]
-
-
-def _error_details(error: errors.APIError) -> list[dict]:
-    """The google.rpc detail objects of an API error body ({"error": {"details": [...]}})."""
-    body = error.details.get("error", error.details) if isinstance(error.details, dict) else {}
-    details = body.get("details", []) if isinstance(body, dict) else []
-    return [item for item in details if isinstance(item, dict)] if isinstance(details, list) else []
-
-
-def redact_key(text: str) -> str:
-    """Remove the configured key and anything shaped like a Google API key before text is logged."""
-    api_key = get_gemini_api_key()
-    if api_key:
-        text = text.replace(api_key, "[REDACTED]")
-    return API_KEY_PATTERN.sub("[REDACTED]", text)
-
-
-def _raw_body(error: errors.APIError) -> str:
-    try:
-        return json.dumps(error.details, ensure_ascii=False, sort_keys=True)
-    except (TypeError, ValueError):
-        return repr(error.details)
-
-
-def _retry_after_s(error: errors.APIError) -> float | None:
-    """Server-suggested wait: HTTP Retry-After header, or google.rpc.RetryInfo retryDelay."""
-    headers = getattr(error.response, "headers", None)
-    if headers is not None:
-        value = headers.get("retry-after")
-        if value:
-            try:
-                return float(value)
-            except ValueError:
-                pass
-    for item in _error_details(error):
-        delay = item.get("retryDelay")
-        match = re.fullmatch(r"(\d+(?:\.\d+)?)s", str(delay)) if delay else None
-        if match:
-            return float(match.group(1))
-    return None
-
-
-def _daily_quota_id(error: errors.APIError) -> str | None:
-    """The per-day quota a 429 names in its google.rpc.QuotaFailure violations, if any.
-
-    Per-minute 429s carry a QuotaFailure too (e.g. "...PerMinute..."); only a per-day quota id or
-    metric counts. Built from the documented error shape; not yet seen in a real response.
-    """
-    for item in _error_details(error):
-        if "QuotaFailure" not in str(item.get("@type", "")):
-            continue
-        for violation in item.get("violations") or []:
-            if not isinstance(violation, dict):
-                continue
-            for field in ("quotaId", "quotaMetric"):
-                value = str(violation.get(field) or "")
-                if DAILY_QUOTA.search(value):
-                    return value
-    return None
 
 
 class GeminiEmbedder:
@@ -195,33 +133,27 @@ class GeminiEmbedder:
                     model=self._settings.model, contents=batch, config=config
                 )
                 return self._validate(response, len(batch))
-            except errors.APIError as error:
-                if error.code == 429 and not self._logged_first_429:
+            except PROVIDER_ERRORS as error:
+                failure = classify_failure(error)
+                if failure.status == 429 and not self._logged_first_429:
                     # Logged before the daily-quota check so the classifier can be checked against a real body.
                     self._logged_first_429 = True
-                    logger.warning("first HTTP 429 of this run, raw error body: %s", redact_key(_raw_body(error)))
-                quota_id = _daily_quota_id(error) if error.code == 429 else None
-                if quota_id:
+                    logger.warning("first HTTP 429 of this run, raw error body: %s", failure.body)
+                if failure.daily_quota_id:
                     raise QuotaExhaustedError(
-                        f"daily embedding quota exhausted ({quota_id}); resume after the {DAILY_RESET} reset"
+                        f"daily embedding quota exhausted ({failure.daily_quota_id}); "
+                        f"resume after the {DAILY_RESET} reset"
                     ) from error
-                if error.code not in RETRYABLE_STATUS:
-                    raise EmbeddingError(f"embedding request failed: HTTP {error.code} {error.status}") from error
+                if not failure.retryable:
+                    raise EmbeddingError(f"embedding request failed: {failure.reason}") from error
                 last_error: Exception = error
-                retry_after = _retry_after_s(error)
-                reason = f"HTTP {error.code} {error.status}"
-            except (httpx.TimeoutException, TimeoutError) as error:
-                last_error = error
-                retry_after = None
-                reason = type(error).__name__
             if attempt == attempts:
                 break
-            backoff = BACKOFF_BASE_S * 2 ** (attempt - 1) + self._jitter()
-            wait = min(max(backoff, retry_after or 0.0), MAX_RETRY_WAIT_S)
+            wait = backoff_wait_s(attempt, failure.retry_after_s, self._jitter())
             self.retries += 1
             logger.warning(
                 "embedding call of %d texts failed (%s), attempt %d/%d; retrying in %.1f s",
-                len(batch), reason, attempt, attempts, wait,
+                len(batch), failure.reason, attempt, attempts, wait,
             )
             self._sleep(wait)
         raise EmbeddingError(

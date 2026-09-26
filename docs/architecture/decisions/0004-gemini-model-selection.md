@@ -1,7 +1,7 @@
 # ADR-0004 Gemini model selection (embedding, answer, fallback, retries)
 
 Date: 2026-09-24
-Status: Accepted (user decision, D10-D13; D11/D12 amended 2026-09-24 to resolve the evaluation quota issue). Implementation not started.
+Status: Accepted (user decision, D10-D13; D11/D12 amended 2026-09-24 to resolve the evaluation quota issue). D13 amended 2026-09-26 (RAG-003, OD-11: retry policy, throttle, error classification); see the last section.
 Related: ADR-0003 D9 (EN + VI queries require a multilingual embedding model).
 
 ## Evidence (2026-09-24, free tier, this project's API key)
@@ -51,7 +51,7 @@ Pricing page (https://ai.google.dev/gemini-api/docs/pricing): free-tier content 
 - Optional: an answer-model comparison on a subset of <= 20 questions answered by `gemini-3.5-flash` (fits one day's quota).
 
 **D13 Transient errors.**
-- On 503/429: retry with exponential backoff (e.g. 1 s, 2 s, 4 s; max attempts TBD), then fall back to D12.
+- On 503/429: retry with exponential backoff (e.g. 1 s, 2 s, 4 s; max attempts TBD), then fall back to D12. (Max attempts and the details are decided in the amendment below.)
 - Latency reporting records retry count and fallback use separately; retried calls are not mixed into normal-call latency statistics.
 
 ## Consequences
@@ -69,3 +69,43 @@ Resolved by the D11/D12 amendment (option 2 below, extended: Flash Lite is also 
   3. Run the retrieval-only chunking metrics (embedding calls only) at full scale and answer generation on a subset.
   4. Enable paid tier.
 - Budget per full run with the amendment: ~120 answers + ~120 judge calls ~= 240 of 500 Flash Lite RPD (estimate).
+
+## Amendment 2026-09-26 (RAG-003): OD-11 retry policy, limits, error classification, accounting
+Decided by the owner in the RAG-003 run addendum (2026-09-26); OD-11 is closed. Code: `infrastructure/llm/gemini/gemini_llm.py`; the retry, retry-after, quota-classification and key-redaction helpers moved out of the embedder into `infrastructure/gemini_retry.py`, which the embedder and the LLM adapter both use.
+
+**D13 resolved: retry policy of the answer model (`gemini-3.5-flash-lite`).**
+- Up to **3 attempts in total** (1 + 2 retries) on a per-minute 429, 503, timeouts and connection errors.
+- Exponential backoff with jitter: the wait after attempt n is `1 s * 2^(n-1) + jitter` (jitter in [0, 1) s), or the server's retry-after (HTTP `Retry-After` or the `RetryInfo` delay) when that is longer. Any single wait is capped at **120 s** (the embedder's cap).
+- Then the fallback model (`FALLBACK_MODEL`, `gemini-3.5-flash`) gets **one attempt**, never a retry. Its RPD is 20, so it is a safety net.
+- A **daily-quota 429** (a per-day quota id in the error's `QuotaFailure`): no retries; straight to the single fallback attempt. If that also fails with a quota error, the quota error is raised.
+- `ALLOW_FALLBACK` (default `true` for the app and the CLI). The evaluation runner sets it to `false`, so every answer and judgment comes from `gemini-3.5-flash-lite` (no mixed-model results); a case whose attempts all fail is recorded as an error and re-run later. With `ALLOW_FALLBACK=false` the fallback model is never called and the answer model's classified error is raised. An unrecognised value (e.g. `flase`) is a configuration error, not a silent `true`.
+
+**Limits and throttle (config, `AnswerSettings`).** Read by the owner from AI Studio on 2026-09-26, free tier. Each model has its own client-side per-minute throttle, applied to every attempt (retries and the fallback call included).
+
+| Model | RPM | TPM | RPD | Throttle |
+|---|---|---|---|---|
+| `gemini-3.5-flash-lite` (answer, judge) | 15 | 250K | 500 | 13 RPM |
+| `gemini-3.5-flash` (fallback) | 5 | 250K | 20 | 4 RPM |
+
+TPM and RPD are configuration for planning a run; the adapter enforces the request throttle only (13 requests a minute of a ~3K-token prompt cannot reach 250K TPM). One `GeminiLLM` instance shares its throttles across its calls; a second instance of the same model (e.g. a judge) would get its own window unless the throttles are shared explicitly.
+
+**Error classification.** No `google.genai` or `httpx` exception leaves infrastructure. Provider and transport failures are wrapped into core `LLMError` subtypes, whose `kind` is the GUI's `AskQuestionError.kind`, 1:1:
+
+| Core error | `kind` | Raised when |
+|---|---|---|
+| `LLMQuotaError` (`daily` flag) | `quota` | HTTP 429: the daily quota is used up, or the per-minute limit persisted through every attempt |
+| `LLMUnavailableError` | `unavailable` | 5xx, timeout or connection error that persisted through every attempt |
+| `LLMRequestError` | `other` | anything no retry can fix: 400/401/403/404, an unparsable reply, an unsupported URL |
+
+`GenerationError` (unusable output: `MAX_TOKENS`, empty, not JSON) stays separate and maps to `other` in the GUI wiring; `ConfigurationError` and `RetrievalError` likewise.
+
+**Choices inside the owner's rules (not spelled out in the addendum; the owner can veto them at 99-VERIFY).**
+1. **Retryable statuses** are the embedder's set: 429, 500, 503, 504, plus timeouts and connection errors (`httpx.TimeoutException`, `NetworkError`, `RemoteProtocolError`, `TimeoutError`, `ConnectionError`). 500 and 504 go beyond the owner's list because the two adapters share one classifier.
+2. **Errors no retry can fix** (400, 401, 403, 404, unparsable reply) are raised at once as `other`: no retry and no fallback, since the fallback would fail the same way and its daily quota is scarce.
+3. **When both models fail,** the error raised describes the **answer model's** failure, with the fallback's failure named in its message; `__cause__` is the answer model's provider error. A daily-quota primary whose fallback returns 503 is therefore still a quota error (retrying will not help before the reset), and a 503 primary whose fallback is out of daily quota is still "unavailable" (transient).
+4. **`retry_count`** counts retries on the answer model only (0 to 2). The fallback call is not a retry: it sets `fallback_used` and `model_used`. The latency report keeps its rule (D13): retried and fallback answers stay out of the normal-call statistics.
+5. **Unusable output** (`GenerationError`) is not retried and does not trigger the fallback.
+6. The client SDK's own retry is left off (no `retry_options`), so attempts are counted in one place.
+7. The embedder now also retries connection errors (before, an `httpx.ConnectError` escaped it raw); the shared classifier made that a side effect of the move, covered by new embedder tests.
+
+**Accounting (`LLMResponse`, copied into `AnswerResult.llm`).** `model_used`, `retry_count`, `fallback_used`; `prompt_tokens`, `output_tokens`, `thoughts_tokens` (None when the provider does not report them, never 0); `latency_ms` is the model time of the call that produced the answer; `retry_wait_ms` is the total time spent in backoff. `AnswerResult.latency_ms` gains `retry_wait` (backoff) and `throttle_wait` (client-side throttle) next to `generate` (the wall time of the whole call), so the latency report can separate model time from waiting. Both keys are absent when the retrieval gate answered without an LLM call. `throttle_wait` is an addition to the owner's list, needed because at 13 RPM a full run is throttled and would otherwise inflate `generate`.

@@ -4,7 +4,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 PKG = ROOT / "src" / "knowledge_assistant"
 EXCLUDED_IDS = {"14", "19", "24", "27"}
-FORBIDDEN_CORE = ("PySide6", "chromadb", "google", "markitdown")
+FORBIDDEN_CORE = ("PySide6", "chromadb", "google", "markitdown", "httpx")  # httpx: RAG-003, raw HTTP errors stay in infrastructure
 FORBIDDEN_APP = FORBIDDEN_CORE
 
 
@@ -32,6 +32,11 @@ def test_core_has_no_technology_dependencies():
 def test_application_has_no_technology_or_presentation_dependencies():
     assert not _imports("application") & set(FORBIDDEN_APP)
     assert "presentation" not in _imports("application")
+
+
+def test_presentation_does_not_import_provider_libraries():
+    """RAG-003: google.genai / httpx exceptions are wrapped in infrastructure, so the GUI never needs (or sees) them."""
+    assert not _imports("presentation") & {"google", "httpx", "chromadb", "markitdown"}
 
 
 def test_core_and_application_do_not_import_outer_layers():
