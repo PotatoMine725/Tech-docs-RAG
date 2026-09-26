@@ -96,3 +96,24 @@ tick M2 in master-plan; ledger row 08 += "smoke must exercise the LLM insufficie
 disabled (1 LLM request)"; ledger row 09a += "runner records top-1 and gate decision per case; report answerable
 cases refused by the gate"; row 07 -> verified.
 ```
+
+## Addendum: limited re-verify after the F1 fix (HEAD `ba5aa59`) — ACCEPT
+
+Zero Gemini requests. `.env` not opened. No eval question text printed.
+
+| # | Check | Result | Evidence |
+|---|-------|--------|----------|
+| 0 | Scope | PASS | `git diff 8e41b29..HEAD --name-status`: `citations.py`, `config.py` (default prompt version), `answer_v2.md` (new), specs, report/ledger/worklog, and 5 test files (citations, AnswerQuestion, prompt builder, config, GUI mapping; the last three only switch to v2 / add v2 tests). Nothing else. `answer_v1.md`: `git diff 8e41b29..HEAD -- config/prompts/answer_v1.md` is empty. |
+| 1 | F1 behavior (k=5, scratch script, not committed; LLM `cited_passages` empty so citations come from the text only) | PASS | a. `` `args[0]` `` / `` `values[7]` ``: text identical, no drop. b. fenced block with and without `csharp`, containing `items[2]`: identical, citations `[1]` only. c. plain `args[0]`: identical, not dropped. d. `sealed[2].`: citation `[2]`. e. `` `x`[1] ``: citation `[1]`, text identical. f. plain `[7]`: removed, `dropped_markers=(7,)`. g. unclosed backtick: no crash, text identical, later `[1]` counts as a marker (an unclosed backtick is not a code span). Unclosed fence: no crash, text identical, runs to end so `items[2]` and `[3]` inside are ignored. Literal `` `[1]` `` in inline code and in a fence: identical, not a citation. |
+| 2 | Tests and mutation | PASS | Committed tests cover the verifier probe, `[0]`, `sealed[2].`, `` `x`[1] ``, unclosed fence, AnswerQuestion-level code block. Mutation (removed the code-span condition in `_is_marker` on the working file): **7 failed**, 159 passed. File restored; sha256 identical before and after and `git diff HEAD` clean. |
+| 3 | Prompt v2 | PASS | `answer_v2.md` differs from v1 only in rule 4 (+ " Wrap code, identifiers and expressions in backticks."), also asserted by `test_answer_v2_is_v1_plus_the_backtick_instruction`. `get_answer_settings().prompt_version == "answer_v2"`; `AnswerResult.prompt_version == "answer_v2"`. The report's rendered prompt is built offline with sample passages by `PromptBuilder` (report says no LLM call; no live script path is involved, and this session made none). |
+| 4 | Gate equality | PASS | `retrieval-spec.md:35`: "score == threshold passes the gate (strict <)". |
+| 5 | Offline suite (Windows) | PASS | **384 passed**, 1 deselected (369 + 15). `tests/unit/test_project_structure.py`: 7 passed. `AIza[0-9A-Za-z_-]{35}` over `git diff 8e41b29..HEAD`: 0. |
+| 6 | Backlog | PASS | GUI fake messages → GUI-001 (N2), doc 15 SVG links → QC-001 (N1), in the report and the ledger row 07. |
+
+**F1: FAIL → PASS. Verdict: ACCEPT.** Held items applied: M2 ticked in `master-plan.md`; ledger row 07 → verified; row 08
+note (smoke must exercise the LLM insufficient path once: Q-DEV-005 with gate disabled, 1 LLM request); row 09a note
+(runner records top-1 and gate decision per case; report answerable cases refused by the gate).
+
+Residual, not blocking: the unclosed-backtick case treats a later `[n]` as a marker (by design); whether Gemini follows the
+backtick rule is unverified live (0 requests).
