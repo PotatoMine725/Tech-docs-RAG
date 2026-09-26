@@ -116,3 +116,86 @@ def api_error(code: int = 503, retry_delay: str | None = None, quota_id: str | N
         error["details"] = details
     cls = errors.ServerError if code >= 500 else errors.ClientError
     return cls(code, {"error": error})
+
+
+def make_chunk(
+    source_id: str = "01",
+    index: int = 0,
+    text: str = "Some text.",
+    heading_path: tuple[str, ...] = ("Doc", "Section"),
+    char_start: int = 0,
+    char_end: int | None = None,
+    document_name: str | None = None,
+    config: str = "header-1600",
+    content_hash: str | None = None,
+):
+    """A DocumentChunk shaped like the chunk builder's (embed_text = heading line + blank line + body)."""
+    from knowledge_assistant.core.models import HEADING_PATH_SEPARATOR, DocumentChunk
+
+    heading = HEADING_PATH_SEPARATOR.join(heading_path)
+    return DocumentChunk(
+        chunk_id=f"{source_id}:{config}:{index:04d}",
+        source_id=source_id,
+        document_name=document_name or f"Document {source_id}",
+        source_url=f"https://example.invalid/{source_id}",
+        heading_path=heading_path,
+        location_type="heading",
+        char_start=char_start,
+        char_end=char_start + len(text) if char_end is None else char_end,
+        display_text=text,
+        embed_text=f"{heading}\n\n{text}" if heading else text,
+        content_hash=content_hash or hashlib.sha256(text.encode("utf-8")).hexdigest(),
+        chunker_config=config,
+    )
+
+
+class InMemoryVectorStore:
+    """VectorStore double: dot-product scores (unit vectors → cosine), highest first, insertion order on ties.
+
+    `scores` (chunk_id → score) overrides the computed score, to script exact rankings and ties.
+    """
+
+    def __init__(self, scores: dict[str, float] | None = None) -> None:
+        self._items: list[tuple] = []
+        self.scores = scores or {}
+        self.searches: list[int] = []
+
+    def upsert(self, chunks, embeddings) -> None:
+        ids = {chunk.chunk_id for chunk in chunks}
+        self._items = [item for item in self._items if item[0].chunk_id not in ids]
+        self._items.extend(zip(chunks, embeddings))
+
+    def search(self, embedding, top_k):
+        from knowledge_assistant.core.models import RetrievedChunk
+
+        self.searches.append(top_k)
+        scored = [
+            (self.scores.get(chunk.chunk_id, sum(a * b for a, b in zip(embedding, vector))), chunk)
+            for chunk, vector in self._items
+        ]
+        scored.sort(key=lambda item: -item[0])  # stable: insertion order on ties
+        return [RetrievedChunk(chunk=chunk, rank=rank, score=score)
+                for rank, (score, chunk) in enumerate(scored[:top_k], start=1)]
+
+    def count(self) -> int:
+        return len(self._items)
+
+    def get_ids(self) -> set[str]:
+        return {chunk.chunk_id for chunk, _ in self._items}
+
+
+class FakeLLM:
+    """LLM double: returns the scripted texts in order (the last one repeats) and records every request."""
+
+    def __init__(self, *texts: str, model: str = "fake-llm") -> None:
+        self.texts = list(texts)
+        self.model = model
+        self.requests: list = []
+
+    def generate(self, request):
+        from knowledge_assistant.core.interfaces.llm import LLMResponse
+
+        self.requests.append(request)
+        text = self.texts[min(len(self.requests), len(self.texts)) - 1]
+        return LLMResponse(text=text, model_used=self.model, retry_count=0, fallback_used=False,
+                           prompt_tokens=len(request.prompt) // 4, output_tokens=len(text) // 4, latency_ms=1.0)

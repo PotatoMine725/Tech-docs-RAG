@@ -64,3 +64,42 @@ def get_embedding_settings() -> EmbeddingSettings:
         timeout_s=float(os.getenv("EMBEDDING_TIMEOUT_S", "60")),
         cache_path=resolve_project_path(os.getenv("EMBEDDING_CACHE_PATH", "data/cache/embeddings.sqlite")),
     )
+
+
+@dataclass(frozen=True)
+class AnswerSettings:
+    """Answer generation (ADR-0004 D11, RAG-002). The model name is pinned here only, never a `-latest` alias."""
+
+    model: str
+    timeout_s: float
+    prompt_version: str  # file name (without .md) in `prompts_dir`
+    prompts_dir: Path
+    messages_path: Path
+
+
+def get_answer_settings() -> AnswerSettings:
+    return AnswerSettings(
+        model=os.getenv("ANSWER_MODEL", "gemini-3.5-flash-lite"),
+        timeout_s=float(os.getenv("ANSWER_TIMEOUT_S", "60")),
+        prompt_version=os.getenv("ANSWER_PROMPT_VERSION", "answer_v2"),
+        prompts_dir=resolve_project_path(os.getenv("PROMPTS_DIR", "config/prompts")),
+        messages_path=resolve_project_path(os.getenv("MESSAGES_PATH", "config/messages.json")),
+    )
+
+
+@dataclass(frozen=True)
+class RetrievalSettings:
+    """top_k = 5 for both arms (ADR-0003 D7). The threshold is the OD-9 retrieval gate, tuned on the dev set, Arm A,
+    used for both arms (retrieval-spec.md; RAG-002, 2026-09-26)."""
+
+    top_k: int
+    overfetch: int  # extra hits fetched so same-content duplicates can be dropped (RAG-002 addendum 1)
+    insufficient_score_threshold: float
+
+
+def get_retrieval_settings() -> RetrievalSettings:
+    return RetrievalSettings(
+        top_k=int(os.getenv("TOP_K", "5")),
+        overfetch=int(os.getenv("RETRIEVAL_OVERFETCH", "10")),
+        insufficient_score_threshold=float(os.getenv("INSUFFICIENT_SCORE_THRESHOLD", "0.686")),
+    )

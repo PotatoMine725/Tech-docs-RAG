@@ -1,13 +1,4 @@
-"""Gemini adapter for core.interfaces.llm. Model name is TBD; no calls are made at setup."""
-from knowledge_assistant.config import get_gemini_api_key
-from knowledge_assistant.core.exceptions import ConfigurationError
+"""Gemini adapter for core.interfaces.llm; the model name comes from configuration (`ANSWER_MODEL`)."""
+from knowledge_assistant.infrastructure.llm.gemini.gemini_llm import GeminiLLM
 
-
-class GeminiLLM:
-    def __init__(self, api_key: str | None = None) -> None:
-        self._api_key = api_key or get_gemini_api_key()
-
-    def generate(self, prompt: str) -> str:
-        if not self._api_key:
-            raise ConfigurationError("GEMINI_API_KEY is not set")
-        raise NotImplementedError("Generation is implemented in the RAG phase")
+__all__ = ["GeminiLLM"]

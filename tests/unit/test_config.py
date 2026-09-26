@@ -9,6 +9,7 @@ import pytest
 
 from knowledge_assistant.config import (
     PROJECT_ROOT,
+    get_answer_settings,
     get_chroma_path,
     get_chunks_dir,
     get_embedding_settings,
@@ -88,3 +89,27 @@ def test_the_chunk_builder_writes_where_config_reads(no_path_env):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     assert Path(module.CHUNKS_DIR) == get_chunks_dir()
+
+
+ANSWER_V1_COMMIT = "e12eba8"  # the commit that created answer_v1.md; the first live dev answers used this text
+
+
+def test_configured_answer_prompt_is_v2(monkeypatch):
+    for name in ("ANSWER_PROMPT_VERSION", "PROMPTS_DIR"):
+        monkeypatch.delenv(name, raising=False)
+    settings = get_answer_settings()
+    assert settings.prompt_version == "answer_v2"
+    assert (settings.prompts_dir / "answer_v2.md").is_file()
+
+
+def test_answer_v1_is_byte_unchanged():
+    """answer_v1.md is referenced by existing validation output (RAG-002), so it must never be edited. It did not
+    exist at the origin/dev merge base, so it is compared with the commit that created it."""
+    try:
+        original = subprocess.run(
+            ["git", "show", f"{ANSWER_V1_COMMIT}:config/prompts/answer_v1.md"],
+            cwd=PROJECT_ROOT, capture_output=True, check=True,
+        ).stdout
+    except (OSError, subprocess.CalledProcessError):
+        pytest.skip("git history not available")
+    assert (PROJECT_ROOT / "config" / "prompts" / "answer_v1.md").read_bytes() == original
