@@ -156,3 +156,20 @@ The bullets in the report's "Explain it back" are correct against the code (retr
 2. **Document the `--json` schema (F2).** File: `docs/specs/generation-spec.md` "CLI" (and the `scripts/ask.py` module docstring): list every key of `result_to_dict` with type and when it is `null`, the `error` object shape (`{"error": {"kind", "message"}}`) and the exit codes. Proof: a test that compares the documented key set with `result_to_dict(...)` keys (so the doc cannot drift), plus a grep that the doc names `llm_called`, `latency_ms`, `tokens`, `retrieval`.
 3. **Complete the error-boundary list (F3).** File: `tests/unit/infrastructure/test_gemini_llm_resilience.py:307`. Add `api_error(500)` → `LLMUnavailableError` and a 400 `errors.ClientError` → `LLMRequestError` to the parametrized cases, and a 504 case to `:130`. Proof: pytest shows the new ids passing; mutate `code >= 500` → `code > 500` in a scratch copy and see the 500/504 cases fail.
 4. **Record the thinking-token question (UNVERIFIED).** File: `docs/specs/generation-spec.md` "Resilience" / ledger row 08 note. Expected: state that whether `max_output_tokens` includes thinking tokens is not settled by the installed SDK, that the adapter sets no `thinking_config`, and that `max_output_tokens` is 1024 by default. Do not change the code speculatively. If the owner wants it settled, one owner-approved live call on `gemini-3.5-flash` with a small `max_output_tokens` can decide it; add it to the smoke plan of a later task or to 09a's first live run.
+
+## Re-verify of the fix commit `7e192d4` (2026-09-27)
+
+Scope: `git diff 2f6a2cd..HEAD`, items 1-5 of the owner's fix list. 0 Gemini requests; `.env` not opened; `OPENBLAS_NUM_THREADS=1`.
+
+**Verdict: ACCEPT.**
+
+| # | Check | Result |
+|---|---|---|
+| 1 | 502 in the shared set; per-status tests for both adapters | `gemini_retry.py` `RETRYABLE_STATUS = {429, 500, 502, 503, 504}`. Embedder `test_each_transient_server_status_is_retried[500,502,503,504]`; LLM `test_each_persistent_server_status_takes_three_attempts_then_one_fallback[500,502,503,504]`; classifier test has 502. **Mutation:** 502 removed → 3 tests failed (embedder `[502]`, LLM `[502]`, classifier `[502]`); restored with `git checkout`, SHA-256 identical to before. |
+| 2 | Documented `--json` keys = `result_to_dict`; test enforces | Spec table, module docstring and `--help` epilog are each compared with the keys of a real `--json` run (`test_the_documented_json_keys_equal_the_keys_result_to_dict_returns`); a gate-refusal test checks the same top-level keys and the null LLM fields. The error shape and exit codes are documented. |
+| 3 | Boundary test has a persistent 500 and a 400 | Added `500`, `502`, `504` → `LLMUnavailableError` and a 400 `ClientError` → `LLMRequestError`, in both fallback-on and fallback-off variants. |
+| 4 | `FALLBACK_MAX_OUTPUT_TOKENS` from config; MAX_TOKENS test; limitation recorded; no `thinking_config` | Config default 2048, validated ≥ 1 (`test_config`); the fallback is sent `max(request, config)`, the answer model keeps 1024 (`configs == [1024, 1024, 1024, 2048]`, `thinking_config` absent on all). `MAX_TOKENS` → `GenerationError` naming model and limit, tested for both models. The limitation is recorded as UNVERIFIED in `generation-spec.md` (and the ADR-0004 amendment). |
+| 5 | `.env.example` and README line | Both present (`FALLBACK_MAX_OUTPUT_TOKENS`, `OPENBLAS_NUM_THREADS=1`, README Troubleshooting). |
+| 6 | Suite, structure, key scan, firewall | 569 passed, 1 deselected (`gemini`), up from 546. `test_project_structure.py` 8 passed. `AIza[0-9A-Za-z_-]{35}` over all tracked files: 0 hits. Eval firewall: the diff touches no eval, corpus or ground-truth file, and `evaluation/` has no reference to `ask`, `ALLOW_FALLBACK` or `fallback_max_output_tokens`. |
+
+Still open (unchanged, not a blocker): the thinking-token accounting against `max_output_tokens`, and a real 429/5xx on the LLM path, have not been seen live.
