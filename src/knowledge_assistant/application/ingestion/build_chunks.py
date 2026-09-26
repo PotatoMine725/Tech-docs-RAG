@@ -62,3 +62,16 @@ def chunk_to_record(chunk: DocumentChunk) -> dict:
     record = {field: getattr(chunk, field) for field in CHUNK_FIELDS}
     record["heading_path"] = HEADING_PATH_SEPARATOR.join(chunk.heading_path)
     return record
+
+
+def record_to_chunk(record: dict) -> DocumentChunk:
+    """Inverse of `chunk_to_record`: one chunk-file line -> a `DocumentChunk` (heading path split back)."""
+    values = {field: record[field] for field in CHUNK_FIELDS}
+    heading = values["heading_path"]
+    values["heading_path"] = tuple(heading.split(HEADING_PATH_SEPARATOR)) if heading else ()
+    return DocumentChunk(**values)
+
+
+def load_chunks(path: Path) -> list[DocumentChunk]:
+    """Read a chunk file written by `scripts/ingestion/build_chunks.py` (`arm-a.jsonl`, `arm-b.jsonl`)."""
+    return [record_to_chunk(json.loads(line)) for line in path.read_text(encoding="utf-8").splitlines() if line]

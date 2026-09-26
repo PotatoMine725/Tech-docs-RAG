@@ -1,3 +1,16 @@
+# RAG-001b prompt log
+
+Date: 2026-09-26 · Tool: Claude Code (CLI), Claude Opus 5.5
+
+## Owner invocation (chat, verbatim)
+
+```text
+Execute agents/prompts/06b-RAG-001b-chroma-and-indexing.md.
+```
+
+## Prompt file `agents/prompts/06b-RAG-001b-chroma-and-indexing.md` (verbatim, as committed in `1865607`)
+
+````markdown
 # RAG-001b — ChromaDB vector store + index both arms
 
 Read `agents/prompts/_common.md` first and follow it.
@@ -60,3 +73,4 @@ class VectorStore(Protocol):
 - For both arms: `store.count()` == number of lines in the chunk file (script prints both numbers; paste real output into the execution report).
 - Re-running `build_index.py` for an arm reports 0 newly embedded, 0 API requests.
 - Offline pytest green; key never printed (`git grep` for the key prefix in repo and logs = 0).
+````

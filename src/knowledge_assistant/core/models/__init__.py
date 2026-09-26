@@ -62,6 +62,15 @@ class DocumentChunk:
 
 
 @dataclass(frozen=True)
+class RetrievedChunk:
+    """One search hit. `score` is a similarity (higher = more similar); for cosine, 1 - distance."""
+
+    chunk: DocumentChunk
+    rank: int  # 1-based
+    score: float
+
+
+@dataclass(frozen=True)
 class Citation:
     source_id: str
     document_name: str

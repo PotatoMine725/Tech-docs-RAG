@@ -4,6 +4,7 @@ from types import SimpleNamespace
 
 import httpx
 import pytest
+from google.genai import errors
 
 from knowledge_assistant.config import EmbeddingSettings, get_embedding_settings
 from knowledge_assistant.core.exceptions import ConfigurationError, EmbeddingError, QuotaExhaustedError
@@ -179,6 +180,49 @@ def test_daily_quota_429_stops_at_once_with_the_reset_time(caplog):
     assert len(models.calls) == 1
     assert clock.sleeps == []
     assert not [r for r in caplog.records if "retrying in" in r.getMessage()]
+
+
+def test_first_daily_429_body_is_logged_before_the_quota_stop(caplog):
+    """RAG-001b Step 0b: the daily-quota classifier must be checkable against a real error body."""
+    daily = api_error(429, quota_id="EmbedContentRequestsPerDayPerProjectPerModel-FreeTier")
+    with caplog.at_level(logging.WARNING), pytest.raises(QuotaExhaustedError):
+        make_embedder(FakeModels(script=[daily])).embed(["a"], EmbeddingTask.DOCUMENT)
+    bodies = [r.getMessage() for r in caplog.records if "raw error body" in r.getMessage()]
+    assert len(bodies) == 1
+    assert "EmbedContentRequestsPerDayPerProjectPerModel-FreeTier" in bodies[0]
+    assert "QuotaFailure" in bodies[0]
+
+
+def test_only_the_first_429_of_a_run_is_logged_raw(caplog):
+    clock = FakeClock()
+    models = FakeModels(script=[api_error(429, retry_delay="1s"), api_error(429, retry_delay="1s")])
+    embedder = make_embedder(models, clock)
+    with caplog.at_level(logging.WARNING):
+        embedder.embed(["a"], EmbeddingTask.DOCUMENT)
+        models.script = [api_error(429, retry_delay="1s")]
+        embedder.embed(["b"], EmbeddingTask.DOCUMENT)
+    assert len([r for r in caplog.records if "raw error body" in r.getMessage()]) == 1
+    assert len([r for r in caplog.records if "retrying in" in r.getMessage()]) == 3
+
+
+def test_503_bodies_are_not_logged_raw(caplog):
+    with caplog.at_level(logging.WARNING):
+        make_embedder(FakeModels(script=[api_error(503)]), FakeClock()).embed(["a"], EmbeddingTask.DOCUMENT)
+    assert not [r for r in caplog.records if "raw error body" in r.getMessage()]
+
+
+def test_the_key_is_redacted_from_the_logged_429_body(caplog, monkeypatch):
+    key = "AIza" + "x" * 35
+    other_key_shape = "AIza" + "Y" * 35
+    monkeypatch.setenv("GEMINI_API_KEY", key)
+    body = {"error": {"code": 429, "status": "RESOURCE_EXHAUSTED", "message": f"key={key} other={other_key_shape}"}}
+    models = FakeModels(script=[errors.ClientError(429, body)])
+    with caplog.at_level(logging.WARNING):
+        make_embedder(models, FakeClock()).embed(["a"], EmbeddingTask.DOCUMENT)
+    logged = caplog.text
+    assert "raw error body" in logged
+    assert key not in logged and other_key_shape not in logged and "AIza" not in logged
+    assert "[REDACTED]" in logged
 
 
 def test_quota_exhausted_error_is_an_embedding_error():
