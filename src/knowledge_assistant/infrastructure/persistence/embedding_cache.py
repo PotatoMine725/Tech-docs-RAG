@@ -1,7 +1,8 @@
 """Embedding cache: a decorator around any Embedder, backed by one SQLite file (ADR-0005).
 
-Paid vectors are written after every batch, so a crash or quota stop never loses them and
-a re-run only sends the texts that are still missing.
+Misses are sent in the groups the inner embedder plans (`plan_calls`), one provider call per group,
+and each group's vectors are committed before the next group is sent. A crash or quota stop therefore
+never loses a paid call's vectors, and a re-run only sends the texts that are still missing.
 """
 
 import hashlib
@@ -40,11 +41,10 @@ def _from_blob(blob: bytes, dim: int) -> list[float]:
 
 
 class CachingEmbedder:
-    """Looks every text up first; only misses reach the inner embedder, one batch at a time."""
+    """Looks every text up first; only misses reach the inner embedder, one planned call at a time."""
 
-    def __init__(self, inner: Embedder, path: str | Path, batch_size: int) -> None:
+    def __init__(self, inner: Embedder, path: str | Path) -> None:
         self._inner = inner
-        self._batch_size = batch_size
         Path(path).parent.mkdir(parents=True, exist_ok=True)
         self._db = sqlite3.connect(str(path))
         self._db.execute(SCHEMA)
@@ -88,10 +88,18 @@ class CachingEmbedder:
         for key, text in zip(keys, texts):
             if key not in found and key not in missing:
                 missing[key] = text
+        # The inner embedder owns the split rule (count and token caps); the cache never re-slices,
+        # so a group here is exactly one paid call and is committed before the next one is sent.
         pending = list(missing.items())
-        for start in range(0, len(pending), self._batch_size):
-            batch = pending[start : start + self._batch_size]
+        start = 0
+        for group in self._inner.plan_calls([text for _, text in pending]):
+            batch = pending[start : start + len(group)]
+            start += len(group)
+            if [text for _, text in batch] != list(group):
+                raise EmbeddingError("inner plan_calls must return every text once, in order")
             found.update(self._embed_and_store(batch, task))
+        if start != len(pending):
+            raise EmbeddingError(f"inner plan_calls covered {start} of {len(pending)} texts")
 
         return [found[key] for key in keys]
 
@@ -123,6 +131,6 @@ class CachingEmbedder:
             blob = _to_blob(vector)
             rows.append((key, self.model_id, task.value, len(vector), blob, now))
             stored[key] = _from_blob(blob, len(vector))  # same float32 values as a later cache hit
-        with self._db:  # one transaction per batch
+        with self._db:  # one transaction per provider call
             self._db.executemany("INSERT OR REPLACE INTO embeddings VALUES (?, ?, ?, ?, ?, ?)", rows)
         return stored

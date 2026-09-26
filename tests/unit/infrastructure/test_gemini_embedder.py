@@ -1,15 +1,16 @@
+import logging
 import math
 from types import SimpleNamespace
 
 import httpx
 import pytest
-from google.genai import errors
 
 from knowledge_assistant.config import EmbeddingSettings, get_embedding_settings
-from knowledge_assistant.core.exceptions import ConfigurationError, EmbeddingError
+from knowledge_assistant.core.exceptions import ConfigurationError, EmbeddingError, QuotaExhaustedError
 from knowledge_assistant.core.interfaces.embedding import EmbeddingTask
 from knowledge_assistant.infrastructure.embeddings.gemini_embedder import GeminiEmbedder, l2_normalize
 from knowledge_assistant.infrastructure.embeddings.throttle import SlidingWindowThrottle, estimate_tokens
+from tests.fakes import FakeClock, FakeModels, api_error
 
 
 def make_settings(**overrides) -> EmbeddingSettings:
@@ -27,36 +28,6 @@ def make_settings(**overrides) -> EmbeddingSettings:
     return EmbeddingSettings(**values)
 
 
-class FakeClock:
-    def __init__(self) -> None:
-        self.now = 0.0
-        self.sleeps: list[float] = []
-
-    def __call__(self) -> float:
-        return self.now
-
-    def sleep(self, seconds: float) -> None:
-        self.sleeps.append(seconds)
-        self.now += seconds
-
-
-class FakeModels:
-    """Stands in for client.models; `script` holds exceptions to raise, in order, before succeeding."""
-
-    def __init__(self, dim: int = 4, script: list[Exception] | None = None, raw: list[float] | None = None):
-        self.dim = dim
-        self.script = list(script or [])
-        self.raw = raw
-        self.calls: list[dict] = []
-
-    def embed_content(self, *, model, contents, config):
-        self.calls.append({"model": model, "contents": list(contents), "config": config})
-        if self.script:
-            raise self.script.pop(0)
-        values = self.raw or [3.0, 4.0] + [0.0] * (self.dim - 2)
-        return SimpleNamespace(embeddings=[SimpleNamespace(values=list(values)) for _ in contents])
-
-
 def make_embedder(models: FakeModels, clock: FakeClock | None = None, **overrides) -> GeminiEmbedder:
     settings = make_settings(**overrides)
     clock = clock or FakeClock()
@@ -66,14 +37,6 @@ def make_embedder(models: FakeModels, clock: FakeClock | None = None, **override
     return GeminiEmbedder(
         settings, client=SimpleNamespace(models=models), throttle=throttle, sleep=clock.sleep, jitter=lambda: 0.0
     )
-
-
-def server_error(code: int = 503, retry_delay: str | None = None) -> errors.APIError:
-    error = {"code": code, "status": "UNAVAILABLE", "message": "overloaded"}
-    if retry_delay:
-        error["details"] = [{"@type": "type.googleapis.com/google.rpc.RetryInfo", "retryDelay": retry_delay}]
-    cls = errors.ServerError if code >= 500 else errors.ClientError
-    return cls(code, {"error": error})
 
 
 # --- config -----------------------------------------------------------------
@@ -108,6 +71,16 @@ def test_task_types_and_dim_are_sent_and_texts_are_batched():
     assert [c["config"].task_type for c in models.calls] == ["RETRIEVAL_DOCUMENT"] * 2 + ["RETRIEVAL_QUERY"]
     assert {c["config"].output_dimensionality for c in models.calls} == {4}
     assert {c["model"] for c in models.calls} == {"test-embedding-model"}
+
+
+def test_plan_calls_is_what_embed_sends_and_replanning_a_group_returns_it_unchanged():
+    models = FakeModels()
+    embedder = make_embedder(models, batch_size=3, tokens_per_minute=1_000)
+    texts = ["x" * 1600, "a", "b", "c", "d", "x" * 800, "x" * 800, "e"]  # 400, 1, ..., 200, 200, 1 tokens
+    plan = embedder.plan_calls(texts)
+    embedder.embed(texts, EmbeddingTask.DOCUMENT)
+    assert [c["contents"] for c in models.calls] == plan
+    assert all(embedder.plan_calls(group) == [group] for group in plan)
 
 
 def test_batches_are_capped_at_half_the_tokens_per_minute():
@@ -147,7 +120,7 @@ def test_zero_vector_cannot_be_normalized():
 
 def test_503_twice_then_success_takes_three_attempts_with_backoff():
     clock = FakeClock()
-    models = FakeModels(script=[server_error(503), server_error(503)])
+    models = FakeModels(script=[api_error(503), api_error(503)])
     embedder = make_embedder(models, clock)
     assert len(embedder.embed(["a"], EmbeddingTask.DOCUMENT)) == 1
     assert len(models.calls) == 3
@@ -157,7 +130,7 @@ def test_503_twice_then_success_takes_three_attempts_with_backoff():
 
 def test_always_failing_raises_embedding_error_after_max_attempts():
     clock = FakeClock()
-    models = FakeModels(script=[server_error(503)] * 10)
+    models = FakeModels(script=[api_error(503)] * 10)
     with pytest.raises(EmbeddingError, match="after 4 attempts"):
         make_embedder(models, clock, max_attempts=4).embed(["a"], EmbeddingTask.DOCUMENT)
     assert len(models.calls) == 4
@@ -172,13 +145,48 @@ def test_timeouts_are_retried():
 
 def test_429_honours_retry_delay_when_longer_than_backoff():
     clock = FakeClock()
-    models = FakeModels(script=[server_error(429, retry_delay="17s")])
+    models = FakeModels(script=[api_error(429, retry_delay="17s")])
     make_embedder(models, clock).embed(["a"], EmbeddingTask.DOCUMENT)
     assert clock.sleeps == [17.0]
 
 
+def test_server_retry_delay_is_capped_at_120_s_and_every_wait_is_logged(caplog):
+    """A per-minute 429 asking for 10 h must not block a run for 40 h (verify X5a)."""
+    clock = FakeClock()
+    models = FakeModels(script=[api_error(429, retry_delay="36000s")] * 10)
+    with caplog.at_level(logging.WARNING), pytest.raises(EmbeddingError, match="after 5 attempts"):
+        make_embedder(models, clock, max_attempts=5).embed(["a"], EmbeddingTask.DOCUMENT)
+    assert clock.sleeps == [120.0] * 4
+    waits = [r.getMessage() for r in caplog.records if "retrying in" in r.getMessage()]
+    assert len(waits) == 4 and all("HTTP 429" in w and "retrying in 120.0 s" in w for w in waits)
+
+
+def test_per_minute_429_is_retried_with_the_server_delay():
+    clock = FakeClock()
+    per_minute = api_error(429, retry_delay="30s", quota_id="EmbedContentRequestsPerMinutePerProjectPerModel-FreeTier")
+    models = FakeModels(script=[per_minute])
+    assert len(make_embedder(models, clock).embed(["a"], EmbeddingTask.DOCUMENT)) == 1
+    assert len(models.calls) == 2
+    assert clock.sleeps == [30.0]
+
+
+def test_daily_quota_429_stops_at_once_with_the_reset_time(caplog):
+    clock = FakeClock()
+    daily = api_error(429, retry_delay="30s", quota_id="EmbedContentRequestsPerDayPerProjectPerModel-FreeTier")
+    models = FakeModels(script=[daily] * 10)
+    with caplog.at_level(logging.WARNING), pytest.raises(QuotaExhaustedError, match=r"after the 14:00 UTC\+7 reset"):
+        make_embedder(models, clock).embed(["a"], EmbeddingTask.DOCUMENT)
+    assert len(models.calls) == 1
+    assert clock.sleeps == []
+    assert not [r for r in caplog.records if "retrying in" in r.getMessage()]
+
+
+def test_quota_exhausted_error_is_an_embedding_error():
+    assert issubclass(QuotaExhaustedError, EmbeddingError)
+
+
 def test_non_retryable_error_fails_immediately():
-    models = FakeModels(script=[server_error(400)])
+    models = FakeModels(script=[api_error(400)])
     with pytest.raises(EmbeddingError, match="400"):
         make_embedder(models).embed(["a"], EmbeddingTask.DOCUMENT)
     assert len(models.calls) == 1

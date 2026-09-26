@@ -21,7 +21,7 @@
 C#, .NET, Java, Node.js, React, Angular, Vue, Flutter, Electron, ASP.NET Core as an app framework (it appears only as corpus subject matter), SQLite (until required), ML/ONNX/local models (until required), reranking (until an experiment).
 
 ## Configuration notes
-- `CHROMA_PATH` env var; default `data/chroma/` (OD-7, ADR-0005 D16; was `D:\ChromaDB`).
+- `CHROMA_PATH` env var; default `data/chroma/` (OD-7, ADR-0005 D16; was `D:\ChromaDB`). All data paths (Chroma, embedding cache, chunks, logs) resolve from the repo root, not the working directory (ADR-0005 D16).
 - Generated vector data is git-ignored and not committed; it is rebuilt by script from the chunk files and the embedding cache (ADR-0005 D16).
 - Embedding settings (model, dimension 768, limits, batch size) live in `config.py`, env-overridable (ADR-0005).
-- SQLite (stdlib `sqlite3`) is used for one concrete need: the embedding cache `data/cache/embeddings.sqlite` (atomic per-batch writes, resume across quota days; ADR-0005 D18).
+- SQLite (stdlib `sqlite3`) is used for one concrete need: the embedding cache `data/cache/embeddings.sqlite` (one atomic write per provider call, resume across quota days; ADR-0005 D18).

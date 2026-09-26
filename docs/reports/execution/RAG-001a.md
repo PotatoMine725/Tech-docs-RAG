@@ -115,15 +115,92 @@ No new dependency. `httpx` is imported to catch timeouts; it is already installe
 ## Deviations from the prompt
 1. **Retry codes:** 500 and 504 are retried in addition to 429/503/timeouts (both transient server errors). Non-retryable codes (e.g. 400) fail at once.
 2. **Throttle unit = texts,** not HTTP calls. This follows V-1; the prompt says "requests", and V-1 shows each text is a request.
-3. **Batching in two layers:** `CachingEmbedder` slices misses into batches itself (constructor `batch_size`), so each batch is committed before the next call. Otherwise one inner call could hold all misses, and a crash would lose them.
+3. **Batching in two layers** (superseded by the verify fixes: the cache now follows the embedder's plan, see the addendum): `CachingEmbedder` slices misses into batches itself (constructor `batch_size`), so each batch is committed before the next call. Otherwise one inner call could hold all misses, and a crash would lose them.
 4. **Dimension check raises `EmbeddingError`,** not a Python `assert`, because asserts vanish under `-O`.
 5. **`CachingEmbedder` path is a constructor argument;** the default location (`data/cache/embeddings.sqlite`) is `EmbeddingSettings.cache_path`.
 6. **The live test uses its own cache file** (`data/cache/live-tests.sqlite`) so its texts never mix into the index cache, and a re-run spends no quota.
 7. **Per-call token cap = half the per-minute budget** (added after the owner's throughput check). The prompt's rule is "largest batch that stays under the per-minute token limit". With per-text quota and a throttle that admits whole calls, that rule lets one Arm B call take most of a window, so only one call per minute would run (simulated 18 min instead of 12). Half the budget lets two calls share every window.
 
 ## Explain it back
+The first two bullets were partly wrong (verify C1/C2); the corrected versions are in the addendum below.
+
 - **Why a cache, and why SQLite:** each paid embedding is committed in one transaction right after its batch returns. A crash or the 14:00 quota stop loses nothing, and a re-run sends only misses. JSONL could leave a torn last line, and using Chroma as the cache would tie paid vectors to collections we delete and rebuild.
 - **Why the throttle counts texts:** the V-1 probe (1 HTTP call, 3 texts) moved AI Studio's RPM from 0 to 3, so batching saves HTTP overhead but not quota. Counting calls would have let a 45-text batch look like 1 request and hit 429s. The same fact makes indexing two quota days: 709 + 859 = 1,568 > 1,000/day. The throttle admits whole calls over a sliding 60 s window, so each call is also capped at half the token budget. Without the cap, two 45-text Arm B calls (≈ 32K) could not share a 25K window, and Arm B would take 18 min instead of 12.
 - **Why normalize at 768:** only 3,072-d output is pre-normalized (the probe measured norms ≈ 0.58 at 768). Unit vectors make cosine, inner product and L2 rank the same, and cosine (OD-8) is also robust if a vector were ever left unnormalized. 768 keeps the store 4× smaller with a small quality cost.
 - **Why `model_id = model@dim` is part of the key:** changing model, dimension or task type can never silently reuse old vectors. The alternative, a plain text hash, would mix incompatible vectors after a config change.
 - **Why core has `EmbeddingTask` and not `RETRIEVAL_DOCUMENT`:** core stays provider-free (CLAUDE.md rule 3). The Gemini strings live only in the Gemini adapter, so a different provider could plug in without touching core or application code.
+
+## Addendum 2026-09-26: fixes from 99-VERIFY
+Input: [RAG-001a-verify](../../reviews/code/RAG-001a-verify.md), ACCEPT WITH FIXES, plus the owner's fix list (F1, F2, retry, paths). Offline only: **0 Gemini requests** in this session; the gemini-marked live test was edited (constructor call) but **not run**. First step: pushed the verifier's local commit `c53be1b` to `origin/rag-001a`.
+
+### What was wrong
+- **F1 (paid vectors lost):** `CachingEmbedder` cut misses into 45-text slices and committed per slice, but `GeminiEmbedder` re-split any slice over 12.5K est. tokens into several HTTP calls. If a later call in a slice failed, the earlier calls' paid vectors were dropped.
+- **F2:** for the same reason the half-budget cap did not reach the real pipeline: Arm B ran in 39 calls with the last one at 18.0 min.
+- My throughput simulation had modelled `GeminiEmbedder` alone, not the `CachingEmbedder(GeminiEmbedder)` pipeline RAG-001b will run, so it could not see this.
+
+### Changes
+| File | Change |
+|---|---|
+| `src/.../core/interfaces/embedding.py` | `Embedder.plan_calls(texts) -> list[list[str]]`: the groups `embed` sends; `embed(group)` on one group is one provider call |
+| `src/.../core/exceptions/__init__.py` | `QuotaExhaustedError(EmbeddingError)` |
+| `src/.../infrastructure/embeddings/gemini_embedder.py` | `_batches` → public `plan_calls` (GitNexus rename dry run: 1 call site). Daily-quota 429 (QuotaFailure `quotaId`/`quotaMetric` names a per-day quota) → `QuotaExhaustedError` at once, message "resume after the 14:00 UTC+7 reset". Other retries: wait = max(backoff, server delay) capped at **120 s**; each wait logged at `WARNING` (texts, HTTP code/status, attempt, seconds; no body, no key) |
+| `src/.../infrastructure/persistence/embedding_cache.py` | No `batch_size`; misses go out in the inner embedder's planned groups, one commit per group before the next is sent. A plan that drops or reorders texts raises `EmbeddingError` |
+| `src/.../config.py` | `PROJECT_ROOT`, `resolve_project_path`; `get_chroma_path()` and `cache_path` resolve relative values (default or env) from the repo root; new `get_chunks_dir()` (`data/processed/chunks`), `get_logs_dir()` (`data/logs`). Absolute values are kept |
+| `.gitignore` | `**/data/chroma/*` + `!/data/chroma/.gitkeep`, `**/data/cache/`, `**/data/logs/` |
+| `.env.example` | Note that relative paths resolve from the repo root; commented `CHUNKS_DIR`, `LOGS_DIR` |
+| `tests/fakes.py` | `FakeEmbedder(batch_size=10)` + `plan_calls`; `FakeClock`, `FakeModels` (now with `fail_from_call`, call timestamps) and `api_error` (RetryInfo / QuotaFailure bodies) moved here from the embedder tests |
+| `tests/unit/infrastructure/test_embedding_pipeline.py` (new) | 3 tests of `CachingEmbedder(GeminiEmbedder)` with real default limits (below) |
+| `tests/unit/infrastructure/test_gemini_embedder.py` | +5: 120 s cap + logged waits, per-minute 429 retried with the server delay, daily 429 stops at once, `QuotaExhaustedError` is an `EmbeddingError`, `plan_calls` = what `embed` sends and re-planning a group returns it |
+| `tests/unit/infrastructure/test_embedding_cache.py` | `batch_size` moved to `FakeEmbedder`; +1: a bad inner plan is rejected |
+| `tests/unit/test_config.py` | Rewritten (pytest): root anchoring of defaults and relative env values, absolute values kept, a child process in another cwd resolves the same absolute files, `build_chunks.py` writes where config reads |
+| `tests/integration/retrieval/test_gemini_embedding_live.py` | Constructor call without `batch_size` (not run) |
+| ADR-0005, `tech-stack.md` | D15 pipeline numbers, 120 s cap, daily-quota rule; D16 root-relative paths + `.gitignore`; D18 one commit per provider call; D19 wall-time row source; amendment note |
+
+### Commands run (real output)
+- Offline suite (Windows, `.venv` Python 3.13.3): `.venv/Scripts/python.exe -m pytest -q` → **`186 passed, 1 deselected in 5.01s`** (173 before; +13 new: 3 pipeline, 5 embedder, 1 cache, 6 config − 2 replaced config tests).
+- F1 pipeline tests (fake client, one fake clock, real defaults 45 / 90 / 25K / 5 attempts):
+  - `test_a_failed_second_call_keeps_the_first_calls_paid_vectors_and_a_rerun_pays_only_the_rest`: 45 texts × 352 est. tokens are planned as 35 + 10. Calls: `[35] + [10] * 5` → `EmbeddingError`; **35 rows** in the SQLite file. The resumed run sends exactly one call with the other 10 texts (`api_requests == 10`), and the file then holds 45 rows.
+  - `test_daily_quota_stop_keeps_earlier_calls_and_makes_no_retry`: call 2 is a daily 429 → `QuotaExhaustedError`, 2 HTTP calls, **no sleep**, 35 rows kept.
+  - `test_through_the_cache_every_http_call_is_one_cache_group_and_windows_stay_under_the_token_budget`: 120 worst-case texts (435 est. tokens); HTTP calls == cache groups, no call over 12,500, every 60 s window ≤ 25,000.
+- Mutation proofs (each file copied to the scratchpad first and restored from that copy, byte-identical by `cmp`; suite back to 186 passed):
+
+| Mutation | Result |
+|---|---|
+| MF1 cache slices misses by count (45) instead of the embedder's plan | 6 failed: all 3 pipeline tests, `test_misses_are_sent_in_batches_and_each_batch_is_stored`, `test_stats_expose_counters`, `test_an_inner_plan_that_drops_or_reorders_texts_is_rejected` |
+| MR1 retry wait not capped | 1 failed: `test_server_retry_delay_is_capped_at_120_s_and_every_wait_is_logged` (waits were 36,000 s) |
+| MR2 daily 429 treated as retryable | 2 failed: `test_daily_quota_429_stops_at_once_with_the_reset_time`, `test_daily_quota_stop_keeps_earlier_calls_and_makes_no_retry` |
+| MR3 retry waits not logged | 1 failed: the cap/log test |
+| MP1 paths resolved from the cwd | 4 failed: defaults, relative env values, other-cwd child process, chunk builder |
+
+  - The first MP1 run left the other-cwd test green: it compared the child's paths only with the parent's, and both were the same relative strings. The test now also asserts the absolute paths under the repo root; re-run → 4 failed.
+- F2 re-simulation through the real pipeline: `CachingEmbedder(GeminiEmbedder)`, fake client, one fake clock for throttle and sleeps, temp SQLite per arm, **all** chunk `embed_text`s from `data/processed/chunks/arm-*.jsonl`, default settings:
+  ```
+  settings: batch=45 rpm=90 tpm=25000 dim=768
+  arm A: chunks=733 unique=709 vectors=733 http_calls=16 cache_groups=16 api_requests=709 est_tokens=174842 avg_texts_per_call=44.3 max_call_tokens=12487 worst_60s_tokens=24648 worst_60s_requests=90 last_call_start_min=7.0 throttle_wait_s=420.0
+  arm B: chunks=859 unique=859 vectors=859 http_calls=25 cache_groups=25 api_requests=859 est_tokens=307285 avg_texts_per_call=34.4 max_call_tokens=12499 worst_60s_tokens=24755 worst_60s_requests=79 last_call_start_min=12.0 throttle_wait_s=720.0
+  ```
+  Verifier's numbers before the fix: Arm A 20 calls / 7.0 min, Arm B 39 calls / 18.0 min.
+- `.gitignore` check: `git check-ignore -v` ignores `data/cache/x`, `scripts/data/cache/x`, `src/data/chroma/x`, `data/chroma/x`, `data/logs/x`, `scripts/data/logs/x`; `data/chroma/.gitkeep` is **not** ignored. `git ls-files -ci --exclude-standard` is empty before and after (no tracked file newly ignored).
+- GitNexus: `npx gitnexus analyze` (index was older than `c53be1b`); `impact` upstream on `CachingEmbedder`, `GeminiEmbedder`, `Embedder`, `get_embedding_settings`, `get_chroma_path`, `FakeEmbedder` → all **LOW** (callers are tests and the other embedding module). `detect_changes(all)`: 75 changed symbols in 15 files, risk "high" by volume; the 8 affected processes are all embed flows (`_embed_and_store → _from_blob`, `Embed → Get_gemini_api_key`, `Embed → L2_normalize`, `Embed → Estimate_tokens`, `Embed → _to_blob`, `Embed → _from_blob`, `_embed_and_store → Cache_key`, `Embed → _retry_after_s`). No chunking, parsing or evaluation flow.
+- Quota spent in this fix session: **0**.
+
+### Unverified / limits
+- The daily-quota classifier is built from the documented `google.rpc.QuotaFailure` shape (`quotaId` like `...PerDay...`). No real daily 429 has been captured, so the exact field values Gemini sends are not verified. If a real daily 429 does not match, it falls back to the retry path: at most 4 waits of ≤ 120 s, each logged, then `EmbeddingError`. The run stops within about 8 minutes instead of hanging.
+- A 429 whose QuotaFailure names neither a per-minute nor a per-day quota is treated as per-minute (retried).
+- The live test's constructor call changed; it was not re-run (quota rule).
+- The throughput numbers are simulated (no call latency); a real run adds network time per call.
+- Scripts under `scripts/` already anchor their own paths with `Path(__file__).parents[2]`. They were not changed; a test pins that `build_chunks.py` writes to `get_chunks_dir()`.
+- Windows only.
+
+### Deviations
+1. **`plan_calls` joins the core `Embedder` protocol.** The owner offered "the cache forms groups with the same half-budget token cap" or a commit callback. Copying the cap into the cache would give two copies of the split rule that can drift, and a callback would change the `embed` signature. With `plan_calls` the embedder stays the only owner of the rule and the cache commits per call by construction; `FakeEmbedder` implements it too.
+2. **`get_chroma_path()` returns a `Path`**, not a `str` (no production caller yet). `EmbeddingSettings.cache_path` is a `Path` too.
+3. **New `CHUNKS_DIR` / `LOGS_DIR` settings** (defaults `data/processed/chunks`, `data/logs`) so RAG-001b has one root-anchored source for them; no logs directory existed before.
+4. **Retry waits are logged at `WARNING`** via the standard `logging` module; nothing configures a handler yet, so the host script decides where logs go.
+
+### Explain it back (corrected)
+- **Why a cache, and why SQLite:** the embedder decides how texts are split into provider calls (`plan_calls`), and the cache sends misses in exactly those groups, committing each group in one SQLite transaction before the next call. So every paid call's vectors are stored before anything else is sent; a crash, a 503 run-out or the 14:00 daily stop loses nothing, and a re-run sends only the missing texts. My first version committed per 45-text slice while the embedder split slices further, so one failure could drop a paid call.
+- **Why each call is capped at half the token budget, and why that now reaches indexing:** the throttle admits whole calls in a sliding 60 s window, so two calls per window must each stay ≤ 12.5K est. tokens. Because the cache no longer re-slices, the real pipeline runs Arm B in 25 calls with the last at 12.0 min (18.0 min before). Arm A is request-bound at 7.0 min either way.
+- **Why a daily-quota 429 stops at once but a per-minute one is retried:** a per-minute 429 clears within a minute, so backing off (server delay honoured, capped at 120 s, logged) works. A daily 429 cannot clear before 14:00 UTC+7, so retrying would only burn time; `QuotaExhaustedError` stops the run cleanly and the cache already holds everything paid for.
+- **Why paths resolve from the repo root:** a relative path follows the working directory, so a script started from `scripts/` would open a new, empty cache there (paying for every text again) in a folder `.gitignore` did not cover. Now every relative data path is joined to the repo root, and `.gitignore` covers a `data/` folder anywhere.
+- **Why the tests use the real pipeline:** each class was already tested alone. The bug was in how the two classes fit together, so only a test of `CachingEmbedder(GeminiEmbedder)` with real limits could catch it.

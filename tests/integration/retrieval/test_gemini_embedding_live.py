@@ -31,9 +31,7 @@ def cosine(a: list[float], b: list[float]) -> float:
 def test_live_embedding_is_multilingual_and_has_configured_dim():
     load_dotenv(ROOT / ".env")
     settings = get_embedding_settings()
-    with CachingEmbedder(
-        GeminiEmbedder(settings), ROOT / "data" / "cache" / "live-tests.sqlite", settings.batch_size
-    ) as embedder:
+    with CachingEmbedder(GeminiEmbedder(settings), ROOT / "data" / "cache" / "live-tests.sqlite") as embedder:
         en, vi, unrelated = embedder.embed([EN, VI, UNRELATED], EmbeddingTask.DOCUMENT)
         stats = embedder.stats()
 

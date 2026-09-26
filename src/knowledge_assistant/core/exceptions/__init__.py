@@ -16,3 +16,7 @@ class DocumentParseError(KnowledgeAssistantError):
 
 class EmbeddingError(KnowledgeAssistantError):
     """Embedding failed after all retries, or the provider returned an invalid result."""
+
+
+class QuotaExhaustedError(EmbeddingError):
+    """The provider's daily quota is used up: retrying is pointless until the daily reset."""

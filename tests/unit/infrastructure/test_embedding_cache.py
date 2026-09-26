@@ -16,7 +16,7 @@ def db_path(tmp_path):
 
 def test_second_call_with_same_texts_makes_no_inner_call(db_path):
     inner = FakeEmbedder()
-    with CachingEmbedder(inner, db_path, batch_size=10) as cache:
+    with CachingEmbedder(inner, db_path) as cache:
         first = cache.embed(["a", "b"], DOC)
         second = cache.embed(["a", "b"], DOC)
     assert len(inner.calls) == 1
@@ -26,7 +26,7 @@ def test_second_call_with_same_texts_makes_no_inner_call(db_path):
 
 def test_mixed_batch_sends_only_misses_and_keeps_order(db_path):
     inner = FakeEmbedder()
-    with CachingEmbedder(inner, db_path, batch_size=10) as cache:
+    with CachingEmbedder(inner, db_path) as cache:
         cache.embed(["b"], DOC)
         result = cache.embed(["a", "b", "c"], DOC)
     assert inner.calls[-1] == (["a", "c"], DOC)
@@ -35,7 +35,7 @@ def test_mixed_batch_sends_only_misses_and_keeps_order(db_path):
 
 def test_duplicate_texts_in_one_call_are_sent_once(db_path):
     inner = FakeEmbedder()
-    with CachingEmbedder(inner, db_path, batch_size=10) as cache:
+    with CachingEmbedder(inner, db_path) as cache:
         result = cache.embed(["x", "y", "x"], DOC)
     assert inner.calls == [(["x", "y"], DOC)]
     assert result[0] == result[2]
@@ -48,14 +48,14 @@ def test_misses_are_sent_in_batches_and_each_batch_is_stored(db_path):
                 raise EmbeddingError("quota")
             return super().embed(texts, task)
 
-    inner = FailsOnThirdCall()
-    with CachingEmbedder(inner, db_path, batch_size=2) as cache:
+    inner = FailsOnThirdCall(batch_size=2)
+    with CachingEmbedder(inner, db_path) as cache:
         with pytest.raises(EmbeddingError):
             cache.embed(["1", "2", "3", "4", "5"], DOC)
     assert [len(texts) for texts, _ in inner.calls] == [2, 2]
 
-    resumed = FakeEmbedder()
-    with CachingEmbedder(resumed, db_path, batch_size=2) as cache:
+    resumed = FakeEmbedder(batch_size=2)
+    with CachingEmbedder(resumed, db_path) as cache:
         cache.embed(["1", "2", "3", "4", "5"], DOC)
     assert resumed.calls == [(["5"], DOC)]
 
@@ -65,35 +65,35 @@ def test_task_and_model_id_are_part_of_the_key(db_path):
     assert cache_key("m@8", DOC, "t") != cache_key("m@768", DOC, "t")
 
     inner = FakeEmbedder()
-    with CachingEmbedder(inner, db_path, batch_size=10) as cache:
+    with CachingEmbedder(inner, db_path) as cache:
         cache.embed(["t"], DOC)
         cache.embed(["t"], QUERY)
     other = FakeEmbedder(model_id="other-model@8")
-    with CachingEmbedder(other, db_path, batch_size=10) as cache:
+    with CachingEmbedder(other, db_path) as cache:
         cache.embed(["t"], DOC)
     assert len(inner.calls) == 2
     assert len(other.calls) == 1
 
 
 def test_cache_survives_reopening_the_file(db_path):
-    with CachingEmbedder(FakeEmbedder(), db_path, batch_size=10) as cache:
+    with CachingEmbedder(FakeEmbedder(), db_path) as cache:
         first = cache.embed(["persist me"], DOC)
     inner = FakeEmbedder()
-    with CachingEmbedder(inner, db_path, batch_size=10) as cache:
+    with CachingEmbedder(inner, db_path) as cache:
         again = cache.embed(["persist me"], DOC)
     assert inner.calls == []
     assert again == first
 
 
 def test_first_call_returns_the_same_float32_values_as_a_cache_hit(db_path):
-    with CachingEmbedder(FakeEmbedder(), db_path, batch_size=10) as cache:
+    with CachingEmbedder(FakeEmbedder(), db_path) as cache:
         miss = cache.embed(["same"], DOC)
         hit = cache.embed(["same"], DOC)
     assert miss == hit
 
 
 def test_stats_expose_counters(db_path):
-    with CachingEmbedder(FakeEmbedder(), db_path, batch_size=1) as cache:
+    with CachingEmbedder(FakeEmbedder(batch_size=1), db_path) as cache:
         cache.embed(["abcd", "efgh"], DOC)
         cache.embed(["abcd"], DOC)
         stats = cache.stats()
@@ -105,6 +105,16 @@ def test_wrong_vector_count_from_inner_raises(db_path):
         def embed(self, texts, task):
             return super().embed(texts, task)[:-1]
 
-    with CachingEmbedder(Short(), db_path, batch_size=10) as cache:
+    with CachingEmbedder(Short(), db_path) as cache:
         with pytest.raises(EmbeddingError):
+            cache.embed(["a", "b"], DOC)
+
+
+def test_an_inner_plan_that_drops_or_reorders_texts_is_rejected(db_path):
+    class BadPlan(FakeEmbedder):
+        def plan_calls(self, texts):
+            return [list(reversed(texts))]
+
+    with CachingEmbedder(BadPlan(), db_path) as cache:
+        with pytest.raises(EmbeddingError, match="in order"):
             cache.embed(["a", "b"], DOC)
