@@ -250,7 +250,8 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
     - Arm A: 733 = 733, 709 requests, 16 calls, 0 retries, 7.1 min. The re-run showed 0 new and 0 API requests.
     - One sanity query: 1 request.
     - Arm B (after the 14:00 UTC+7 reset, started by hand at 14:09 because the background waiter had been stopped for low memory): 859 = 859, 859 requests, 25 calls, 0 retries, 12.1 min (12.0 simulated), throttle wait 669 s. Re-run: 0 new, 0 API requests, 0.148 s. Arm A still 733 = 733.
-    - Both collections are in `D:\ChromaDB` (the owner's `.env`), not `data/chroma/` (ADR-0005 D16): owner decision required, see (4).
+    - Both collections were first written to `D:\ChromaDB` (the owner's `.env`), not `data/chroma/` (ADR-0005 D16); see (4).
+    - Owner decision 14:37: the index moves to `data/chroma/` (D16 stands); the owner edited `.env`. Rebuilt both arms there from the embedding cache: A 733 = 733 and B 859 = 859, both cosine, **0 API requests** (709 + 859 cache hits); re-runs 0 new. The sanity query on the rebuilt store gave the same top-5 and scores. This is live evidence that the cache works.
 - *AI got wrong:*
   - (1) The first ledger edit named a commit hash, `33c5e3b`, that does not exist; I wrote it before looking up the real hash.
   - (2) My first plan had `IndexCorpus` embed in 100-chunk slices. The embedder would then have planned calls per slice (e.g. 45 + 45 + 10), which breaks ADR-0005 D15's call plan and the 7.0 / 12.0 min figures the verifier accepted.
@@ -264,8 +265,8 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - (1) Replaced it with the real `efc11e3` before committing.
   - (2) One `embed()` call for all pending texts, with only the upsert batched. The dry-run and the live Arm A call counts (16) match D15.
   - (3) An extra test: a query `[2,0,0]` against a stored `[1,0,0]` must score 1.0 (inner product would give 2, squared L2 would give 0). The `DISTANCE = "ip"` mutation fails it.
-  - (4) Re-ran the key scan on the real store (`D:\ChromaDB`, raw bytes): 0 matches. The report now gives the real path, with the morning scan marked as a correction. I did not edit `.env` or move the store; that is left to the owner.
-- *Human decision:* none new in this session. The quota plan (Arm A before 14:00, Arm B after) and the accepted open items come from the owner's prompt (ADR-0005 D19).
+  - (4) Re-ran the key scan on the real store (`D:\ChromaDB`, raw bytes): 0 matches. The report now gives the real path, with the morning scan marked as a correction. I did not edit `.env` or move the store myself. The owner chose `data/chroma/` and edited `.env`; I rebuilt there from the cache (0 requests) and re-scanned `data/chroma/` (0 matches). `D:\ChromaDB` is left for the owner to clean up.
+- *Human decision:* index location `data/chroma/` (owner, 14:37; ADR-0005 D16 stands); the owner edited `.env`. The quota plan (Arm A before 14:00, Arm B after) and the accepted open items come from the owner's prompt (ADR-0005 D19).
 
 ## Summary: how AI helped
 

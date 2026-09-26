@@ -145,7 +145,7 @@ Deliverables:
 - Tests: offline tests with fake embedder/LLM/store; live tests marked `@pytest.mark.gemini`.
 
 Exit gate **G3** (M2 is the first successful end-to-end answer):
-- [x] For both arms, number of items in the Chroma collection = number of chunks in the chunk file. (RAG-001b, 26 Sep: Arm A 733 = 733, Arm B 859 = 859; re-runs 0 new / 0 API. Store path `D:\ChromaDB` from the owner's `.env`, not `data/chroma/` as in ADR-0005 D16: owner decision pending, see [ledger](task-ledger.md) row 06b.)
+- [x] For both arms, number of items in the Chroma collection = number of chunks in the chunk file. (RAG-001b, 26 Sep: Arm A 733 = 733, Arm B 859 = 859; re-runs 0 new / 0 API. The store is in `data/chroma/` (ADR-0005 D16); it was rebuilt there from the embedding cache with 0 API requests after the owner fixed `.env`.)
 - [ ] Smoke checks saved in `validation/` (labelled "smoke check, not evaluation data"): 1 English + 1 Vietnamese question answered with heading-path citations; 1 out-of-corpus question gets the "insufficient information" message.
 - [ ] No API key in code, logs or output (secret scan); model names only in config.
 - [ ] Offline pytest passes; `-m gemini` tests pass when run on purpose.

@@ -147,8 +147,29 @@ No new dependency: `chromadb` was already in `pyproject.toml` and `requirements.
   - I found this at 14:22 when a check I ran without `.env` saw 0 items.
   - `D:\ChromaDB\chroma.sqlite3` holds exactly the two collections of this task. It also has two folders dated 2026-09-24 that this task did not create, and I left them alone.
   - I did **not** edit `.env` (owner's file, holds the key), did not re-index into `data/chroma/`, and did not copy the store: RAG-002 reads the same `.env`, so one store stays the single source.
-  - **DECISION REQUIRED (owner):** keep `D:\ChromaDB` and amend OD-7 / ADR-0005 D16, or set `CHROMA_PATH=data/chroma` and rebuild. A rebuild should cost 0 quota because every vector is in the embedding cache; that is expected, not verified.
-  - Side effect of my check: it created an empty `data/chroma/chroma.sqlite3` (0 collections, git-ignored). My attempt to delete it was blocked by the permission check, so it is still there for the owner to remove.
+  - At 14:30 I asked the owner to decide: keep `D:\ChromaDB` and amend OD-7 / ADR-0005 D16, or set `CHROMA_PATH=data/chroma` and rebuild.
+  - Side effect of my check: it created an empty `data/chroma/chroma.sqlite3` (0 collections, git-ignored). The owner said to leave it; Chroma reused it.
+- **Owner decision (14:37): the index moves to `data/chroma/`, and ADR-0005 D16 stands.**
+  - The owner edited `.env`. I did not open or print it.
+  - `D:\ChromaDB` is left untouched; the owner will clean it up.
+  - Resolved paths, printed with `.env` loaded and with the owner's approval (paths only):
+    - `CHROMA_PATH` → `<repo>\data\chroma`, which equals `<repo>/data/chroma`;
+    - embedding cache → `<repo>\data\cache\embeddings.sqlite`.
+  - `.env.example` already has `CHROMA_PATH=data/chroma`, so it needed no change.
+- **Rebuild in `data/chroma/` from the embedding cache (14:38 UTC+7) is evidence that the cache works:**
+  - Dry-runs first: A: 733 to index, 0 texts not in cache, **0 provider calls**. B: 859 to index, 0 not in cache, **0 provider calls**.
+  - Builds, from `indexing-log.jsonl`:
+
+    | Arm | newly_embedded | cache_hits | api_requests | http_calls | retries | store_count | lines | duration |
+    |---|---:|---:|---:|---:|---:|---:|---:|---:|
+    | A | 733 | 709 | **0** | 0 | 0 | 733 | 733 | 1.27 s |
+    | B | 859 | 859 | **0** | 0 | 0 | 859 | 859 | 2.24 s |
+
+    A has 709 cache hits for 733 chunks because its 733 chunks have 709 unique `embed_text`s, and the cache counts each unique text once. That is the same 709 the Arm A live run paid for.
+  - Re-runs: A 733 already present, 0 newly embedded, 0 API; B 859 / 0 / 0.
+  - Direct check: A `733 == 733`, B `859 == 859`. Both collections show `hnsw:space = cosine` in their metadata **and** `space = cosine` in Chroma's HNSW configuration. `data/chroma/` is now 39 MB.
+  - Sanity query again, on the rebuilt store (1 cache hit, 0 API requests; appended to the sanity file): **the same top-5 with the same scores** (0.7325 / 0.7303 / 0.7244 / 0.7190 / 0.7183).
+  - Quota spent by the move: **0**. Both `build-index-arm-*.log` files are empty.
 - **Sanity check** (live, 1 request; [sanity-2026-09-26.md](../../../validation/retrieval/sanity-2026-09-26.md)):
   ```
   | 1 | 0.7325 | 10:header-1600:0005 | Dependency injection in ASP.NET Core > Overview of dependency injection |
@@ -172,9 +193,12 @@ No new dependency: `chromadb` was already in `pyproject.toml` and `requirements.
     - 24 occurrences in 17 files at `bd2fee8`, and 22 in 17 at `456f2f8`.
     - Every one is of the same kinds as before: verifier scan commands in `docs/reviews/…`, this report and ADR-0005 describing the scan, the redaction regex, and fake test keys.
     - I did not re-derive the morning figure of 19; it was not produced with this same command.
+- **Key-leak check, after the move** (14:40; raw bytes, key from the environment, counts only):
+  - 16 files: `data/chroma/**` (9 files, 39 MB sqlite plus HNSW segment files), `data/cache/*`, `data/logs/*` and `validation/retrieval/*`.
+  - 0 matches of the full key, 0 of its 8-character prefix, 0 of `AIza`. `.env.example` contains no `AIza`.
 - **Quota** (V-1 accounting, 1 request per text; not checked against the AI Studio dashboard):
   - Quota day ending 14:00 UTC+7: 6 before this task + Arm A 709 + sanity query 1 = **716 of 1,000**.
-  - Quota day starting 14:00 UTC+7: Arm B **859 of 1,000**. The re-run and the dry-runs cost 0.
+  - Quota day starting 14:00 UTC+7: Arm B **859 of 1,000**. The re-run, the dry-runs, the move to `data/chroma/` and the second sanity query cost 0.
 - **GitNexus:**
   - `npx gitnexus analyze`, then `detect_changes(compare, origin/dev)` before the milestone-1 commit: 52 symbols in 14 files, risk **medium**.
   - Affected flows: only the embed/cache flows (`Embed → …`, `_embed_and_store → _from_blob`, `Missing → _from_blob`) and the new `Run → Record_to_chunk`.
@@ -183,14 +207,15 @@ No new dependency: `chromadb` was already in `pyproject.toml` and `requirements.
     - `npx gitnexus analyze` crashed with `COPY failed for File: bad allocation`. The machine was low on memory, the same cause that stopped the Arm B waiter. The index stays stale at `1865607`.
     - `npx gitnexus detect-changes -s unstaged` reported "No changes detected". That is expected: this commit changes only docs and `indexing-log.jsonl`, with no code symbol.
     - `-s compare -b origin/dev` also reported "No changes detected". That is **not credible** for a branch with code changes, so I treat it as inconclusive (stale index). The milestone-1 MCP result above (52 symbols, medium) is the valid one for the code, because `git diff --stat efc11e3 bd2fee8 -- src scripts tests` is empty: no code changed after that check.
-- **Offline pytest after all edits:** 211 passed, 1 deselected (the live Gemini test).
+- **Offline pytest after all edits:** 211 passed, 1 deselected (the live Gemini test). Run again after the move: 211 passed, 1 deselected.
+- **GitNexus after the move:** I skipped `npx gitnexus analyze` (it crashed on low memory at 14:30; the owner said to skip it if memory is still low). The move commit changes docs, `indexing-log.jsonl` and the sanity file only, with no code.
 
 ## Unverified / limits
-- **The store path differs from ADR-0005 D16:** it is `D:\ChromaDB` (owner's `.env`), not `data/chroma/`. This is DECISION REQUIRED, see Checks.
 - The daily-quota 429 classifier has still not seen a real response: no 429 happened in either arm.
 - Chroma behaviour was checked on Windows only.
-- The Chroma data is outside the repo and not committed (ADR-0005 D16). It can be rebuilt from the chunk files plus the embedding cache set in `.env`, expected at 0 quota; that rebuild was not tried.
-- I did not print the effective cache path. My attempt to print the path settings was blocked by the permission check, so the cache location is unverified. The key scan covered `data/cache/*`.
+- The Chroma data in `data/chroma/` is git-ignored and not committed (ADR-0005 D16). A rebuild from the chunk files plus the embedding cache was done and cost 0 requests (see Checks).
+- The old copy in `D:\ChromaDB` (both collections plus two folders from 2026-09-24) still exists. The owner will clean it up; nothing reads it now.
+- The GitNexus index is stale at `1865607`: `analyze` crashed on low memory and was skipped after the move.
 - The sanity check is one question and one arm.
 
 ## Deviations from the prompt
@@ -223,7 +248,7 @@ No new dependency: `chromadb` was already in `pyproject.toml` and `requirements.
 - **Why `plan_calls` left core:**
   - How a provider splits calls is a Gemini batching detail. Core describes only what the application needs: `model_id` and `embed`.
   - Moving it to an infrastructure protocol lets `CachingEmbedder` satisfy the core `Embedder` without faking a method, and keeps core provider-free (CLAUDE.md rule 3).
-- **Why the index stayed in `D:\ChromaDB` instead of being moved to `data/chroma/`:**
-  - The path comes from `CHROMA_PATH` in the owner's `.env`. Every script and the future RAG-002 retrieval read the same setting, so the index they use is the one they will find.
-  - Editing `.env` (it holds the key) or keeping a second copy in `data/chroma/` would split one index into two that can drift apart. Changing where the data lives is the owner's decision (OD-7).
-  - Either way, a rebuild is cheap: the vectors are in the embedding cache, so rebuilding should need no new quota.
+- **Why I did not move the index myself, and why the move cost nothing:**
+  - The path comes from `CHROMA_PATH` in `.env`, which every script and RAG-002 read. Editing `.env` (it holds the key) or keeping a second copy myself would have split one index into two that can drift apart. So I left the choice to the owner (OD-7), and the owner changed `.env`.
+  - The move was a rebuild, not a copy. Every paid vector is in the SQLite embedding cache, keyed by model, task and text. The rebuild therefore read 709 + 859 vectors from the cache and sent **0** API requests.
+  - This is a live check that the cache does its job: an index can be thrown away and rebuilt for free.
