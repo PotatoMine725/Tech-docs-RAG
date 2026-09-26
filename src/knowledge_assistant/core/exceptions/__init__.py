@@ -20,3 +20,7 @@ class EmbeddingError(KnowledgeAssistantError):
 
 class QuotaExhaustedError(EmbeddingError):
     """The provider's daily quota is used up: retrying is pointless until the daily reset."""
+
+
+class VectorStoreError(KnowledgeAssistantError):
+    """The vector store cannot serve the request, e.g. its collection was built with other settings."""

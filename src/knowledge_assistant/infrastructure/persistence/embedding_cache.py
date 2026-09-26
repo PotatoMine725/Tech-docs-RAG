@@ -10,6 +10,7 @@ import sqlite3
 import struct
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Protocol
 
 from knowledge_assistant.core.exceptions import EmbeddingError
 from knowledge_assistant.core.interfaces.embedding import Embedder, EmbeddingTask
@@ -40,10 +41,25 @@ def _from_blob(blob: bytes, dim: int) -> list[float]:
     return list(struct.unpack(f"<{dim}f", blob))
 
 
-class CachingEmbedder:
-    """Looks every text up first; only misses reach the inner embedder, one planned call at a time."""
+class PlannedEmbedder(Embedder, Protocol):
+    """An Embedder that also says how it splits texts into provider calls (a batching detail, so not core)."""
 
-    def __init__(self, inner: Embedder, path: str | Path) -> None:
+    def plan_calls(self, texts: list[str]) -> list[list[str]]:
+        """How `embed` splits `texts` into provider calls, in order.
+
+        `embed(group)` on one returned group makes exactly one provider call, so a caller that
+        stores results per group (the embedding cache) keeps every paid call's vectors.
+        """
+        ...
+
+
+class CachingEmbedder:
+    """Looks every text up first; only misses reach the inner embedder, one planned call at a time.
+
+    Satisfies the core `Embedder` protocol (`model_id`, `embed`).
+    """
+
+    def __init__(self, inner: PlannedEmbedder, path: str | Path) -> None:
         self._inner = inner
         Path(path).parent.mkdir(parents=True, exist_ok=True)
         self._db = sqlite3.connect(str(path))
@@ -102,6 +118,16 @@ class CachingEmbedder:
             raise EmbeddingError(f"inner plan_calls covered {start} of {len(pending)} texts")
 
         return [found[key] for key in keys]
+
+    def missing(self, texts: list[str], task: EmbeddingTask) -> list[str]:
+        """The unique texts `embed` would send to the inner embedder (first-occurrence order). No API call."""
+        keys = [cache_key(self.model_id, task, text) for text in texts]
+        found = self._lookup(list(dict.fromkeys(keys)))
+        missing: dict[str, str] = {}
+        for key, text in zip(keys, texts):
+            if key not in found and key not in missing:
+                missing[key] = text
+        return list(missing.values())
 
     def _lookup(self, keys: list[str]) -> dict[str, list[float]]:
         found: dict[str, list[float]] = {}

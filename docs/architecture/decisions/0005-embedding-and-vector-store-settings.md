@@ -1,7 +1,7 @@
 # ADR-0005 Embedding and vector-store settings (dimension, batching, cache, Chroma path, distance)
 
 Date: 2026-09-26
-Status: Accepted (owner decisions D14, D16, D17 via AskUserQuestion; D15 batch size 45 confirmed by the owner; D19 quota plan set by the owner from V-1; all 2026-09-26). Amended 2026-09-26 after 99-VERIFY ([RAG-001a-verify](../../reviews/code/RAG-001a-verify.md)): see the amendment note at the end.
+Status: Accepted (owner decisions D14, D16, D17 via AskUserQuestion; D15 batch size 45 confirmed by the owner; D19 quota plan set by the owner from V-1; all 2026-09-26). Amended 2026-09-26 after 99-VERIFY ([RAG-001a-verify](../../reviews/code/RAG-001a-verify.md)): see the amendment note at the end. Amended again 2026-09-26 by RAG-001b Step 0 (RAG-001a re-verify open items): see amendment 2.
 Task: RAG-001a. Refines: ADR-0004 D10 (embedding model), D13 (retries). Closes: OD-7, OD-8 (master-plan §8), fact V-1.
 Does not close: OD-11 (max retry attempts before the *answer-model* fallback; that belongs to RAG-003).
 
@@ -59,7 +59,7 @@ Evidence limits:
   - Throughput is request-bound for Arm A (≈ 90 texts/min; tokens alone would allow ≈ 101) and token-bound for Arm B (≈ 70 texts/min).
   - Across both arms the average is 307 tokens per text, so a token-bound average of ≈ 81 texts/min.
   - chars/4 overestimates real tokens by about 15% (V-1), so the real token use is a little below the budget.
-- Retries: exponential backoff 1-2-4-8 s + jitter (0-1 s), with any server `Retry-After` / `RetryInfo.retryDelay` honoured when longer, **but never more than 120 s per wait**. Every wait is logged (`WARNING`: texts in the call, HTTP code and status, attempt, seconds; never the error body or the key). Retried: HTTP 429/500/503/504 and timeouts (explicit 60 s client timeout; the SDK default is none). The embedder's max attempts is **5** (config `EMBEDDING_MAX_ATTEMPTS`), then `EmbeddingError`. The SDK's own retry is off (its default), so retries are not doubled.
+- Retries: exponential backoff 1-2-4-8 s + jitter (0-1 s), with any server `Retry-After` / `RetryInfo.retryDelay` honoured when longer, **but never more than 120 s per wait**. Every wait is logged (`WARNING`: texts in the call, HTTP code and status, attempt, seconds; never the error body or the key; one exception since amendment 2: the raw body of the first 429 of a run, key redacted). Retried: HTTP 429/500/503/504 and timeouts (explicit 60 s client timeout; the SDK default is none). The embedder's max attempts is **5** (config `EMBEDDING_MAX_ATTEMPTS`), then `EmbeddingError`. The SDK's own retry is off (its default), so retries are not doubled.
 - **Daily quota:** a 429 whose `google.rpc.QuotaFailure` names a per-day quota (`quotaId` / `quotaMetric` matching "PerDay" / "per_day" / "daily") raises `QuotaExhaustedError` (a core subclass of `EmbeddingError`) at once, with no retry and no wait. The message says to resume after the 14:00 UTC+7 reset. Per-minute 429s (their QuotaFailure names a "PerMinute" quota) and 429s with no QuotaFailure take the retry path above. The classifier follows the documented error shape; no real daily 429 has been seen yet.
 
 **D16 OD-7 Chroma path: `data/chroma/` (owner).** Repo-local, git-ignored (already in `.gitignore`), and not committed. It is rebuilt by a script from the chunk files plus the embedding cache, so rebuilding costs no quota. `CHROMA_PATH` default in `config.py` and `.env.example` changed from `D:\ChromaDB`.
@@ -69,7 +69,7 @@ Evidence limits:
 **D17 OD-8 Distance: cosine (owner).** Same for both arms. On unit vectors cosine, inner product and L2 rank identically. Cosine stays correct even if a vector were ever left unnormalized, and its scores are the easiest to read.
 
 **D18 Embedding cache in SQLite (stdlib `sqlite3`).** `CachingEmbedder` wraps any `Embedder`.
-- **One commit per provider call.** The embedder alone owns the split rule. `Embedder.plan_calls(texts)` returns the groups `embed` would send, and `embed(group)` on one group makes exactly one provider call. The cache sends misses group by group from that plan and commits each group before sending the next. So the vectors of every successful call are stored before the next call is made, and a later failure or quota stop loses no paid vector. The cache never re-slices, so the embedder's half-budget token cap (D15) reaches the real pipeline.
+- **One commit per provider call.** The embedder alone owns the split rule. `plan_calls(texts)` (on the infrastructure `PlannedEmbedder` protocol since amendment 2) returns the groups `embed` would send, and `embed(group)` on one group makes exactly one provider call. The cache sends misses group by group from that plan and commits each group before sending the next. So the vectors of every successful call are stored before the next call is made, and a later failure or quota stop loses no paid vector. The cache never re-slices, so the embedder's half-budget token cap (D15) reaches the real pipeline.
 - The key is `sha256(model_id | task | text)`, stored in `data/cache/embeddings.sqlite` (git-ignored).
 - Columns: key, model_id, task, dim, vector (float32 little-endian bytes), created_at.
 - CLAUDE.md rule 2 allows SQLite only for a concrete need. The need:
@@ -112,9 +112,18 @@ The verifier ([RAG-001a-verify](../../reviews/code/RAG-001a-verify.md), ACCEPT W
 - **F2:** through the cache, Arm B still ran in 39 calls with the last call at 18.0 min.
 
 Changes:
-- **F1:** `Embedder.plan_calls` added to the core protocol; `CachingEmbedder` no longer takes a `batch_size` and commits per planned call (D18).
+- **F1:** `Embedder.plan_calls` added to the core protocol (moved to infrastructure in amendment 2); `CachingEmbedder` no longer takes a `batch_size` and commits per planned call (D18).
   - Test: 45 texts of 352 est. tokens are planned as 35 + 10. When the second call always fails, the 35 rows of the first call are in the SQLite file, and a re-run sends only the other 10.
   - The same with a daily-quota 429 on the second call: 35 rows kept, no wait, no retry.
 - **F2:** D15 now gives numbers for the real pipeline (Arm A 16 calls / 7.0 min, Arm B 25 calls / 12.0 min). They are unchanged from the embedder-alone simulation because each cache group is now one call.
 - **Retry (verify X5a):** a daily-quota 429 raises `QuotaExhaustedError` at once. Other retry waits are capped at 120 s and logged (D15).
 - **Paths (verify X5b):** data paths resolve from the repo root; `.gitignore` covers `data/` folders anywhere in the tree (D16).
+
+## Amendment 2 2026-09-26: RAG-001b Step 0 (open items from the RAG-001a re-verify)
+- **`plan_calls` leaves core.** How texts are split into provider calls is a Gemini batching detail, so it is no longer part of the core `Embedder` protocol (`model_id`, `embed`). It lives on `PlannedEmbedder(Embedder, Protocol)` in `infrastructure/persistence/embedding_cache.py`; `CachingEmbedder` takes a `PlannedEmbedder` as its inner embedder, and D18's one-commit-per-call rule is unchanged. `CachingEmbedder` itself satisfies the core `Embedder` protocol, so the application's `IndexCorpus` receives it as a plain `Embedder`. Tests: the core protocol has exactly `model_id` and `embed`; every protocol member exists on `CachingEmbedder` with the same signature.
+- **Raw body of the first 429 (exception to D15's "never the error body").** `GeminiEmbedder` logs the JSON body of the first HTTP 429 per embedder instance (one run) at `WARNING`, before the daily-quota check, so the D15 classifier can be checked against a real error. The configured key and anything shaped like a Google API key (`AIza` + 35 characters) are replaced by `[REDACTED]` first. Later 429s and other codes are not logged raw. `scripts/ingestion/build_index.py` writes warnings to stderr and to `data/logs/build-index-arm-<a|b>.log` (git-ignored). Tests: a daily 429 logs its body once and then raises; a second 429 in a run is not logged raw; a 503 is not; the key is redacted. Mutations (log after the daily check; no redaction) are each killed.
+- **Accepted, not fixed (owner, RAG-001b prompt):**
+  - the daily-quota error format is still untested against a real daily 429;
+  - connection errors (`httpx.ConnectError`) are not retried by the embedder: indexing is resumable, and RAG-003 retries them on the LLM path;
+  - the throttle's per-minute counter lives in one process, so it resets when a script restarts.
+- **Chroma detail (installed chromadb 1.5.9).** Creating a collection with `metadata={"hnsw:space": "cosine", ...}` sets `configuration.hnsw.space = "cosine"` (checked on a scratch collection). This is the "equivalent in the installed Chroma version" named in Consequences. Collection name `kb_{chunker_config}_{model_id}`, with characters Chroma does not allow (such as `@`) changed to `-`. The metadata keeps the exact `chunker_config` and `embedding_model_id` and is checked on every open, so two settings that sanitize to the same name cannot share a collection.
