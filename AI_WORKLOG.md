@@ -238,6 +238,14 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - Tests: 186 passed.
   - Non-blocking, all LOW: (1) `CachingEmbedder` has no `plan_calls`, so it no longer satisfies the core `Embedder` protocol; (2) the daily-429 classifier has not been tested on a real daily-quota response (disclosed); (3) `httpx.ConnectError` is still not wrapped; (4) the throttle's state lives in one process only.
 
+### 2026-09-26 EVAL-003b-pre: verifier findings (branch `eval-003b-pre`, PR #12)
+- *Verifier findings (99-VERIFY, 2026-09-26, Windows 3.13.3, 0 Gemini requests, no ChromaDB, [EVAL-003b-pre-verify](docs/reviews/evaluation/EVAL-003b-pre-verify.md) -> ACCEPT WITH FIXES):*
+  - (1) MEDIUM (report / spec wording, not code): the report says no case can be evidence-hit from alternate-section retrieval and calls evidence_hit "strict-like"; the owner is told to paste that into `evaluation-spec.md`. False for 4 of 32 cases: Q-EVAL-003 and 004 (their quotes also occur in `#12 ... Developer Exception Page`, an approved alternate) and Q-EVAL-007 and 008 (also in `#23 ... Route constraint reference`). With real Arm A and Arm B chunks that overlap no expected span, the real functions give evidence@5 = 1, lenient section = 1, strict section = 0. The report's check covered only the 3 quotes whose sole location is an alternate section, which is narrower than the sentence.
+  - (2) LOW: the M5 mutation transcript shows "1 failed"; running the whole retrieval test file gives 3 failures.
+  - (3) LOW: the report writes the float `(1-0.95)/2*100` as `2.5000000000000022`; Python prints `2.500000000000002`.
+  - Observed, cause unverified: one pytest subprocess in the verifier's mutation harness died with Windows exit 3221225773 (commit limit reached, about 875 MB virtual memory free); it passed on every re-run. Consistent with the earlier truncated run being environmental. Both full runs here: 272 passed, 1 deselected.
+  - Checks that passed: scope (14 added files only); 51 metric values on Q-EVAL-017, 022 and 031 equal my hand calculations on real Arm A records; McNemar / bootstrap (pairs together, independent reimplementation) / Wilcoxon equal hand-computed exact p; `expected-spans-v1.json` rebuilds byte-identical with correct input hashes; frozen hashes unchanged; mutations M1-M5 all caught (scratch copy); all report numbers traced.
+
 ## Summary: how AI helped
 
 To be filled at QC-001.

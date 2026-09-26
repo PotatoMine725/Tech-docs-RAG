@@ -29,7 +29,7 @@ The master plan links here instead of repeating statuses. Task order = `agents/p
 | 07 | `07-RAG-002-retrieval-generation-citation.md` | RAG-002 | 06b | not started | — | — | — | — |
 | 08 | `08-RAG-003-resilience-cli-smoke.md` | RAG-003 | 07 | not started | — | — | — | — |
 | 09a | `09a-EVAL-003a-runner.md` | EVAL-003a | 08 | not started | — | — | — | — |
-| 09b | `09b-EVAL-003b-metrics-and-judge.md` | EVAL-003b | 09a | not started | — | — | — | — |
+| 09b | `09b-EVAL-003b-metrics-and-judge.md` | EVAL-003b | 09a | not started | — | — | — | Pre-work EVAL-003b-pre (PR #12, branch `eval-003b-pre`; owner exception 2026-09-26): [report](../reports/execution/EVAL-003b-pre.md), [EVAL-003b-pre-verify](../reviews/evaluation/EVAL-003b-pre-verify.md) -> ACCEPT WITH FIXES (2026-09-26): code, spans file and statistics reproduce; fix the report / spec-line claim that evidence_hit is strict-like (4 of 32 cases can be evidence-hit from alternate-only chunks) before merging. Becomes `verified` after the fixes are re-verified. 09b proper audits it instead of redoing it. |
 | 09c | `09c-EVAL-003c-report-generator.md` | EVAL-003c | 09b | not started | — | — | — | — |
 | 10 | `10-GUI-001-desktop-app.md` | GUI-001 | 08 (parallel) | not started | — | — | — | — |
 | 11 | `11-EVAL-004-run-and-report.md` | EVAL-004 | 09c | not started | — | — | — | — |
