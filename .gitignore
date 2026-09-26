@@ -229,3 +229,5 @@ output/reports/*
 output/exports/*
 !output/reports/.gitkeep
 !output/exports/.gitkeep
+# Embedding cache + probe output (RAG-001a, ADR-0005): paid vectors, local only, never committed.
+data/cache/
