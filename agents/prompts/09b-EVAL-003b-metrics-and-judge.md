@@ -12,7 +12,7 @@ Entry: EVAL-003a done.
 - `source_hit@k` = 1 if every slot has at least one of its source_ids among the top-k chunks. Secondary: fraction of slots satisfied (report separately; it differs from the main value only for multi-slot cases: cross-document, BP-EVAL-022 and BP-EVAL-017).
 - **Strict and lenient (owner, 2026-09-25, OWNER-001):** report `source_hit@k` and `section_hit@k` both **lenient** (the rule above: expected + alternate sources/sections per slot) and **strict** (expected sources/sections only; alternates ignored). Tag every span in `expected-spans-v1.json` with its role (`expected` / `alternate`) so strict section hit can be computed. **Headline = lenient**; strict always sits next to it in the same table (owner, 2026-09-25). MRR and the slot fraction use the lenient rule; also compute `strict MRR` (same function, expected spans only) as a secondary value. See `evaluation-spec.md` § Retrieval hit rule (EXP-001 must report a strict/lenient flip).
 - `section_hit@k` = 1 if every slot has a top-k chunk that overlaps a span of a section listed in that slot.
-- `evidence_hit@k` = 1 if any top-k chunk's text contains the evidence quote (whitespace-normalized) — the strictest check; shows when a chunk boundary cuts the evidence.
+- `evidence_hit@k` = 1 if any top-k chunk's text contains the evidence quote, matched with the same whitespace normalization as `scripts/evaluation/validate_questions.py` (`re.sub(r"\s+", " ", text).strip()` on both sides: collapses all Unicode whitespace, including U+00A0; example Q-EVAL-028 / #18) — the strictest check; shows when a chunk boundary cuts the evidence.
 - `MRR` (section level) = 1 / rank of the first chunk that hits any slot's span, 0 if none. Also `source MRR`.
 - Also report @1 and @3 for the same metrics (cheap, shows ranking quality).
 
@@ -53,6 +53,7 @@ The unanswerable-but-answered row is the one place where the judge's verdict pic
 - section hit via span overlap incl. edge cases (touching spans `[0,10)` vs `[10,20)` = no overlap; multiple variants);
 - MRR with hit at rank 3 = 0.333…; no hit = 0; strict MRR: alternate hit at rank 1 and expected hit at rank 3 → lenient 1.0, strict 0.333…;
 - evidence_hit false when the quote is split across two chunks;
+- evidence_hit true when the chunk and the quote differ only in whitespace (runs of spaces, newlines, U+00A0), e.g. Q-EVAL-028 / #18;
 - every row of the mapping table, including both refusal-check outcomes for insufficient + related note;
 - slots: case with S1 = {04 expected}, S2 = {26 expected, 20 alternate}: top-k {04, 20} → lenient hit, strict miss; {04, 26} → hit under both; {20, 26} → miss under both, slot fraction 0.5;
 - points-covered: required P1 `yes`, P2 `partial`, P3 `no`, optional P4 `no` → 0.5;

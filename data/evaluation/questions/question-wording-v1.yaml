@@ -68,7 +68,7 @@ cases:
       ```
   - blueprint_id: BP-EVAL-017
     id: Q-EVAL-017
-    question: "In ASP.NET Core, what is the difference between how a conventional middleware and a middleware that implements IMiddleware get a scoped DbContext, and what does the IMiddleware one need so the framework can create it?"
+    question: "In ASP.NET Core, what is the difference between how a conventional middleware and a middleware that implements IMiddleware get a scoped DbContext, and what extra setup does the IMiddleware one need in the app?"
   - blueprint_id: BP-EVAL-018
     id: Q-EVAL-018
     question: "Mình muốn kiểm tra ký tự `c` không phải chữ thường nên viết `c is not >= 'a' and <= 'z'`, nhưng kết quả không như mong đợi. Sai ở đâu và sửa thế nào?"
@@ -89,7 +89,7 @@ cases:
     question: "When my IExceptionHandler handles an exception and returns true, does ASP.NET Core still write logs and emit metrics for that exception? Can I change that?"
   - blueprint_id: BP-EVAL-024
     id: Q-EVAL-024
-    question: "Integration test viết bằng xUnit của mình load file theo đường dẫn tương đối với `Assembly.Location`, nhưng lúc chạy test thì không tìm thấy file, vì test không chạy trong thư mục output. Nguyên nhân là gì và cấu hình thế nào để khắc phục?"
+    question: "Integration test viết bằng xUnit của mình load file theo đường dẫn tương đối với `Assembly.Location`, nhưng lúc chạy test thì không tìm thấy file. Nguyên nhân là gì và cấu hình thế nào để khắc phục?"
   - blueprint_id: BP-EVAL-025
     id: Q-EVAL-025
     question: "Bots keep requesting /robots.txt and /favicon.ico on my ASP.NET Core app, which has neither file, and every one of those requests runs through the whole middleware pipeline, including authentication. How can I cheaply end these requests without running the rest of the pipeline?"
@@ -101,7 +101,7 @@ cases:
     question: "In an ASP.NET Core web API controller, what does the framework send back automatically when a posted model fails validation, and how can I change the format of that response?"
   - blueprint_id: BP-EVAL-028
     id: Q-EVAL-028
-    question: "Ngay từ đầu, C# có nhắm tới việc chạy nhanh và gọn ngang ngửa C hay assembly không?"
+    question: "Ngay từ đầu, C# có nhắm tới việc chạy nhanh và nhẹ ngang ngửa C hay assembly không?"
   - blueprint_id: BP-EVAL-029
     id: Q-EVAL-029
     question: "In an ASP.NET Core app, when I inject my EF Core DbContext into a controller, what service lifetime does it have by default, and how do I use it to load the blog whose BlogId is 1?"

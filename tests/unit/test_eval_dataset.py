@@ -105,3 +105,12 @@ def test_validator_rejects_overlap_and_too_few_cases(files, corpus):
     assert any("at least 30 required" in e for e in errors), errors
     errors = validator.validate(files[0] + [copy.deepcopy(files[0][0])], files[1], corpus)
     assert any("duplicate ID Q-EVAL-001" in e for e in errors), errors
+
+
+def test_validator_rejects_shared_expected_section_alone(files, corpus):
+    """Only the expected section is shared (ID, blueprint and question all differ), so only that check can fire."""
+    eval_cases, dev_cases = copy.deepcopy(files)
+    dev_cases[0]["expected_sources"] = copy.deepcopy(eval_cases[0]["expected_sources"])
+    errors = validator.validate(eval_cases, dev_cases, corpus)
+    assert any("eval and dev share expected sections" in e for e in errors), errors
+    assert not any(f"share {field}" in e for e in errors for field in ("id", "blueprint_id", "question")), errors
