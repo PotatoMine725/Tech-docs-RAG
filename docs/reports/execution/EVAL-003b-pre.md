@@ -1,13 +1,13 @@
 # EVAL-003b-pre — pure metric + statistics functions (execution report)
 
-Date: 2026-09-26. Branch `eval-003b-pre` from `origin/dev` (`f81faa5`), separate git worktree. Agent: Claude Code, Opus 5.5.
+Date: 2026-09-26. Branch `eval-003b-pre` from `origin/dev` (`f81faa5`), separate git worktree. Agent: Claude Code, Opus 5.5. Before re-verify, `origin/dev` (`8cb2010`: RAG-001b, GUI-001-pre) was merged in with merge commit `bebf486` (owner, 2026-09-26).
 
 ## Summary
 
-- Pure retrieval metrics, expected spans (`expected-spans-v1.json`: 36 cases, 120 spans), the 09b §3 mapping table, the latency summary and exact paired statistics; 87 new offline tests; full suite `273 passed, 1 deselected`; 5 mutation proofs; frozen question files unchanged.
+- Pure retrieval metrics, expected spans (`expected-spans-v1.json`: 36 cases, 120 spans), the 09b §3 mapping table, the latency summary and exact paired statistics; 87 new offline tests; full suite `273 passed, 1 deselected` before the merge, and `313 passed, 1 deselected` on the merged branch = dev's `226` (measured on `8cb2010`) + 87; 5 mutation proofs; frozen question files unchanged.
 - **evidence_hit** (owner, 2026-09-26): per required point. evidence_hit is content-level: a required point counts if a supporting quote appears whole in any top-k chunk, including chunks from owner-approved alternate sections. It therefore aligns with lenient section hit, not strict. Strict section hit is reported alongside.
 - **evidence_hit_via_alternate_only count** (diagnostic, owner follow-up 2026-09-26): **4 of 32** answerable cases on both arms: Q-EVAL-003, Q-EVAL-004, Q-EVAL-007, Q-EVAL-008. This is simulated alternate-only retrieval (every chunk that overlaps no expected span of the case, `k` = all of them), **not a retrieval result**; there is no runner yet. Output: § evidence_hit_via_alternate_only below.
-- Verify: [EVAL-003b-pre-verify](../../reviews/evaluation/EVAL-003b-pre-verify.md) → ACCEPT WITH FIXES; the fixes the owner chose (option (a): keep the rule, fix the wording, add the diagnostic) are applied, pending a limited re-verify.
+- Verify: [EVAL-003b-pre-verify](../../reviews/evaluation/EVAL-003b-pre-verify.md) → ACCEPT WITH FIXES; the fixes the owner chose (option (a): keep the rule, fix the wording, add the diagnostic) are applied, and verifier fix 4 (Windows memory note, § Anomaly) was added at the owner's later request; pending a limited re-verify.
 
 ## Scope and entry condition
 
@@ -17,6 +17,7 @@ Date: 2026-09-26. Branch `eval-003b-pre` from `origin/dev` (`f81faa5`), separate
 - Not touched by the task's own commits (through `8adeb71`): embeddings/, vector_store/, llm/, generation/, retrieval/, core/interfaces/, presentation/, scripts/, the frozen question files, shared docs (ledger, AI_WORKLOG, CHANGELOG, master plan). No Gemini calls, no ChromaDB access, no new dependency, no venv/pip.
 - `data/processed/documents/normalized.jsonl` is tracked in git, so the worktree had its own copy: nothing was read from the main checkout.
 - **After verify (owner-authorized):** the branch now also modifies two shared docs: `AI_WORKLOG.md` and `docs/plans/task-ledger.md`. The verifier's commit `fd59109` did that first; this follow-up then added the merged 09b ledger note and the worklog entry the owner asked for. For re-verify scope, check the task's own files with `git diff --name-status origin/dev...8adeb71` and review the later commits separately.
+- **Merge of `origin/dev` (`bebf486`, owner, before re-verify):** a merge commit, no rebase, no force. `AI_WORKLOG.md` conflicted only where both sides appended a new 2026-09-26 entry; both entries are kept unchanged in time order (RAG-001b first committed 14:30:54, EVAL-003b-pre verifier findings 14:34:04), and a line-count check shows no line of either parent missing. `task-ledger.md` merged cleanly: it equals dev's file except the 09b row, which carries this branch's note. After the merge, `git diff --name-status origin/dev...HEAD` lists only this branch's work: the 14 task files, the verify report, and the two shared docs.
 
 ## Files (all new)
 
@@ -70,9 +71,14 @@ Environment: `D:\Code\Python\Knowledge assistant\.venv\Scripts\python.exe` by ab
 | evidence_hit follow-up (`240f948`) | `pytest tests/unit/application/test_eval_retrieval_metrics.py`; full pytest | `29 passed`; `272 passed, 1 deselected` |
 | Post-verify follow-up (`943f063`) | `pytest` retrieval + stats files; full pytest (×3) | `48 passed`; run 1 cut off (see Anomaly), runs 2 and 3: `273 passed, 1 deselected` each, exit 0 |
 | Alternate-only count | `PYTHONPATH="src;." python alt_only.py` (job tmp, not committed) | 4 / 32 on each arm (below) |
-| Frozen hashes at the end | `Get-FileHash` + `git diff origin/dev -- <both files>` | unchanged (see below), diff empty |
+| Dev baseline before the merge | full pytest in a detached worktree of `origin/dev` (`8cb2010`), job tmp | `226 passed, 1 deselected`, exit 0 |
+| Merge (`bebf486`) | `git merge --no-ff --no-commit origin/dev`; resolve `AI_WORKLOG.md`; commit | 1 conflict (`AI_WORKLOG.md`), ledger auto-merged; 0 lines of either parent missing |
+| Merged branch | full pytest; `pytest --collect-only` on the 5 task test files | `313 passed, 1 deselected`, exit 0 (= 226 + 87, not truncated); `87 tests collected` |
+| Frozen hashes at the end | `Get-FileHash` + `git diff origin/dev -- <both files>` | unchanged (see below), diff empty; re-checked after the merge |
 
 Anomaly (unexplained, reported honestly): one full run with `-rfE`, piped to a file, stopped at about 60 % with exit code 1 and no failure or summary line. The next verbose run and two quiet runs all exited 0 with `267 passed`. No test failure was ever shown; the likely cause is the environment (another session's job on this machine was killed for low memory earlier the same day), but this is **unverified**. It happened once more in the post-verify follow-up: the first full run (`pytest -q … 2>&1 | Select-Object -Last 3`) printed progress to about 70 % and then exited 1 with no summary. The two re-runs straight after, with output redirected to a file, both gave `273 passed, 1 deselected`, exit 0, and about 1.5 GB of virtual memory was free right after them. Cause still unverified.
+
+Verifier observation (verifier fix 4, added at the owner's request): while running the mutation harness, the verifier saw one pytest subprocess die with Windows exit code `3221225773` (0xC000012D, "commit limit reached"; no pytest output), with only about 875 MB of virtual memory free system-wide. The same subprocess passed on every re-run ([verify report](../../reviews/evaluation/EVAL-003b-pre-verify.md)). This is consistent with today's truncated run at about 70 % (post-verify follow-up, above) and the earlier one at about 60 % both being environmental: machine-wide memory pressure from parallel sessions. It is not proof. My two truncated runs exited with 1, not `3221225773`, and I did not record free memory at the moment they stopped. The cause therefore stays **unverified (environmental, likely)**; no test failure was ever shown. The full run on the merged branch was not truncated.
 
 Tests fixed while writing (my own mistakes, caught by running them): (1) a latency test comment claimed `0.1*30` is not exactly 3 in floats; it is `3.0`, so the test proved nothing. It was replaced with a searched real counterexample (`14/100*50`). (2) The bootstrap pairing test compared floats exactly (`0.9999999999999964` vs `1.0`, summation noise); it now uses `approx(abs=1e-9)`.
 
@@ -200,12 +206,12 @@ Both equal `docs/snapshots/evaluation/eval-v1.md`. `git diff origin/dev --` on b
 
 ## GitNexus
 
-All changes are new files; no existing symbol was edited, so no impact analysis was needed (`_common.md`). `gitnexus_detect_changes` was run before the first commit but cannot see this worktree: the index `Tech-docs-RAG` is registered for the main checkout (currently on `rag-001b`). The compare against `origin/dev` returned risk "high" with 223 changed symbols in 20 files, **all from the other session's `rag-001b` work** (Chroma store, embedder, index_corpus, …) and none from this branch. `git diff --name-status origin/dev` on this branch lists only the 13 added files above. Because the index cannot see this worktree, `detect_changes` was not re-run before commits 2–4 (`0125683`, `afd7007`, the report commits) or the evidence_hit follow-up (`240f948`, which modified only this branch's own `retrieval.py` and its test file); `git diff --name-status` was the scope check instead (only added files, no modified ones). Post-verify follow-up: `detect_changes` was tried again before `943f063` and returned `Repository "…\worktrees\eval-003b-pre" not found`. The commit changes only this branch's own files: `retrieval.py` (new function + module docstring), its test file, and one trailing comment each in `stats.py` (inside `percentile_interval`'s tail line) and `test_eval_stats.py` (inside the bootstrap-rank test). `git diff fd59109 943f063` on those two files shows only the comment text changing (the float repr, now `2.500000000000002`), with no code token changed. No existing code was changed, so no impact analysis was run. The report commit also modifies `AI_WORKLOG.md` and `task-ledger.md` (owner-authorized, docs only).
+All changes are new files; no existing symbol was edited, so no impact analysis was needed (`_common.md`). `gitnexus_detect_changes` was run before the first commit but cannot see this worktree: the index `Tech-docs-RAG` is registered for the main checkout (currently on `rag-001b`). The compare against `origin/dev` returned risk "high" with 223 changed symbols in 20 files, **all from the other session's `rag-001b` work** (Chroma store, embedder, index_corpus, …) and none from this branch. `git diff --name-status origin/dev` on this branch lists only the 13 added files above. Because the index cannot see this worktree, `detect_changes` was not re-run before commits 2–4 (`0125683`, `afd7007`, the report commits) or the evidence_hit follow-up (`240f948`, which modified only this branch's own `retrieval.py` and its test file); `git diff --name-status` was the scope check instead (only added files, no modified ones). Post-verify follow-up: `detect_changes` was tried again before `943f063` and returned `Repository "…\worktrees\eval-003b-pre" not found`. The commit changes only this branch's own files: `retrieval.py` (new function + module docstring), its test file, and one trailing comment each in `stats.py` (inside `percentile_interval`'s tail line) and `test_eval_stats.py` (inside the bootstrap-rank test). `git diff fd59109 943f063` on those two files shows only the comment text changing (the float repr, now `2.500000000000002`), with no code token changed. No existing code was changed, so no impact analysis was run. The report commit also modifies `AI_WORKLOG.md` and `task-ledger.md` (owner-authorized, docs only). Merge `bebf486`: `detect_changes` (compare against `origin/dev`) was tried again and returned the same "not found". The merge adds dev's own reviewed code without changes, and its only hand-resolved file is `AI_WORKLOG.md`. The report commit after it changes docs only.
 
 ## Unverified / open
 
 - evidence_hit headline: decided by the owner (item 5; kept after verify, option (a)). evidence_hit is content-level: a required point counts if a supporting quote appears whole in any top-k chunk, including chunks from owner-approved alternate sections. It therefore aligns with lenient section hit, not strict. Strict section hit is reported alongside. The alternate-only diagnostic is 4 / 32 on simulated alternate-only retrieval (003, 004, 007, 008). The evaluation spec and CHANGELOG do not record the rule yet; the owner lines are below.
-- Verifier fix 4 (add the verifier's Windows exit `3221225773` observation to the anomaly note) was not in the owner's follow-up list and was not applied; the observation is recorded in the verify report and in `AI_WORKLOG.md`.
+- Verifier fix 4 (add the verifier's Windows exit `3221225773` observation to the anomaly note): not in the owner's first follow-up list. It was applied later, in the owner's pre-re-verify instruction, and now appears in § Anomaly, linked to today's truncated run at about 70 %.
 - Refusal-check JSON key, latency record shape, `RankedChunk` adapter: to be fixed by 09b proper / EVAL-003a (items 7, 8, 11).
 - No metric has been run on real retrieval output (no runner yet). Correctness rests on the hand-computed tests and the mutation proofs.
 - The two truncated pytest runs (see Anomaly).
@@ -343,4 +349,17 @@ Owner decision on issue 1: option (a). Keep the per-required-point rule. Do not 
      that evidence quotes exist only in expected sections. Caught by verify on real Arm A/B chunks."
 5. Run the full offline suite and commit/push using the standard git block (no force).
    Do not merge. STOP for a limited re-verify.
+```
+
+## Appendix — owner instruction before re-verify (verbatim, 2026-09-26)
+
+```
+Before the re-verify:
+1. Merge origin/dev into eval-003b-pre with a merge commit (no rebase, no force).
+   Resolve AI_WORKLOG.md by keeping every entry from both sides, in chronological order. Delete nothing.
+   If task-ledger.md conflicts: keep dev's rows and re-apply the 09b note.
+2. Also apply verifier fix 4: add their Windows memory-error note (exit 3221225773, commit limit) to the report's anomalies section,
+   and link it to today's truncated run at ~70%.
+3. Run the full offline suite on the merged branch. The count must be dev's count + this task's new tests; report both numbers.
+4. Push. Do not merge. STOP.
 ```
