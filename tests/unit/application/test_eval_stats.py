@@ -78,7 +78,7 @@ def test_bootstrap_is_reproducible_with_the_fixed_seed():
 
 def test_percentile_interval_uses_exact_nearest_ranks():
     values = list(range(1, 10_001))
-    # ranks ceil(2.5% x 10 000) = 250 and ceil(97.5% x 10 000) = 9750 (a float tail of 2.5000000000000022 gives 251)
+    # ranks ceil(2.5% x 10 000) = 250 and ceil(97.5% x 10 000) = 9750 (a float tail of 2.500000000000002 gives 251)
     assert percentile_interval(values, 0.95) == (250, 9750)
     assert percentile_interval(values, 0.9) == (500, 9500)
 

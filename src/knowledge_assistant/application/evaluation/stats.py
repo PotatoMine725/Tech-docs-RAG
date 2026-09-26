@@ -83,7 +83,7 @@ def paired_bootstrap_ci(a: list[float], b: list[float], resamples: int = BOOTSTR
 
 def percentile_interval(values: list[float], confidence: float = 0.95) -> tuple[float, float]:
     """Nearest-rank (1 - confidence) / 2 and (1 + confidence) / 2 percentiles of `values`."""
-    tail = (1 - Fraction(str(confidence))) / 2 * 100  # exact: 0.95 -> 5/2, not 2.5000000000000022
+    tail = (1 - Fraction(str(confidence))) / 2 * 100  # exact: 0.95 -> 5/2, not 2.500000000000002
     return nearest_rank(values, tail), nearest_rank(values, 100 - tail)
 
 

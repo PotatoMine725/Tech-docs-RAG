@@ -10,6 +10,7 @@ from knowledge_assistant.application.evaluation.metrics.retrieval import (
     RankedChunk,
     any_evidence_hit_at_k,
     evidence_hit_at_k,
+    evidence_hit_via_alternate_only_at_k,
     mean,
     overlaps,
     reciprocal_rank,
@@ -234,6 +235,26 @@ def test_required_point_quotes_real_case_q_eval_023():
     assert list(points) == ["P1", "P2", "P3"]
     assert [len(quotes) for quotes in points.values()] == [2, 2, 2]
     assert points["P1"][1] == "Starting in .NET 10, diagnostics are suppressed by default for handled exceptions."
+
+
+def test_evidence_hit_via_alternate_only_flags_hits_earned_outside_the_expected_spans():
+    """Expected #13 [0, 100), alternate #12 [0, 100); the alternate chunk holds both points' quotes (Q-EVAL-003 style)."""
+    spans = [span("13", 0, 100), span("12", 0, 100, role=ALTERNATE)]
+    points = {"P1": ["alpha beta"], "P2": ["gamma delta"]}
+    alternate = chunk("12", 10, 60, "x alpha beta y gamma delta z")
+    expected_plain = chunk("13", 20, 80, "unrelated text")
+    expected_quote = chunk("13", 20, 80, "the alpha beta line")
+    via = evidence_hit_via_alternate_only_at_k
+    # every point satisfied only outside the expected span -> 1 (the headline is 1 as well)
+    assert (evidence_hit_at_k([alternate], points, k=5), via([alternate], points, spans, k=5)) == (1, 1)
+    # an expected chunk without a quote changes nothing
+    assert via([expected_plain, alternate], points, spans, k=5) == 1
+    # P1 is also found in a chunk overlapping the expected span -> not alternate-only
+    assert via([alternate, expected_quote], points, spans, k=5) == 0
+    # ... unless that chunk is below the cut-off
+    assert via([alternate, expected_quote], points, spans, k=1) == 1
+    # no evidence hit at all -> 0
+    assert via([chunk("12", 10, 60, "alpha beta only")], points, spans, k=5) == 0
 
 
 def test_evidence_hit_real_case_q_eval_028_no_break_space_in_source_18():

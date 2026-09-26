@@ -8,7 +8,9 @@ compared (Arm A labels a merged section with its first heading, ADR-0003 D3; Arm
 - strict: the same with alternates removed (OWNER-001, 2026-09-25);
 - a case hits when every slot is satisfied; the slot fraction and MRR use the lenient rule, strict MRR is secondary;
 - evidence hit (headline): every required answer point has one of its quotes whole in a top-k chunk;
-  any-quote evidence hit is a secondary diagnostic.
+  any-quote evidence hit is a secondary diagnostic. Evidence hit is content-level: quotes found in chunks of
+  owner-approved alternate sections count too (it aligns with lenient section hit, not strict); the diagnostic
+  `evidence_hit_via_alternate_only_at_k` flags hits earned only outside the expected spans.
 Corpus-insufficient cases have no spans and are excluded from these metrics; passing them in raises ValueError.
 """
 from dataclasses import dataclass
@@ -144,6 +146,26 @@ def any_evidence_hit_at_k(chunks: list[RankedChunk], quotes: list[str], k: int) 
     if not quotes:
         raise ValueError("no evidence quotes: corpus-insufficient cases are excluded from retrieval metrics")
     return int(any(_quotes_found(chunks, quotes, k)))
+
+
+def evidence_hit_via_alternate_only_at_k(chunks: list[RankedChunk], point_quotes: dict[str, list[str]],
+                                         spans: list[ExpectedSpan], k: int) -> int:
+    """Diagnostic (owner, 2026-09-26; the headline is unchanged): 1 if `evidence_hit_at_k` is 1 and every required
+    point was satisfied only by top-k chunks outside the expected spans, i.e. no top-k chunk overlapping a span with
+    role `expected` contains one of that point's quotes. Such a hit was earned from alternate (or other) sections only.
+    """
+    _check(spans, k)
+    if not point_quotes:
+        raise ValueError("no required points: corpus-insufficient cases are excluded from retrieval metrics")
+    expected = _usable(spans, strict=True)
+    inside, outside = [], []
+    for chunk in chunks[:k]:
+        (inside if any(_hits(chunk, span, SECTION) for span in expected) else outside).append(chunk)
+
+    def found(part: list[RankedChunk], quotes: list[str]) -> bool:
+        return bool(part) and any(_quotes_found(part, quotes, len(part)))
+
+    return int(all(found(outside, quotes) and not found(inside, quotes) for quotes in point_quotes.values()))
 
 
 def mean(values: list[float]) -> float:
