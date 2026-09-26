@@ -71,7 +71,8 @@ class GeminiEmbedder:
         )
         self._sleep = sleep
         self._jitter = jitter
-        self.api_requests = 0  # HTTP attempts, retries included (quota accounting)
+        self.http_calls = 0  # HTTP attempts, retries included
+        self.api_requests = 0  # quota requests: V-1 showed every text in a call counts as one
         self.retries = 0
         self.estimated_tokens = 0
 
@@ -81,6 +82,7 @@ class GeminiEmbedder:
 
     def stats(self) -> dict[str, float]:
         return {
+            "http_calls": self.http_calls,
             "api_requests": self.api_requests,
             "retries": self.retries,
             "estimated_tokens": self.estimated_tokens,
@@ -94,14 +96,15 @@ class GeminiEmbedder:
         return vectors
 
     def _batches(self, texts: list[str]) -> list[list[str]]:
-        """At most `batch_size` texts and at most one minute of estimated tokens per request."""
+        """At most `batch_size` texts (and the per-minute request limit) and one minute of tokens per call."""
+        max_texts = min(self._settings.batch_size, self._settings.requests_per_minute)
         batches: list[list[str]] = []
         current: list[str] = []
         current_tokens = 0
         for text in texts:
             tokens = estimate_tokens(text)
             if current and (
-                len(current) >= self._settings.batch_size
+                len(current) >= max_texts
                 or current_tokens + tokens > self._settings.tokens_per_minute
             ):
                 batches.append(current)
@@ -131,8 +134,9 @@ class GeminiEmbedder:
         )
         attempts = self._settings.max_attempts
         for attempt in range(1, attempts + 1):
-            self._throttle.acquire(tokens)
-            self.api_requests += 1
+            self._throttle.acquire(tokens, requests=len(batch))
+            self.http_calls += 1
+            self.api_requests += len(batch)
             self.estimated_tokens += tokens
             try:
                 response = client.models.embed_content(

@@ -7,7 +7,7 @@ from collections.abc import Callable
 
 from knowledge_assistant.core.exceptions import EmbeddingError
 
-CHARS_PER_TOKEN = 4  # ADR-0003 D3 rule of thumb; calibrated against the V-1 probe in ADR-0005
+CHARS_PER_TOKEN = 4  # ADR-0003 D3; V-1 probe: overestimates real tokens by ~15% (safe side), ADR-0005
 
 
 def estimate_tokens(text: str) -> int:
@@ -15,7 +15,11 @@ def estimate_tokens(text: str) -> int:
 
 
 class SlidingWindowThrottle:
-    """Blocks until one more request of `tokens` fits in the last `window_s` seconds."""
+    """Blocks until `requests` more quota requests of `tokens` fit in the last `window_s` seconds.
+
+    V-1 (ADR-0005): Gemini counts every text in a batched call as one request, so the
+    embedder passes the number of texts as `requests`, not 1 per HTTP call.
+    """
 
     def __init__(
         self,
@@ -30,24 +34,25 @@ class SlidingWindowThrottle:
         self._window_s = window_s
         self._clock = clock
         self._sleep = sleep
-        self._sent: deque[tuple[float, int]] = deque()  # (time, estimated tokens)
+        self._sent: deque[tuple[float, int, int]] = deque()  # (time, requests, estimated tokens)
         self.total_wait_s = 0.0
 
-    def acquire(self, tokens: int) -> float:
-        """Record one request; return the seconds waited for it."""
-        if tokens > self._max_tokens:
+    def acquire(self, tokens: int, requests: int = 1) -> float:
+        """Record one call worth `requests` quota requests; return the seconds waited for it."""
+        if tokens > self._max_tokens or requests > self._max_requests:
             raise EmbeddingError(
-                f"one request needs ~{tokens} tokens, above the per-minute limit {self._max_tokens}; "
-                "use a smaller batch"
+                f"one call needs {requests} requests / ~{tokens} tokens, above the per-minute limits "
+                f"{self._max_requests} / {self._max_tokens}; use a smaller batch"
             )
         waited = 0.0
         while True:
             now = self._clock()
             while self._sent and self._sent[0][0] <= now - self._window_s:
                 self._sent.popleft()
-            used_tokens = sum(t for _, t in self._sent)
-            if len(self._sent) < self._max_requests and used_tokens + tokens <= self._max_tokens:
-                self._sent.append((now, tokens))
+            used_requests = sum(r for _, r, _ in self._sent)
+            used_tokens = sum(t for _, _, t in self._sent)
+            if used_requests + requests <= self._max_requests and used_tokens + tokens <= self._max_tokens:
+                self._sent.append((now, requests, tokens))
                 self.total_wait_s += waited
                 return waited
             wait = self._sent[0][0] + self._window_s - now

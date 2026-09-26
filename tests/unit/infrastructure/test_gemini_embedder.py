@@ -223,6 +223,27 @@ def test_request_larger_than_the_token_limit_raises_instead_of_waiting_forever()
     throttle = SlidingWindowThrottle(100, 100, clock=FakeClock(), sleep=lambda s: None)
     with pytest.raises(EmbeddingError):
         throttle.acquire(101)
+    with pytest.raises(EmbeddingError):
+        throttle.acquire(1, requests=101)
+
+
+def test_every_text_in_a_batched_call_counts_as_one_quota_request():
+    """V-1 (ADR-0005): one HTTP call with 3 texts moved AI Studio's RPM from 0 to 3."""
+    clock = FakeClock()
+    models = FakeModels()
+    embedder = make_embedder(models, clock, batch_size=3, requests_per_minute=4)
+    embedder.embed(["a", "b", "c", "d", "e", "f"], EmbeddingTask.DOCUMENT)
+    # 3 + 3 > 4 per window, so the second call waits a full minute
+    assert len(models.calls) == 2
+    assert clock.now == pytest.approx(60.0)
+    stats = embedder.stats()
+    assert (stats["http_calls"], stats["api_requests"]) == (2, 6)
+
+
+def test_batches_never_exceed_the_per_minute_request_limit():
+    models = FakeModels()
+    make_embedder(models, batch_size=50, requests_per_minute=3).embed(list("abcdefg"), EmbeddingTask.DOCUMENT)
+    assert [len(c["contents"]) for c in models.calls] == [3, 3, 1]
 
 
 def test_estimate_tokens_is_chars_over_four_rounded_up():

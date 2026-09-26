@@ -36,7 +36,7 @@ def get_embedding_settings() -> EmbeddingSettings:
     return EmbeddingSettings(
         model=os.getenv("EMBEDDING_MODEL", "gemini-embedding-001"),
         dim=int(os.getenv("EMBEDDING_DIM", "768")),
-        batch_size=int(os.getenv("EMBEDDING_BATCH_SIZE", "40")),
+        batch_size=int(os.getenv("EMBEDDING_BATCH_SIZE", "45")),
         requests_per_minute=int(os.getenv("EMBEDDING_RPM", "90")),
         tokens_per_minute=int(os.getenv("EMBEDDING_TPM", "25000")),
         max_attempts=int(os.getenv("EMBEDDING_MAX_ATTEMPTS", "5")),
