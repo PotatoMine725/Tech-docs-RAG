@@ -6,7 +6,8 @@ JSON mode uses the installed google-genai 1.75.0 API: `response_mime_type="appli
 Policy (ADR-0004 amendment 2026-09-26, OD-11):
   - The answer model gets up to `max_attempts` (3) attempts on a per-minute 429, 5xx, timeout or connection error,
     with exponential backoff, jitter and the server's retry-after; one wait never exceeds 120 s.
-  - Then the fallback model gets ONE attempt (only when ALLOW_FALLBACK is true). A daily-quota 429 skips the retries
+  - Then the fallback model gets ONE attempt (only when ALLOW_FALLBACK is true), with its own output budget
+    (FALLBACK_MAX_OUTPUT_TOKENS, 2048; the answer model keeps the request's 1024). A daily-quota 429 skips the retries
     and goes straight to that single fallback attempt. Errors that no retry can fix (400, 401, 403, 404, ...) are
     raised at once, without the fallback.
   - Each model has its own per-minute throttle (config); every attempt, retries and fallback included, passes it.
@@ -92,6 +93,7 @@ class _Attempt:
     latency_ms: float = 0.0
     failure: Failure | None = None
     error: Exception | None = None  # the raw provider exception behind `failure`
+    config: Any = None  # the GenerateContentConfig this attempt was sent with
 
 
 class GeminiLLM:
@@ -133,11 +135,8 @@ class GeminiLLM:
 
     def generate(self, request: LLMRequest) -> LLMResponse:
         client = self._get_client()
-        options: dict[str, Any] = {"temperature": request.temperature, "max_output_tokens": request.max_output_tokens}
-        if request.response_schema is not None:
-            options.update(response_mime_type="application/json", response_json_schema=request.response_schema)
-        config = types.GenerateContentConfig(**options)
         settings = self._settings
+        config = self._config(request, request.max_output_tokens)
         tally = _Tally()
 
         failed: _Attempt | None = None
@@ -163,11 +162,20 @@ class GeminiLLM:
                 "%s failed (%s); one attempt on the fallback model %s",
                 settings.model, failed.failure.reason, settings.fallback_model,
             )
-            outcome = self._attempt(client, settings.fallback_model, request, config, tally)
+            # The fallback thinks (~370 thinking tokens seen once), so it gets its own, larger output budget.
+            fallback_config = self._config(request, max(request.max_output_tokens, settings.fallback_max_output_tokens))
+            outcome = self._attempt(client, settings.fallback_model, request, fallback_config, tally)
             if outcome.failure is None:
                 return self._response(outcome, settings.fallback_model, tally, fallback_used=True)
             fallback_failed = outcome
         raise self._error(failed, fallback_failed, tally)
+
+    @staticmethod
+    def _config(request: LLMRequest, max_output_tokens: int) -> Any:
+        options: dict[str, Any] = {"temperature": request.temperature, "max_output_tokens": max_output_tokens}
+        if request.response_schema is not None:
+            options.update(response_mime_type="application/json", response_json_schema=request.response_schema)
+        return types.GenerateContentConfig(**options)
 
     def _attempt(self, client: Any, model: str, request: LLMRequest, config: Any, tally: _Tally) -> _Attempt:
         tally.throttle_wait_s += self._throttles[model].acquire(0)
@@ -181,8 +189,8 @@ class GeminiLLM:
             if failure.status == 429 and not self._logged_first_429:
                 self._logged_first_429 = True
                 logger.warning("first HTTP 429 of this run (model %s), raw error body: %s", model, failure.body)
-            return _Attempt(failure=failure, error=error)
-        return _Attempt(response=response, latency_ms=(self._clock() - start) * 1000.0)
+            return _Attempt(failure=failure, error=error, config=config)
+        return _Attempt(response=response, latency_ms=(self._clock() - start) * 1000.0, config=config)
 
     def _response(self, outcome: _Attempt, model: str, tally: _Tally, fallback_used: bool) -> LLMResponse:
         response = outcome.response
@@ -194,6 +202,14 @@ class GeminiLLM:
         }
         self.last_finish_reason = _finish_reason(response)
         text = getattr(response, "text", None)
+        if self.last_finish_reason == "MAX_TOKENS":
+            limit = getattr(outcome.config, "max_output_tokens", None)
+            raise GenerationError(
+                f"the answer was cut off at the output limit (model={model}, max_output_tokens={limit}, "
+                f"finish_reason=MAX_TOKENS, usage={self.last_usage}); raise the limit "
+                f"(FALLBACK_MAX_OUTPUT_TOKENS for the fallback model) or shorten the question",
+                raw_text=text,
+            )
         if self.last_finish_reason in UNUSABLE_FINISH:
             raise GenerationError(
                 f"generation stopped early (model={model}, finish_reason={self.last_finish_reason}, "

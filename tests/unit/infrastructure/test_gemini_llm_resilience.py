@@ -49,11 +49,13 @@ class ScriptedModels:
     def __init__(self, script: dict[str, list] | None = None, clock: FakeClock | None = None, call_seconds: float = 0.0):
         self.script = {model: list(outcomes) for model, outcomes in (script or {}).items()}
         self.calls: list[str] = []
+        self.configs: list = []
         self._clock = clock
         self._call_seconds = call_seconds  # how long the fake HTTP call "takes" on the shared test clock
 
     def generate_content(self, *, model, contents, config):
         self.calls.append(model)
+        self.configs.append(config)
         if self._clock is not None:
             self._clock.now += self._call_seconds
         outcomes = self.script.get(model, [])
@@ -108,6 +110,16 @@ def test_two_failures_then_success_uses_all_three_attempts_with_doubling_backoff
     assert models.calls == [PRIMARY] * 3
     assert clock.sleeps == [1.0, 2.0]
     assert (response.retry_count, response.retry_wait_ms, response.fallback_used) == (2, 3000.0, False)
+
+
+@pytest.mark.parametrize("code", [500, 502, 503, 504])
+def test_each_persistent_server_status_takes_three_attempts_then_one_fallback(code):
+    models = ScriptedModels({PRIMARY: [api_error(code) for _ in range(3)]})
+    llm, clock = make_llm(models)
+    response = llm.generate(REQUEST)
+    assert models.calls == [PRIMARY, PRIMARY, PRIMARY, FALLBACK]
+    assert clock.sleeps == [1.0, 2.0]
+    assert (response.retry_count, response.fallback_used, response.model_used) == (2, True, FALLBACK)
 
 
 def test_jitter_is_added_to_the_backoff():
@@ -295,6 +307,25 @@ def test_unusable_output_is_a_generation_error_and_is_neither_retried_nor_sent_t
     assert models.calls == [PRIMARY] and clock.sleeps == []
 
 
+def test_the_fallback_gets_its_own_larger_output_budget_and_the_answer_model_keeps_the_request_limit():
+    models = ScriptedModels({PRIMARY: [api_error(503) for _ in range(3)]})
+    llm, _ = make_llm(models, fallback_max_output_tokens=2048)
+    llm.generate(REQUEST)
+    assert [c.max_output_tokens for c in models.configs] == [1024, 1024, 1024, 2048]
+    assert all(getattr(c, "thinking_config", None) is None for c in models.configs)  # no thinking_config (owner)
+
+
+@pytest.mark.parametrize(("failing", "limit"), [(PRIMARY, 1024), (FALLBACK, 2048)])
+def test_max_tokens_names_the_model_and_the_limit(failing, limit):
+    script = {PRIMARY: [reply(finish="MAX_TOKENS")]} if failing == PRIMARY else {
+        PRIMARY: [api_error(503) for _ in range(3)], FALLBACK: [reply(finish="MAX_TOKENS")]}
+    llm, _ = make_llm(ScriptedModels(script), fallback_max_output_tokens=2048)
+    with pytest.raises(GenerationError) as raised:
+        llm.generate(REQUEST)
+    message = str(raised.value)
+    assert f"model={failing}" in message and f"max_output_tokens={limit}" in message and "MAX_TOKENS" in message
+
+
 def test_a_programming_error_is_not_swallowed_as_an_llm_error():
     llm, _ = make_llm(ScriptedModels({PRIMARY: [KeyError("bug")]}))
     with pytest.raises(KeyError):
@@ -309,14 +340,19 @@ def test_a_programming_error_is_not_swallowed_as_an_llm_error():
     [
         (lambda: api_error(429, retry_delay="1s", quota_id=PER_MINUTE), LLMQuotaError),
         (lambda: api_error(429, quota_id=DAILY), LLMQuotaError),
+        (lambda: api_error(500), LLMUnavailableError),
+        (lambda: api_error(502), LLMUnavailableError),
         (lambda: api_error(503), LLMUnavailableError),
+        (lambda: api_error(504), LLMUnavailableError),
+        (lambda: errors.ClientError(400, {"error": {"code": 400, "status": "INVALID_ARGUMENT", "message": "m"}}),
+         LLMRequestError),
         (lambda: httpx.ConnectError("refused"), LLMUnavailableError),
         (lambda: httpx.ReadTimeout("slow"), LLMUnavailableError),
         (lambda: httpx.RemoteProtocolError("server disconnected"), LLMUnavailableError),
         (lambda: httpx.UnsupportedProtocol("no scheme"), LLMRequestError),
         (lambda: errors.UnknownApiResponseError("not json"), LLMRequestError),
     ],
-    ids=["429-per-minute", "429-daily", "503", "ConnectError", "ReadTimeout", "RemoteProtocolError",
+    ids=["429-per-minute", "429-daily", "500", "502", "503", "504", "400", "ConnectError", "ReadTimeout", "RemoteProtocolError",
          "UnsupportedProtocol", "UnknownApiResponse"],
 )
 @pytest.mark.parametrize("allow_fallback", [True, False], ids=["fallback-on", "fallback-off"])

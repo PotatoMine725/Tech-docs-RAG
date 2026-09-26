@@ -13,7 +13,7 @@ from google.genai import errors
 
 from knowledge_assistant.config import get_gemini_api_key
 
-RETRYABLE_STATUS = {429, 500, 503, 504}
+RETRYABLE_STATUS = {429, 500, 502, 503, 504}  # shared by the embedder and the LLM adapter (502: ADR-0004 amendment)
 BACKOFF_BASE_S = 1.0  # 1, 2, 4, 8 ... seconds
 MAX_RETRY_WAIT_S = 120.0  # a server retry-after above this is cut, so a run never hangs silently
 DAILY_RESET = "14:00 UTC+7"  # free-tier daily quota reset (ADR-0005 D19)

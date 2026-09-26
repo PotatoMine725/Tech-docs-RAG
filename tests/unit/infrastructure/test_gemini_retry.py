@@ -35,7 +35,7 @@ def test_per_minute_429_is_a_retryable_quota_failure_with_the_server_delay():
     assert failure.retry_after_s == 17.0
 
 
-@pytest.mark.parametrize("code", [500, 503, 504])
+@pytest.mark.parametrize("code", [500, 502, 503, 504])
 def test_transient_server_errors_are_retryable_unavailable_failures(code):
     failure = classify_failure(api_error(code))
     assert (failure.kind, failure.retryable) == ("unavailable", True)

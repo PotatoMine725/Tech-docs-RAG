@@ -205,3 +205,58 @@ def test_no_question_is_a_usage_error():
     with pytest.raises(SystemExit) as exit_info:
         run([], Factory(FakeLLM(REPLY)))
     assert exit_info.value.code == 2
+
+
+# --- the documented --json schema cannot drift from result_to_dict ---------------------------------------------------
+
+
+def _flatten(data: dict) -> set[str]:
+    """Top-level keys, `parent.child` for the fixed sub-objects, `citations[].key` for list elements.
+
+    latency_ms is a stage -> ms map, so it stays one key.
+    """
+    keys = set()
+    for key, value in data.items():
+        keys.add(key)
+        if key in ("tokens", "retrieval"):
+            keys |= {f"{key}.{child}" for child in value}
+        elif key == "citations":
+            keys |= {f"citations[].{child}" for child in value[0]}
+    return keys
+
+
+def _documented(text: str) -> set[str]:
+    import re
+    return set(re.findall(r"^(?:\||  )\s*`?([a-z_0-9]+(?:\[\])?(?:\.[a-z_0-9]+)?)`?\s*(?:\||\s{2,})", text, re.MULTILINE))
+
+
+def _spec_keys() -> set[str]:
+    spec_text = (ROOT / "docs" / "specs" / "generation-spec.md").read_text(encoding="utf-8")
+    section = spec_text.split("### `--json` output", 1)[1]
+    import re
+    return set(re.findall(r"^\| `([a-z_0-9\[\].]+)` \|", section, re.MULTILINE))
+
+
+def test_the_documented_json_keys_equal_the_keys_result_to_dict_returns(capsys):
+    _, out, _ = run(["What does part one say?", "--json"], Factory(FakeLLM(REPLY)))
+    actual = _flatten(json.loads(out))
+    assert {"llm_called", "latency_ms", "tokens", "retrieval", "tokens.prompt", "citations[].marker"} <= actual
+
+    docstring = ask.__doc__.split("JSON output (--json):", 1)[1]
+    with pytest.raises(SystemExit):
+        ask.parse_args(["--help"])
+    epilog = capsys.readouterr().out.split("JSON output (--json):", 1)[1]
+    for name, text in (("spec", None), ("docstring", docstring), ("--help epilog", epilog)):
+        documented = _spec_keys() if text is None else _documented(text)
+        assert documented == actual, f"{name}: undocumented {actual - documented}, stale {documented - actual}"
+
+
+def test_a_gate_refusal_has_the_same_keys_and_llm_fields_are_null():
+    _, out, _ = run(["Q?", "--json"], Factory(FakeLLM(REPLY), top_score=0.3))
+    data = json.loads(out)
+    assert data["llm_called"] is False
+    assert (data["model_used"], data["retry_count"], data["fallback_used"]) == (None, None, None)
+    assert data["tokens"] == {"prompt": None, "output": None, "thoughts": None}
+    _, answered, _ = run(["Q?", "--json"], Factory(FakeLLM(REPLY)))
+    assert set(data) == set(json.loads(answered))  # the refusal path returns the same top-level keys
+

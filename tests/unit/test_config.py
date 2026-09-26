@@ -124,6 +124,7 @@ ANSWER_ENV = (
     "ANSWER_MODEL", "FALLBACK_MODEL", "ALLOW_FALLBACK", "ANSWER_MAX_ATTEMPTS",
     "ANSWER_LIMIT_RPM", "ANSWER_LIMIT_TPM", "ANSWER_LIMIT_RPD", "ANSWER_THROTTLE_RPM",
     "FALLBACK_LIMIT_RPM", "FALLBACK_LIMIT_TPM", "FALLBACK_LIMIT_RPD", "FALLBACK_THROTTLE_RPM",
+    "FALLBACK_MAX_OUTPUT_TOKENS",
 )
 
 
@@ -144,6 +145,15 @@ def test_default_limits_and_throttles_are_the_owner_values_from_ai_studio(clean_
     settings = get_answer_settings()
     assert settings.limits == ModelLimits(rpm=15, tpm=250_000, rpd=500, throttle_rpm=13)
     assert settings.fallback_limits == ModelLimits(rpm=5, tpm=250_000, rpd=20, throttle_rpm=4)
+
+
+def test_fallback_output_budget_defaults_to_2048_and_can_be_overridden(clean_answer_env, monkeypatch):
+    assert get_answer_settings().fallback_max_output_tokens == 2048
+    monkeypatch.setenv("FALLBACK_MAX_OUTPUT_TOKENS", "4096")
+    assert get_answer_settings().fallback_max_output_tokens == 4096
+    monkeypatch.setenv("FALLBACK_MAX_OUTPUT_TOKENS", "0")
+    with pytest.raises(ConfigurationError):
+        get_answer_settings()
 
 
 def test_default_retry_policy_is_three_attempts_with_the_fallback_on(clean_answer_env):

@@ -129,6 +129,15 @@ def test_503_twice_then_success_takes_three_attempts_with_backoff():
     assert embedder.stats()["api_requests"] == 3 and embedder.stats()["retries"] == 2
 
 
+@pytest.mark.parametrize("code", [500, 502, 503, 504])
+def test_each_transient_server_status_is_retried(code):
+    """ADR-0004 amendment: 502 joined the shared retry set, so the embedder retries it too (as 500, 503, 504)."""
+    clock = FakeClock()
+    models = FakeModels(script=[api_error(code), api_error(code)])
+    assert len(make_embedder(models, clock).embed(["a"], EmbeddingTask.DOCUMENT)) == 1
+    assert len(models.calls) == 3 and clock.sleeps == [1.0, 2.0]
+
+
 def test_always_failing_raises_embedding_error_after_max_attempts():
     clock = FakeClock()
     models = FakeModels(script=[api_error(503)] * 10)

@@ -13,6 +13,47 @@ check the LLM's own "insufficient" answer. The evaluation runner never uses it.
 
 Exit codes: 0 answered (an "insufficient" answer is still 0), 2 provider failure (quota / unavailable / other),
 3 unusable model output, 4 setup or retrieval failure (missing index, missing key, embedding failure).
+
+JSON output (--json): one JSON document on stdout, keys as below (a nested key is written parent.child; citations[]
+is one element of the list). A test keeps this list equal to what result_to_dict returns.
+  question                      str
+  arm                           str          "A" | "B"
+  language                      str          "en" | "vi"
+  answer                        str          the localized refusal message when insufficient
+  insufficient                  bool
+  insufficient_reason           str | null   "retrieval_gate" | "llm"; null when answered
+  missing_information           str | null   null when the model gave none (also when the gate refused)
+  citations                     list         may be empty
+  citations[].marker            int          the [n] number in the answer
+  citations[].document_name     str
+  citations[].location          str          heading path, never a page number
+  citations[].location_type     str          "heading" | "position"
+  citations[].excerpt           str          original English passage prefix, at most 300 characters
+  citations[].source_id         str
+  citations[].chunk_id          str
+  citations[].source_url        str          "" when the document has none
+  citations[].related_only      bool         true for every citation of an insufficient answer
+  llm_called                    bool         false when the retrieval gate refused (no LLM request)
+  model_used                    str | null   null when llm_called is false
+  retry_count                   int | null   retries on the answer model; null when llm_called is false
+  fallback_used                 bool | null  null when llm_called is false
+  tokens                        object
+  tokens.prompt                 int | null   null when llm_called is false or the provider did not report it
+  tokens.output                 int | null   same
+  tokens.thoughts               int | null   same (flash-lite reports none)
+  latency_ms                    object       stage -> ms (float): embed_query, retrieve, generate, retry_wait,
+                                             throttle_wait, total; generate/retry_wait/throttle_wait absent when
+                                             the gate refused
+  retrieval                     object
+  retrieval.top1_score          float        similarity of the best passage
+  retrieval.threshold           float | null  null with --gate-off
+  retrieval.gate_off            bool
+  retrieval.duplicates_dropped  int
+  prompt_version                str
+  dropped_markers               list[int]    markers that pointed outside the passages
+  uncited_sentences             int          diagnostic count
+On failure --json prints {"error": {"kind": str, "message": str}} instead (kind: quota | unavailable | other |
+generation | setup | retrieval) and exits with the code above; the message has the API key redacted.
 """
 import argparse
 import contextlib
@@ -158,7 +199,10 @@ def classify(error: KnowledgeAssistantError) -> tuple[int, str]:
 
 
 def parse_args(argv: list[str] | None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    epilog = "JSON output (--json):" + __doc__.split("JSON output (--json):", 1)[1]
+    parser = argparse.ArgumentParser(
+        description=__doc__.splitlines()[0], epilog=epilog, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("question")
     parser.add_argument("--arm", choices=ARMS, default="A", help="experiment arm (default A)")
     parser.add_argument("--json", action="store_true", help="print one JSON document instead of text")

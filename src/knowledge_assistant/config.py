@@ -99,6 +99,7 @@ class AnswerSettings:
     messages_path: Path
     limits: ModelLimits  # of `model`
     fallback_limits: ModelLimits  # of `fallback_model`
+    fallback_max_output_tokens: int  # output budget of the fallback call; the answer model uses the request's (1024)
 
 
 _TRUE = {"1", "true", "yes", "on"}
@@ -136,6 +137,9 @@ def get_answer_settings() -> AnswerSettings:
     max_attempts = int(os.getenv("ANSWER_MAX_ATTEMPTS", "3"))
     if max_attempts < 1:
         raise ConfigurationError(f"ANSWER_MAX_ATTEMPTS={max_attempts} must be at least 1")
+    fallback_max_output_tokens = int(os.getenv("FALLBACK_MAX_OUTPUT_TOKENS", "2048"))
+    if fallback_max_output_tokens < 1:
+        raise ConfigurationError(f"FALLBACK_MAX_OUTPUT_TOKENS={fallback_max_output_tokens} must be at least 1")
     return AnswerSettings(
         model=os.getenv("ANSWER_MODEL", "gemini-3.5-flash-lite"),
         fallback_model=os.getenv("FALLBACK_MODEL", "gemini-3.5-flash"),
@@ -147,6 +151,7 @@ def get_answer_settings() -> AnswerSettings:
         messages_path=resolve_project_path(os.getenv("MESSAGES_PATH", "config/messages.json")),
         limits=_model_limits("ANSWER", rpm=15, tpm=250_000, rpd=500, throttle_rpm=13),
         fallback_limits=_model_limits("FALLBACK", rpm=5, tpm=250_000, rpd=20, throttle_rpm=4),
+        fallback_max_output_tokens=fallback_max_output_tokens,
     )
 
 
