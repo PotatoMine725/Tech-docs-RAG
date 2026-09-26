@@ -149,3 +149,38 @@ project root (X5b).
 - X5b: resolve `CHROMA_PATH` / `EMBEDDING_CACHE_PATH` defaults against the project root, or refuse to run outside it. MEDIUM. Until then, run every indexing command from the repo root.
 - F LOW: a non-timeout transport error (`httpx.ConnectError`) is not wrapped in `EmbeddingError` and not retried.
 - F LOW: the throttle's state is per process, so a restart right after a crash may cause one 429 (the retry covers it).
+
+---
+
+## Re-verify of the fix commit (2026-09-26, 08:45–09:00 UTC+7)
+
+This was a new verifier session on the same machine: Windows 11, `.venv` Python 3.13.3. It checked the fix commit `94fdef2` ("RAG-001a: fixes from verify") on `rag-001a`.
+- **Zero Gemini requests.** No gemini-marked test and no probe was run.
+- **Scope:** the four FAIL/risk rows the owner named: F1 (= X2d/C1), F2 (= C2), retry (= X5a) and paths (= X5b). The run also covers the full offline suite and every row that passed before but whose code the fix touched (Iface, X1c/M2, X2e, X6).
+- **Method:** mutations were applied in place by a Python rewrite, then restored with `git checkout -- <file>`. `git status --short src tests` was empty after each one. Simulations used the real `CachingEmbedder(GeminiEmbedder)` with the real default settings, `tests.fakes.FakeModels`, a `FakeClock` and a temp SQLite file.
+
+| Row | Result | Evidence (my commands) |
+|---|---|---|
+| **F1 = X2d/C1**: every paid HTTP call is committed before the next one | **PASS** | `embedding_cache.py:93-102`: the cache walks `self._inner.plan_calls(...)` and calls `_embed_and_store` once per group. It checks that the plan covers every text once, in order. `gemini_embedder.py:125` `embed` sends exactly `plan_calls(texts)`. The plan is greedy, so a planned group re-plans to itself; this is pinned by `test_plan_calls_is_what_embed_sends_and_replanning_a_group_returns_it_unchanged`. **Repro from the first verify, re-run** (45 × ~352 tokens, 2nd HTTP call always 503): `EmbeddingError`, 6 HTTP calls, 85 quota requests, **35 rows stored** (was 0). **Mutations:** MF1 (cache slices by count 45, the pre-fix rule) → 6 failed, including all 3 `test_embedding_pipeline.py` tests. M3′ (defer every DB write until after the loop, on the new code) → 3 failed: `test_misses_are_sent_in_batches_and_each_batch_is_stored`, `test_a_failed_second_call_keeps_the_first_calls_paid_vectors…`, `test_daily_quota_stop_keeps_earlier_calls…`. |
+| **F2 = C2**: throughput of the real pipeline | **PASS** | I ran my own simulation over the unique `embed_text`s of `data/processed/chunks/arm-*.jsonl` through `CachingEmbedder(GeminiEmbedder)`. **Arm A:** 709 unique, **16 HTTP calls = 16 cache groups**, last start **7.0 min**, max call 12,487 est. tokens, worst 60 s window 24,648. **Arm B:** 859 unique, **25 = 25**, last start **12.0 min** (was 39 calls / 18.0 min), max call 12,499, worst window 24,755. These match the report addendum and ADR-0005 D15/D18 exactly. |
+| **Retry = X5a**: server retry-after capped, daily quota stops | **PASS** | `gemini_embedder.py`: `wait = min(max(backoff, retry_after), MAX_RETRY_WAIT_S=120)`, and each wait is logged at WARNING. The first verify's `retryDelay: "36000s"` repro now sleeps `[120, 120, 120, 120]` (was 40 h). A 429 whose `QuotaFailure` names a per-day quota raises `QuotaExhaustedError` (a subclass of `EmbeddingError`) with no retry and no sleep. A per-minute 429 is still retried. **Mutations:** MR1 (no cap) → 1 failed. MR2 (daily detection off) → 2 failed. MR3 (every `QuotaFailure` 429 treated as daily) → 1 failed (`test_per_minute_429_is_retried_with_the_server_delay`). |
+| **Paths = X5b**: data paths are independent of the working directory | **PASS** | `config.py`: `PROJECT_ROOT = Path(__file__).resolve().parents[2]`. Relative defaults and env values resolve against it; absolute values are kept. From the scratchpad directory (`PYTHONPATH=src`), `get_chroma_path()` → `D:\Code\Python\Knowledge assistant\data\chroma` and the cache → `…\data\cache\embeddings.sqlite`. The package is **not** installed in `.venv`: from another directory, `import knowledge_assistant` fails with no PYTHONPATH, and there is no `.pth` or editable entry. Every entry point loads `config.py` from the repo's `src/`, either through `sys.path.insert(0, ROOT/"src")` in the scripts or through pytest `pythonpath`, so `parents[2]` is always the repo root. `git check-ignore -v scripts/data/cache/x src/data/chroma/x scripts/data/logs/x` → matched by `**/data/…` (`.gitignore:227/234/236`). `git ls-files -ci --exclude-standard` → empty, so no tracked file is newly ignored. `data/chroma/.gitkeep` is still tracked and not ignored. **Mutation:** MP1 (resolve relative to the cwd) → 4 failed. |
+| C3: stale worklog counts | PASS | The worklog now says 32 offline tests and 173 passed (before the fixes), and the fix entry says 186. |
+| Touched rows that passed before | PASS | **Iface:** the core/application grep for `chromadb\|google\.genai\|from google\|PySide6\|RETRIEVAL_…\|gemini-embedding` → no hits (rc=1). `plan_calls` is provider-free. **X1c/M2** (token cap at the full TPM) → 5 failed, still killed. **X2e:** see M3′ above. **X6:** `git grep -nI AIza` → only earlier reviews quoting the grep command. |
+| **Tests** | PASS | `.venv/Scripts/python.exe -m pytest -q` → **`186 passed, 1 deselected in 4.96s`**. After all mutations were restored: `186 passed, 1 deselected in 5.02s`. The new pipeline tests assert exact call sizes (`[35] + [10] * 5`), stored row counts, the resumed call's exact inputs, no sleep after a daily 429, and 60 s token windows. They are not "runs without error" tests. |
+
+**Scope (E):**
+- The fix put `plan_calls` on the core `Embedder` protocol. The fix prompt had suggested a shared infrastructure helper instead.
+- This is disclosed in ADR-0005 (D18, and the amendment list "F1: `Embedder.plan_calls` added to the core protocol"). It stays provider-free.
+- It is a recorded design choice, not a defect.
+
+### Re-verify verdict: **ACCEPT**
+- FAIL: 0. UNVERIFIED: 0.
+- All four rows now PASS.
+- RAG-001b is unblocked. Run Arm A before the 14:00 UTC+7 reset and Arm B after it (ADR-0005 D19).
+
+### Open items (non-blocking)
+- **LOW:** `CachingEmbedder` has no `plan_calls`, so it no longer structurally satisfies the core `Embedder` protocol. This only matters if RAG-001b types the cache as `Embedder`, runs a type check, or stacks one cache on another. Either add a pass-through or type the wiring as `CachingEmbedder`.
+- **LOW:** the daily-quota classifier is built from the documented `google.rpc.QuotaFailure` shape; no real daily 429 has been seen yet (disclosed). If a real one does not match, the fallback is 4 × 120 s of capped, logged retries and then `EmbeddingError`, so the stop is bounded.
+- **LOW, carried over:** a non-timeout transport error (`httpx.ConnectError`) is neither wrapped nor retried.
+- **LOW, carried over:** the throttle's state lives in one process, so a restart right after a crash may cause one 429.

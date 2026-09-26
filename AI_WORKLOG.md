@@ -230,6 +230,13 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - Paths: data paths resolve from the repo root (relative env values too); `.gitignore` uses `**/data/...`.
   - 186 passed. Mutations killed: count-only cache slicing (6 failed), no cap (1), daily retried (2), no log (1), cwd-relative paths (4, after fixing (7)).
   - *How (7) was found:* the MP1 mutation left that test green. *Fix:* it now also asserts the absolute paths under the repo root.
+- *Verifier findings (re-verify)* (99-VERIFY of commit `94fdef2`, 2026-09-26, Windows, Python 3.13.3, 0 Gemini requests; [RAG-001a-verify § Re-verify](docs/reviews/code/RAG-001a-verify.md#re-verify-of-the-fix-commit-2026-09-26-0845-0900-utc7) → **ACCEPT**): no defect remains in F1, F2, retry or paths.
+  - F1: the first verify's repro now stores 35 of 45 rows (it stored 0 before the fix). Both the count-only slicing mutation and the deferred-commit mutation are killed.
+  - F2: my own simulation of the cached pipeline gives Arm A 16 calls / 7.0 min and Arm B 25 calls / 12.0 min, which matches the report.
+  - Retry: the 36000 s retry delay is now capped at 4 × 120 s. A daily 429 fails at once with no retry.
+  - Paths: files resolve from the repo root even when the process starts in another directory, and `**/data/...` ignore rules match there too.
+  - Tests: 186 passed.
+  - Non-blocking, all LOW: (1) `CachingEmbedder` has no `plan_calls`, so it no longer satisfies the core `Embedder` protocol; (2) the daily-429 classifier has not been tested on a real daily-quota response (disclosed); (3) `httpx.ConnectError` is still not wrapped; (4) the throttle's state lives in one process only.
 
 ## Summary: how AI helped
 
