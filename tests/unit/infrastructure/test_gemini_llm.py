@@ -42,7 +42,7 @@ def test_json_mode_request_and_response_fields():
     assert call["config"].temperature == 0.0 and call["config"].max_output_tokens == 512
     assert response.text == '{"ok": true}'
     assert (response.model_used, response.retry_count, response.fallback_used) == ("pinned-test-model", 0, False)
-    assert (response.prompt_tokens, response.output_tokens) == (120, 30)
+    assert (response.prompt_tokens, response.output_tokens, response.thoughts_tokens) == (120, 30, 5)
     assert response.latency_ms == pytest.approx(250.0)
 
 

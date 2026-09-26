@@ -4,7 +4,8 @@ Two insufficient layers (OD-9, retrieval-spec.md):
   (a) retrieval gate: top-1 score < threshold → the LLM is not called, `insufficient_reason="retrieval_gate"`;
   (b) LLM layer: the model answers `"insufficient": true` → `insufficient_reason="llm"`.
 An insufficient answer shows the localized message, keeps `missing_information`, and may keep related citations
-(owner decision D2, 2026-09-24). Unusable LLM output raises GenerationError; it is never turned into "insufficient".
+(owner decision D2, 2026-09-24). Unusable LLM output raises GenerationError, and a provider failure raises an LLMError
+(quota | unavailable | other, RAG-003); neither is ever turned into "insufficient".
 """
 import json
 import time
@@ -97,7 +98,9 @@ class AnswerQuestion:
         prompt = self._prompts.build(question, language, retrieved)
         generate_start = self._clock()
         response = self._llm.generate(LLMRequest(prompt=prompt, response_schema=ANSWER_SCHEMA))
-        latency["generate"] = (self._clock() - generate_start) * 1000.0
+        latency["generate"] = (self._clock() - generate_start) * 1000.0  # wall time: model + waits + failed attempts
+        latency["retry_wait"] = response.retry_wait_ms  # backoff between attempts (RAG-003)
+        latency["throttle_wait"] = response.throttle_wait_ms  # client-side per-minute throttle (RAG-003)
         data = parse_answer_json(response.text)
 
         answer, citations, dropped = resolve_citations(data["answer"], data["cited_passages"], retrieved)

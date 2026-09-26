@@ -23,8 +23,6 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from google.genai import errors  # noqa: E402
-
 from knowledge_assistant.application.generation.answer_question import AnswerQuestion, load_messages  # noqa: E402
 from knowledge_assistant.application.generation.prompt_builder import PromptBuilder  # noqa: E402
 from knowledge_assistant.application.common.language import detect_language  # noqa: E402
@@ -40,13 +38,10 @@ from knowledge_assistant.config import (  # noqa: E402
     get_logs_dir,
     get_retrieval_settings,
 )
-from knowledge_assistant.core.exceptions import EmbeddingError, GenerationError  # noqa: E402
+from knowledge_assistant.core.exceptions import EmbeddingError, GenerationError, LLMError  # noqa: E402
 from knowledge_assistant.core.interfaces.embedding import EmbeddingTask  # noqa: E402
-from knowledge_assistant.infrastructure.embeddings.gemini_embedder import (  # noqa: E402
-    GeminiEmbedder,
-    _raw_body,
-    redact_key,
-)
+from knowledge_assistant.infrastructure.embeddings.gemini_embedder import GeminiEmbedder  # noqa: E402
+from knowledge_assistant.infrastructure.gemini_retry import redact_key  # noqa: E402
 from knowledge_assistant.infrastructure.llm.gemini import GeminiLLM  # noqa: E402
 from knowledge_assistant.infrastructure.persistence.embedding_cache import CachingEmbedder  # noqa: E402
 from knowledge_assistant.infrastructure.vector_store.chromadb.chroma_store import ChromaVectorStore  # noqa: E402
@@ -213,7 +208,8 @@ def cmd_answer(args) -> int:
          f"{datetime.now(timezone.utc).isoformat(timespec='seconds')}", args.out)
     emit(f"- ANSWER_MODEL = `{settings.model}`; prompt `{settings.prompt_version}`; threshold {threshold}; "
          f"estimated LLM requests: 1 (0 if the gate fires)", args.out)
-    llm = GeminiLLM(settings)
+    # One attempt, no fallback: a 429 or 503 stops the run instead of looping (RAG-002 addendum 5; RAG-003 added retries).
+    llm = GeminiLLM(replace(settings, max_attempts=1, allow_fallback=False))
     with open_cache() as cache:
         if not check_embed_budget(cache, [case["question"]], False, args.out):
             return 1
@@ -223,9 +219,9 @@ def cmd_answer(args) -> int:
         service = _build_service(args.arm, cache, llm, threshold)
         try:
             result = service.ask(case["question"])
-        except errors.APIError as error:
-            path = save_error(f"llm-http-{error.code}", _raw_body(error))
-            emit(f"- STOPPED: HTTP {error.code} {error.status}; redacted body saved to data/logs/{path.name}; "
+        except LLMError as error:
+            path = save_error(f"llm-{error.kind}", error.provider_body or str(error))
+            emit(f"- STOPPED: {error.kind}: {error}; redacted body saved to data/logs/{path.name}; "
                  f"LLM requests made: {llm.requests}", args.out)
             return 2
         except GenerationError as error:

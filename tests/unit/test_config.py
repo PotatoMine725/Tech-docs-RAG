@@ -1,6 +1,7 @@
 import importlib.util
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -9,12 +10,14 @@ import pytest
 
 from knowledge_assistant.config import (
     PROJECT_ROOT,
+    ModelLimits,
     get_answer_settings,
     get_chroma_path,
     get_chunks_dir,
     get_embedding_settings,
     get_logs_dir,
 )
+from knowledge_assistant.core.exceptions import ConfigurationError
 
 PATH_VARS = ("CHROMA_PATH", "CHUNKS_DIR", "LOGS_DIR", "EMBEDDING_CACHE_PATH")
 
@@ -113,3 +116,81 @@ def test_answer_v1_is_byte_unchanged():
     except (OSError, subprocess.CalledProcessError):
         pytest.skip("git history not available")
     assert (PROJECT_ROOT / "config" / "prompts" / "answer_v1.md").read_bytes() == original
+
+
+# --- RAG-003: retry, fallback, limits (ADR-0004 amendment 2026-09-26) ---------------------------------------------
+
+ANSWER_ENV = (
+    "ANSWER_MODEL", "FALLBACK_MODEL", "ALLOW_FALLBACK", "ANSWER_MAX_ATTEMPTS",
+    "ANSWER_LIMIT_RPM", "ANSWER_LIMIT_TPM", "ANSWER_LIMIT_RPD", "ANSWER_THROTTLE_RPM",
+    "FALLBACK_LIMIT_RPM", "FALLBACK_LIMIT_TPM", "FALLBACK_LIMIT_RPD", "FALLBACK_THROTTLE_RPM",
+)
+
+
+@pytest.fixture
+def clean_answer_env(monkeypatch):
+    for name in ANSWER_ENV:
+        monkeypatch.delenv(name, raising=False)
+
+
+def test_answer_and_fallback_models_are_pinned_in_configuration(clean_answer_env):
+    settings = get_answer_settings()
+    assert (settings.model, settings.fallback_model) == ("gemini-3.5-flash-lite", "gemini-3.5-flash")
+    assert "latest" not in settings.model + settings.fallback_model
+
+
+def test_default_limits_and_throttles_are_the_owner_values_from_ai_studio(clean_answer_env):
+    """Free tier, read by the owner on 2026-09-26. The throttle sits two (answer) / one (fallback) requests below RPM."""
+    settings = get_answer_settings()
+    assert settings.limits == ModelLimits(rpm=15, tpm=250_000, rpd=500, throttle_rpm=13)
+    assert settings.fallback_limits == ModelLimits(rpm=5, tpm=250_000, rpd=20, throttle_rpm=4)
+
+
+def test_default_retry_policy_is_three_attempts_with_the_fallback_on(clean_answer_env):
+    settings = get_answer_settings()
+    assert settings.max_attempts == 3  # 1 + 2 retries (OD-11)
+    assert settings.allow_fallback is True  # the app and the CLI use the fallback; the eval runner turns it off
+
+
+@pytest.mark.parametrize(("value", "expected"), [("false", False), ("0", False), ("No", False), ("OFF", False),
+                                                 ("true", True), ("1", True), ("yes", True), (" True ", True)])
+def test_allow_fallback_is_read_from_the_environment(monkeypatch, clean_answer_env, value, expected):
+    monkeypatch.setenv("ALLOW_FALLBACK", value)
+    assert get_answer_settings().allow_fallback is expected
+
+
+def test_an_unrecognised_allow_fallback_value_fails_loudly(monkeypatch, clean_answer_env):
+    """A typo such as "flase" must not silently leave the fallback on for an evaluation run."""
+    monkeypatch.setenv("ALLOW_FALLBACK", "flase")
+    with pytest.raises(ConfigurationError, match="ALLOW_FALLBACK"):
+        get_answer_settings()
+
+
+def test_limits_and_attempts_can_be_overridden_from_the_environment(monkeypatch, clean_answer_env):
+    monkeypatch.setenv("ANSWER_MAX_ATTEMPTS", "2")
+    monkeypatch.setenv("ANSWER_THROTTLE_RPM", "10")
+    monkeypatch.setenv("FALLBACK_MODEL", "some-other-model")
+    settings = get_answer_settings()
+    assert (settings.max_attempts, settings.limits.throttle_rpm, settings.fallback_model) == (2, 10, "some-other-model")
+
+
+def test_a_throttle_above_the_provider_limit_is_rejected(monkeypatch, clean_answer_env):
+    monkeypatch.setenv("ANSWER_THROTTLE_RPM", "16")  # RPM is 15
+    with pytest.raises(ConfigurationError, match="THROTTLE"):
+        get_answer_settings()
+
+
+def test_at_least_one_attempt_is_required(monkeypatch, clean_answer_env):
+    monkeypatch.setenv("ANSWER_MAX_ATTEMPTS", "0")
+    with pytest.raises(ConfigurationError, match="ANSWER_MAX_ATTEMPTS"):
+        get_answer_settings()
+
+
+def test_model_names_appear_in_no_source_file_except_config():
+    """CLAUDE.md rule 6: model names are pinned in configuration only, never hard-coded in code."""
+    offenders = [
+        path.relative_to(PROJECT_ROOT).as_posix()
+        for path in (PROJECT_ROOT / "src" / "knowledge_assistant").rglob("*.py")
+        if path.name != "config.py" and re.search(r"gemini-(?:\d|embedding|flash|pro)", path.read_text(encoding="utf-8"))
+    ]
+    assert offenders == []
