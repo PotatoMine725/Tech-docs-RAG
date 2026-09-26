@@ -1,0 +1,1228 @@
+{
+ "schema_version": 1,
+ "rule": "Spans are half-open [char_start, char_end) offsets into the normalized text of source_id. Every variant of a heading path is listed; any variant counts (ADR-0003 D8). Lenient = expected + alternate spans per slot; strict = role 'expected' only (OWNER-001).",
+ "inputs": {
+  "questions": {
+   "path": "data/evaluation/questions/eval-v1.jsonl",
+   "sha256": "3436870ef02dfc2c25bd9d403ec6c8dd44cb46dfacbf02d586161dedd1252937"
+  },
+  "normalized": {
+   "path": "data/processed/documents/normalized.jsonl",
+   "sha256": "a6db2f26954d77ddd4d52913f163572c174a113b48534a35420dea3bff19ae95"
+  }
+ },
+ "cases": {
+  "Q-EVAL-001": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "22",
+      "heading_path": "Querying Data",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 850
+     }
+    ]
+   }
+  },
+  "Q-EVAL-002": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "22",
+      "heading_path": "Querying Data",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 850
+     }
+    ]
+   }
+  },
+  "Q-EVAL-003": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > Developer exception page",
+      "variant": 1,
+      "char_start": 408,
+      "char_end": 3406
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > Developer exception page",
+      "variant": 2,
+      "char_start": 48450,
+      "char_end": 51448
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > Developer exception page",
+      "variant": 3,
+      "char_start": 95073,
+      "char_end": 96520
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > Developer exception page",
+      "variant": 4,
+      "char_start": 139715,
+      "char_end": 141162
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > Developer exception page",
+      "variant": 5,
+      "char_start": 177849,
+      "char_end": 179296
+     },
+     {
+      "role": "alternate",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > Developer Exception Page",
+      "variant": 1,
+      "char_start": 196453,
+      "char_end": 198206
+     },
+     {
+      "role": "alternate",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > Developer Exception Page",
+      "variant": 2,
+      "char_start": 221316,
+      "char_end": 222542
+     },
+     {
+      "role": "alternate",
+      "source_id": "12",
+      "heading_path": "Handle errors in ASP.NET Core APIs > Developer Exception Page",
+      "variant": 1,
+      "char_start": 798,
+      "char_end": 4939
+     }
+    ]
+   }
+  },
+  "Q-EVAL-004": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > Developer exception page",
+      "variant": 1,
+      "char_start": 408,
+      "char_end": 3406
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > Developer exception page",
+      "variant": 2,
+      "char_start": 48450,
+      "char_end": 51448
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > Developer exception page",
+      "variant": 3,
+      "char_start": 95073,
+      "char_end": 96520
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > Developer exception page",
+      "variant": 4,
+      "char_start": 139715,
+      "char_end": 141162
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > Developer exception page",
+      "variant": 5,
+      "char_start": 177849,
+      "char_end": 179296
+     },
+     {
+      "role": "alternate",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > Developer Exception Page",
+      "variant": 1,
+      "char_start": 196453,
+      "char_end": 198206
+     },
+     {
+      "role": "alternate",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > Developer Exception Page",
+      "variant": 2,
+      "char_start": 221316,
+      "char_end": 222542
+     },
+     {
+      "role": "alternate",
+      "source_id": "12",
+      "heading_path": "Handle errors in ASP.NET Core APIs > Developer Exception Page",
+      "variant": 1,
+      "char_start": 798,
+      "char_end": 4939
+     }
+    ]
+   }
+  },
+  "Q-EVAL-005": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "02",
+      "heading_path": "Asynchronous programming scenarios > Recognize CPU-bound and I/O-bound scenarios",
+      "variant": 1,
+      "char_start": 5462,
+      "char_end": 7004
+     },
+     {
+      "role": "alternate",
+      "source_id": "02",
+      "heading_path": "Asynchronous programming scenarios > Explore the asynchronous programming model > CPU-bound example: Run game calculation",
+      "variant": 1,
+      "char_start": 4133,
+      "char_end": 5462
+     },
+     {
+      "role": "alternate",
+      "source_id": "02",
+      "heading_path": "Asynchronous programming scenarios > Explore the asynchronous programming model > I/O-bound example: Download data from web service",
+      "variant": 1,
+      "char_start": 3412,
+      "char_end": 4133
+     },
+     {
+      "role": "alternate",
+      "source_id": "02",
+      "heading_path": "Asynchronous programming scenarios > Explore the asynchronous programming model",
+      "variant": 1,
+      "char_start": 656,
+      "char_end": 2249
+     }
+    ]
+   }
+  },
+  "Q-EVAL-006": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "02",
+      "heading_path": "Asynchronous programming scenarios > Recognize CPU-bound and I/O-bound scenarios",
+      "variant": 1,
+      "char_start": 5462,
+      "char_end": 7004
+     },
+     {
+      "role": "alternate",
+      "source_id": "02",
+      "heading_path": "Asynchronous programming scenarios > Explore the asynchronous programming model > CPU-bound example: Run game calculation",
+      "variant": 1,
+      "char_start": 4133,
+      "char_end": 5462
+     },
+     {
+      "role": "alternate",
+      "source_id": "02",
+      "heading_path": "Asynchronous programming scenarios > Explore the asynchronous programming model > I/O-bound example: Download data from web service",
+      "variant": 1,
+      "char_start": 3412,
+      "char_end": 4133
+     },
+     {
+      "role": "alternate",
+      "source_id": "02",
+      "heading_path": "Asynchronous programming scenarios > Explore the asynchronous programming model",
+      "variant": 1,
+      "char_start": 656,
+      "char_end": 2249
+     }
+    ]
+   }
+  },
+  "Q-EVAL-007": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "23",
+      "heading_path": "Routing in ASP.NET Core > Route constraints",
+      "variant": 1,
+      "char_start": 43325,
+      "char_end": 48091
+     },
+     {
+      "role": "expected",
+      "source_id": "23",
+      "heading_path": "Routing in ASP.NET Core > Route constraints",
+      "variant": 2,
+      "char_start": 144643,
+      "char_end": 149079
+     },
+     {
+      "role": "expected",
+      "source_id": "23",
+      "heading_path": "Routing in ASP.NET Core > Route constraints",
+      "variant": 3,
+      "char_start": 240365,
+      "char_end": 244788
+     },
+     {
+      "role": "alternate",
+      "source_id": "23",
+      "heading_path": "Routing in ASP.NET Core > Route constraint reference",
+      "variant": 1,
+      "char_start": 333503,
+      "char_end": 337935
+     }
+    ]
+   }
+  },
+  "Q-EVAL-008": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "23",
+      "heading_path": "Routing in ASP.NET Core > Route constraints",
+      "variant": 1,
+      "char_start": 43325,
+      "char_end": 48091
+     },
+     {
+      "role": "expected",
+      "source_id": "23",
+      "heading_path": "Routing in ASP.NET Core > Route constraints",
+      "variant": 2,
+      "char_start": 144643,
+      "char_end": 149079
+     },
+     {
+      "role": "expected",
+      "source_id": "23",
+      "heading_path": "Routing in ASP.NET Core > Route constraints",
+      "variant": 3,
+      "char_start": 240365,
+      "char_end": 244788
+     },
+     {
+      "role": "alternate",
+      "source_id": "23",
+      "heading_path": "Routing in ASP.NET Core > Route constraint reference",
+      "variant": 1,
+      "char_start": 333503,
+      "char_end": 337935
+     }
+    ]
+   }
+  },
+  "Q-EVAL-009": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "03",
+      "heading_path": "Unit testing best practices for .NET > Best practices > Avoid multiple Act tasks",
+      "variant": 1,
+      "char_start": 16278,
+      "char_end": 17727
+     }
+    ]
+   }
+  },
+  "Q-EVAL-010": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "03",
+      "heading_path": "Unit testing best practices for .NET > Best practices > Avoid multiple Act tasks",
+      "variant": 1,
+      "char_start": 16278,
+      "char_end": 17727
+     }
+    ]
+   }
+  },
+  "Q-EVAL-011": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "29",
+      "heading_path": "ASP0033: `[ValidatableType]` is applied to an inaccessible type > Rule description",
+      "variant": 1,
+      "char_start": 432,
+      "char_end": 886
+     },
+     {
+      "role": "expected",
+      "source_id": "29",
+      "heading_path": "ASP0033: `[ValidatableType]` is applied to an inaccessible type > How to fix violations",
+      "variant": 1,
+      "char_start": 886,
+      "char_end": 1283
+     },
+     {
+      "role": "alternate",
+      "source_id": "29",
+      "heading_path": "ASP0033: `[ValidatableType]` is applied to an inaccessible type > Cause",
+      "variant": 1,
+      "char_start": 203,
+      "char_end": 432
+     }
+    ]
+   }
+  },
+  "Q-EVAL-012": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "29",
+      "heading_path": "ASP0033: `[ValidatableType]` is applied to an inaccessible type > Rule description",
+      "variant": 1,
+      "char_start": 432,
+      "char_end": 886
+     },
+     {
+      "role": "expected",
+      "source_id": "29",
+      "heading_path": "ASP0033: `[ValidatableType]` is applied to an inaccessible type > How to fix violations",
+      "variant": 1,
+      "char_start": 886,
+      "char_end": 1283
+     },
+     {
+      "role": "alternate",
+      "source_id": "29",
+      "heading_path": "ASP0033: `[ValidatableType]` is applied to an inaccessible type > Cause",
+      "variant": 1,
+      "char_start": 203,
+      "char_end": 432
+     }
+    ]
+   }
+  },
+  "Q-EVAL-013": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "10",
+      "heading_path": "Dependency injection in ASP.NET Core > Service lifetimes",
+      "variant": 1,
+      "char_start": 16573,
+      "char_end": 18087
+     },
+     {
+      "role": "alternate",
+      "source_id": "11",
+      "heading_path": "Factory-based middleware activation in ASP.NET Core",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 1327
+     },
+     {
+      "role": "alternate",
+      "source_id": "11",
+      "heading_path": "Factory-based middleware activation in ASP.NET Core > Additional resources",
+      "variant": 1,
+      "char_start": 4936,
+      "char_end": 6819
+     },
+     {
+      "role": "alternate",
+      "source_id": "11",
+      "heading_path": "Factory-based middleware activation in ASP.NET Core > Additional resources",
+      "variant": 2,
+      "char_start": 11134,
+      "char_end": 12803
+     },
+     {
+      "role": "alternate",
+      "source_id": "11",
+      "heading_path": "Factory-based middleware activation in ASP.NET Core > Additional resources",
+      "variant": 3,
+      "char_start": 17126,
+      "char_end": 17339
+     },
+     {
+      "role": "alternate",
+      "source_id": "11",
+      "heading_path": "Factory-based middleware activation in ASP.NET Core > Additional resources",
+      "variant": 4,
+      "char_start": 17339,
+      "char_end": 17363
+     },
+     {
+      "role": "alternate",
+      "source_id": "11",
+      "heading_path": "Factory-based middleware activation in ASP.NET Core > IMiddleware",
+      "variant": 1,
+      "char_start": 1327,
+      "char_end": 4388
+     },
+     {
+      "role": "alternate",
+      "source_id": "11",
+      "heading_path": "Factory-based middleware activation in ASP.NET Core > IMiddleware",
+      "variant": 2,
+      "char_start": 6819,
+      "char_end": 10586
+     },
+     {
+      "role": "alternate",
+      "source_id": "11",
+      "heading_path": "Factory-based middleware activation in ASP.NET Core > IMiddleware",
+      "variant": 3,
+      "char_start": 12803,
+      "char_end": 16578
+     },
+     {
+      "role": "alternate",
+      "source_id": "10",
+      "heading_path": "Dependency injection in ASP.NET Core > Lifetime and registration options",
+      "variant": 1,
+      "char_start": 23344,
+      "char_end": 29053
+     }
+    ]
+   }
+  },
+  "Q-EVAL-014": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "10",
+      "heading_path": "Dependency injection in ASP.NET Core > Service lifetimes",
+      "variant": 1,
+      "char_start": 16573,
+      "char_end": 18087
+     },
+     {
+      "role": "alternate",
+      "source_id": "11",
+      "heading_path": "Factory-based middleware activation in ASP.NET Core",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 1327
+     },
+     {
+      "role": "alternate",
+      "source_id": "11",
+      "heading_path": "Factory-based middleware activation in ASP.NET Core > Additional resources",
+      "variant": 1,
+      "char_start": 4936,
+      "char_end": 6819
+     },
+     {
+      "role": "alternate",
+      "source_id": "11",
+      "heading_path": "Factory-based middleware activation in ASP.NET Core > Additional resources",
+      "variant": 2,
+      "char_start": 11134,
+      "char_end": 12803
+     },
+     {
+      "role": "alternate",
+      "source_id": "11",
+      "heading_path": "Factory-based middleware activation in ASP.NET Core > Additional resources",
+      "variant": 3,
+      "char_start": 17126,
+      "char_end": 17339
+     },
+     {
+      "role": "alternate",
+      "source_id": "11",
+      "heading_path": "Factory-based middleware activation in ASP.NET Core > Additional resources",
+      "variant": 4,
+      "char_start": 17339,
+      "char_end": 17363
+     },
+     {
+      "role": "alternate",
+      "source_id": "11",
+      "heading_path": "Factory-based middleware activation in ASP.NET Core > IMiddleware",
+      "variant": 1,
+      "char_start": 1327,
+      "char_end": 4388
+     },
+     {
+      "role": "alternate",
+      "source_id": "11",
+      "heading_path": "Factory-based middleware activation in ASP.NET Core > IMiddleware",
+      "variant": 2,
+      "char_start": 6819,
+      "char_end": 10586
+     },
+     {
+      "role": "alternate",
+      "source_id": "11",
+      "heading_path": "Factory-based middleware activation in ASP.NET Core > IMiddleware",
+      "variant": 3,
+      "char_start": 12803,
+      "char_end": 16578
+     },
+     {
+      "role": "alternate",
+      "source_id": "10",
+      "heading_path": "Dependency injection in ASP.NET Core > Lifetime and registration options",
+      "variant": 1,
+      "char_start": 23344,
+      "char_end": 29053
+     }
+    ]
+   }
+  },
+  "Q-EVAL-015": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "01",
+      "heading_path": "Asynchronous programming with async and await > Async/await vs ContinueWith > Why async/await is preferred",
+      "variant": 1,
+      "char_start": 32816,
+      "char_end": 33896
+     },
+     {
+      "role": "alternate",
+      "source_id": "01",
+      "heading_path": "Asynchronous programming with async and await > Async/await vs ContinueWith",
+      "variant": 1,
+      "char_start": 29771,
+      "char_end": 30613
+     }
+    ]
+   }
+  },
+  "Q-EVAL-016": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "26",
+      "heading_path": "The C# type system > Value types and reference types",
+      "variant": 1,
+      "char_start": 3579,
+      "char_end": 5427
+     },
+     {
+      "role": "alternate",
+      "source_id": "07",
+      "heading_path": "C# classes",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 944
+     },
+     {
+      "role": "alternate",
+      "source_id": "07",
+      "heading_path": "C# classes > Create objects",
+      "variant": 1,
+      "char_start": 2086,
+      "char_end": 3160
+     }
+    ]
+   }
+  },
+  "Q-EVAL-017": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "11",
+      "heading_path": "Factory-based middleware activation in ASP.NET Core",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 1327
+     },
+     {
+      "role": "alternate",
+      "source_id": "11",
+      "heading_path": "Factory-based middleware activation in ASP.NET Core > Additional resources",
+      "variant": 1,
+      "char_start": 4936,
+      "char_end": 6819
+     },
+     {
+      "role": "alternate",
+      "source_id": "11",
+      "heading_path": "Factory-based middleware activation in ASP.NET Core > Additional resources",
+      "variant": 2,
+      "char_start": 11134,
+      "char_end": 12803
+     },
+     {
+      "role": "alternate",
+      "source_id": "11",
+      "heading_path": "Factory-based middleware activation in ASP.NET Core > Additional resources",
+      "variant": 3,
+      "char_start": 17126,
+      "char_end": 17339
+     },
+     {
+      "role": "alternate",
+      "source_id": "11",
+      "heading_path": "Factory-based middleware activation in ASP.NET Core > Additional resources",
+      "variant": 4,
+      "char_start": 17339,
+      "char_end": 17363
+     }
+    ],
+    "S2": [
+     {
+      "role": "expected",
+      "source_id": "11",
+      "heading_path": "Factory-based middleware activation in ASP.NET Core > IMiddleware",
+      "variant": 1,
+      "char_start": 1327,
+      "char_end": 4388
+     },
+     {
+      "role": "expected",
+      "source_id": "11",
+      "heading_path": "Factory-based middleware activation in ASP.NET Core > IMiddleware",
+      "variant": 2,
+      "char_start": 6819,
+      "char_end": 10586
+     },
+     {
+      "role": "expected",
+      "source_id": "11",
+      "heading_path": "Factory-based middleware activation in ASP.NET Core > IMiddleware",
+      "variant": 3,
+      "char_start": 12803,
+      "char_end": 16578
+     },
+     {
+      "role": "alternate",
+      "source_id": "10",
+      "heading_path": "Dependency injection in ASP.NET Core > Service lifetimes",
+      "variant": 1,
+      "char_start": 16573,
+      "char_end": 18087
+     }
+    ]
+   }
+  },
+  "Q-EVAL-018": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "21",
+      "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Logical patterns > Precedence and order of checking",
+      "variant": 1,
+      "char_start": 12997,
+      "char_end": 14840
+     },
+     {
+      "role": "alternate",
+      "source_id": "21",
+      "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Parenthesized pattern",
+      "variant": 1,
+      "char_start": 24878,
+      "char_end": 25153
+     }
+    ]
+   }
+  },
+  "Q-EVAL-019": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "21",
+      "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > List patterns",
+      "variant": 1,
+      "char_start": 25153,
+      "char_end": 28017
+     }
+    ]
+   }
+  },
+  "Q-EVAL-020": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "16",
+      "heading_path": "Integral numeric types (C# reference) > Integer literals",
+      "variant": 1,
+      "char_start": 3974,
+      "char_end": 6831
+     }
+    ]
+   }
+  },
+  "Q-EVAL-021": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "20",
+      "heading_path": "A tour of the C# language > File-based apps",
+      "variant": 1,
+      "char_start": 4664,
+      "char_end": 6195
+     }
+    ]
+   }
+  },
+  "Q-EVAL-022": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithRedirects",
+      "variant": 1,
+      "char_start": 20183,
+      "char_end": 21473
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithRedirects",
+      "variant": 2,
+      "char_start": 67172,
+      "char_end": 68462
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithRedirects",
+      "variant": 3,
+      "char_start": 111729,
+      "char_end": 113019
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithRedirects",
+      "variant": 4,
+      "char_start": 150016,
+      "char_end": 151306
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithRedirects",
+      "variant": 5,
+      "char_start": 187271,
+      "char_end": 188561
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithRedirects",
+      "variant": 6,
+      "char_start": 209551,
+      "char_end": 211720
+     },
+     {
+      "role": "alternate",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > UseStatusCodePagesWithRedirects",
+      "variant": 1,
+      "char_start": 229417,
+      "char_end": 230599
+     }
+    ],
+    "S2": [
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithReExecute",
+      "variant": 1,
+      "char_start": 21473,
+      "char_end": 24282
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithReExecute",
+      "variant": 2,
+      "char_start": 68462,
+      "char_end": 71271
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithReExecute",
+      "variant": 3,
+      "char_start": 113019,
+      "char_end": 115828
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithReExecute",
+      "variant": 4,
+      "char_start": 151306,
+      "char_end": 154115
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithReExecute",
+      "variant": 5,
+      "char_start": 188561,
+      "char_end": 190648
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithReExecute",
+      "variant": 6,
+      "char_start": 211720,
+      "char_end": 215193
+     },
+     {
+      "role": "alternate",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > UseStatusCodePagesWithReExecute",
+      "variant": 1,
+      "char_start": 230599,
+      "char_end": 232766
+     }
+    ]
+   }
+  },
+  "Q-EVAL-023": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > IExceptionHandler",
+      "variant": 1,
+      "char_start": 9825,
+      "char_end": 13491
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > IExceptionHandler",
+      "variant": 2,
+      "char_start": 57867,
+      "char_end": 61694
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > IExceptionHandler",
+      "variant": 3,
+      "char_start": 102424,
+      "char_end": 106251
+     },
+     {
+      "role": "alternate",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > IExceptionHandler > SuppressDiagnosticsCallback",
+      "variant": 1,
+      "char_start": 16043,
+      "char_end": 17233
+     }
+    ]
+   }
+  },
+  "Q-EVAL-024": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "17",
+      "heading_path": "Integration tests in ASP.NET Core > Disable shadow copying",
+      "variant": 1,
+      "char_start": 57721,
+      "char_end": 58223
+     },
+     {
+      "role": "expected",
+      "source_id": "17",
+      "heading_path": "Integration tests in ASP.NET Core > Disable shadow copying",
+      "variant": 2,
+      "char_start": 100621,
+      "char_end": 101123
+     },
+     {
+      "role": "expected",
+      "source_id": "17",
+      "heading_path": "Integration tests in ASP.NET Core > Disable shadow copying",
+      "variant": 3,
+      "char_start": 143683,
+      "char_end": 144185
+     },
+     {
+      "role": "expected",
+      "source_id": "17",
+      "heading_path": "Integration tests in ASP.NET Core > Disable shadow copying",
+      "variant": 4,
+      "char_start": 186565,
+      "char_end": 187067
+     },
+     {
+      "role": "expected",
+      "source_id": "17",
+      "heading_path": "Integration tests in ASP.NET Core > Disable shadow copying",
+      "variant": 5,
+      "char_start": 249429,
+      "char_end": 249931
+     }
+    ]
+   }
+  },
+  "Q-EVAL-025": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "23",
+      "heading_path": "Routing in ASP.NET Core > Short-circuit middleware after routing",
+      "variant": 1,
+      "char_start": 91577,
+      "char_end": 95922
+     }
+    ]
+   }
+  },
+  "Q-EVAL-026": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "15",
+      "heading_path": "How to create backend application using Asp.net C# Web API Core",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 17123
+     }
+    ]
+   }
+  },
+  "Q-EVAL-027": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "12",
+      "heading_path": "Handle errors in ASP.NET Core APIs > Additional error handling features > Validation failure error response",
+      "variant": 1,
+      "char_start": 21833,
+      "char_end": 22980
+     },
+     {
+      "role": "alternate",
+      "source_id": "12",
+      "heading_path": "Handle errors in ASP.NET Core APIs > Additional error handling features > Key differences for controllers",
+      "variant": 1,
+      "char_start": 24560,
+      "char_end": 25048
+     }
+    ]
+   }
+  },
+  "Q-EVAL-028": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "18",
+      "heading_path": "Introduction",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 2417
+     }
+    ]
+   }
+  },
+  "Q-EVAL-029": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "10",
+      "heading_path": "Dependency injection in ASP.NET Core > Entity Framework contexts",
+      "variant": 1,
+      "char_start": 22624,
+      "char_end": 23344
+     }
+    ],
+    "S2": [
+     {
+      "role": "expected",
+      "source_id": "22",
+      "heading_path": "Querying Data > Loading a single entity",
+      "variant": 1,
+      "char_start": 979,
+      "char_end": 1141
+     }
+    ]
+   }
+  },
+  "Q-EVAL-030": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "03",
+      "heading_path": "Unit testing best practices for .NET > Best practices > Follow test naming standards",
+      "variant": 1,
+      "char_start": 8331,
+      "char_end": 9378
+     }
+    ],
+    "S2": [
+     {
+      "role": "expected",
+      "source_id": "28",
+      "heading_path": "Unit testing C# in .NET using dotnet test and xUnit > Create a test > Add more tests",
+      "variant": 1,
+      "char_start": 5985,
+      "char_end": 8441
+     }
+    ]
+   }
+  },
+  "Q-EVAL-031": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "04",
+      "heading_path": "Built-in types and literals > `default` expressions",
+      "variant": 1,
+      "char_start": 6799,
+      "char_end": 7632
+     }
+    ],
+    "S2": [
+     {
+      "role": "expected",
+      "source_id": "26",
+      "heading_path": "The C# type system > Value types and reference types",
+      "variant": 1,
+      "char_start": 3579,
+      "char_end": 5427
+     },
+     {
+      "role": "alternate",
+      "source_id": "20",
+      "heading_path": "A tour of the C# language > Familiar C# features",
+      "variant": 1,
+      "char_start": 6195,
+      "char_end": 9448
+     }
+    ]
+   }
+  },
+  "Q-EVAL-032": {
+   "answerable": true,
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > IExceptionHandler",
+      "variant": 1,
+      "char_start": 9825,
+      "char_end": 13491
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > IExceptionHandler",
+      "variant": 2,
+      "char_start": 57867,
+      "char_end": 61694
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > IExceptionHandler",
+      "variant": 3,
+      "char_start": 102424,
+      "char_end": 106251
+     }
+    ],
+    "S2": [
+     {
+      "role": "expected",
+      "source_id": "10",
+      "heading_path": "Dependency injection in ASP.NET Core > Entity Framework contexts",
+      "variant": 1,
+      "char_start": 22624,
+      "char_end": 23344
+     }
+    ]
+   }
+  },
+  "Q-EVAL-033": {
+   "answerable": false,
+   "slots": {}
+  },
+  "Q-EVAL-034": {
+   "answerable": false,
+   "slots": {}
+  },
+  "Q-EVAL-035": {
+   "answerable": false,
+   "slots": {}
+  },
+  "Q-EVAL-036": {
+   "answerable": false,
+   "slots": {}
+  }
+ }
+}

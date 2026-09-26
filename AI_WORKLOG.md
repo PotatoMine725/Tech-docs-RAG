@@ -269,6 +269,32 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 - *Human decision:* index location `data/chroma/` (owner, 14:37; ADR-0005 D16 stands); the owner edited `.env`. The quota plan (Arm A before 14:00, Arm B after) and the accepted open items come from the owner's prompt (ADR-0005 D19).
 - *Verifier findings* (99-VERIFY, 2026-09-26, Windows 3.13.3, 0 Gemini requests, [RAG-001b-verify](docs/reviews/code/RAG-001b-verify.md) → ACCEPT): no defect fails a requirement. Reproduced: store 733 = 733 and 859 = 859 with cosine and all stored IDs, documents and metadata equal to the JSONL; unit-norm 768-dim vectors; cache 1,568 document + 1 query rows; quota 716 / 859 / 0; 211 passed vs 186 on dev (+25). Findings: (1) stale narrative: report line 149 said the store was not re-indexed into `data/chroma/`, superseded by the rebuild (note added, original kept); (2) Arm A has 11 duplicated texts / 24 extra copies (doc 17 source repetition, plus docs 23 and 13) that can fill several top-k slots: RAG-002 must dedupe by `content_hash`; (3) full-key/prefix scan not reproducible by the verifier without opening `.env` (`AIza+35` scan: 0 matches); (4) the first-429 log is proven only against fakes.
 
+### 2026-09-26 EVAL-003b-pre: verifier findings (branch `eval-003b-pre`, PR #12)
+- *Verifier findings (99-VERIFY, 2026-09-26, Windows 3.13.3, 0 Gemini requests, no ChromaDB, [EVAL-003b-pre-verify](docs/reviews/evaluation/EVAL-003b-pre-verify.md) -> ACCEPT WITH FIXES):*
+  - (1) MEDIUM (report / spec wording, not code): the report says no case can be evidence-hit from alternate-section retrieval and calls evidence_hit "strict-like"; the owner is told to paste that into `evaluation-spec.md`. False for 4 of 32 cases: Q-EVAL-003 and 004 (their quotes also occur in `#12 ... Developer Exception Page`, an approved alternate) and Q-EVAL-007 and 008 (also in `#23 ... Route constraint reference`). With real Arm A and Arm B chunks that overlap no expected span, the real functions give evidence@5 = 1, lenient section = 1, strict section = 0. The report's check covered only the 3 quotes whose sole location is an alternate section, which is narrower than the sentence.
+  - (2) LOW: the M5 mutation transcript shows "1 failed"; running the whole retrieval test file gives 3 failures.
+  - (3) LOW: the report writes the float `(1-0.95)/2*100` as `2.5000000000000022`; Python prints `2.500000000000002`.
+  - Observed, cause unverified: one pytest subprocess in the verifier's mutation harness died with Windows exit 3221225773 (commit limit reached, about 875 MB virtual memory free); it passed on every re-run. Consistent with the earlier truncated run being environmental. Both full runs here: 272 passed, 1 deselected.
+  - Checks that passed: scope (14 added files only); 51 metric values on Q-EVAL-017, 022 and 031 equal my hand calculations on real Arm A records; McNemar / bootstrap (pairs together, independent reimplementation) / Wilcoxon equal hand-computed exact p; `expected-spans-v1.json` rebuilds byte-identical with correct input hashes; frozen hashes unchanged; mutations M1-M5 all caught (scratch copy); all report numbers traced.
+- *AI got wrong (owner entry, 2026-09-26):* Same false assumption appeared twice (owner-side assistant, then this report): that evidence quotes exist only in expected sections. Caught by verify on real Arm A/B chunks.
+- *Fix:* commit `943f063` and the follow-up report commit. The report and the proposed spec/CHANGELOG lines now say evidence_hit is content-level (aligns with lenient section hit, not strict; strict reported alongside). A new per-case diagnostic `evidence_hit_via_alternate_only` has 1 unit test and gives 4 / 32 on both arms with simulated alternate-only retrieval (003, 004, 007, 008). M5 was re-run on the whole retrieval test file: 5 failed, 25 passed. The verifier reported 3; the reason for the difference was not checked, and the 5 failing tests are listed in the report. The float is now written as Python prints it. Full suite: `273 passed, 1 deselected`.
+- *Human decision:* owner chose option (a): keep the per-required-point rule, change only the wording, and add the diagnostic (2026-09-26).
+- *Verifier findings (re-verify)* (limited re-verify of `943f063`, `281acb8`, `536e2e1`, merge `bebf486`, `001ec17`; 2026-09-26, 0 Gemini requests, no ChromaDB, [EVAL-003b-pre-verify § Re-verify](docs/reviews/evaluation/EVAL-003b-pre-verify.md) -> **ACCEPT**, 13 PASS / 0 FAIL / 1 UNVERIFIED):
+  - Reproduced:
+    - No strict or strict-like claim is left: every mention is a quote or is withdrawn. The owner's sentence is in the report, the proposed spec and CHANGELOG lines, and the PR body.
+    - Matching code unchanged since `fd59109` (numstat 23/1 docstring + new function, 1/1 comment).
+    - Own independent recount of alternate-only evidence hits: 4 / 32 on Arm A and Arm B (Q-EVAL-003, 004, 007, 008), with evidence 1, lenient 1, strict 0. The quotes sit only in approved alternates (#12/#13 Developer Exception Page, #23 Route constraint reference). The branch's function gives the same set.
+    - The diagnostic's test fails under 4 scratch mutations.
+    - Merge `bebf486`: 2 parents, 1 conflict (AI_WORKLOG only), no parent line lost or reordered, ledger = dev + the 09b note, 17-file scope.
+    - Tests: dev `226 passed`, merged `313 passed, 1 deselected` (x2) = 226 + 87 collected, pre-merge `273`.
+    - Frozen hashes unchanged; no key.
+  - *AI got wrong (first verifier):* the first verify reported 3 failures for mutation M5. The report's M5 diff gives 5 failures on the `fd59109` tree (the same 5 tests as now), so later tests do not explain the gap. The first verifier either undercounted or ran an unrecorded variant; its exact diff was not saved. The owner's follow-up repeated the 3; the author's measured 5 is right for the report's M5. This answers the "reason for the difference was not checked" line above.
+  - Non-blocking notes for 09b proper:
+    - The diagnostic splits top-k chunks, not quote locations, into inside and outside, so it can under-count at section boundaries.
+    - "Outside" also covers non-approved sections. On the current data there are none.
+    - Only the "evidence_hit = 1" reading of "every hit point" gives the owner's 4 cases; the literal reading gives 7.
+  - UNVERIFIED: the report's point-in-time memory figure (~1.5 GB free) and the historical truncated runs (not reproducible). None of my 4 full-suite runs was truncated.
+
 ## Summary: how AI helped
 
 To be filled at QC-001.
