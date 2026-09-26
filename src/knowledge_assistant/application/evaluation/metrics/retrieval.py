@@ -6,7 +6,9 @@ compared (Arm A labels a merged section with its first heading, ADR-0003 D3; Arm
 
 - lenient (headline): a slot is satisfied by any of its expected or alternate sources/sections (D1);
 - strict: the same with alternates removed (OWNER-001, 2026-09-25);
-- a case hits when every slot is satisfied; the slot fraction and MRR use the lenient rule, strict MRR is secondary.
+- a case hits when every slot is satisfied; the slot fraction and MRR use the lenient rule, strict MRR is secondary;
+- evidence hit (headline): every required answer point has one of its quotes whole in a top-k chunk;
+  any-quote evidence hit is a secondary diagnostic.
 Corpus-insufficient cases have no spans and are excluded from these metrics; passing them in raises ValueError.
 """
 from dataclasses import dataclass
@@ -94,21 +96,54 @@ def reciprocal_rank(chunks: list[RankedChunk], spans: list[ExpectedSpan], k: int
     return 0.0
 
 
-def evidence_hit_at_k(chunks: list[RankedChunk], quotes: list[str], k: int, require_all: bool = False) -> int:
-    """1 if a top-k chunk contains a whole evidence quote: any of the case's quotes (default), or with
-    `require_all` every quote (each may sit in a different chunk, but each one whole in a single chunk).
+def required_point_quotes(case: dict) -> dict[str, list[str]]:
+    """{required answer point id: the evidence quotes whose `supports` lists it}, in eval-v1 order.
 
-    Both sides are compared after `validate_questions.collapse_whitespace` (every run of Unicode whitespace,
-    incl. U+00A0, becomes one space), the same normalization that verified the quotes against the corpus.
-    A quote split across two chunks is not contained in either, so it does not count.
+    Optional points are left out. A quote supporting several points counts for each of them. Every evidence quote
+    counts, also the few that lie in an approved alternate section (EVAL-003b-pre report, decision 5).
     """
-    if not quotes:
-        raise ValueError("no evidence quotes: corpus-insufficient cases are excluded from retrieval metrics")
+    if not case["answerable"]:
+        raise ValueError(f"{case['id']}: corpus-insufficient cases are excluded from retrieval metrics")
+    points = {point["id"]: [] for point in case["answer_points"] if point["required"]}
+    if not points:
+        raise ValueError(f"{case['id']}: no required answer point")
+    for evidence in case["evidence"]:
+        for point_id in evidence["supports"]:
+            if point_id in points:
+                points[point_id].append(evidence["quote"])
+    missing = [point_id for point_id, quotes in points.items() if not quotes]
+    if missing:
+        raise ValueError(f"{case['id']}: required points without an evidence quote: {missing}")
+    return points
+
+
+def _quotes_found(chunks: list[RankedChunk], quotes: list[str], k: int) -> list[bool]:
+    """Per quote: is it contained whole in one top-k chunk? Both sides go through
+    `validate_questions.collapse_whitespace` (every run of Unicode whitespace, incl. U+00A0, becomes one space), the
+    same normalization that verified the quotes against the corpus. A quote split across two chunks does not count.
+    """
     if k < 1:
         raise ValueError(f"k must be >= 1, got {k}")
     texts = [collapse_whitespace(chunk.text) for chunk in chunks[:k]]
-    found = [any(collapse_whitespace(quote) in text for text in texts) for quote in quotes]
-    return int(all(found) if require_all else any(found))
+    return [any(collapse_whitespace(quote) in text for text in texts) for quote in quotes]
+
+
+def evidence_hit_at_k(chunks: list[RankedChunk], point_quotes: dict[str, list[str]], k: int) -> int:
+    """Headline (owner decision 2026-09-26): 1 if every required answer point has at least one of its supporting
+    quotes contained whole in some top-k chunk - all-of across required points, any-of across the quotes of one point.
+
+    `point_quotes` is `required_point_quotes(case)`; optional-point quotes are therefore ignored.
+    """
+    if not point_quotes:
+        raise ValueError("no required points: corpus-insufficient cases are excluded from retrieval metrics")
+    return int(all(any(_quotes_found(chunks, quotes, k)) for quotes in point_quotes.values()))
+
+
+def any_evidence_hit_at_k(chunks: list[RankedChunk], quotes: list[str], k: int) -> int:
+    """Secondary diagnostic: 1 if any one of the case's evidence quotes is contained whole in a top-k chunk."""
+    if not quotes:
+        raise ValueError("no evidence quotes: corpus-insufficient cases are excluded from retrieval metrics")
+    return int(any(_quotes_found(chunks, quotes, k)))
 
 
 def mean(values: list[float]) -> float:

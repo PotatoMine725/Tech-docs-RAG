@@ -8,10 +8,12 @@ from knowledge_assistant.application.evaluation.metrics import retrieval
 from knowledge_assistant.application.evaluation.metrics.retrieval import (
     SOURCE,
     RankedChunk,
+    any_evidence_hit_at_k,
     evidence_hit_at_k,
     mean,
     overlaps,
     reciprocal_rank,
+    required_point_quotes,
     section_hit_at_k,
     slot_fraction_at_k,
     source_hit_at_k,
@@ -142,7 +144,11 @@ def test_corpus_insufficient_case_raises():
     with pytest.raises(ValueError, match="corpus-insufficient"):
         section_hit_at_k([chunk("04", 0, 10)], [], k=5)
     with pytest.raises(ValueError, match="corpus-insufficient"):
-        evidence_hit_at_k([chunk("04", 0, 10, "x")], [], k=5)
+        evidence_hit_at_k([chunk("04", 0, 10, "x")], {}, k=5)
+    with pytest.raises(ValueError, match="corpus-insufficient"):
+        any_evidence_hit_at_k([chunk("04", 0, 10, "x")], [], k=5)
+    with pytest.raises(ValueError, match="corpus-insufficient"):
+        required_point_quotes({"id": "Q-X", "answerable": False, "answer_points": [], "evidence": []})
 
 
 # --- evidence hit -----------------------------------------------------------------------------------------------
@@ -150,46 +156,97 @@ def test_corpus_insufficient_case_raises():
 QUOTE = "is activated per client request (connection), so scoped services can be injected"
 
 
+def eval_case(points, evidence):
+    """Minimal eval-v1 record: points = [(id, required)], evidence = [(quote, supports)]."""
+    return {"id": "Q-TEST", "answerable": True,
+            "answer_points": [{"id": pid, "text": pid, "required": req} for pid, req in points],
+            "evidence": [{"source_id": "11", "heading_path": "h", "quote": q, "supports": s} for q, s in evidence]}
+
+
+def load_eval_case(case_id):
+    return next(json.loads(line) for line in
+                (ROOT / "data/evaluation/questions/eval-v1.jsonl").read_text(encoding="utf-8").splitlines()
+                if f'"{case_id}"' in line)
+
+
 def test_evidence_hit_false_when_the_quote_is_split_across_two_chunks():
     ranked = [chunk("11", 0, 30, "is activated per client request"),
               chunk("11", 30, 90, " (connection), so scoped services can be injected")]
-    assert evidence_hit_at_k(ranked, [QUOTE], k=5) == 0
-    assert evidence_hit_at_k([chunk("11", 0, 90, "x " + QUOTE + " y")], [QUOTE], k=5) == 1
+    assert evidence_hit_at_k(ranked, {"P1": [QUOTE]}, k=5) == 0
+    assert evidence_hit_at_k([chunk("11", 0, 90, "x " + QUOTE + " y")], {"P1": [QUOTE]}, k=5) == 1
 
 
 def test_evidence_hit_ignores_whitespace_differences():
     text = "is  activated\nper client request (connection),\n\n  so scoped\tservices can be injected."
     assert QUOTE not in text
-    assert evidence_hit_at_k([chunk("11", 0, 99, text)], [QUOTE], k=5) == 1
+    assert evidence_hit_at_k([chunk("11", 0, 99, text)], {"P1": [QUOTE]}, k=5) == 1
 
 
 def test_evidence_hit_respects_k():
     ranked = [chunk("09", 0, 10, "noise")] * 5 + [chunk("11", 0, 99, QUOTE)]
-    assert evidence_hit_at_k(ranked, [QUOTE], k=5) == 0
-    assert evidence_hit_at_k(ranked, [QUOTE], k=6) == 1
+    assert evidence_hit_at_k(ranked, {"P1": [QUOTE]}, k=5) == 0
+    assert evidence_hit_at_k(ranked, {"P1": [QUOTE]}, k=6) == 1
 
 
-def test_evidence_hit_any_quote_vs_all_quotes():
-    quotes = [QUOTE, "The middleware is registered as a scoped or transient service"]
-    ranked = [chunk("11", 0, 99, QUOTE)]
-    assert evidence_hit_at_k(ranked, quotes, k=5) == 1
-    assert evidence_hit_at_k(ranked, quotes, k=5, require_all=True) == 0
-    ranked.append(chunk("11", 99, 200, quotes[1] + "."))
-    assert evidence_hit_at_k(ranked, quotes, k=5, require_all=True) == 1
+def test_evidence_hit_one_of_two_variant_quotes_for_a_point_is_enough():
+    """Q-EVAL-023 style: P1 is supported by a long quote and a short variant; only the short one is retrieved."""
+    long_p1 = "Starting in .NET 10, the default behavior is to suppress emission of diagnostics for handled exceptions."
+    short_p1 = "Starting in .NET 10, diagnostics are suppressed by default for handled exceptions."
+    case = eval_case([("P1", True)], [(long_p1, ["P1"]), (short_p1, ["P1"])])
+    ranked = [chunk("13", 0, 99, "Intro. " + short_p1 + " More.")]
+    assert required_point_quotes(case) == {"P1": [long_p1, short_p1]}
+    assert evidence_hit_at_k(ranked, required_point_quotes(case), k=5) == 1
+
+
+def test_evidence_hit_two_slot_case_with_one_slot_quote_found_is_a_miss():
+    """Q-EVAL-029 shape: P1 is supported only by the S1 quote, P2 only by the S2 quote; only S1 is retrieved."""
+    s1_quote, s2_quote = "Scoped services are created once per client request.", "Blazor circuits live per tab."
+    case = eval_case([("P1", True), ("P2", True), ("P3", False)], [(s1_quote, ["P1"]), (s2_quote, ["P2"])])
+    only_s1 = [chunk("11", 0, 99, s1_quote)]
+    assert evidence_hit_at_k(only_s1, required_point_quotes(case), k=5) == 0
+    assert any_evidence_hit_at_k(only_s1, [s1_quote, s2_quote], k=5) == 1  # the diagnostic would call it a hit
+    both = only_s1 + [chunk("20", 0, 99, s2_quote)]
+    assert evidence_hit_at_k(both, required_point_quotes(case), k=5) == 1
+
+
+def test_evidence_hit_ignores_a_missing_optional_point_quote():
+    optional_quote = "Handlers run in registration order until one returns true."
+    case = eval_case([("P1", True), ("P2", False)], [(QUOTE, ["P1"]), (optional_quote, ["P2"])])
+    assert required_point_quotes(case) == {"P1": [QUOTE]}
+    assert evidence_hit_at_k([chunk("11", 0, 99, QUOTE)], required_point_quotes(case), k=5) == 1
+
+
+def test_required_point_quotes_counts_a_quote_for_every_point_it_supports():
+    case = eval_case([("P1", True), ("P2", True), ("P3", False)], [("a", ["P1"]), ("b", ["P2", "P3", "P1"])])
+    assert required_point_quotes(case) == {"P1": ["a", "b"], "P2": ["b"]}
+
+
+def test_required_point_quotes_raises_when_a_required_point_has_no_quote():
+    with pytest.raises(ValueError, match=r"\['P2'\]"):
+        required_point_quotes(eval_case([("P1", True), ("P2", True)], [("a", ["P1"])]))
+    with pytest.raises(ValueError, match="no required answer point"):
+        required_point_quotes(eval_case([("P1", False)], [("a", ["P1"])]))
+
+
+def test_required_point_quotes_real_case_q_eval_023():
+    """Real record: P1-P3 required, two quotes each (the P2/P3 quote from the alternate section counts); P4 optional."""
+    points = required_point_quotes(load_eval_case("Q-EVAL-023"))
+    assert list(points) == ["P1", "P2", "P3"]
+    assert [len(quotes) for quotes in points.values()] == [2, 2, 2]
+    assert points["P1"][1] == "Starting in .NET 10, diagnostics are suppressed by default for handled exceptions."
 
 
 def test_evidence_hit_real_case_q_eval_028_no_break_space_in_source_18():
     """The #18 text has U+00A0 after 'C#'; the Arm A chunk holding the section must still count as a hit."""
-    case = next(json.loads(line) for line in
-                (ROOT / "data/evaluation/questions/eval-v1.jsonl").read_text(encoding="utf-8").splitlines()
-                if '"Q-EVAL-028"' in line)
+    case = load_eval_case("Q-EVAL-028")
     quote = case["evidence"][0]["quote"]
     chunks = [RankedChunk.from_record(json.loads(line)) for line in
               (ROOT / "data/processed/chunks/arm-a.jsonl").read_text(encoding="utf-8").splitlines()
               if '"source_id": "18"' in line]
     holding = [c for c in chunks if "economical with regard to memory" in c.text]
     assert len(holding) == 1 and quote not in holding[0].text and " " in holding[0].text
-    assert evidence_hit_at_k(holding, [quote], k=1) == 1
+    assert any_evidence_hit_at_k(holding, [quote], k=1) == 1
+    assert evidence_hit_at_k(holding, {"P1": [quote]}, k=1) == 1
 
 
 def test_whitespace_normalization_is_reused_from_validate_questions():
