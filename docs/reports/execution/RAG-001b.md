@@ -168,12 +168,10 @@ No new dependency: `chromadb` was already in `pyproject.toml` and `requirements.
 - **Key-leak check, after Arm B** (14:25; raw bytes, the key read from the environment, counts only):
   - Files scanned: `D:\ChromaDB` (every file, 39 MB sqlite included), `data/cache/*`, `data/logs/*`, `validation/retrieval/*`, and the Arm B console output. That is 27 untracked files, with 0 matches of the full key, 0 of its 8-character prefix and 0 of `AIza`.
   - Tracked files: 0 matches of the full key and 0 of the prefix.
-  - Generic `AIza` in tracked files: 22 occurrences in 17 files. They are the same kinds as before:
-    - verifier scan commands in `docs/reviews/…`;
-    - this report and ADR-0005 describing the scan;
-    - the redaction regex;
-    - fake test keys.
-  - The count went from 19 to 22 because this count is per occurrence, and this report's own text is now tracked.
+  - Generic `AIza` in tracked files (`git grep -o AIza <commit>`):
+    - 24 occurrences in 17 files at `bd2fee8`, and 22 in 17 at `456f2f8`.
+    - Every one is of the same kinds as before: verifier scan commands in `docs/reviews/…`, this report and ADR-0005 describing the scan, the redaction regex, and fake test keys.
+    - I did not re-derive the morning figure of 19; it was not produced with this same command.
 - **Quota** (V-1 accounting, 1 request per text; not checked against the AI Studio dashboard):
   - Quota day ending 14:00 UTC+7: 6 before this task + Arm A 709 + sanity query 1 = **716 of 1,000**.
   - Quota day starting 14:00 UTC+7: Arm B **859 of 1,000**. The re-run and the dry-runs cost 0.
@@ -184,7 +182,7 @@ No new dependency: `chromadb` was already in `pyproject.toml` and `requirements.
   - **Before the final commit (14:30):** the GitNexus MCP server failed to connect in this session, so I used the CLI.
     - `npx gitnexus analyze` crashed with `COPY failed for File: bad allocation`. The machine was low on memory, the same cause that stopped the Arm B waiter. The index stays stale at `1865607`.
     - `npx gitnexus detect-changes -s unstaged` reported "No changes detected". That is expected: this commit changes only docs and `indexing-log.jsonl`, with no code symbol.
-    - `-s compare -b origin/dev` also reported "No changes detected". That is **not credible** for a branch with code changes, so I treat it as inconclusive (stale index). The milestone-1 MCP result above (52 symbols, medium) is the valid one for the code.
+    - `-s compare -b origin/dev` also reported "No changes detected". That is **not credible** for a branch with code changes, so I treat it as inconclusive (stale index). The milestone-1 MCP result above (52 symbols, medium) is the valid one for the code, because `git diff --stat efc11e3 bd2fee8 -- src scripts tests` is empty: no code changed after that check.
 - **Offline pytest after all edits:** 211 passed, 1 deselected (the live Gemini test).
 
 ## Unverified / limits
