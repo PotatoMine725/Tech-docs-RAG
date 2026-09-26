@@ -25,3 +25,5 @@ C#, .NET, Java, Node.js, React, Angular, Vue, Flutter, Electron, ASP.NET Core as
 - Generated vector data is git-ignored and not committed; it is rebuilt by script from the chunk files and the embedding cache (ADR-0005 D16).
 - Embedding settings (model, dimension 768, limits, batch size) live in `config.py`, env-overridable (ADR-0005).
 - SQLite (stdlib `sqlite3`) is used for one concrete need: the embedding cache `data/cache/embeddings.sqlite` (one atomic write per provider call, resume across quota days; ADR-0005 D18).
+- Answer settings (models, fallback, `ALLOW_FALLBACK`, attempts, free-tier limits and the client-side throttle: 13 RPM answer model, 4 RPM fallback) live in `config.py`, env-overridable; listed in `.env.example` (ADR-0004 amendment 2026-09-26).
+- `infrastructure/gemini_retry.py` holds the retry, retry-after, quota-classification and key-redaction helpers shared by the Gemini embedder and the Gemini LLM adapter; `composition.py` wires the layers for scripts (and later the GUI and the evaluation runner).

@@ -7,7 +7,7 @@ import pytest
 from knowledge_assistant.application.generation.answer_question import AnswerQuestion, load_messages
 from knowledge_assistant.application.generation.prompt_builder import ANSWER_SCHEMA, PromptBuilder
 from knowledge_assistant.application.retrieval.retrieve import Retriever
-from knowledge_assistant.core.exceptions import GenerationError
+from knowledge_assistant.core.exceptions import GenerationError, LLMQuotaError, LLMRequestError, LLMUnavailableError
 from tests.fakes import FakeEmbedder, FakeLLM, InMemoryVectorStore, make_chunk
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -44,7 +44,7 @@ def test_answer_with_marker_builds_citation_for_that_rank():
     assert result.uncited_sentences == 1  # the second sentence lost its only marker
     assert result.llm.model_used == "fake-llm"
     assert result.prompt_version == "answer_v2"
-    assert set(result.latency_ms) == {"embed_query", "retrieve", "generate", "total"}
+    assert set(result.latency_ms) == {"embed_query", "retrieve", "generate", "retry_wait", "throttle_wait", "total"}
 
 
 def test_prompt_sent_to_llm_has_the_retrieved_passages_in_rank_order_and_the_schema():
@@ -122,3 +122,49 @@ def test_code_block_indexer_in_the_llm_answer_is_kept_and_not_cited():
     assert [c.marker for c in result.citations] == [1]
     assert result.dropped_markers == ()
     assert result.uncited_sentences == 0
+
+
+class WaitingLLM(FakeLLM):
+    """A FakeLLM whose responses report time spent waiting (RAG-003 accounting)."""
+
+    def __init__(self, *texts, retry_wait_ms=0.0, throttle_wait_ms=0.0):
+        super().__init__(*texts)
+        self.retry_wait_ms = retry_wait_ms
+        self.throttle_wait_ms = throttle_wait_ms
+
+    def generate(self, request):
+        from dataclasses import replace
+
+        response = super().generate(request)
+        return replace(response, retry_wait_ms=self.retry_wait_ms, throttle_wait_ms=self.throttle_wait_ms,
+                       retry_count=2, fallback_used=True, model_used="fallback-model", thoughts_tokens=9)
+
+
+def test_latency_separates_waiting_from_the_generate_stage():
+    llm = WaitingLLM(_reply(answer="Yes [1]."), retry_wait_ms=3000.0, throttle_wait_ms=250.0)
+    result = _service(llm).ask("Question?")
+    assert result.latency_ms["retry_wait"] == 3000.0
+    assert result.latency_ms["throttle_wait"] == 250.0
+    assert "generate" in result.latency_ms  # the wall time of generate(), waits included
+
+
+def test_result_carries_the_llm_accounting_fields():
+    result = _service(WaitingLLM(_reply(answer="Yes [1]."))).ask("Question?")
+    assert (result.llm.model_used, result.llm.retry_count, result.llm.fallback_used) == ("fallback-model", 2, True)
+    assert result.llm.thoughts_tokens == 9 and result.llm.prompt_tokens is not None
+
+
+def test_gate_refusal_has_no_llm_wait_keys():
+    result = _service(FakeLLM(_reply()), top_score=0.3, threshold=0.5).ask("Question?")
+    assert "retry_wait" not in result.latency_ms and "throttle_wait" not in result.latency_ms and result.llm is None
+
+
+@pytest.mark.parametrize("error", [LLMQuotaError("quota"), LLMUnavailableError("down"), LLMRequestError("bad")])
+def test_an_llm_error_reaches_the_caller_and_is_never_turned_into_insufficient(error):
+    class FailingLLM:
+        def generate(self, request):
+            raise error
+
+    with pytest.raises(type(error)) as raised:
+        _service(FailingLLM()).ask("Question?")
+    assert raised.value is error

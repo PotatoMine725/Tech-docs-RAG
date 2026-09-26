@@ -44,7 +44,7 @@ Real position (REORIENT-001, 2026-09-24): CORPUS-001, HOUSE-001 and EVAL-001 fin
 | Thu 24 Sep | Master plan. CORPUS-001 (EPIC-01), HOUSE-001 + VERIFY (ACCEPT), EVAL-001 + VERIFY (ACCEPT WITH FIXES) + fixes, REORIENT-001. | **G1** ✅ |
 | Fri 25 Sep | Owner fills the EVAL-001 re-check sheet; VERIFY EVAL-001 again; VERIFY REORIENT-001. Then EVAL-002 (write + freeze, tag `eval-freeze-v1`) and, in parallel, INGEST-001 (models, parser, normalization). Answer OD-1. | **M1 ground truth frozen** |
 | Sat 26 Sep | INGEST-002 (both chunkers + stats), INGEST-003 (MarkItDown, cuttable). RAG-001a (embedder + cache, V-1 probe, ADR-0005), then RAG-001b (Chroma; index Arm A before 14:00 and Arm B after 14:00 if quota needs two quota days). | **G2** |
-| Sun 27 Sep | Finish RAG-001b indexing. RAG-002 (retrieval, generation, citations, "insufficient information"; dev-set threshold). RAG-003 (retry/fallback, CLI, smoke checks). | **M2 first end-to-end answer** ✅ *(reached 26 Sep: RAG-002 verified, first grounded answers with heading-path citations on the dev set; G3 still open until RAG-003 smoke checks)*, **G3** |
+| Sun 27 Sep | Finish RAG-001b indexing. RAG-002 (retrieval, generation, citations, "insufficient information"; dev-set threshold). RAG-003 (retry/fallback, CLI, smoke checks). | **M2 first end-to-end answer** ✅ *(reached 26 Sep: RAG-002 verified, first grounded answers with heading-path citations on the dev set; G3 evidence completed by RAG-003 on 26 Sep, pending its 99-VERIFY)*, **G3** |
 | Mon 28 Sep | EVAL-003a (runner), EVAL-003b (metrics + judge), EVAL-003c (tables + spot-check tools), offline tests. GUI-001 in parallel. EVAL-004 starts: retrieval-only metrics for both arms (embeddings only, cheap), dry run of 3 questions after 14:00. | **G4** |
 | Tue 29 Sep | EVAL-004: full answer + judge run, both arms; after 14:00 fresh quota → re-run slot if needed; judge spot-check; evaluation report. EXP-001 (experiment + failure analysis). | **G5B** |
 | Wed 30 Sep | Finish EXP-001. BONUS-001 only if time remains (after M3 rule). QC-001 (README, AI_WORKLOG, final checks, video script). After 14:00: last quota day for small fixes. | **G6**, **M3 submission-ready** |
@@ -134,7 +134,7 @@ INGEST-004 (ADR-0003 D3a, owner 2026-09-25): Arm A drops heading-only chunks (75
 
 Deliverables:
 - **First step:** V-1 — check how a batched embedding request counts against the daily limit. This decides whether indexing takes one or two quota days. ✅ Answered 26 Sep (RAG-001a, ADR-0005): each text counts as one request → two quota days.
-- Decide OD-7…OD-11 before building indexes. (OD-7, OD-8 decided 26 Sep in ADR-0005; OD-9, OD-10 decided 26 Sep in RAG-002.)
+- Decide OD-7…OD-11 before building indexes. (OD-7, OD-8 decided 26 Sep in ADR-0005; OD-9, OD-10 decided 26 Sep in RAG-002; OD-11 decided 26 Sep by the owner in the RAG-003 addendum, recorded in the ADR-0004 amendment.)
 - Embedder: `gemini-embedding-001`, task types `RETRIEVAL_DOCUMENT` (chunks) / `RETRIEVAL_QUERY` (questions), batched and throttled to the per-minute token limit; save embeddings to disk so quota is never spent twice on the same text.
 - ChromaDB adapter; one collection per arm; **both arms indexed now** (uses embedding quota early).
 - Retrieval use case (top-k = 5).
@@ -146,9 +146,9 @@ Deliverables:
 
 Exit gate **G3** (M2 is the first successful end-to-end answer):
 - [x] For both arms, number of items in the Chroma collection = number of chunks in the chunk file. (RAG-001b, 26 Sep: Arm A 733 = 733, Arm B 859 = 859; re-runs 0 new / 0 API. The store is in `data/chroma/` (ADR-0005 D16); it was rebuilt there from the embedding cache with 0 API requests after the owner fixed `.env`.)
-- [ ] Smoke checks saved in `validation/` (labelled "smoke check, not evaluation data"): 1 English + 1 Vietnamese question answered with heading-path citations; 1 out-of-corpus question gets the "insufficient information" message.
-- [ ] No API key in code, logs or output (secret scan); model names only in config.
-- [ ] Offline pytest passes; `-m gemini` tests pass when run on purpose.
+- [x] Smoke checks saved in `validation/` (labelled "smoke check, not evaluation data"): 1 English + 1 Vietnamese question answered with heading-path citations; 1 out-of-corpus question gets the "insufficient information" message. (RAG-003, 26 Sep: [smoke-2026-09-26](../../validation/generation/smoke-2026-09-26.md), 4 LLM + 0 embedding requests; pending 99-VERIFY.)
+- [x] No API key in code, logs or output (secret scan); model names only in config. (RAG-003, 26 Sep: scan 0 matches; test that no model name is in `src/` outside `config.py`; pending 99-VERIFY.)
+- [x] Offline pytest passes; `-m gemini` tests pass when run on purpose. (RAG-003, 26 Sep: 546 passed; `-m gemini` 1 passed on cached vectors, 0 requests; there is no LLM `-m gemini` test, the LLM live check is the smoke script; pending 99-VERIFY.)
 
 ### EPIC-04 Knowledge assistant (desktop GUI)
 **When:** Mon 28 – Tue 29 Sep · **Phase:** 3 · **Task:** GUI-001 (`10`)
@@ -284,7 +284,7 @@ This plan does **not** decide these. Each must be decided by the owner epic's la
 | OD-8 | Distance metric (held constant by D7, but not named) | ADR-0003 D7 | EPIC-03 | ✅ Decided 26 Sep (owner, RAG-001a): cosine, both arms (ADR-0005 D17) |
 | OD-9 | Rule for answering "insufficient information" | retrieval-spec | EPIC-03 | ✅ Decided 26 Sep (RAG-002, rule from the prompt, owner addendum): retrieval gate top-1 < 0.686 (dev set, Arm A, one value) + LLM `insufficient` flag |
 | OD-10 | Prompt template / grounding instructions | generation-spec | EPIC-03 | ✅ Decided 26 Sep (owner, RAG-002): `config/prompts/answer_v1.md`, owner's rule 2, JSON mode |
-| OD-11 | Max retry attempts before fallback | ADR-0004 D13 | EPIC-03 | 27 Sep |
+| OD-11 | Max retry attempts before fallback | ADR-0004 D13 | EPIC-03 | ✅ Decided 26 Sep (owner, RAG-003 addendum; ADR-0004 amendment): 3 attempts in total (1 + 2 retries) with backoff, jitter and retry-after, each wait ≤ 120 s; then the fallback gets one attempt; a daily-quota 429 skips the retries; `ALLOW_FALLBACK` (the eval runner sets false); throttle 13 / 4 RPM |
 | OD-12 | How citation quality is checked (by hand, judge, or both) | evaluation-spec | EPIC-05 B | 28 Sep |
 | OD-13 | Judge spot-check sample size | ADR-0004 D12 | EPIC-05 B | 29 Sep |
 | OD-14 | GUI features beyond the minimum | gui-architecture | EPIC-04 | 28 Sep |

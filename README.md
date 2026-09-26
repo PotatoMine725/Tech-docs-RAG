@@ -45,3 +45,7 @@ Details: [`docs/knowledge/domain/corpus-topic-map.md`](docs/knowledge/domain/cor
 ## Setup, usage, evaluation and experiment results
 
 TBD (EPIC-07).
+
+### Troubleshooting
+
+- **Memory errors on a low-memory Windows machine** (numpy / ChromaDB failing to allocate memory at import or query time): set `OPENBLAS_NUM_THREADS=1` (it is in `.env.example`; copy it into `.env` or the environment) to limit the BLAS thread pool.

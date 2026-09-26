@@ -129,6 +129,15 @@ def test_503_twice_then_success_takes_three_attempts_with_backoff():
     assert embedder.stats()["api_requests"] == 3 and embedder.stats()["retries"] == 2
 
 
+@pytest.mark.parametrize("code", [500, 502, 503, 504])
+def test_each_transient_server_status_is_retried(code):
+    """ADR-0004 amendment: 502 joined the shared retry set, so the embedder retries it too (as 500, 503, 504)."""
+    clock = FakeClock()
+    models = FakeModels(script=[api_error(code), api_error(code)])
+    assert len(make_embedder(models, clock).embed(["a"], EmbeddingTask.DOCUMENT)) == 1
+    assert len(models.calls) == 3 and clock.sleeps == [1.0, 2.0]
+
+
 def test_always_failing_raises_embedding_error_after_max_attempts():
     clock = FakeClock()
     models = FakeModels(script=[api_error(503)] * 10)
@@ -232,6 +241,26 @@ def test_quota_exhausted_error_is_an_embedding_error():
 def test_non_retryable_error_fails_immediately():
     models = FakeModels(script=[api_error(400)])
     with pytest.raises(EmbeddingError, match="400"):
+        make_embedder(models).embed(["a"], EmbeddingTask.DOCUMENT)
+    assert len(models.calls) == 1
+
+
+@pytest.mark.parametrize("error", [httpx.ConnectError("refused"), httpx.ReadError("reset"), httpx.RemoteProtocolError("closed")],
+                         ids=lambda e: type(e).__name__)
+def test_connection_errors_are_wrapped_and_not_retried(error):
+    """ADR-0005 amendment 2 (owner-accepted): the embedder does not retry connection errors (indexing is resumable).
+    RAG-003 only stops them escaping as raw httpx exceptions: they become EmbeddingError at the first failure."""
+    models = FakeModels(script=[error] * 5)
+    clock = FakeClock()
+    with pytest.raises(EmbeddingError, match="embedding request failed: " + type(error).__name__) as raised:
+        make_embedder(models, clock).embed(["a"], EmbeddingTask.DOCUMENT)
+    assert not isinstance(raised.value, httpx.HTTPError) and raised.value.__cause__ is not None
+    assert len(models.calls) == 1 and clock.sleeps == []
+
+
+def test_a_provider_side_httpx_error_that_is_not_a_timeout_is_wrapped_too():
+    models = FakeModels(script=[httpx.UnsupportedProtocol("no scheme")])
+    with pytest.raises(EmbeddingError):
         make_embedder(models).embed(["a"], EmbeddingTask.DOCUMENT)
     assert len(models.calls) == 1
 
