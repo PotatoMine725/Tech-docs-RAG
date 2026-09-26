@@ -146,7 +146,7 @@ No new dependency: `chromadb` was already in `pyproject.toml` and `requirements.
   - `get_chroma_path()` without `.env` gives `data/chroma` (the ADR-0005 D16 / OD-7 default).
   - I found this at 14:22 when a check I ran without `.env` saw 0 items.
   - `D:\ChromaDB\chroma.sqlite3` holds exactly the two collections of this task. It also has two folders dated 2026-09-24 that this task did not create, and I left them alone.
-  - I did **not** edit `.env` (owner's file, holds the key), did not re-index into `data/chroma/`, and did not copy the store: RAG-002 reads the same `.env`, so one store stays the single source.
+  - I did **not** edit `.env` (owner's file, holds the key), did not re-index into `data/chroma/`, and did not copy the store: RAG-002 reads the same `.env`, so one store stays the single source. (superseded, see the rebuild at line 152)
   - At 14:30 I asked the owner to decide: keep `D:\ChromaDB` and amend OD-7 / ADR-0005 D16, or set `CHROMA_PATH=data/chroma` and rebuild.
   - Side effect of my check: it created an empty `data/chroma/chroma.sqlite3` (0 collections, git-ignored). The owner said to leave it; Chroma reused it.
 - **Owner decision (14:37): the index moves to `data/chroma/`, and ADR-0005 D16 stands.**
