@@ -135,7 +135,7 @@ def render_text(result: AnswerResult, arm: str, threshold: float) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _save_error_body(error: LLMError) -> str | None:
+def save_error_body(error: LLMError) -> str | None:
     """The provider's error body (key redacted) goes to data/logs so a 429 can be inspected; returns the file name."""
     if not error.provider_body:
         return None
@@ -145,7 +145,7 @@ def _save_error_body(error: LLMError) -> str | None:
     return path.name
 
 
-def _classify(error: KnowledgeAssistantError) -> tuple[int, str]:
+def classify(error: KnowledgeAssistantError) -> tuple[int, str]:
     if isinstance(error, LLMError):
         return 2, error.kind
     if isinstance(error, GenerationError):
@@ -174,9 +174,9 @@ def main(argv: list[str] | None = None, *, factory=open_service, out=None, err=N
             result = service.ask(args.question)
             threshold = service.threshold
     except KnowledgeAssistantError as error:
-        code, kind = _classify(error)
+        code, kind = classify(error)
         message = redact_key(str(error))
-        saved = _save_error_body(error) if isinstance(error, LLMError) else None
+        saved = save_error_body(error) if isinstance(error, LLMError) else None
         if args.json:
             print(json.dumps({"error": {"kind": kind, "message": message}}, ensure_ascii=False), file=out)
         else:
