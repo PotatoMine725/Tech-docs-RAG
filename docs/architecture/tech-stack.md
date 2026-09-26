@@ -8,7 +8,7 @@
 - TESTING: pytest (Gemini-dependent tests use the `gemini` marker and are deselected by default)
 - SOURCE FORMAT: current corpus = Markdown; architecture = format-independent
 - STRUCTURED DATA: JSON / JSONL
-- OPTIONAL FUTURE STORAGE: SQLite only if a concrete requirement appears
+- OPTIONAL FUTURE STORAGE: SQLite only if a concrete requirement appears (first one: the embedding cache, ADR-0005 D18)
 - DOCUMENT CONVERSION: Microsoft MarkItDown `markitdown[pdf,docx]>=0.1.8,<0.2` (ADR-0002; added in INGEST-003; only `infrastructure/parsing/markitdown_parser.py`). Its `magika` dependency needs `onnxruntime`, which `chromadb` already requires (no new runtime; imported lazily).
 - CHUNKING: header-aware baseline; fixed-size as experiment comparison (ADR-0002); parameters in ADR-0003
 - EMBEDDING: abstracted behind `core.interfaces.embedding`; `gemini-embedding-001` (ADR-0004); MUST be multilingual (EN + VI queries over an English corpus, ADR-0003 D9)
@@ -21,5 +21,7 @@
 C#, .NET, Java, Node.js, React, Angular, Vue, Flutter, Electron, ASP.NET Core as an app framework (it appears only as corpus subject matter), SQLite (until required), ML/ONNX/local models (until required), reranking (until an experiment).
 
 ## Configuration notes
-- `CHROMA_PATH` env var; existing default is `D:\ChromaDB` (deliberate prior choice, kept). Repo `data/chroma/` is the documented alternative. DECISION REQUIRED: which is canonical.
-- Generated vector data policy: DECISION REQUIRED. Currently `data/chroma/*` is git-ignored (except .gitkeep).
+- `CHROMA_PATH` env var; default `data/chroma/` (OD-7, ADR-0005 D16; was `D:\ChromaDB`).
+- Generated vector data is git-ignored and not committed; it is rebuilt by script from the chunk files and the embedding cache (ADR-0005 D16).
+- Embedding settings (model, dimension 768, limits, batch size) live in `config.py`, env-overridable (ADR-0005).
+- SQLite (stdlib `sqlite3`) is used for one concrete need: the embedding cache `data/cache/embeddings.sqlite` (atomic per-batch writes, resume across quota days; ADR-0005 D18).

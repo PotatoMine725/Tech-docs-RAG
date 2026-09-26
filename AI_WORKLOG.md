@@ -10,7 +10,7 @@ A record of how AI tools were used in this project, required by the submission (
 | Claude Code (CLI) | Claude Opus 5.5 (`claude-opus-5-5`; commits `490068f` onward) | ADR drafting, master plan, corpus analysis, repo hygiene, evaluation design |
 | GitNexus (`npx gitnexus`) | local code index | Impact analysis before edits, change detection before commits |
 | Chunking consultation (`docs/plans/chunking-consultation-handoff.md`, cited as context by ADR-0003) | — | A handoff written by Claude Code so another agent could advise on chunking before ADR-0003 |
-| Google Gemini API | not used yet (planned: `gemini-embedding-001`, `gemini-3.5-flash-lite`, `gemini-3.5-flash`, ADR-0004) | Embeddings, answers, LLM judge (from EPIC-03) |
+| Google Gemini API | `gemini-embedding-001` (from RAG-001a, 2026-09-26); planned: `gemini-3.5-flash-lite`, `gemini-3.5-flash` (ADR-0004) | Embeddings (V-1 probe + 1 live test so far), answers, LLM judge (from EPIC-03) |
 
 ## Log
 
@@ -202,6 +202,17 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 - *Fix:* (1) mutation uses 015 with its evidence emptied; (2) `<` escaped outside code spans.
 - *Human decision:* none yet. AI decisions to confirm and one ground-truth proposal (G1, not applied) are in the [review sheet](docs/reviews/evaluation/eval-v1-review.md) and the [handoff](docs/plans/session-handoff-2026-09-25-eval-002.md). GitNexus was unavailable in this container, so `detect_changes` was not run (no existing symbol edited).
 - *Verifier findings (99-VERIFY, 2026-09-25, [EVAL-002-verify](docs/reviews/evaluation/EVAL-002-verify.md) → ACCEPT):* no defect that fails a requirement. Ground truth in the JSONL equals `blueprint.yaml` except the owner-approved 017 note; rebuild byte-identical; 107/107 quotes re-found independently; 140 passed. Non-blocking: (1) test gap: disabling the eval/dev expected-section overlap check leaves all 19 new tests green; (2) Q-EVAL-024 (vi) also states the cause ("test không chạy trong thư mục output"), a bigger leak than the sheet flags; (3) Q-EVAL-028 quote matches only via whitespace collapse (source has a no-break space), undisclosed; (4) G5A box 1 ticked before the freeze (with a "not frozen" note); (5) blueprints still `status: proposed`. Unverified: Windows run, GitNexus.
+
+### 2026-09-26 RAG-001a: Gemini embedder + embedding cache, V-1 probe (branch `rag-001a`)
+- *AI did:* core `EmbeddingTask` + `Embedder.model_id` + `EmbeddingError`; `GeminiEmbedder` (batching, sliding-window throttle, retry/backoff, L2 normalization, dimension check); SQLite `CachingEmbedder` (per-batch commit, resume, in-call dedup); `FakeEmbedder`; 30 offline tests + 1 live test; V-1 probe script; ADR-0005 ([report](docs/reports/execution/RAG-001a.md)). Asked the owner for dim / OD-7 / OD-8 (768, `data/chroma/`, cosine) and guided the before/after AI Studio reading. Live calls: probe (1 call, 3 texts) and the live test (1 call, 3 texts), each run once. 171 passed offline; live test passed (cos EN–VI 0.9055 > EN–unrelated 0.6606).
+- *AI got wrong:*
+  - (1) The first code (commit `a8e4a2d`, written before the V-1 reading) charged the throttle 1 request per HTTP call. V-1 showed each text counts as a request, so a 40-text batch would have looked like 1 of 90 requests/min and run into 429s during indexing.
+  - (2) One new throttle test expected a wait where 600 + 400 tokens exactly meets the 1,000 limit, so no wait is correct.
+  - (3) The first draft of the execution report said the embedder test file has 24 tests; it has 21.
+  - (4) A shell command meant to measure the pre-task test count included `git checkout origin/dev -- .`, which would have overwritten uncommitted doc edits.
+- *How found:* (1) the owner's V-1 reading (AI Studio RPM 0 → 3 for one 3-text call); (2) the first pytest run (1 failed); (3) counting with `pytest --collect-only` before the commit; (4) blocked by the Claude Code auto-mode permission check before it ran. Nothing changed.
+- *Fix:* (1) commit `05ec4d6`: throttle charges `len(batch)` requests, batches are capped at the per-minute request limit, a test pins the V-1 behaviour, and a mutation (per-call counting) fails it. (2) The test now asks for 500 tokens. (3) Corrected to 21 before the commit. (4) The command was dropped. The baseline count was not needed, so the report states only the tests this task adds.
+- *Human decision:* dimension 768, OD-7 `data/chroma/`, OD-8 cosine (owner, AskUserQuestion). The owner read the AI Studio usage page for V-1.
 
 ## Summary: how AI helped
 
