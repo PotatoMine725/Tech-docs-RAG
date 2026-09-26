@@ -24,3 +24,15 @@ class QuotaExhaustedError(EmbeddingError):
 
 class VectorStoreError(KnowledgeAssistantError):
     """The vector store cannot serve the request, e.g. its collection was built with other settings."""
+
+
+class RetrievalError(KnowledgeAssistantError):
+    """Retrieval returned nothing usable, e.g. the collection is empty or the query embedding is missing."""
+
+
+class GenerationError(KnowledgeAssistantError):
+    """The LLM output is unusable (not the expected JSON, truncated, empty). Never turned into "insufficient"."""
+
+    def __init__(self, message: str, raw_text: str | None = None) -> None:
+        super().__init__(message)
+        self.raw_text = raw_text

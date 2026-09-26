@@ -1,6 +1,8 @@
 """Domain models. Fields marked TBD are intentionally undecided (see docs/architecture/data-model.md)."""
 from dataclasses import dataclass
 
+from knowledge_assistant.core.interfaces.llm import LLMResponse
+
 HEADING_PATH_SEPARATOR = " > "
 
 
@@ -75,8 +77,32 @@ class Citation:
     source_id: str
     document_name: str
     location: str  # heading path (ADR-0003 D5); never a page number
-    excerpt: str
+    excerpt: str  # original English chunk text (ADR-0003 D9)
+    chunk_id: str
+    marker: int  # the [n] passage number in the prompt and the answer (1..k)
+    source_url: str  # "" when the document has none (all 24 accepted documents have one)
     location_type: str = "heading"  # extensible: heading | position (documents without headings)
+
+
+@dataclass(frozen=True)
+class AnswerResult:
+    """One answered question (RAG-002). When `insufficient`, `answer` is the localized message and `citations`
+    are optional related content only, never support for an answer (owner decision D2, 2026-09-24)."""
+
+    question: str
+    language: str  # "en" | "vi"
+    answer: str
+    insufficient: bool
+    insufficient_reason: str | None  # "retrieval_gate" | "llm" | None
+    missing_information: str | None
+    citations: tuple[Citation, ...]  # ordered by first marker in the answer, then the LLM's cited_passages
+    retrieved: tuple[RetrievedChunk, ...]
+    dropped_markers: tuple[int, ...]  # [n] markers / cited passages that pointed outside 1..k
+    uncited_sentences: int  # diagnostic: sentences of >= 5 words without any marker
+    latency_ms: dict[str, float]  # embed_query, retrieve, generate, total
+    llm: LLMResponse | None  # None when the retrieval gate fired
+    prompt_version: str
+    duplicates_dropped: int = 0  # over-fetched hits dropped as same-content duplicates (RAG-002 addendum 1)
 
 
 @dataclass(frozen=True)
