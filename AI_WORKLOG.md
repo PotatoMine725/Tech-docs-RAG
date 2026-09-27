@@ -383,6 +383,38 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 - *Human decision:* the whole addendum: OD-11 policy, the 13 / 4 RPM throttle and limits, `ALLOW_FALLBACK` and the eval runner's use of it (ledger note for 09a), the smoke design and its budget (at most 5 LLM and 0 embedding requests), `--gate-off` as a diagnostic. Open for the owner at `99-VERIFY`: the choices listed in the [report](docs/reports/execution/RAG-003.md) ("Decisions and open choices").
 - *Verifier findings* (99-VERIFY, 2026-09-26, Windows 3.13.3, 0 Gemini requests, [RAG-003-verify](docs/reviews/code/RAG-003-verify.md) → ACCEPT WITH FIXES): 546 offline tests pass (dev 383); the embedder's RAG-001a tests pass unchanged against the branch; no test assertion was deleted or loosened; three mutations (retry count, daily-quota fast path, `ALLOW_FALLBACK` guard) each fail tests (9, 3, 5) and the files were restored byte for byte. Defects: (1) **502 is not retried**: `RETRYABLE_STATUS` is the embedder's `{429, 500, 503, 504}`, but the owner's list includes 502; a probe showed a 502 skips the retries and spends one of the fallback's 20 daily requests, and the ADR note that lists the embedder's set does not mention the omission. (2) The `--json` output schema is documented only in code and one test, not in the spec, `--help` or the docstring. (3) The parametrized error-boundary test lacks the persistent 500 and 400 cases (500 and 400 behave correctly in a probe and in other tests). Unverified: whether thinking tokens count against `max_output_tokens` (the installed google-genai 1.75.0 does not say; the adapter sets no `thinking_config`; default `max_output_tokens` is 1024; the fallback used 370 thinking tokens in the smoke check).
 
+### 2026-09-27 EVAL-003a: resumable evaluation runner, generation only (branch `eval-003a`, PR into `dev`)
+- *AI did:*
+  - `RunEvaluation` (application) and `scripts/evaluation/run_eval.py`: resume (ok skipped, error retried, settings mismatch refused), a request-counted LLM budget, quota stop with a resume command, model-purity abort, estimate before a run, frozen-hash check of both question files, `eval-freeze-v1` in `run.json`, fallback forced off, throttles built once.
+  - The record schema with the owner's extra fields; `display_text` per retrieved chunk so runner records go into the EVAL-003b-pre latency and retrieval functions with no adapter; a `RecordStore` port and a crash-safe JSONL store.
+  - An optional `on_provider_error` hook on `GeminiLLM` and `FirstProviderErrors`, which keeps the first real 429 and 5xx body.
+  - 84 new offline tests (653 passed), 19 mutations, all killed; live dry run on dev, arm A: 2 LLM requests, 0 embedding requests, 0 × 429; no eval-split run ([report](docs/reports/execution/EVAL-003a.md)).
+- *AI got wrong:*
+  - **Shared checkout.** My first `git switch -c eval-003a` ran in the main checkout while another session had uncommitted GUI work there, so it moved that checkout's HEAD for a few seconds.
+  - **Resume check skipped.** The "nothing to run" shortcut skipped the settings check that lived only in `run()`, so a finished run could be resumed with other settings.
+  - **Two flawed tests before their first run.** The fallback-purity test replied `"{}"`, which `AnswerQuestion` rejects while parsing, before the purity check can see the answer; the default-run-id test never asserted on the ids it listed.
+  - **Test double against the guard.** The CLI tests' fake LLM answered as `test-answer-model`, not the configured model, so the purity guard aborted every CLI test.
+  - **Wrong counter assumption.** The arm-B cache test assumed `missing()` counts cache hits.
+  - **Live test by mistake.** I ran `pytest -m gemini` to "confirm it stays deselected"; that option selects the live test.
+  - **Test count.** The first report draft said 83 new tests.
+- *How found:*
+  - Shared checkout: the `git switch` output listed modified files I had not touched.
+  - Resume check: a failing CLI test (exit code 0, expected 3).
+  - Flawed tests: re-reading them before running (the purity one also by re-reading `AnswerQuestion.ask`).
+  - Test double: the abort message named the configured model.
+  - Counter: the failing assertion.
+  - Live test: it failed at once; `gemini_embedder.py` raises `ConfigurationError` without a key, and the shell had none, so 0 requests were sent.
+  - Test count: `pytest --collect-only` (84).
+- *Fix:*
+  - Switched back at once, deleted the empty branch, worked in a git worktree; nothing of the other session was changed or staged.
+  - The settings check also runs in `estimate()`, with a test seen failing first.
+  - Both tests corrected before their first run.
+  - The doubles answer as the configured model.
+  - The test expects the hits of arm B only.
+  - Removed the empty git-ignored cache file the run created.
+  - The report says 84.
+- *Human decision:* the whole addendum of 2026-09-27: extra record fields, frozen-hash check and tag in `run.json`, model purity, the quota estimate, budget and stop rule, saving the first 429/5xx body, no eval-split run. Open for the verifier and owner: the choices under "Design decisions" in the report (run id with the split, request-counted budget, the `GeminiLLM` hook, `display_text` in records).
+
 ## Summary: how AI helped
 
 To be filled at QC-001.
