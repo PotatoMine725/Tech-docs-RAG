@@ -410,6 +410,11 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - The settings check also runs in `estimate()`, with a test seen failing first.
   - Both tests corrected before their first run.
   - The doubles answer as the configured model.
+- *Verifier findings* (99-VERIFY, 2026-09-27, 0 Gemini requests, [review](docs/reviews/evaluation/EVAL-003a-verify.md) → ACCEPT WITH FIXES): 653 offline tests pass (dev `dcdea66` 569; the 569 old test files pass unchanged against the branch's `src`; trial merge with current `dev` 681); metric outputs on the dev cases and the committed records are byte-identical before and after; the quota-stop and retry-counting mutations each fail tests. Real defects:
+  - **Hook not exception-safe.** `GeminiLLM` calls `on_provider_error` unguarded: a hook that raises `OSError` ended a `429, 503, ok` sequence after 1 request instead of 3, so the observer can change retry behavior. No test used a raising hook.
+  - **Question-hash resume refusal untested.** Excluding `question_files` from the settings comparison on a scratch copy left the whole suite green (652 passed); the prompt-hash refusal is tested only through `estimate()`.
+  - Records carry no `split` field (owner wants one); `AI_WORKLOG.md` conflicts with `dev` (PR #15 merged since); a purity-aborted case's request is missing from that invocation's `llm_requests` (the adapter counter in the same manifest is right).
+  - The report's numbers, the pasted record (only `display_text` and `passage_hash` shortened, as stated), the per-file test counts, the frozen hashes and the firewall counts all reproduced. No real 429/5xx was ever seen, so the body capture stays proven offline only.
   - The test expects the hits of arm B only.
   - Removed the empty git-ignored cache file the run created.
   - The report says 84.
