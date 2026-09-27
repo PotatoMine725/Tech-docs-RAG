@@ -1,7 +1,8 @@
-"""EVAL-003b: the duplicate overlap rule (owner decision, EVAL-003b addendum 2026-09-27; RAG-002 ledger note).
+"""EVAL-003b: the duplicate overlap rule (owner decision, EVAL-003b addendum 2026-09-27; RAG-002 ledger note; scope
+narrowed by the owner the same day: section level only).
 
-For span and source metrics (lenient and strict), a retrieved chunk counts as overlapping a span if it OR any chunk in
-its `duplicate_chunk_ids` does. The retriever keeps one chunk per `passage_hash` group (RAG-002) and lists the dropped
+For span (section-level) metrics, lenient and strict, a retrieved chunk counts as overlapping a span if it OR any chunk
+in its `duplicate_chunk_ids` does. Source metrics use the kept chunk's own document (what the user sees). The retriever keeps one chunk per `passage_hash` group (RAG-002) and lists the dropped
 copies; the copy it kept can sit in another document (the doc 12/13 pair) than the one the ground truth names.
 Offsets and documents are made up; every expected value is worked out by hand.
 """
@@ -34,9 +35,12 @@ def test_a_duplicate_that_overlaps_the_span_makes_the_kept_chunk_a_section_hit()
     assert section_hit_at_k([KEPT_IN_13], SPANS_12, k=5, strict=True) == 1
 
 
-def test_a_duplicate_in_the_expected_document_makes_the_kept_chunk_a_source_hit():
-    assert source_hit_at_k([KEPT_IN_13], SPANS_12, k=5) == 1
-    assert source_hit_at_k([KEPT_IN_13], SPANS_12, k=5, strict=True) == 1
+def test_source_metrics_use_the_kept_chunks_own_document():
+    """Owner, 2026-09-27: the kept #13 chunk is a #13 source, whatever its dropped #12 copy is."""
+    assert source_hit_at_k([KEPT_IN_13], SPANS_12, k=5) == 0
+    assert source_hit_at_k([KEPT_IN_13], SPANS_12, k=5, strict=True) == 0
+    assert reciprocal_rank([KEPT_IN_13], SPANS_12, level=SOURCE) == 0.0
+    assert slot_fraction_at_k([KEPT_IN_13], SPANS_12, k=5, level=SOURCE) == 0.0
 
 
 def test_without_the_duplicate_the_same_chunk_misses():
@@ -48,7 +52,6 @@ def test_without_the_duplicate_the_same_chunk_misses():
 def test_a_touching_duplicate_does_not_overlap():
     touching = RankedChunk("13", 500, 600, duplicates=(("12", 50, 150),))  # ends where the span starts
     assert section_hit_at_k([touching], SPANS_12, k=5) == 0
-    assert source_hit_at_k([touching], SPANS_12, k=5) == 1  # source level ignores offsets
 
 
 def test_duplicate_rule_is_strict_aware():
@@ -62,7 +65,7 @@ def test_duplicate_rule_in_mrr_and_slot_fraction():
     spans = [span("12", 150, 400, slot="S1"), span("20", 0, 100, slot="S2")]
     miss = RankedChunk("05", 0, 100)
     assert reciprocal_rank([miss, KEPT_IN_13], spans) == pytest.approx(0.5)
-    assert reciprocal_rank([miss, KEPT_IN_13], spans, level=SOURCE) == pytest.approx(0.5)
+    assert reciprocal_rank([miss, KEPT_IN_13], spans, level=SOURCE) == 0.0  # source level: the kept chunk's own #13
     assert slot_fraction_at_k([miss, KEPT_IN_13], spans, k=5) == pytest.approx(0.5)
 
 
@@ -100,9 +103,10 @@ def test_from_record_without_duplicates_needs_no_index():
 
 def test_duplicate_rule_changes_names_every_value_the_rule_changed():
     changed = duplicate_rule_changes([KEPT_IN_13], SPANS_12)
-    # k = 1, 3, 5 x source/section x lenient/strict hit, plus the four MRR values and the two slot fractions
-    assert "section_hit@5" in changed and "source_hit@1:strict" in changed and "mrr" in changed
-    assert len(changed) == 12 + 4 + 2
+    # section level only: k = 1, 3, 5 x lenient/strict hit, lenient and strict MRR, the section slot fraction
+    assert "section_hit@5" in changed and "section_hit@1:strict" in changed and "mrr:strict" in changed
+    assert not [name for name in changed if name.startswith("source")]
+    assert len(changed) == 6 + 2 + 1
 
 
 def test_duplicate_rule_changes_is_empty_without_duplicates_or_when_the_kept_chunk_already_hits():

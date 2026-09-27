@@ -217,6 +217,8 @@ def summarize_answers(rows: list[dict]) -> dict:
     judged = [row["answer"] for row in answerable if row["answer"]["check"] == ANSWER_CHECK]
     return {
         "records": len(scored),
+        # a runner error has no answer to label: listed so a table caption can name it (never counted as right or wrong)
+        "runner_errors": sorted(f"{row['case_id']}:{row['arm']}" for row in rows if row["status"] != "ok"),
         "unlabelled": sorted(f"{row['case_id']}:{row['arm']}" for row in scored if row["answer"]["result"] is None),
         "labels": {label: count(labelled, label) for label in
                    (CORRECT, PARTIALLY_CORRECT, "incorrect", FALSE_REFUSAL, CORRECT_REFUSAL, HALLUCINATION)},

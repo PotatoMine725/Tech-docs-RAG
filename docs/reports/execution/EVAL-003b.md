@@ -10,11 +10,13 @@ Task: `agents/prompts/09b-EVAL-003b-metrics-and-judge.md` with the owner's adden
 - **Audit, not redo.** The EVAL-003b-pre code (§1 retrieval metrics, expected spans, §3 mapping, §4 latency) was audited
   against the prompt and the owner decisions. One change, test first: the owner's new **duplicate overlap rule**. Every
   other audited item is unchanged (table below).
-- **Duplicate rule count.** Real records: **0** values changed. The committed dev dry-run records hold no duplicates,
-  and no eval-split records exist. Simulated on the chunk files (not a retrieval result):
-  - Arm A at **section** level: only the **2** doc-12/13 cases (Q-EVAL-003, 004), as the owner expected.
-  - Arm A at **source** level: **4 more** cases (Q-EVAL-022, 023, 027, 032). This is **above the owner's "at most 2"**; see § Duplicate rule.
-  - Arm B has no duplicate groups.
+- **Duplicate rule, scope decided by the owner during the task: section level only.** Source metrics use the kept
+  chunk's own document; the addendum's "span/source" wording was a mistake (owner, 2026-09-27). Count of changed values:
+  - Real records: **0** values changed. The committed dev dry-run records hold no duplicates, and no eval-split records exist.
+  - Simulated on the chunk files (not a retrieval result): only the **2** doc-12/13 cases (Q-EVAL-003, 004) on Arm A, as the
+    owner expected. Arm B has no duplicate groups.
+  - My first implementation also applied the rule at source level. That gave a bound of 6 (+ Q-EVAL-022, 023, 027, 032),
+    and I asked the owner (§ Duplicate rule). EVAL-004 reports the actual count.
 - **Judge.** `application/evaluation/judge.py`, `config/prompts/judge_v1.md` (two sections: answer check and refusal
   check) and `scripts/evaluation/judge_run.py`.
   - Settings: `JUDGE_MODEL` = `gemini-3.5-flash-lite` in config, temperature 0, fallback off, 13 RPM.
@@ -24,9 +26,10 @@ Task: `agents/prompts/09b-EVAL-003b-metrics-and-judge.md` with the owner's adden
 - **Scoring.** `application/evaluation/scoring.py` holds the pure per-record scores and summaries: answer, refusal and
   citation (OD-12: span check and judge support check, separately), the breakdowns, judge latency and cost.
   `config/pricing.json` cites the Gemini pricing page (flash-lite $0.30 / $2.50 per 1M tokens; the other two models are null).
-- **Tests.** 89 new offline tests. Full suite: **774 passed, 1 deselected** (dev `7db105b` measured: 685). All **8 mutations killed**
-  (refusal-check row, duplicate rule, per-point evidence rule, the cache key with each of its 4 components, and the cost
-  per-question formula).
+- **Tests.** 90 new offline tests. Full suite: **775 passed, 1 deselected** (dev `7db105b` measured: 685). All **13 mutations
+  killed**: the refusal-check row, the duplicate rule (off, and wrongly applied at source level), the two `from_record`
+  guards, the per-point evidence rule, each of the 4 cache-key components, the cost per-question formula, and the
+  runner-error listing.
 - **Live** (dev dry-run records): **2 judge requests** (Q-DEV-001 EN, Q-DEV-002 VI; both ok, `gemini-3.5-flash-lite`,
   0 retries). A re-run spent **0**. **0 embedding requests.** The committed runs contain **no refusal-check record**
   (Q-DEV-005 is a bare retrieval-gate refusal, labelled `correct_refusal` without a call), so no refusal check ran live.
@@ -57,13 +60,18 @@ Task: `agents/prompts/09b-EVAL-003b-metrics-and-judge.md` with the owner's adden
 **Every change to audited code** (`metrics/retrieval.py`; GitNexus impact below):
 1. `RankedChunk` gains `duplicates: tuple[(source_id, start, end), ...] = ()`, and `from_record(record, chunk_index=None)` resolves
    `duplicate_chunk_ids` (unknown id → `ValueError`).
-2. `_hits` = chunk **or any duplicate** hits the span (new helper `_location_hits` holds the old body unchanged).
+2. `_hits`: at **section** level the chunk **or any duplicate** overlaps the span; at source level only the kept chunk's own
+   document counts (owner). The new helper `_location_hits` holds the old body unchanged.
 3. New functions: `duplicate_rule_changes`, `chunk_index`, `hits_any`, constant `HIT_KS = (1, 3, 5)`; module docstring.
 
 Failing test first. `tests/unit/application/test_eval_duplicate_rule.py` was written before the rule:
 - First run: collection error, since `duplicate_rule_changes` did not exist.
 - With only the data field and a stub in place: **`7 failed, 6 passed`**. The 6 that passed are the `from_record` tests and the "no change" cases.
 - After the rule: `13 passed`. All 241 application tests passed, including the 30 retrieval tests unchanged.
+- **Scope change (owner, during the task): section level only.** The tests were changed first. The source-level test
+  became "source metrics use the kept chunk's own document", the changed-values count went from 18 to 9, and source
+  precision on a duplicate was pinned to 0.0. Against the old code they gave **`4 failed, 32 passed`**. After the
+  one-line change in `_hits`: `36 passed`.
 
 ## Files
 
@@ -77,7 +85,7 @@ New:
 | `config/pricing.json` | cited prices (URL, page date, retrieval date), nulls where not available |
 | `scripts/evaluation/judge_run.py` | CLI: `--run-id`, `--max-llm-calls`, `--cases`, `--estimate-only`, `--allow-unfinished` |
 | `tests/judge_fakes.py` | made-up records, verdict JSON, in-memory judgement store |
-| `tests/unit/application/test_eval_duplicate_rule.py` (13), `test_eval_judge.py` (42), `test_eval_scoring.py` (23), `tests/unit/test_judge_run_cli.py` (11) | 89 tests (`pytest --collect-only`: `89 tests collected`) |
+| `tests/unit/application/test_eval_duplicate_rule.py` (13), `test_eval_judge.py` (42), `test_eval_scoring.py` (24), `tests/unit/test_judge_run_cli.py` (11) | 90 tests (`pytest --collect-only`: `90 tests collected`) |
 | `data/evaluation/results/20260927-dev-A-full-05680f9/judgements.jsonl` | the 2 live judgements (dev split; **not evaluation results**) |
 
 Modified:
@@ -138,15 +146,17 @@ Modified:
    - Uncited chunks are not shown.
 9. **Groundedness.** An unsupported claim is "a substantive claim that neither the ground truth nor the cited passages support".
 10. **Citation scoring (OD-12).** Answered answerable records only.
-    - Automatic: source precision and section precision (both follow the duplicate rule), and `auto_class`.
+    - Automatic: source precision (the cited chunk's own document), section precision (the duplicate rule applies), and `auto_class`.
     - Judge: support rate = citations judged `yes` (`partial` does not count), and `judge_class`.
     - Both classes are `correct_evidence` > `correct_source_wrong_evidence` > `unsupported_citation`, or `citation_missing`
       when there are no citations. "Any cited chunk" is enough for `correct_evidence`; precision shows the rest.
     - Insufficient records only add to `related_citation_count`.
     - An answered unanswerable record gets no class: there is no evidence to check its citations against, and the
       refusal check judges it. Such records are counted in `answered_unanswerable_with_citations`.
-11. **Accuracy denominators** are the labelled answerable records. Unlabelled records (judge missing or error) are listed,
-    not counted as wrong or right. EVAL-003c must print that list in the table caption.
+11. **Accuracy denominators** are the labelled answerable records. Two kinds of record are listed and never counted as
+    right or wrong: unlabelled records (judge missing or error), in `answer.unlabelled`, and runner-error records (no
+    answer), in `answer.runner_errors`. The second list was added after the advisor review; without it, error records
+    would have shrunk the denominator with no trace. EVAL-003c must print both lists in the table caption.
 12. **Cost.**
     - Formula: prompt tokens × input price + (output + thinking tokens) × output price. The source prices output
       "including thinking tokens".
@@ -159,6 +169,11 @@ Modified:
 
 ## Duplicate rule: how many case × arm values it changes (addendum item 2)
 
+**Owner decision (2026-09-27, during this task): section level only.** "Record in the spec/report that the owner's
+addendum said 'span/source' by mistake; the intended scope was section level (owner prediction 'at most 2 cases').
+Source metrics and citation source precision use the kept chunk's own document, i.e. what the user sees. Report the
+actual number of changed case×arm values after EVAL-004."
+
 - **Real records:** both committed dev folders (arm A, 3 records each) have **0** retrieved chunks with
   `duplicate_chunk_ids`, so the rule changed **0** values. No eval-split records exist, and I created none.
   `summarize_retrieval` reports the real count (`duplicate_rule_changed`), so EVAL-004 will produce it from real runs.
@@ -166,42 +181,55 @@ Modified:
   retrieval result**). Method:
   - Group each arm's chunks by the retriever's `passage_hash` (link-stripped body).
   - Try each member of a duplicate group as the kept chunk, alone, with the other members as its duplicates.
-  - Ask `duplicate_rule_changes` whether any span or source value of an answerable eval case differs.
+  - Ask `duplicate_rule_changes` whether any span value of an answerable eval case differs.
 
+Final code (section level only):
 ```
-(a) 20260927-dev-A-full-05680f9: 3 records, retrieved chunks with duplicates: 0; no dev spans exist (expected-spans-v1 covers eval only), so 0 values can change
-(a) 20260927-dev-A-retrieval-05680f9: 3 records, retrieved chunks with duplicates: 0; no dev spans exist (expected-spans-v1 covers eval only), so 0 values can change
-(b) arm A: 733 chunks, 13 duplicate groups (26 extra copies); eval cases whose values the rule CAN change (some group member kept alone): 6 ['Q-EVAL-003', 'Q-EVAL-004', 'Q-EVAL-022', 'Q-EVAL-023', 'Q-EVAL-027', 'Q-EVAL-032']
+(b) arm A: 733 chunks, 13 duplicate groups (26 extra copies); eval cases whose values the rule CAN change (some group member kept alone): 2 ['Q-EVAL-003', 'Q-EVAL-004']
+      Q-EVAL-003: kept->dropped docs ['section:12->13']
+      Q-EVAL-004: kept->dropped docs ['section:12->13']
+(b) arm B: 859 chunks, 0 duplicate groups (0 extra copies); eval cases whose values the rule CAN change (some group member kept alone): 0 []
+```
+(The 13 groups / 26 extra copies match RAG-002's "Arm A 26 extra copies by passage". RAG-002's report lists the same two
+cases, Q-EVAL-003 and 004, at `RAG-002.md` lines 142–145.)
+
+**History: the first implementation, which applied the rule at source level too.** I read the addendum's "span/source
+metrics" literally. The same script then gave:
+```
+(b) arm A: ... 6 ['Q-EVAL-003', 'Q-EVAL-004', 'Q-EVAL-022', 'Q-EVAL-023', 'Q-EVAL-027', 'Q-EVAL-032']
       Q-EVAL-003: kept->dropped docs ['section:12->13', 'source-only:12->13']
       Q-EVAL-004: kept->dropped docs ['section:12->13', 'source-only:12->13']
       Q-EVAL-022: kept->dropped docs ['source-only:12->13']
       Q-EVAL-023: kept->dropped docs ['source-only:12->13']
       Q-EVAL-027: kept->dropped docs ['source-only:13->12']
       Q-EVAL-032: kept->dropped docs ['source-only:12->13']
-(b) arm B: 859 chunks, 0 duplicate groups (0 extra copies); eval cases whose values the rule CAN change (some group member kept alone): 0 []
 ```
+At source level, a kept #12 chunk whose dropped copy is in #13 counted as "from #13" for every case that names #13 in
+*any* section. That was above the owner's "at most 2", so I asked the owner (AskUserQuestion) instead of explaining it
+away. The answer is quoted above. The tests were changed first, then the code (§ Audit).
 
-(The 13 groups / 26 extra copies match RAG-002's "Arm A 26 extra copies by passage".)
-
-**Reading.** At section level the rule can change only Q-EVAL-003 and 004: the 2 doc-12/13 cases the owner expected (RAG-002
-counted the same two). The addendum also applies the rule to **source** metrics. There, a kept #12 chunk whose dropped copy
-is in #13 counts as "from #13" for every case whose slots name #13 in *any* section. That adds Q-EVAL-022, 023, 032 (#13)
-and 027 (#12). **So the bound is 6 cases on Arm A, above the owner's "at most 2".**
-
-This is an upper bound: it needs one member of a group to be retrieved in the top 5 for that case. I implemented the rule
-as written (source level included; the tests pin it). **For the owner:** confirm source level, or restrict the rule to
-section level. Restricting it is a one-line change in `_hits` plus the tests.
+**Alternate-only diagnostic under the rule** (advisor check). The rule makes a chunk whose copy overlaps an expected span
+count as "inside". So I re-ran EVAL-003b-pre's simulated alternate-only count: every chunk that overlaps no expected
+span, now judged with the rule, `k` = all of them. The result is unchanged, so the spec's figure stands:
+```
+arm A without duplicate rule: 4 / 32 ['Q-EVAL-003', 'Q-EVAL-004', 'Q-EVAL-007', 'Q-EVAL-008']
+arm A with duplicate rule: 4 / 32 ['Q-EVAL-003', 'Q-EVAL-004', 'Q-EVAL-007', 'Q-EVAL-008']
+arm B without duplicate rule: 4 / 32 ['Q-EVAL-003', 'Q-EVAL-004', 'Q-EVAL-007', 'Q-EVAL-008']
+arm B with duplicate rule: 4 / 32 ['Q-EVAL-003', 'Q-EVAL-004', 'Q-EVAL-007', 'Q-EVAL-008']
+```
 
 ## Tests
 
 - `test_eval_duplicate_rule.py` (13) covers:
-  - a kept #13 chunk whose #12 copy overlaps the span: section and source hit, lenient and strict;
+  - a kept #13 chunk whose #12 copy overlaps the span is a section hit, lenient and strict;
+  - **source metrics use the kept chunk's own document**: hit, MRR and slot fraction are all 0 there;
   - a touching copy does not overlap;
   - strict-aware (a copy that overlaps only an alternate span);
   - MRR and slot fraction;
   - the alternate-only diagnostic treats a copy inside an expected span as "inside";
   - `from_record` resolves ids and refuses a missing index or an unknown id;
-  - `duplicate_rule_changes` names all 18 values (12 hits + 4 MRR + 2 slot fractions), and is empty when nothing changes.
+  - `duplicate_rule_changes` names the 9 section values (6 hits + 2 MRR + 1 slot fraction) and no source value, and is
+    empty when nothing changes.
 - `test_eval_judge.py` (42) covers:
   - `judge_check` for every §3 row (8 parametrized);
   - prompt contents (full cited text, braces not rescanned, uncited chunk absent, sections separate);
@@ -215,10 +243,11 @@ section level. Restricting it is a one-line change in `_hits` plus the tests.
   - an unavailable error continues, a quota error stops;
   - the budget counts requests; tokens, latency and the key are recorded; `plan` counts;
   - verdict → label for both refusal outcomes, and `partially_correct` / `correct`.
-- `test_eval_scoring.py` (23) covers, with hand-computed values:
+- `test_eval_scoring.py` (24) covers, with hand-computed values:
   - citation precision, support and both classes; `correct_source_wrong_evidence`;
   - the span check and the judge check disagreeing; `citation_missing`;
-  - a duplicate counting for section precision; related citations only counted;
+  - a duplicate counting for section precision but not for source precision; related citations only counted;
+  - runner-error records listed in `runner_errors` and kept out of the denominators;
   - unlabelled when the judgement is missing or an error; no-judge rows;
   - points-covered **0.5** for yes / partial / no + optional; the refusal-check label;
   - rates (accuracy 1/4, lenient 2/4, false refusal 1/4, correct refusal and hallucination 1/2, groundedness 2/3);
@@ -255,20 +284,57 @@ section level. Restricting it is a one-line change in `_hits` plus the tests.
    | 6 failed, 79 passed in 1.59s
    restored: sha256 before ef2cc3732a20414e after ef2cc3732a20414e equal=True git-diff-exit=0
 == M2 duplicate rule off: src/knowledge_assistant/application/evaluation/metrics/retrieval.py
-   - for location in ((chunk.source_id, chunk.char_start, chunk.char_end), *chunk.duplicates))
-   + for location in ((chunk.source_id, chunk.char_start, chunk.char_end),))
+   - duplicates = chunk.duplicates if level == SECTION else ()
+   + duplicates = ()
    pytest exit 1
    | FAILED tests/unit/application/test_eval_duplicate_rule.py::test_a_duplicate_that_overlaps_the_span_makes_the_kept_chunk_a_section_hit
-   | FAILED tests/unit/application/test_eval_duplicate_rule.py::test_a_duplicate_in_the_expected_document_makes_the_kept_chunk_a_source_hit
-   | FAILED tests/unit/application/test_eval_duplicate_rule.py::test_a_touching_duplicate_does_not_overlap
    | FAILED tests/unit/application/test_eval_duplicate_rule.py::test_duplicate_rule_is_strict_aware
    | FAILED tests/unit/application/test_eval_duplicate_rule.py::test_duplicate_rule_in_mrr_and_slot_fraction
    | FAILED tests/unit/application/test_eval_duplicate_rule.py::test_duplicate_counts_as_inside_the_expected_spans_for_the_alternate_only_diagnostic
    | FAILED tests/unit/application/test_eval_duplicate_rule.py::test_duplicate_rule_changes_names_every_value_the_rule_changed
    | FAILED tests/unit/application/test_eval_scoring.py::test_a_duplicate_of_the_cited_chunk_counts_for_section_precision
    | FAILED tests/unit/application/test_eval_scoring.py::test_retrieval_summary_counts_duplicate_rule_changes
-   | 9 failed, 55 passed in 1.58s
-   restored: sha256 before b4ec82059dc2a941 after b4ec82059dc2a941 equal=True git-diff-exit=0
+   | 7 failed, 60 passed in 1.40s
+   restored: sha256 before 62dd99d622159cb2 after 62dd99d622159cb2 equal=True git-diff-exit=1
+== M2b duplicate rule also at source level: src/knowledge_assistant/application/evaluation/metrics/retrieval.py
+   - duplicates = chunk.duplicates if level == SECTION else ()
+   + duplicates = chunk.duplicates
+   pytest exit 1
+   | FAILED tests/unit/application/test_eval_duplicate_rule.py::test_source_metrics_use_the_kept_chunks_own_document
+   | FAILED tests/unit/application/test_eval_duplicate_rule.py::test_duplicate_rule_in_mrr_and_slot_fraction
+   | FAILED tests/unit/application/test_eval_duplicate_rule.py::test_duplicate_rule_changes_names_every_value_the_rule_changed
+   | FAILED tests/unit/application/test_eval_scoring.py::test_a_duplicate_of_the_cited_chunk_counts_for_section_precision
+   | 4 failed, 63 passed in 1.40s
+   restored: sha256 before 62dd99d622159cb2 after 62dd99d622159cb2 equal=True git-diff-exit=1
+== M6a from_record without the missing-index guard: src/knowledge_assistant/application/evaluation/metrics/retrieval.py
+   - if duplicate_ids and chunk_index is None:
+   + if False:
+   pytest exit 1
+   | FAILED tests/unit/application/test_eval_duplicate_rule.py::test_from_record_refuses_duplicates_without_a_chunk_index
+   | FAILED tests/unit/application/test_eval_scoring.py::test_score_record_refuses_unresolved_duplicates
+   | 2 failed, 35 passed in 1.43s
+   restored: sha256 before 62dd99d622159cb2 after 62dd99d622159cb2 equal=True git-diff-exit=1
+== M6b from_record without the unknown-id guard: src/knowledge_assistant/application/evaluation/metrics/retrieval.py
+   - if unknown:
+   + if False:
+   pytest exit 1
+   | FAILED tests/unit/application/test_eval_duplicate_rule.py::test_from_record_refuses_an_unknown_duplicate_id
+   | 1 failed, 36 passed in 1.36s
+   restored: sha256 before 62dd99d622159cb2 after 62dd99d622159cb2 equal=True git-diff-exit=1
+== M5 cost per question by case id: src/knowledge_assistant/application/evaluation/scoring.py
+   - per_question = {name: tokens[name] / tokens["calls"] if tokens["calls"] else None
+   + per_question = {name: tokens[name] / len({i["case_id"] for i in items}) if tokens["calls"] else None
+   pytest exit 1
+   | FAILED tests/unit/application/test_eval_scoring.py::test_per_question_tokens_count_each_arm_as_its_own_call
+   | 1 failed, 23 passed in 1.37s
+   restored: sha256 before 3550ded5c7b01922 after 3550ded5c7b01922 equal=True git-diff-exit=1
+== M7 runner errors not listed: src/knowledge_assistant/application/evaluation/scoring.py
+   - for row in rows if row["status"] != "ok"),
+   + for row in rows if False),
+   pytest exit 1
+   | FAILED tests/unit/application/test_eval_scoring.py::test_runner_error_records_are_listed_not_silently_dropped
+   | 1 failed, 66 passed in 1.42s
+   restored: sha256 before 3550ded5c7b01922 after 3550ded5c7b01922 equal=True git-diff-exit=1
 == M3 per-point evidence all->any: src/knowledge_assistant/application/evaluation/metrics/retrieval.py
    - return int(all(any(_quotes_found(chunks, quotes, k)) for quotes in point_quotes.values()))
    + return int(any(any(_quotes_found(chunks, quotes, k)) for quotes in point_quotes.values()))
@@ -312,10 +378,14 @@ section level. Restricting it is a one-line change in `_hits` plus the tests.
    | 5 failed, 69 passed in 1.65s
    restored: sha256 before 25f6c4c5494a1a49 after 25f6c4c5494a1a49 equal=True git-diff-exit=0
 ```
-`git status` was clean after the harness. M1–M4d ran against commit `088124e`.
+The harness ran twice. The first run was M1–M4d with the source-level M2, against commit `088124e`; `git status` was clean
+afterwards. The second run, whose M2 to M7 blocks are pasted here, covers all 13 mutations against the working tree after
+the owner's scope change. It restores each file from its working-tree bytes. Its `git-diff-exit=1` only means the file had
+uncommitted edits; the sha256 check and `sha256sum -c` over the 4 files afterwards were the proof (all OK). In the second
+run, M1 and M3/M4 killed the same tests as shown (only the passed counts grew, by the tests added since).
 
-M5 (added after the report draft). It is run by hand: back up `scoring.py`, apply the edit, run the test file, restore
-from the backup. The mutation puts back my first draft's per-question divisor (distinct case ids instead of calls):
+M5 (added after the report draft) was first run by hand, as below, and is now in the harness run above: back up `scoring.py`,
+apply the edit, run the test file, restore from the backup. The mutation puts back my first draft's per-question divisor (distinct case ids instead of calls):
 ```
 - per_question = {name: tokens[name] / tokens["calls"] if tokens["calls"] else None
 + per_question = {name: tokens[name] / len({i["case_id"] for i in items}) if tokens["calls"] else None
@@ -341,7 +411,9 @@ After the restore: `23 passed`, and `grep` shows the `tokens["calls"]` line back
 | After the rule | `pytest tests/unit/application/` | `241 passed` |
 | Code milestone | full `pytest -q` | `772 passed, 1 deselected` (commit `088124e`) |
 | After the report draft | full `pytest -q` | `773 passed, 1 deselected` |
-| Final (after the cost test, below) | full `pytest -q`; `--collect-only` on the 4 new test files | `774 passed, 1 deselected` = 685 + 89; `89 tests collected` |
+| After the cost test | full `pytest -q` | `774 passed, 1 deselected` |
+| Scope change, red | duplicate + scoring test files, old `_hits` | `4 failed, 32 passed` |
+| Final (after the scope change and the runner-error listing) | full `pytest -q`; `--collect-only` on the 4 new test files | `775 passed, 1 deselected` = 685 + 90; `90 tests collected` |
 | Frozen hashes | `sha256sum eval-v1.jsonl dev-v1.jsonl`; `git diff 7db105b --stat -- data/evaluation/questions corpus` | `3436870e…2937`, `37d349e5…21d6` (= snapshot); diff empty |
 
 ## Live judge (addendum item 5)
@@ -444,10 +516,11 @@ Scratch script over the 22 files this branch changed or added since `7db105b` (t
 judgements file and every doc of this task; final run after all docs were written). It reads `eval-v1.jsonl` in memory and prints counts only.
 
 - **0** of the 36 eval question texts in any file (whitespace collapsed).
-- `Q-EVAL`/`BP-EVAL` ids in added lines appear in only three places:
-  - `docs/specs/evaluation-spec.md` (2 matches): the simulated duplicate-rule cases;
-  - the prompt log (4 matches): the verbatim 09b prompt's own examples;
-  - this report (16 matches): the analysis sections named below.
+- `Q-EVAL`/`BP-EVAL` ids in added lines appear in only four places (final scan):
+  - `docs/specs/evaluation-spec.md` (1 match): the simulated duplicate-rule cases;
+  - `AI_WORKLOG.md` (1): the same two cases;
+  - the prompt log (4): the verbatim 09b prompt's own examples;
+  - this report (36): the analysis sections named below.
 - The judge prompt, judge code, test fakes and `judgements.jsonl` hold **0** ids and **0** question texts. The judge-prompt
   example is made up, and "MapGroup" is in no eval case.
 - No eval-split command was run.
@@ -473,8 +546,8 @@ judgements file and every doc of this task; final run after all docs were writte
 
 ## Unverified / open
 
-- **Duplicate rule at source level**: the simulated bound is 6 cases on Arm A, not ≤ 2. For the owner: confirm, or restrict
-  the rule to section level (§ Duplicate rule).
+- **Duplicate rule, actual count**: 0 on the dev records. The eval count comes from EVAL-004's real runs (owner); the
+  simulated bound is 2 (Q-EVAL-003, 004, Arm A).
 - **Refusal check never ran live.** No committed record needs one. Proven offline only; EVAL-004 will run it for real.
 - **Judge quality is unmeasured.** 2 dev judgements agree with a reading of the records, but that is not a spot-check. The
   owner spot-check of ~10 judgments after EVAL-004 is now a task in ledger row 11. OD-13 (sample size) stays open.
@@ -491,6 +564,8 @@ judgements file and every doc of this task; final run after all docs were writte
   owner lines below.
 - `judge_run.py --allow-unfinished` and the unfinished-invocation guard were not asked for. They enforce "never
   concurrently with the runner".
+- Addendum item 2 said "span/source metrics". The owner corrected this during the task to section level only
+  (§ Duplicate rule).
 
 ## Explain it back
 
@@ -511,7 +586,9 @@ judgements file and every doc of this task; final run after all docs were writte
   same paragraph, it may keep the #12 copy while the ground truth names #13. Without the rule, a retrieval that found
   exactly the right text would score as a miss because of which copy survived dedup. With it, a chunk also counts through
   the copies it replaced. The count of changed values is reported, so a reader can see how much the rule moves the numbers.
-  At source level that can be up to 6 Arm A cases, more than expected, which is flagged for the owner.
+  It applies only to section-level (span) metrics. Source metrics keep the document the user actually sees cited, so a
+  #12 chunk never becomes a #13 "source" (owner decision; applied at source level too, the rule could change 6 cases
+  instead of the 2 intended).
 - **Why cache by (case, arm, answer hash, prompt version) and refuse on a hash/model mismatch.** Judge calls come out of the
   same 500-per-day quota as answers, so a re-run must cost 0. Any change to what the judge sees (a new answer, another arm,
   a new prompt version) must cost a new call. An edited prompt file under the same version name, or another judge model,

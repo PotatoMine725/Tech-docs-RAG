@@ -84,9 +84,11 @@ def _location_hits(location: Location, span: ExpectedSpan, level: str) -> bool:
 
 
 def _hits(chunk: RankedChunk, span: ExpectedSpan, level: str) -> bool:
-    """The chunk or any of its dropped duplicates hits the span (duplicate rule, owner 2026-09-27)."""
+    """Section level: the chunk or any of its dropped duplicates overlaps the span (duplicate rule, owner 2026-09-27).
+    Source level: the kept chunk's own document only, i.e. what the user sees (owner, same day)."""
+    duplicates = chunk.duplicates if level == SECTION else ()
     return any(_location_hits(location, span, level)
-               for location in ((chunk.source_id, chunk.char_start, chunk.char_end), *chunk.duplicates))
+               for location in ((chunk.source_id, chunk.char_start, chunk.char_end), *duplicates))
 
 
 def _usable(spans: list[ExpectedSpan], strict: bool) -> list[ExpectedSpan]:

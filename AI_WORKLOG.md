@@ -439,23 +439,28 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 
 ### 2026-09-27 EVAL-003b: metrics audit, duplicate rule, LLM judge, scoring (branch `eval-003b`, PR into `dev`)
 - *AI did:*
-  - Audited the EVAL-003b-pre metrics, spans, mapping and latency against the prompt and the owner's decisions. Changed only one thing, test first: the owner's duplicate overlap rule, where a chunk also hits through its `duplicate_chunk_ids`, for span and source metrics.
+  - Audited the EVAL-003b-pre metrics, spans, mapping and latency against the prompt and the owner's decisions. Changed only one thing, test first: the owner's duplicate overlap rule, where a chunk also hits through its `duplicate_chunk_ids`. After the owner's correction it applies to section-level metrics only.
   - Wrote the LLM judge: `judge.py`, `judge_v1.md` with a separate refusal section, and `judge_run.py`. Parsing is strict (point ids and markers must match exactly). A failed parse is `judge_error`, never a guess. A judgement from another model is rejected. Judgements are cached per (case, arm, answer hash, prompt version).
   - Wrote pure scoring: answer, refusal and citation summaries with OD-12's two checks kept separate, plus breakdowns, judge latency and a cost estimate. `pricing.json` cites its source.
-  - 89 offline tests (774 passed) and 8 mutations, all killed. Live: 2 judge requests on dev records, 0 embedding requests ([report](docs/reports/execution/EVAL-003b.md)).
+  - 90 offline tests (775 passed) and 13 mutations, all killed. Live: 2 judge requests on dev records, 0 embedding requests ([report](docs/reports/execution/EVAL-003b.md)).
 - *AI got wrong:*
   - **Double count in cost.** The first draft of `cost_summary` divided the token totals by the number of distinct case ids. With two arms that divides by half the calls, so the "per question" figure would have doubled.
   - **Weak tests.** The judge, scoring and CLI test files passed on their first run, so on their own they proved little.
-  - **Owner's expectation.** It was stated as "at most 2 cases" for the duplicate rule. Applied at source level as written, the simulated bound on Arm A is 6. This is a finding, not a code defect; it is flagged for the owner, not explained away.
+  - **Duplicate rule scope.** I applied the rule at source level too, reading the addendum's "span/source metrics" literally; the advisor's first review suggested the same reading. The owner had predicted "at most 2 cases". The simulated bound at source level was 6 on Arm A.
+  - **Silent denominator.** Runner-error records dropped out of the answer summary without being listed, so they would have shrunk the accuracy denominator with no trace.
+  - **Untested guards.** The two `from_record` guards (missing chunk index, unknown duplicate id) had never been shown failing under mutation.
 - *How found:*
   - Cost: re-reading the function before its tests ran.
   - Tests: noticed when they went green on the first run.
-  - Owner's expectation: a scratch count over the chunk files, broken down by section and source level.
+  - Duplicate rule scope: a scratch count over the chunk files, broken down by section and source level. The advisor's final review then pointed at the mismatch with the owner's prediction.
+  - Silent denominator and untested guards: the advisor's final review.
 - *Fix:*
   - Cost: the per-question figure is now the stage total ÷ calls (one call per case × arm). My first test of it used two different cases, so it would have passed under the wrong formula as well. I added a two-arm test, which fails under the old formula (mutation M5).
   - Tests: mutations on the refusal-check row, the duplicate rule, the per-point evidence rule, each of the 4 cache-key components and the cost formula; each one made a test fail.
-  - Owner's expectation: the report and the ledger give the section-level count (2, as expected) and the source-level count (6), and ask the owner to choose.
-- *Human decision:* the whole addendum of 2026-09-27: OD-12 = both checks, evidence_hit per required point, lenient headline, the duplicate rule, the judge settings, the refusal-check key, no guessed labels, cited prices or null, ≤ 3 live judge calls, and the spot-check task in ledger row 11. Open for the owner: the duplicate rule at source level (6 cases) or section level only (2). OD-13 remains open.
+  - Duplicate rule scope: I asked the owner (AskUserQuestion). The owner chose section level only and said the addendum's "span/source" was a wording mistake. The tests were changed first and seen failing (`4 failed, 32 passed`), then the one-line fix. The bound is now 2 (Q-EVAL-003, 004), and mutation M2b (the rule at source level) is killed.
+  - Silent denominator: `answer.runner_errors` lists the error records, with a test seen failing first (M7).
+  - Untested guards: mutations M6a and M6b, both killed.
+- *Human decision:* the whole addendum of 2026-09-27: OD-12 = both checks, evidence_hit per required point, lenient headline, the duplicate rule, the judge settings, the refusal-check key, no guessed labels, cited prices or null, ≤ 3 live judge calls, and the spot-check task in ledger row 11. The owner also decided, during the task, the duplicate rule's scope: section level only; source metrics use the kept chunk's own document; the actual count is reported after EVAL-004. OD-13 remains open.
 
 ## Summary: how AI helped
 

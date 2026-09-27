@@ -10,7 +10,7 @@ records already judged ok (cache key: case, arm, sha256 of the answer, judge pro
 retried. The judge prompt's file hash and the judge model are checked against earlier ok lines: a mismatch refuses
 the run.
 
-The judge is JUDGE_MODEL from config (gemini-3.5-flash-lite), temperature 0, no fallback model, its own 13-RPM
+The judge is JUDGE_MODEL from config (the answer model, ADR-0004 D12), temperature 0, no fallback model, its own 13-RPM
 throttle. It runs as a separate step AFTER generation, never at the same time as run_eval.py on the same key: the
 throttle windows are per process, so two processes could exceed the model's 15 RPM together. The script refuses a run
 whose last run_eval.py invocation has no finish time (it may still be running); pass --allow-unfinished only when you

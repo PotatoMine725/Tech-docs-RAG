@@ -83,6 +83,7 @@ def test_a_duplicate_of_the_cited_chunk_counts_for_section_precision():
     record["retrieved"][1]["duplicate_chunk_ids"] = ["01:header-1600:0009"]
     scores = citation_scores(record, SPANS, {"01:header-1600:0009": ("01", 5, 15)}, None)
     assert (scores["section_precision"], scores["auto_class"], scores["judge_class"]) == (1.0, CORRECT_EVIDENCE, None)
+    assert scores["source_precision"] == 0.0  # source level: the cited chunk's own document (#02), what the user sees
 
 
 def test_related_citations_of_an_insufficient_answer_are_only_counted():
@@ -138,7 +139,7 @@ def test_refusal_check_labels_without_groundedness():
 
 
 def _row(result, answerable, check=ANSWER_CHECK, grounded=True, covered=1.0, language="en", arm="A", group=None):
-    return {"case_id": f"Q-{result}", "arm": arm, "language": language, "parallel_group_id": group,
+    return {"case_id": f"Q-{result}", "arm": arm, "status": "ok", "language": language, "parallel_group_id": group,
             "answerable": answerable, "size_class": "small", "difficulty": "easy", "failure_mode": "none",
             "retrieval": None, "duplicate_rule_changed": None, "citation": None,
             "answer": {"check": check if answerable and result not in ("false_refusal",) else REFUSAL_CHECK,
@@ -157,6 +158,14 @@ def test_answer_and_refusal_rates():
     assert summary["groundedness_rate"] == {"n": 3, "count": 2, "value": pytest.approx(2 / 3)}
     assert summary["points_covered_mean"]["value"] == pytest.approx(0.5)  # (1 + 0.5 + 0) / 3
     assert summary["unlabelled"] == ["Q-None:A"]
+
+
+def test_runner_error_records_are_listed_not_silently_dropped():
+    rows = [score_record(make_record(1, answerable=False, insufficient=True, answer="m", cited=()), SPANS_BY_CASE, None,
+                         {}, "judge_v1"),
+            score_record(make_record(2, status="error"), SPANS_BY_CASE, None, {}, "judge_v1")]
+    summary = summarize_answers(rows)
+    assert summary["runner_errors"] == ["Q-TEST-002:A"] and summary["records"] == 1
 
 
 def test_breakdowns_by_language_arm_and_parallel_subset():
