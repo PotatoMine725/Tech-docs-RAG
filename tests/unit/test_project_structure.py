@@ -68,3 +68,16 @@ def test_excluded_corpus_ids_are_exactly_14_19_24_27():
 def test_excluded_ids_absent_from_sources():
     sources = {p.name.split("-")[0] for p in (ROOT / "corpus" / "sources").glob("*.md")}
     assert not sources & EXCLUDED_IDS
+
+
+def test_only_the_desktop_wiring_touches_composition_and_infrastructure():
+    """GUI-001: view-model, view, adapter and fake stay clean; `wiring.py` is the one seam to the composition root."""
+    importers = set()
+    for py in (PKG / "presentation").rglob("*.py"):
+        for node in ast.walk(ast.parse(py.read_text(encoding="utf-8"))):
+            names = [a.name for a in node.names] if isinstance(node, ast.Import) else []
+            if isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+                names = [node.module]
+            if any(n.startswith(("knowledge_assistant.composition", "knowledge_assistant.infrastructure")) for n in names):
+                importers.add(py.relative_to(PKG).as_posix())
+    assert importers == {"presentation/desktop/wiring.py"}

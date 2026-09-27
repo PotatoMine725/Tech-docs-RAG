@@ -1,27 +1,40 @@
 """Desktop entry point. PySide6 is imported lazily so package imports do not require it.
 
-Run:  python -m knowledge_assistant.presentation.desktop.app --fake
-(the real use case is wired in GUI-001 proper)
+Run the real app:   python -m knowledge_assistant.presentation.desktop.app
+Offline demo:       python -m knowledge_assistant.presentation.desktop.app --fake
+The real app reads GEMINI_API_KEY from the environment or .env (never printed) and needs the Chroma indexes.
 """
 import sys
+from pathlib import Path
 
 
 def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
-    if "--fake" not in argv:
-        print("Only --fake is available until GUI-001 wires the real use case.", file=sys.stderr)
-        return 2
+    fake = "--fake" in argv
 
+    from PySide6.QtCore import QThreadPool
     from PySide6.QtWidgets import QApplication
 
     from .viewmodels.ask_viewmodel import AskViewModel
-    from .viewmodels.fake_ask_question import FakeAskQuestion
     from .windows.main_window import MainWindow
     from .workers import QtExecutor
 
+    if fake:
+        from .viewmodels.fake_ask_question import FakeAskQuestion
+
+        port = FakeAskQuestion()
+    else:
+        from dotenv import load_dotenv
+
+        from .wiring import build_real_port
+
+        load_dotenv(Path(__file__).resolve().parents[4] / ".env")
+        port = build_real_port()
+
     app = QApplication(sys.argv[:1])
-    vm = AskViewModel(FakeAskQuestion(), QtExecutor())
-    window = MainWindow(vm)
+    # one question at a time (the view-model disables input while busy); a private pool keeps the global one free
+    vm = AskViewModel(port, QtExecutor(QThreadPool()))
+    window = MainWindow(vm, title="Knowledge Assistant (fake data)" if fake else "Knowledge Assistant")
     window.show()
     return app.exec()
 

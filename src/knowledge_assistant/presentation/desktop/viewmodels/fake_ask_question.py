@@ -3,6 +3,7 @@
 Trigger words in the question pick the scenario (case-insensitive):
   quota -> quota error      503 / unavailable -> service error     noindex -> missing-index error
   insufficient -> insufficient answer     related -> insufficient + one related-only citation
+  fallback -> answer marked as coming from the fallback model 
   slow -> 3 s delay (proves the window stays responsive)
 Anything else answers. Vietnamese is detected from diacritics and the reply is in that language.
 """
@@ -11,6 +12,9 @@ from __future__ import annotations
 import re
 import time
 from typing import Callable
+
+from knowledge_assistant.application.generation.answer_question import load_messages
+from knowledge_assistant.config import get_answer_settings
 
 from .contracts import AnswerResult, AskQuestionError, Citation
 
@@ -31,7 +35,9 @@ def _cite(marker: int, excerpt: str, name: str, loc: str, related: bool = False)
 
 class FakeAskQuestion:
     def __init__(self, sleep: Callable[[float], None] = time.sleep, slow_seconds: float = 3.0,
-                 default_seconds: float = 0.5) -> None:
+                 default_seconds: float = 0.5, messages: dict[str, str] | None = None) -> None:
+        # the insufficient-information message is the real one from config/messages.json (backlog N2)
+        self._messages = messages or load_messages(get_answer_settings().messages_path)
         self._sleep = sleep
         self._slow = slow_seconds
         self._default = default_seconds
@@ -49,18 +55,17 @@ class FakeAskQuestion:
         vi = bool(_VI_CHARS.search(question))
         lang = "vi" if vi else "en"
         latency = {"embed_query": 120.0, "retrieve": 35.0, "generate": 900.0, "total": 1055.0}
-        model = "fake-model"
+        model = "fake-fallback-model" if "fallback" in q else "fake-model"
 
         if "insufficient" in q or "related" in q:
             related = ()
             if "related" in q:
                 related = (_cite(1, _EXCERPT_REL, "ASP.NET Core Middleware", "Middleware > Pipeline", True),)
             if vi:
-                answer = "Bộ tài liệu hiện có không chứa đủ thông tin để trả lời câu hỏi này."
                 missing = "Tài liệu không đề cập đến chủ đề này."
             else:
-                answer = "The document collection does not contain enough information to answer this question."
                 missing = "The documents do not cover this topic."
+            answer = self._messages[lang]
             return AnswerResult(question, lang, answer, True, "llm", missing, related, latency, model)
 
         if vi:
@@ -73,4 +78,4 @@ class FakeAskQuestion:
             _cite(1, _EXCERPT_1, "Dependency Injection Guide", "Overview > What is DI"),
             _cite(2, _EXCERPT_2, "Dependency Injection Guide", "Usage > Registering services"),
         )
-        return AnswerResult(question, lang, answer, False, None, None, cites, latency, model)
+        return AnswerResult(question, lang, answer, False, None, None, cites, latency, model, "fallback" in q)

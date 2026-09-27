@@ -104,7 +104,10 @@ class AskViewModel:
         parts = []
         if total is not None:
             parts.append(f"Total latency {total / 1000:.1f} s")
-        parts.append(f"model: {self.result.model_used or 'none (no model call)'}")
+        model = self.result.model_used
+        if model and self.result.fallback_used:
+            model += " (fallback)"
+        parts.append(f"model: {model or 'none (no model call)'}")
         return " · ".join(parts)
 
     @property

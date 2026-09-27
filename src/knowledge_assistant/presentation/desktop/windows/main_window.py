@@ -19,10 +19,10 @@ _BANNERS = {
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, vm: AskViewModel) -> None:
+    def __init__(self, vm: AskViewModel, title: str = "Knowledge Assistant") -> None:
         super().__init__()
         self.vm = vm
-        self.setWindowTitle("Knowledge Assistant")
+        self.setWindowTitle(title)
         self.resize(820, 700)
 
         self.question = QLineEdit(placeholderText="Ask a question (English or Vietnamese) and press Enter")
