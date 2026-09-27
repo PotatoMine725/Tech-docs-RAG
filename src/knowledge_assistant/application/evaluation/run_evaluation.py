@@ -338,8 +338,8 @@ class RunEvaluation:
                 "retry_count": generated["retry_count"], "provider_body": getattr(caught, "provider_body", None),
                 "raw_text": getattr(caught, "raw_text", None),
             })
-        record = assemble(self._run_id, case, config.arm, config.mode, "error" if error else "ok", started_at,
-                          self._stamp(), generated, error_fields)
+        record = assemble(self._run_id, case, config.arm, config.mode, config.split, "error" if error else "ok",
+                          started_at, self._stamp(), generated, error_fields)
         return record, error, spent
 
     def _generate(self, case: dict) -> tuple[dict, int]:

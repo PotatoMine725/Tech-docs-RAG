@@ -29,6 +29,7 @@ def test_the_schema_has_the_fields_of_the_task_prompt_and_the_addendum():
         "citation_criteria", "tags",
     }
     # the addendum's extra fields, next to the prompt's own
+    assert IDENTITY_FIELDS == ("run_id", "case_id", "arm", "mode", "split", "status")
     assert {"top1_score", "gate_fired", "duplicates_dropped", "thoughts_tokens", "error_kind", "error_model"} <= set(
         RECORD_FIELDS
     )
@@ -56,11 +57,12 @@ def test_ground_truth_of_a_case_that_lacks_a_field_is_an_error():
 
 
 def test_assemble_returns_every_field_in_schema_order_with_defaults_for_what_was_not_generated():
-    record = assemble("run-1", make_case(2), "A", "retrieval", "ok", "2026-09-27T10:00:00+00:00",
+    record = assemble("run-1", make_case(2), "A", "retrieval", "eval", "ok", "2026-09-27T10:00:00+00:00",
                       "2026-09-27T10:00:01+00:00", {"llm_called": False, "top1_score": 0.5})
     assert tuple(record) == RECORD_FIELDS
     assert (record["run_id"], record["case_id"], record["arm"], record["mode"], record["status"]) == (
         "run-1", "Q-TEST-002", "A", "retrieval", "ok")
+    assert record["split"] == "eval"  # written from the run config, so a record says which question file it answers
     assert record["top1_score"] == 0.5 and record["answer"] is None
     # no-LLM records must count as clean in the latency table (retry_count 0, fallback False), latency_ms a full dict
     assert (record["retry_count"], record["fallback_used"], record["llm_called"]) == (0, False, False)
@@ -70,14 +72,14 @@ def test_assemble_returns_every_field_in_schema_order_with_defaults_for_what_was
 
 def test_assemble_rejects_a_field_that_is_not_in_the_schema():
     with pytest.raises(ValueError, match="not_a_field"):
-        assemble("run-1", make_case(1), "A", "full", "ok", "t0", "t1", {"not_a_field": 1})
+        assemble("run-1", make_case(1), "A", "full", "dev", "ok", "t0", "t1", {"not_a_field": 1})
 
 
 def test_defaults_are_not_shared_between_records():
-    first = assemble("run-1", make_case(1), "A", "full", "ok", "t0", "t1", {})
+    first = assemble("run-1", make_case(1), "A", "full", "dev", "ok", "t0", "t1", {})
     first["retrieved"].append("x")
     first["latency_ms"]["total"] = 9.0
-    second = assemble("run-1", make_case(2), "A", "full", "ok", "t0", "t1", {})
+    second = assemble("run-1", make_case(2), "A", "full", "dev", "ok", "t0", "t1", {})
     assert second["retrieved"] == [] and second["latency_ms"]["total"] is None
 
 

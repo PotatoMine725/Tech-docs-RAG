@@ -6,6 +6,7 @@ what was not generated is null (or an empty list). Two conventions matter to the
 - a record without an LLM call (retrieval mode, or the gate answered) has `retry_count` 0 and `fallback_used` false,
   so it counts as clean in the latency table, and `latency_ms` is always a full dict, missing stages null;
 - each retrieved chunk carries `display_text`, so `RankedChunk.from_record(retrieved[i])` works on it as it is.
+`split` ("eval" or "dev") is written from the run config, not read from the case.
 `records.jsonl` is append-only: a retried case leaves its earlier error line, so read it with `latest_records`.
 """
 import copy
@@ -13,7 +14,7 @@ import copy
 from knowledge_assistant.application.common.passage import passage_hash
 from knowledge_assistant.core.models import HEADING_PATH_SEPARATOR, Citation, RetrievedChunk
 
-IDENTITY_FIELDS = ("run_id", "case_id", "arm", "mode", "status")
+IDENTITY_FIELDS = ("run_id", "case_id", "arm", "mode", "split", "status")
 ERROR_FIELDS = ("error", "error_kind", "error_model", "error_type")
 GROUND_TRUTH_FIELDS = (
     "question", "language", "parallel_group_id", "answerable", "expected_answer", "answer_points",
@@ -84,8 +85,8 @@ def citation_entry(citation: Citation) -> dict:
     }
 
 
-def assemble(run_id: str, case: dict, arm: str, mode: str, status: str, started_at: str, finished_at: str,
-             generated: dict, error: dict | None = None) -> dict:
+def assemble(run_id: str, case: dict, arm: str, mode: str, split: str, status: str, started_at: str,
+             finished_at: str, generated: dict, error: dict | None = None) -> dict:
     """The full record in schema order. `generated` and `error` override defaults; an unknown key is a bug."""
     unknown = set(generated) - set(GENERATED_DEFAULTS)
     if unknown:
@@ -94,7 +95,7 @@ def assemble(run_id: str, case: dict, arm: str, mode: str, status: str, started_
     if unknown_error:
         raise ValueError(f"not in the record schema: {sorted(unknown_error)}")
     values = {
-        "run_id": run_id, "case_id": case["id"], "arm": arm, "mode": mode, "status": status,
+        "run_id": run_id, "case_id": case["id"], "arm": arm, "mode": mode, "split": split, "status": status,
         **dict.fromkeys(ERROR_FIELDS), **(error or {}),
         **ground_truth(case),
         **copy.deepcopy(GENERATED_DEFAULTS), **generated,

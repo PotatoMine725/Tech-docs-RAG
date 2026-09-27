@@ -57,7 +57,7 @@ appended to `core/exceptions/__init__.py` and the docstring in `latency.py` edit
 | File | Change |
 |---|---|
 | `core/exceptions/__init__.py` | 4 new classes: `EvaluationError`, `IntegrityError`, `RunConfigMismatch`, `ModelPurityError` |
-| `infrastructure/llm/gemini/gemini_llm.py` | +6 lines: optional constructor argument `on_provider_error(model, failure)`, called for every failed attempt; unset by default, no behaviour change (the RAG-003 resilience suite runs unchanged: 487 lines, all pass) |
+| `infrastructure/llm/gemini/gemini_llm.py` | +9 lines: optional constructor argument `on_provider_error(model, failure)`, called for every failed attempt; unset by default, no behaviour change; an exception the hook raises is caught, logged as a warning (exception type only, no body) and ignored, so it can never alter retry, fallback or the raised `LLMError` (fix F1) (the RAG-003 resilience suite runs unchanged: 487 lines, all pass) |
 | `application/evaluation/metrics/retrieval.py` | `_case_label(case)`: `required_point_quotes` error messages accept a run record (`case_id`) as well as a dataset case (`id`) |
 | `application/evaluation/metrics/latency.py` | module docstring only: the record shape is now fixed by this task |
 
@@ -72,7 +72,7 @@ metrics read it).
 
 | Group | Fields |
 |---|---|
-| identity | `run_id`, `case_id`, `arm`, `mode`, `status` (`ok` / `error`) |
+| identity | `run_id`, `case_id`, `arm`, `mode`, `split` (`eval` / `dev`, from the run config), `status` (`ok` / `error`) |
 | failure | `error`, `error_kind` (`quota` / `unavailable` / `other`), `error_model`, `error_type` (class name) |
 | ground truth (13) | `question`, `language`, `parallel_group_id`, `answerable`, `expected_answer`, `answer_points`, `expected_sources`, `acceptable_alternate_sources`, `evidence`, `acceptable_variations`, `must_not_claim`, `citation_criteria`, `tags` |
 | retrieval | `llm_called`, `retrieved[]` = `rank`, `chunk_id`, `source_id`, `heading_path` (string), `char_start`, `char_end`, `score`, **`display_text`**, **`passage_hash`**, **`duplicate_chunk_ids`**; **`top1_score`**, **`gate_fired`**, **`duplicates_dropped`** |
@@ -143,7 +143,7 @@ script sets `OPENBLAS_NUM_THREADS=1` if unset (a Windows memory failure at numpy
 | `tests/unit/infrastructure/test_jsonl_record_store.py` | 9 | flush per line, UTF-8 and `\n`, torn tail, corrupt line, redaction, atomic manifest, non-finite refused |
 | `tests/unit/application/test_eval_records.py` | 8 | schema fields and order, verbatim ground truth, defaults not shared, `chunk_entry`, `latest_records` |
 | `tests/unit/application/test_eval_integrity.py` | 7 | mismatch names the file and both hashes; the repository snapshot holds the owner's hashes (`3436870e…2937`, `37d349e5…21d6`); the repository files match it |
-| `tests/unit/infrastructure/test_provider_error_log.py` | 5 | hook sees every failed attempt; first 429 and first 5xx only; a retried 429 is still saved through the real adapter; key redacted |
+| `tests/unit/infrastructure/test_provider_error_log.py` | 6 | hook sees every failed attempt; first 429 and first 5xx only; a retried 429 is still saved through the real adapter; key redacted; a hook that raises `OSError` changes neither the 3 requests, the retry count nor the result |
 | `tests/unit/test_eval_arm_b_reuses_query_embeddings.py` | 1 | real `CachingEmbedder` + `Retriever` + `RunEvaluation`: arm A sends 4 questions to the provider, arm B sends 0 (4 cache hits) |
 
 **What was seen failing first and what was not** (no red run was staged afterwards):
@@ -357,8 +357,9 @@ the two result folders, the prompt log and this report).
   while a runner process is still live has its own 13-RPM window, and together they can exceed the model's 15 RPM. Run them one after the
   other, or drive the judge in the same process with `Services.throttles`.
 - **Committed dev dry-run results.** I committed the two folders under `data/evaluation/results/` as evidence for the verifier; they are
-  dev cases, not evaluation results. Keep or delete is the owner's choice (also asked in the PR). Records carry no `split` field, so
-  EVAL-003c must read `run.json` (`config.split`) and must not glob every run directory blindly.
+  dev cases, not evaluation results. Keep or delete is the owner's choice (also asked in the PR). Fix F3 added a `split` field to every record, so these two
+  folders, written before it, lack it (regenerating needs 2 LLM requests, not done); EVAL-003c reads `split` from the record and, for
+  pre-fix records only, from `run.json` (`config.split`). Do not glob every run directory blindly.
 - Commit `4e7912d` (the Ctrl-C test) has no Co-Authored-By line; it is pushed, so history was not rewritten.
 
 ## Deviations from the prompt
@@ -370,7 +371,7 @@ the two result folders, the prompt log and this report).
 ## Explain it back
 
 - **Why generation and judging are separate, and the file is append-only.** A paid answer is written and fsynced before the next case
-  starts, and a rerun skips every case whose latest line is `ok`. So a crash, a quota stop or a judge fix never costs a second answer.
+  starts, and a rerun skips every case whose latest line is `ok`. So a crash, a quota stop or a judge fix does not cost a second answer for a case that already has an `ok` line (a case aborted by the purity check, or killed mid-request, may have cost requests that no record shows: `llm_http_requests` in `run.json` is the authoritative count, `llm_requests` counts recorded cases).
   The alternative, one script that answers and judges, would re-spend quota every time the judge changes.
 - **Why the budget counts requests and stops before each case, and why a quota error stops instead of marking the rest as errors.** The
   daily quota is counted in HTTP requests, retries included, so counting cases would under-count exactly when the API is unhealthy. A

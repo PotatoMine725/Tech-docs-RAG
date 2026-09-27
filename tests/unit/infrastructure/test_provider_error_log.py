@@ -92,3 +92,23 @@ def test_an_api_key_in_the_provider_body_never_reaches_the_error_log():
     llm.generate(REQUEST)
     [entry] = store.errors
     assert KEY not in entry["body"] and "[REDACTED]" in entry["body"]
+
+
+def test_a_hook_that_raises_changes_neither_retry_nor_result(caplog):
+    def broken(model, failure):
+        raise OSError("disk full")
+
+    scripted = [api_error(429), api_error(503)]
+    plain_models = ScriptedModels({PRIMARY: list(scripted)})
+    plain, _ = make_llm(plain_models, None)
+    expected = plain.generate(REQUEST)
+
+    models = ScriptedModels({PRIMARY: list(scripted)})
+    llm, _ = make_llm(models, broken)
+    with caplog.at_level("WARNING"):
+        response = llm.generate(REQUEST)
+    assert response.retry_count == expected.retry_count == 2
+    assert response.text == expected.text
+    assert llm.requests == plain.requests == 3
+    assert "provider-error hook failed" in caplog.text and "OSError" in caplog.text
+    assert "disk full" not in caplog.text  # no body, no message: it may carry a path or a key

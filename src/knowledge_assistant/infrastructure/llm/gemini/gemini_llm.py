@@ -17,7 +17,7 @@ Policy (ADR-0004 amendment 2026-09-26, OD-11):
     (not retried, no fallback).
 The SDK's own retry is left off (`retry_options` unset = one attempt), so attempts are counted here and only here.
 `on_provider_error(model, failure)` is an optional observer, called for every failed attempt before any retry (EVAL-003a:
-it keeps the first real 429/5xx bodies of an evaluation run); it changes no behaviour and is unset by default.
+it keeps the first real 429/5xx bodies of an evaluation run); it changes no behaviour (an exception it raises is logged and swallowed) and is unset by default.
 """
 import logging
 import random
@@ -194,7 +194,10 @@ class GeminiLLM:
                 self._logged_first_429 = True
                 logger.warning("first HTTP 429 of this run (model %s), raw error body: %s", model, failure.body)
             if self._on_provider_error is not None:
-                self._on_provider_error(model, failure)
+                try:
+                    self._on_provider_error(model, failure)
+                except Exception as hook_error:  # the observer must never change retry, fallback or the raised error
+                    logger.warning("provider-error hook failed (%s); continuing", type(hook_error).__name__)
             return _Attempt(failure=failure, error=error, config=config)
         return _Attempt(response=response, latency_ms=(self._clock() - start) * 1000.0, config=config)
 

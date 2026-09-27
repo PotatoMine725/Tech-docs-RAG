@@ -90,8 +90,18 @@ def test_a_full_run_writes_one_ok_record_per_case_with_every_schema_field():
     for record in run.store.records:
         assert tuple(record) == RECORD_FIELDS
         assert (record["status"], record["arm"], record["mode"], record["run_id"]) == ("ok", "A", "full", "run-1")
+        assert record["split"] == "dev"  # make_config's split
         assert record["error"] is None and record["error_kind"] is None and record["error_model"] is None
     assert [r["case_id"] for r in run.store.records] == [f"Q-TEST-00{n}" for n in range(1, 6)]
+
+
+def test_every_record_carries_the_split_of_the_run_config_error_records_too():
+    for split in ("eval", "dev"):
+        llm = ScriptedLLM(LLMRequestError("bad request"))  # case 1 errors, case 2 answers
+        run = Run(llm=llm, config=make_config(split=split))
+        run.run(make_cases(2))
+        assert [r["status"] for r in run.store.records] == ["error", "ok"]
+        assert [r["split"] for r in run.store.records] == [split, split]
 
 
 def test_ground_truth_in_the_records_equals_the_dataset_cases():
@@ -369,6 +379,32 @@ def test_resuming_with_different_settings_aborts_before_anything_is_written_or_c
             other.run(make_cases(5))
         assert other.llm.requests == [] and other.retriever.calls == []
     assert (json.dumps(run.store.manifest), len(run.store.records)) == before
+
+
+def _refused_on_resume(run, **change):
+    """A resume of `run` with one changed setting: refused by run(), nothing called, nothing written."""
+    before = json.dumps(run.store.manifest), len(run.store.records)
+    other = Run(store=run.store, config=make_config(**change))
+    with pytest.raises(RunConfigMismatch) as refusal:
+        other.run(make_cases(5))
+    assert other.llm.requests == [] and other.retriever.calls == []
+    assert (json.dumps(run.store.manifest), len(run.store.records)) == before
+    return str(refusal.value)
+
+
+def test_run_refuses_to_resume_when_either_question_file_hash_differs():
+    run = Run()
+    run.run(make_cases(2))
+    for name, other_name in (("eval-v1.jsonl", "dev-v1.jsonl"), ("dev-v1.jsonl", "eval-v1.jsonl")):
+        files = {name: "c" * 64, other_name: {"eval-v1.jsonl": "a" * 64, "dev-v1.jsonl": "b" * 64}[other_name]}
+        message = _refused_on_resume(run, question_files=files)
+        assert "question_files" in message and "c" * 64 in message
+
+
+def test_run_refuses_to_resume_when_the_prompt_file_hash_differs():
+    run = Run()
+    run.run(make_cases(2))
+    assert "prompt_sha256" in _refused_on_resume(run, prompt_sha256="f" * 64)
 
 
 def test_the_estimate_of_a_finished_run_with_different_settings_is_refused_too():
