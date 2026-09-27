@@ -3,6 +3,9 @@
 `chunks` is the ranked retrieval result, rank 1 first; `k` cuts it to the top k. A chunk hits a span only on
 offsets: same source_id and overlapping half-open `[char_start, char_end)` ranges. The chunk's heading path is never
 compared (Arm A labels a merged section with its first heading, ADR-0003 D3; Arm B uses the nearest heading, D5).
+Duplicate rule (owner, EVAL-003b addendum 2026-09-27): for every span and source metric, lenient and strict, a chunk
+also hits when one of its dropped same-passage copies (`duplicate_chunk_ids`) does; `duplicate_rule_changes` names the
+values the rule changed for a case, so a report can count them.
 
 - lenient (headline): a slot is satisfied by any of its expected or alternate sources/sections (D1);
 - strict: the same with alternates removed (OWNER-001, 2026-09-25);
@@ -13,27 +16,48 @@ compared (Arm A labels a merged section with its first heading, ADR-0003 D3; Arm
   `evidence_hit_via_alternate_only_at_k` flags hits earned only outside the expected spans.
 Corpus-insufficient cases have no spans and are excluded from these metrics; passing them in raises ValueError.
 """
-from dataclasses import dataclass
+from collections.abc import Mapping
+from dataclasses import dataclass, replace
 
 from knowledge_assistant.application.evaluation.metrics.spans import EXPECTED, ExpectedSpan
 from scripts.evaluation.validate_questions import collapse_whitespace
 
 SOURCE = "source"
 SECTION = "section"
+HIT_KS = (1, 3, 5)  # reported cut-offs (§1: @5 headline, @1 and @3 for ranking quality)
+
+
+Location = tuple[str, int, int]  # (source_id, char_start, char_end) of a chunk
 
 
 @dataclass(frozen=True)
 class RankedChunk:
-    """The fields of a retrieved chunk the metrics need; `text` is `display_text` (normalized slice, no heading)."""
+    """The fields of a retrieved chunk the metrics need; `text` is `display_text` (normalized slice, no heading).
+
+    `duplicates` are the locations of the same-passage copies the retriever dropped for this chunk
+    (`duplicate_chunk_ids`, RAG-002). Span and source metrics count a hit by the chunk OR any duplicate (owner,
+    EVAL-003b addendum 2026-09-27); evidence metrics read `text` only.
+    """
 
     source_id: str
     char_start: int
     char_end: int  # exclusive
     text: str = ""
+    duplicates: tuple[Location, ...] = ()
 
     @classmethod
-    def from_record(cls, record: dict) -> "RankedChunk":
-        return cls(record["source_id"], record["char_start"], record["char_end"], record["display_text"])
+    def from_record(cls, record: dict, chunk_index: Mapping[str, Location] | None = None) -> "RankedChunk":
+        """A runner record's retrieved chunk. `chunk_index` ({chunk_id: location}, from the arm's chunk file) resolves
+        `duplicate_chunk_ids`; a chunk with duplicates and no index raises, so the rule is never skipped silently."""
+        duplicate_ids = record.get("duplicate_chunk_ids") or []
+        if duplicate_ids and chunk_index is None:
+            raise ValueError(f"chunk at {record['source_id']} [{record['char_start']}, {record['char_end']}) has "
+                             f"duplicate_chunk_ids {duplicate_ids}: pass the arm's chunk index to resolve them")
+        unknown = [chunk_id for chunk_id in duplicate_ids if chunk_id not in chunk_index]
+        if unknown:
+            raise ValueError(f"duplicate chunk ids not in the chunk index: {unknown}")
+        return cls(record["source_id"], record["char_start"], record["char_end"], record["display_text"],
+                   tuple(tuple(chunk_index[chunk_id]) for chunk_id in duplicate_ids))
 
 
 def overlaps(a_start: int, a_end: int, b_start: int, b_end: int) -> bool:
@@ -48,14 +72,21 @@ def _check(spans: list[ExpectedSpan], k: int | None = None) -> None:
         raise ValueError(f"k must be >= 1, got {k}")
 
 
-def _hits(chunk: RankedChunk, span: ExpectedSpan, level: str) -> bool:
-    if chunk.source_id != span.source_id:
+def _location_hits(location: Location, span: ExpectedSpan, level: str) -> bool:
+    source_id, char_start, char_end = location
+    if source_id != span.source_id:
         return False
     if level == SOURCE:
         return True
     if level == SECTION:
-        return overlaps(chunk.char_start, chunk.char_end, span.char_start, span.char_end)
+        return overlaps(char_start, char_end, span.char_start, span.char_end)
     raise ValueError(f"unknown level {level!r}")
+
+
+def _hits(chunk: RankedChunk, span: ExpectedSpan, level: str) -> bool:
+    """The chunk or any of its dropped duplicates hits the span (duplicate rule, owner 2026-09-27)."""
+    return any(_location_hits(location, span, level)
+               for location in ((chunk.source_id, chunk.char_start, chunk.char_end), *chunk.duplicates))
 
 
 def _usable(spans: list[ExpectedSpan], strict: bool) -> list[ExpectedSpan]:
@@ -172,6 +203,39 @@ def evidence_hit_via_alternate_only_at_k(chunks: list[RankedChunk], point_quotes
         return bool(part) and any(_quotes_found(part, quotes, len(part)))
 
     return int(all(found(outside, quotes) and not found(inside, quotes) for quotes in point_quotes.values()))
+
+
+def chunk_index(chunk_records: list[dict]) -> dict[str, Location]:
+    """{chunk_id: (source_id, char_start, char_end)} from an arm's parsed chunk file; resolves duplicate_chunk_ids."""
+    return {record["chunk_id"]: (record["source_id"], record["char_start"], record["char_end"])
+            for record in chunk_records}
+
+
+def hits_any(chunk: RankedChunk, spans: list[ExpectedSpan], level: str = SECTION, strict: bool = False) -> bool:
+    """Does this one chunk (or a duplicate of it) hit any span of the case? Used for citation precision."""
+    _check(spans)
+    return any(_hits(chunk, span, level) for span in _usable(spans, strict))
+
+
+def duplicate_rule_changes(chunks: list[RankedChunk], spans: list[ExpectedSpan]) -> list[str]:
+    """Names of the span/source values of one case x arm that the duplicate rule changed (for the report count):
+    hit@1/3/5 at source and section level, lenient and strict, the four MRR values and the two slot fractions,
+    each computed with the duplicates and again with them removed."""
+    bare = [replace(chunk, duplicates=()) for chunk in chunks]
+    changed = []
+    for k in HIT_KS:
+        for level, hit in ((SOURCE, source_hit_at_k), (SECTION, section_hit_at_k)):
+            for strict in (False, True):
+                if hit(chunks, spans, k, strict) != hit(bare, spans, k, strict):
+                    changed.append(f"{level}_hit@{k}" + (":strict" if strict else ""))
+    for level in (SECTION, SOURCE):
+        for strict in (False, True):
+            if reciprocal_rank(chunks, spans, level=level, strict=strict) != reciprocal_rank(bare, spans, level=level,
+                                                                                           strict=strict):
+                changed.append(("mrr" if level == SECTION else "source_mrr") + (":strict" if strict else ""))
+        if slot_fraction_at_k(chunks, spans, max(HIT_KS), level) != slot_fraction_at_k(bare, spans, max(HIT_KS), level):
+            changed.append(f"{level}_slot_fraction@{max(HIT_KS)}")
+    return changed
 
 
 def mean(values: list[float]) -> float:
