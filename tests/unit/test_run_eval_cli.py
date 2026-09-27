@@ -226,6 +226,17 @@ def test_resuming_with_other_settings_aborts_with_exit_3(project, monkeypatch):
     assert code == 3 and "threshold" in err and "different settings" in err
 
 
+def test_ctrl_c_stops_cleanly_keeps_what_was_recorded_and_prints_the_resume_command(project):
+    services = FakeServices(llm=scripted("ok", KeyboardInterrupt()))
+    code, out, _ = go(project, "--arm", "A", "--mode", "full", "--split", "dev", services=services)
+    assert code == 2 and "INTERRUPTED" in out and f"--run-id {DEFAULT_ID}" in out
+    directory, records = results(project, DEFAULT_ID)
+    assert [(r["case_id"], r["status"]) for r in records] == [("Q-TEST-001", "ok")]
+    [invocation] = json.loads((directory / "run.json").read_text(encoding="utf-8"))["invocations"]
+    assert invocation["stopped"] == "aborted" and "KeyboardInterrupt" in invocation["detail"]
+    assert invocation["finished_at"] is not None
+
+
 def test_a_run_with_failed_cases_exits_1(project):
     from knowledge_assistant.core.exceptions import LLMUnavailableError
 

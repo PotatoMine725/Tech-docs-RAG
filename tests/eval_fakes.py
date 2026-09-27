@@ -95,7 +95,7 @@ class ScriptedRetriever:
 
 
 class ScriptedLLM:
-    """LLM double. `outcomes` is consumed one per generate() call: an Exception is raised, an LLMResponse is returned
+    """LLM double. `outcomes` is consumed one per generate() call: an exception is raised, an LLMResponse is returned
     as is, "ok" becomes the default JSON answer, any other str is the raw model text; when it runs out the default
     answer is returned. `requests` counts calls."""
 
@@ -107,7 +107,7 @@ class ScriptedLLM:
     def generate(self, request) -> LLMResponse:
         self.requests.append(request)
         outcome = self.outcomes.pop(0) if self.outcomes else answer_json()
-        if isinstance(outcome, Exception):
+        if isinstance(outcome, BaseException):  # also KeyboardInterrupt
             raise outcome
         if isinstance(outcome, LLMResponse):
             return outcome
