@@ -85,3 +85,19 @@ class LLMRequestError(LLMError):
     """Any other provider failure (bad request, invalid key, unknown model, unparsable reply): never retried."""
 
     kind = "other"
+
+
+class EvaluationError(KnowledgeAssistantError):
+    """An evaluation run cannot start or must stop, because its inputs or its own records are not trustworthy."""
+
+
+class IntegrityError(EvaluationError):
+    """A frozen question file does not match the hash recorded in its snapshot (EVAL-003a)."""
+
+
+class RunConfigMismatch(EvaluationError):
+    """A run is resumed with settings that differ from those recorded in its run.json."""
+
+
+class ModelPurityError(EvaluationError):
+    """An answer came from the fallback model or from a model other than the run's answer model."""
