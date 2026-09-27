@@ -1,7 +1,6 @@
 # GUI manual check (GUI-001, real app + fake errors)
 
-Owner checklist. Status of each row: **unverified until you tick it.** The agent ran the same three questions through
-the real view-model and window *offscreen* (see the report), but nobody has looked at the real window yet: that is you.
+Owner checklist. **All rows ticked by the owner on 2026-09-27 (reported "all passed"; the agent did not witness the run).** The agent had run the same three questions through the real view-model and window *offscreen* (see the report).
 
 Setup, from the repo root, PowerShell (one BLAS thread avoids the OpenBLAS memory error seen at process start):
 
@@ -23,13 +22,13 @@ Row A3 must send 0 LLM requests. Use only these dev questions; do not type eval 
 
 | # | Do | Expect | OK |
 |---|----|--------|----|
-| A1 | Arm A. Ask `What is a static class in C#, and can another class inherit from it?` | Busy bar, then an English answer with `[n]` markers; citations list (document — heading path); status line "Total latency … s · model: gemini-3.5-flash-lite"; window stays movable while waiting | [ ] |
-| A2 | Click a citation | Detail shows the **English** excerpt and the source URL (link) | [ ] |
-| A3 | Ask `nint và nuint trong C# là gì, và khi nào thì nên dùng chúng thay cho int hay long?` | Answer in **Vietnamese**; citation excerpts still English | [ ] |
-| A4 | Ask `How do I issue refresh tokens and use them to renew JWT access tokens in ASP.NET Core?` | Amber "Not enough information in the documents" with the message from `config/messages.json`; no citations; status "model: none (no model call)" (0 LLM requests: the retrieval gate refused) | [ ] |
-| A5 | After A1 or A3, click "Copy answer", paste into Notepad | Pasted text equals the answer | [ ] |
-| A6 | Optional, 0 LLM requests: close the app, start it with `$env:GEMINI_API_KEY = ""`, ask anything | Red banner "Could not get an answer" with "Something went wrong: GEMINI_API_KEY is not set"; window stays usable | [ ] |
-| A7 | Optional, spends 1 more LLM request: switch to Arm B and ask the A1 question | Answer or refusal from Arm B; no crash | [ ] |
+| A1 | Arm A. Ask `What is a static class in C#, and can another class inherit from it?` | Busy bar, then an English answer with `[n]` markers; citations list (document — heading path); status line "Total latency … s · model: gemini-3.5-flash-lite"; window stays movable while waiting | [x] |
+| A2 | Click a citation | Detail shows the **English** excerpt and the source URL (link) | [x] |
+| A3 | Ask `nint và nuint trong C# là gì, và khi nào thì nên dùng chúng thay cho int hay long?` | Answer in **Vietnamese**; citation excerpts still English | [x] |
+| A4 | Ask `How do I issue refresh tokens and use them to renew JWT access tokens in ASP.NET Core?` | Amber "Not enough information in the documents" with the message from `config/messages.json`; no citations; status "model: none (no model call)" (0 LLM requests: the retrieval gate refused) | [x] |
+| A5 | After A1 or A3, click "Copy answer", paste into Notepad | Pasted text equals the answer | [x] |
+| A6 | Optional, 0 LLM requests: close the app, start it with `$env:GEMINI_API_KEY = ""`, ask anything | Red banner "Could not get an answer" with "Something went wrong: GEMINI_API_KEY is not set"; window stays usable | [x] |
+| A7 | Optional, spends 1 more LLM request: switch to Arm B and ask the A1 question | Answer or refusal from Arm B; no crash | [x] |
 
 ## Part B: `--fake` (offline, no Gemini, no Chroma)
 
@@ -37,15 +36,15 @@ Trigger words in the question choose the scenario (case-insensitive); Vietnamese
 
 | # | Do | Expect | OK |
 |---|----|--------|----|
-| B1 | `What is dependency injection?` | English answer, 2 citations, status "… · model: fake-model" | [ ] |
-| B2 | `insufficient topic` and `chủ đề insufficient` | Amber banner, the **real** refusal text (EN / VI) from `config/messages.json`, "Not covered: …", no citations, Copy disabled | [ ] |
-| B3 | `related topic` | Amber state plus list "Related content (not an answer)"; row ends "(related, not an answer)" | [ ] |
-| B4 | `quota` | Red banner "Quota used up", readable message, no raw `429` text | [ ] |
-| B5 | `503 please` | Red banner "Model service unavailable" | [ ] |
-| B6 | `noindex` | Red banner "Search index not found" | [ ] |
-| B7 | `what is dependency injection, fallback please` | Status line ends "model: fake-fallback-model (fallback)" | [ ] |
-| B8 | `slow question`, then drag/resize/minimise during the 3 s | Window keeps repainting; busy bar animates; input disabled | [ ] |
-| B9 | Empty box + Enter | Nothing happens | [ ] |
+| B1 | `What is dependency injection?` | English answer, 2 citations, status "… · model: fake-model" | [x] |
+| B2 | `insufficient topic` and `chủ đề insufficient` | Amber banner, the **real** refusal text (EN / VI) from `config/messages.json`, "Not covered: …", no citations, Copy disabled | [x] |
+| B3 | `related topic` | Amber state plus list "Related content (not an answer)"; row ends "(related, not an answer)" | [x] |
+| B4 | `quota` | Red banner "Quota used up", readable message, no raw `429` text | [x] |
+| B5 | `503 please` | Red banner "Model service unavailable" | [x] |
+| B6 | `noindex` | Red banner "Search index not found" | [x] |
+| B7 | `what is dependency injection, fallback please` | Status line ends "model: fake-fallback-model (fallback)" | [x] |
+| B8 | `slow question`, then drag/resize/minimise during the 3 s | Window keeps repainting; busy bar animates; input disabled | [x] |
+| B9 | Empty box + Enter | Nothing happens | [x] |
 
 ## Screenshot moments (for the README / video)
 

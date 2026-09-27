@@ -160,10 +160,10 @@ Deliverables:
 - Offline tests for the view-model logic.
 - Extra features beyond this: OD-14.
 
-Exit gate **G4** (GUI-001 done 2026-09-27, evidence in the [report](../reports/execution/GUI-001.md); owner ticks after the manual check):
-- [ ] Launches from one documented command.
-- [ ] Checked by hand: 1 English answer, 1 Vietnamese answer, 1 "insufficient information" case.
-- [ ] Layer tests pass.
+Exit gate **G4** (GUI-001 done 2026-09-27, evidence in the [report](../reports/execution/GUI-001.md); owner ticked all of `gui-check.md` on 2026-09-27, "all passed", reported by the owner):
+- [x] Launches from one documented command.
+- [x] Checked by hand: 1 English answer, 1 Vietnamese answer, 1 "insufficient information" case.
+- [x] Layer tests pass.
 
 ### EPIC-05 Evaluation
 Two stages, because the questions must be frozen before indexing, but scoring needs the finished pipeline. **Role:** evaluation-designer.
