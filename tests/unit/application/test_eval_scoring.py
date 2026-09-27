@@ -195,6 +195,11 @@ def test_retrieval_summary_counts_duplicate_rule_changes():
     assert summary["duplicate_rule_changed"]["count"] == 1 and summary["duplicate_rule_changed"]["cases"] == ["Q-TEST-002:A"]
 
 
+def test_score_record_needs_spans_for_an_answerable_case():
+    with pytest.raises(ValueError, match="no expected spans"):
+        score_record(make_record(3), SPANS_BY_CASE, None, {}, "judge_v1")
+
+
 def test_score_record_refuses_unresolved_duplicates():
     record = make_record(1)
     record["retrieved"][0]["duplicate_chunk_ids"] = ["09:header-1600:0000"]
@@ -247,6 +252,14 @@ def test_cost_summary_per_stage_and_per_question():
     assert answer["estimate"]["usd"] == pytest.approx((2000 * 0.30 + 200 * 2.50) / 1e6)
     assert judge["estimate"]["usd"] == pytest.approx((3000 * 0.30 + 320 * 2.50) / 1e6)
     assert "free tier" in cost["note"]
+
+
+def test_per_question_tokens_count_each_arm_as_its_own_call():
+    """One case answered on both arms is 2 calls: 100 output tokens per call, not 200 per distinct case id."""
+    records = [{**make_record(1, arm=arm), "model_used": JUDGE_MODEL, "prompt_tokens": 1000, "output_tokens": 100,
+                "thoughts_tokens": None} for arm in ("A", "B")]
+    answer = cost_summary(records, [], PRICING)["stages"]["answer"]
+    assert (answer["calls"], answer["per_question"]["output_tokens"]) == (2, 100.0)
 
 
 def test_real_pricing_file_is_cited_and_never_guesses():

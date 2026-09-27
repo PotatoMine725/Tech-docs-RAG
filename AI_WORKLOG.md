@@ -12,7 +12,7 @@ A record of how AI tools were used in this project, required by the submission (
 | Claude Code (CLI) | Claude Sonnet 5 (`claude-sonnet-5`; GUI-001 commit, co-author trailer) | GUI-001: adapter, wiring, tests, owner checklist |
 | GitNexus (`npx gitnexus`) | local code index | Impact analysis before edits, change detection before commits |
 | Chunking consultation (`docs/plans/chunking-consultation-handoff.md`, cited as context by ADR-0003) | — | A handoff written by Claude Code so another agent could advise on chunking before ADR-0003 |
-| Google Gemini API | `gemini-embedding-001` (from RAG-001a, 2026-09-26); `gemini-3.5-flash-lite` (answers, from RAG-002, 2026-09-26); `gemini-3.5-flash` fallback (RAG-003 smoke check: 1 direct call; ADR-0004) | Embeddings, answers (2 dev answers in RAG-002, 3 in the RAG-003 smoke checks), LLM judge (from EPIC-05) |
+| Google Gemini API | `gemini-embedding-001` (from RAG-001a, 2026-09-26); `gemini-3.5-flash-lite` (answers, from RAG-002, 2026-09-26); `gemini-3.5-flash` fallback (RAG-003 smoke check: 1 direct call; ADR-0004) | Embeddings, answers (2 dev answers in RAG-002, 3 in the RAG-003 smoke checks), LLM judge (2 dev judgements in EVAL-003b) (from EPIC-05) |
 
 ## Log
 
@@ -436,6 +436,26 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 - *How found:* code reading (1), the full suite (2, 3), looking at the image (4).
 - *Fix:* as above.
 - *Human decision:* OD-14 (arm selector, latency + model line, copy) pre-approved; the live budget and dev-only rule; the owner ticks the manual check.
+
+### 2026-09-27 EVAL-003b: metrics audit, duplicate rule, LLM judge, scoring (branch `eval-003b`, PR into `dev`)
+- *AI did:*
+  - Audited the EVAL-003b-pre metrics, spans, mapping and latency against the prompt and the owner's decisions. Changed only one thing, test first: the owner's duplicate overlap rule, where a chunk also hits through its `duplicate_chunk_ids`, for span and source metrics.
+  - Wrote the LLM judge: `judge.py`, `judge_v1.md` with a separate refusal section, and `judge_run.py`. Parsing is strict (point ids and markers must match exactly). A failed parse is `judge_error`, never a guess. A judgement from another model is rejected. Judgements are cached per (case, arm, answer hash, prompt version).
+  - Wrote pure scoring: answer, refusal and citation summaries with OD-12's two checks kept separate, plus breakdowns, judge latency and a cost estimate. `pricing.json` cites its source.
+  - 89 offline tests (774 passed) and 8 mutations, all killed. Live: 2 judge requests on dev records, 0 embedding requests ([report](docs/reports/execution/EVAL-003b.md)).
+- *AI got wrong:*
+  - **Double count in cost.** The first draft of `cost_summary` divided the token totals by the number of distinct case ids. With two arms that divides by half the calls, so the "per question" figure would have doubled.
+  - **Weak tests.** The judge, scoring and CLI test files passed on their first run, so on their own they proved little.
+  - **Owner's expectation.** It was stated as "at most 2 cases" for the duplicate rule. Applied at source level as written, the simulated bound on Arm A is 6. This is a finding, not a code defect; it is flagged for the owner, not explained away.
+- *How found:*
+  - Cost: re-reading the function before its tests ran.
+  - Tests: noticed when they went green on the first run.
+  - Owner's expectation: a scratch count over the chunk files, broken down by section and source level.
+- *Fix:*
+  - Cost: the per-question figure is now the stage total ÷ calls (one call per case × arm). My first test of it used two different cases, so it would have passed under the wrong formula as well. I added a two-arm test, which fails under the old formula (mutation M5).
+  - Tests: mutations on the refusal-check row, the duplicate rule, the per-point evidence rule, each of the 4 cache-key components and the cost formula; each one made a test fail.
+  - Owner's expectation: the report and the ledger give the section-level count (2, as expected) and the source-level count (6), and ask the owner to choose.
+- *Human decision:* the whole addendum of 2026-09-27: OD-12 = both checks, evidence_hit per required point, lenient headline, the duplicate rule, the judge settings, the refusal-check key, no guessed labels, cited prices or null, ≤ 3 live judge calls, and the spot-check task in ledger row 11. Open for the owner: the duplicate rule at source level (6 cases) or section level only (2). OD-13 remains open.
 
 ## Summary: how AI helped
 

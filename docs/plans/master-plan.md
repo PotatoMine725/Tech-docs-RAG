@@ -184,7 +184,7 @@ Exit gate **G5A = M1 ground truth frozen**:
 - [ ] After the freeze, any change is a logged amendment (what, why, date), never a quiet edit.
 
 **Stage B — runner, metrics, runs, report.** **When:** Mon 28 – Tue 29 Sep · **Phase:** 3 · **Tasks:** EVAL-003a (`09a`, runner), EVAL-003b (`09b`, metrics + judge), EVAL-003c (`09c`, tables + spot-check tools), EVAL-004 (`11`, runs + spot-check + report)
-*Status 2026-09-27: EVAL-003a (runner) **done, pending `99-VERIFY`** ([report](../reports/execution/EVAL-003a.md)); EVAL-003b-pre verified 2026-09-26; 09b, 09c and EVAL-004 not started. Status of each task: [ledger](task-ledger.md).*
+*Status 2026-09-27: EVAL-003a (runner) verified; EVAL-003b-pre verified 2026-09-26; EVAL-003b (metrics audit, duplicate rule, LLM judge, scoring) **done, pending `99-VERIFY`** ([report](../reports/execution/EVAL-003b.md)); 09c and EVAL-004 not started. Status of each task: [ledger](task-ledger.md).*
 Deliverables:
 - Resumable, checkpointed runner (can stop and continue without repeating paid calls) → `data/evaluation/results/`. One record per case per arm: generated answer, retrieved chunk IDs and ranks, citations, model used, retry/fallback count, latency per stage (embed query, retrieve, generate), judge verdict, result.
 - Metrics (ADR-0003 D8, ADR-0004 D12): source hit@5, section hit@5, MRR (retrieval-only, run first); answer quality by rubric using the `gemini-3.5-flash-lite` judge; citation quality (does the cited chunk contain the evidence; method OD-12); latency, with retried calls reported separately.
@@ -286,7 +286,7 @@ This plan does **not** decide these. Each must be decided by the owner epic's la
 | OD-9 | Rule for answering "insufficient information" | retrieval-spec | EPIC-03 | ✅ Decided 26 Sep (RAG-002, rule from the prompt, owner addendum): retrieval gate top-1 < 0.686 (dev set, Arm A, one value) + LLM `insufficient` flag |
 | OD-10 | Prompt template / grounding instructions | generation-spec | EPIC-03 | ✅ Decided 26 Sep (owner, RAG-002): `config/prompts/answer_v1.md`, owner's rule 2, JSON mode |
 | OD-11 | Max retry attempts before fallback | ADR-0004 D13 | EPIC-03 | ✅ Decided 26 Sep (owner, RAG-003 addendum; ADR-0004 amendment): 3 attempts in total (1 + 2 retries) with backoff, jitter and retry-after, each wait ≤ 120 s; then the fallback gets one attempt; a daily-quota 429 skips the retries; `ALLOW_FALLBACK` (the eval runner sets false); throttle 13 / 4 RPM |
-| OD-12 | How citation quality is checked (by hand, judge, or both) | evaluation-spec | EPIC-05 B | 28 Sep |
+| OD-12 | How citation quality is checked (by hand, judge, or both) — **decided by the owner 2026-09-26: both (automatic span check + judge support check), reported separately** (`evaluation-spec.md`, EVAL-003b) | evaluation-spec | EPIC-05 B | 28 Sep |
 | OD-13 | Judge spot-check sample size | ADR-0004 D12 | EPIC-05 B | 29 Sep |
 | OD-14 | GUI features beyond the minimum | gui-architecture | EPIC-04 | 28 Sep |
 | OD-15 | Defer MarkItDown past the deadline (only if the cut line is reached) | ADR-0002 | user | 28 Sep |

@@ -167,6 +167,8 @@ def score_record(record: dict, spans_by_case: dict[str, list[ExpectedSpan]], ind
     if record["status"] != "ok":
         return row
     if record["answerable"]:
+        if record["case_id"] not in spans_by_case:
+            raise ValueError(f"{record['case_id']}: no expected spans (expected-spans-v1.json covers the eval split only)")
         spans = spans_by_case[record["case_id"]]
         row["retrieval"] = retrieval_scores(record, spans, index)
         row["duplicate_rule_changed"] = duplicate_rule_changes(ranked_chunks(record, index), spans)
