@@ -138,10 +138,12 @@ Interpretation, tables and narrative are EVAL-004b.
   says nothing about label or arm.
 - **Strata sizes:** A/correct 23, A/correct_refusal 1, A/partially_correct 5, B/correct 23, B/correct_refusal 1,
   B/partially_correct 6. There were no `incorrect` or `hallucination` judge labels, so those strata do not exist.
-- **Picks** (also in the key file): S01 Q-EVAL-017 A, S02 Q-EVAL-035 B, S03 Q-EVAL-012 A, S04 Q-EVAL-035 A,
-  S05 Q-EVAL-024 A, S06 Q-EVAL-025 A, S07 Q-EVAL-024 B, S08 Q-EVAL-022 B, S09 Q-EVAL-020 B, S10 Q-EVAL-017 B.
-  (4 answer checks per arm labelled correct/partial = 2 + 2, plus 1 refusal check per arm.) Three questions appear once
-  per arm (017, 024, 035); their answers differ by arm.
+- **Picks and the S-id → case / arm mapping:** only in `judge-spot-check-judge.md`, on purpose. The committed
+  `summary.json` holds every case × arm label, so listing the mapping here would un-blind the sheet. 99-VERIFY can
+  reproduce the picks with appendix B.
+- **Limits of the blinding** (cannot be removed without changing the sample): the arm can be guessed from the passages
+  (fixed-size chunks start mid-sentence, header chunks start at a `##` heading); and both refusal strata hold only
+  `correct_refusal`, so an item headed "refusal check" reveals its judge label.
 - **Blind file** `judge-spot-check.md`: per item the question and its language, the ground truth (expected answer,
   answer points with required flag, acceptable variations, MUST-NOT-CLAIM, citation criteria), the answer, the note about
   missing information, the full cited passages, and empty owner columns shaped like the judge's schema. It holds no label,

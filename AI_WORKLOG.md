@@ -471,8 +471,10 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 - *AI got wrong:*
   - **Candidate count.** The report draft said 58 spot-check candidates (A 29, B 29); arm B has 30 ok judgements, so the right number is 59.
   - **Import path.** The first scoring-script run failed with `ModuleNotFoundError: scripts`: the metrics module imports `scripts.evaluation`, which needs the repo root on the path. No data was affected.
-- *How found:* Candidate count: re-checking the report's claims against the judgement files before the commit. Import path: the traceback.
-- *Fix:* Candidate count corrected in the report. Import path: `PYTHONPATH="src;."`. Both scripts were re-run and gave byte-identical outputs.
+  - **Wrong hashes (CRLF).** The report first listed the Windows working-copy hashes of the two `summary.json` files. Python wrote them with CRLF, while git commits LF, so the listed hashes did not match the committed blobs.
+  - **Blinding leak.** The report listed the S-id → case/arm mapping of the spot-check. With the committed `summary.json` labels, anyone reading the report could look up the judge's label for each blind item.
+- *How found:* Candidate count: re-checking the report's claims against the judgement files before the commit. Import path: the traceback. Hashes: git's CRLF warning at commit time. Blinding leak: the advisor's final review.
+- *Fix:* Candidate count corrected in the report. Import path: `PYTHONPATH="src;."`. Both scripts were re-run and gave byte-identical outputs. Hashes: files normalized to LF and the report fixed (`07264fc`). Blinding leak: the mapping is removed from the report and kept only in the key file; the limits of the blinding are stated.
 - *Human decision:*
   - Merge PR #17 and branch from it.
   - **judge_error rule**, applied to both arms: exactly one resume with the identical config; if it fails again, leave it unlabelled and list it. Report the count before and after, the raw reason, and format errors per judge call.
