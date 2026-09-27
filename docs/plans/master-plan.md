@@ -160,7 +160,7 @@ Deliverables:
 - Offline tests for the view-model logic.
 - Extra features beyond this: OD-14.
 
-Exit gate **G4**:
+Exit gate **G4** (GUI-001 done 2026-09-27, evidence in the [report](../reports/execution/GUI-001.md); owner ticks after the manual check):
 - [ ] Launches from one documented command.
 - [ ] Checked by hand: 1 English answer, 1 Vietnamese answer, 1 "insufficient information" case.
 - [ ] Layer tests pass.

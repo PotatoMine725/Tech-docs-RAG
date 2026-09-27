@@ -1,29 +1,57 @@
-# GUI manual check (GUI-001-pre, fake use case)
+# GUI manual check (GUI-001, real app + fake errors)
 
-Owner checklist. Nothing here calls Gemini or ChromaDB. Status of each row: **unverified until you tick it.**
+Owner checklist. Status of each row: **unverified until you tick it.** The agent ran the same three questions through
+the real view-model and window *offscreen* (see the report), but nobody has looked at the real window yet: that is you.
 
-Launch (from the repo/worktree root):
+Setup, from the repo root, PowerShell (one BLAS thread avoids the OpenBLAS memory error seen at process start):
 
 ```
-$env:PYTHONPATH = "src"
-.venv\Scripts\python.exe -m knowledge_assistant.presentation.desktop.app --fake
+$env:OPENBLAS_NUM_THREADS = "1"
+.venv\Scripts\python.exe -m knowledge_assistant.presentation.desktop.app          # real app (Part A)
+.venv\Scripts\python.exe -m knowledge_assistant.presentation.desktop.app --fake   # offline demo (Part B)
 ```
 
-Trigger words in the question choose the fake scenario (case-insensitive). Vietnamese is detected from diacritics.
+The real app reads `GEMINI_API_KEY` from `.env`, answers with `gemini-3.5-flash-lite` and falls back to
+`gemini-3.5-flash` when it fails (`ALLOW_FALLBACK` is forced on in the app). The fake window's title says
+"(fake data)".
+
+**Budget for Part A: 2 LLM requests (rows A1, A2) + at most 3 embedding requests (0 if the vectors are cached).**
+Row A3 must send 0 LLM requests. Use only these dev questions; do not type eval questions.
+
+## Part A: real app (dev questions only)
 
 | # | Do | Expect | OK |
 |---|----|--------|----|
-| 1 | Type `What is dependency injection?` + Enter | Thin busy bar ~0.5 s, then an English answer with `[1] [2]`; 2 citations; status line "Total latency 1.1 s · model: fake-model"; "Copy answer" enabled | [ ] |
-| 2 | Click citation `[1]` | Detail box shows the English excerpt and a source URL (example.invalid link) | [ ] |
-| 3 | Type `Dependency injection là gì?` + Enter | Vietnamese answer; citation excerpt still in English | [ ] |
-| 4 | Type `insufficient topic` | Amber banner "Not enough information in the documents", italic message, "Not covered: …"; NO citations list; Copy disabled | [ ] |
-| 5 | Type `related topic` | Same amber state, plus list titled "Related content (not an answer)"; the row ends with "(related, not an answer)"; clicking it shows "Related, not an answer." | [ ] |
-| 6 | Type `chủ đề insufficient` and `related ở đâu?` | Same as 4 / 5 with the Vietnamese message | [ ] |
-| 7 | Type `quota` (only that word) | Red banner "Quota used up"; message below "The Gemini quota is used up…", no raw `429`/`RESOURCE_EXHAUSTED` text | [ ] |
-| 8 | Type `503 please`, then `noindex` (each alone, no `quota` in the text) | Banner "Model service unavailable" + "…temporarily unavailable (503)…"; banner "Search index not found" + "…index was not found…" | [ ] |
-| 9 | Type `slow question`; while the 3 s delay runs, drag/resize/minimise the window | Window keeps moving and repainting; busy bar animates; Ask/input/arm disabled; answer appears after ~3 s | [ ] |
-| 10 | After an answer, click "Copy answer", paste into Notepad | Pasted text equals the answer text | [ ] |
-| 11 | Switch selector to Arm B, ask any answerable question | Answer begins `[Arm B]` (fake echoes the arm); back on Arm A → `[Arm A]` | [ ] |
-| 12 | Press Enter on an empty box | Nothing happens | [ ] |
+| A1 | Arm A. Ask `What is a static class in C#, and can another class inherit from it?` | Busy bar, then an English answer with `[n]` markers; citations list (document — heading path); status line "Total latency … s · model: gemini-3.5-flash-lite"; window stays movable while waiting | [ ] |
+| A2 | Click a citation | Detail shows the **English** excerpt and the source URL (link) | [ ] |
+| A3 | Ask `nint và nuint trong C# là gì, và khi nào thì nên dùng chúng thay cho int hay long?` | Answer in **Vietnamese**; citation excerpts still English | [ ] |
+| A4 | Ask `How do I issue refresh tokens and use them to renew JWT access tokens in ASP.NET Core?` | Amber "Not enough information in the documents" with the message from `config/messages.json`; no citations; status "model: none (no model call)" (0 LLM requests: the retrieval gate refused) | [ ] |
+| A5 | After A1 or A3, click "Copy answer", paste into Notepad | Pasted text equals the answer | [ ] |
+| A6 | Optional, 0 LLM requests: close the app, start it with `$env:GEMINI_API_KEY = ""`, ask anything | Red banner "Could not get an answer" with "Something went wrong: GEMINI_API_KEY is not set"; window stays usable | [ ] |
+| A7 | Optional, spends 1 more LLM request: switch to Arm B and ask the A1 question | Answer or refusal from Arm B; no crash | [ ] |
 
-Screenshots of rows 1, 4/5, 7 are welcome for the README/video.
+## Part B: `--fake` (offline, no Gemini, no Chroma)
+
+Trigger words in the question choose the scenario (case-insensitive); Vietnamese is detected from diacritics.
+
+| # | Do | Expect | OK |
+|---|----|--------|----|
+| B1 | `What is dependency injection?` | English answer, 2 citations, status "… · model: fake-model" | [ ] |
+| B2 | `insufficient topic` and `chủ đề insufficient` | Amber banner, the **real** refusal text (EN / VI) from `config/messages.json`, "Not covered: …", no citations, Copy disabled | [ ] |
+| B3 | `related topic` | Amber state plus list "Related content (not an answer)"; row ends "(related, not an answer)" | [ ] |
+| B4 | `quota` | Red banner "Quota used up", readable message, no raw `429` text | [ ] |
+| B5 | `503 please` | Red banner "Model service unavailable" | [ ] |
+| B6 | `noindex` | Red banner "Search index not found" | [ ] |
+| B7 | `what is dependency injection, fallback please` | Status line ends "model: fake-fallback-model (fallback)" | [ ] |
+| B8 | `slow question`, then drag/resize/minimise during the 3 s | Window keeps repainting; busy bar animates; input disabled | [ ] |
+| B9 | Empty box + Enter | Nothing happens | [ ] |
+
+## Screenshot moments (for the README / video)
+
+The agent could not take them: the offscreen Qt platform has no fonts (every glyph is a box), so no screenshot is
+committed. Take them on your desktop (Win+Shift+S), real app unless noted:
+
+1. **Grounded answer** (A1 after clicking a citation): answer with `[1]`, the citation list, the English excerpt + URL
+   in the detail box, the model/latency line. Shows "grounded + cited".
+2. **Refusal** (A4): the amber banner with no citations and "model: none (no model call)". Shows "insufficient information" handled without a model call.
+3. **Vietnamese question** (A3) or **error state** (`--fake`, B4): pick one: language handling, or a readable error.

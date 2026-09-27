@@ -1,9 +1,9 @@
-# mirror of AnswerResult (prompt 07 §1) — reconcile in GUI-001
-"""The ONLY file in presentation that knows the shape of an answer.
+"""The ONLY file in presentation that knows the shape of an answer the view-model shows.
 
 Field names copy agents/prompts/07-RAG-002 §1 (AnswerResult / Citation). Owner decision D2:
 an insufficient answer may carry `missing_information` and related-only citations.
-`model_used` is flattened from `AnswerResult.llm.model_used` (None when the retrieval gate fired).
+`model_used` and `fallback_used` are flattened from `AnswerResult.llm` (None / False when the retrieval gate
+fired). The core result is mapped onto this shape in ONE place: `core_ask_question.py` (GUI-001).
 """
 from __future__ import annotations
 
@@ -32,6 +32,7 @@ class AnswerResult:
     citations: tuple[Citation, ...] = ()
     latency_ms: dict[str, float] = field(default_factory=dict)  # ..., "total"
     model_used: str | None = None
+    fallback_used: bool = False  # the answer came from the fallback model
 
 
 class AskQuestionError(Exception):
