@@ -179,12 +179,15 @@ Run-folder SHA-256 at commit time:
 0fa18da82e970675a4af83a1c166bd7b0fbdb82352fd8154eee8d7da6eba97e5  A/records.jsonl
 7f12dcb0344e87ee383be1a284ca80d2ed6bb022a14e3adfffca3133085a570e  A/judgements.jsonl
 e6aaf4f9afc43f29885b9dcd23ca591b9854134542de18183b4f4e65a356ff7d  A/run.json
-9383b6c0b2a9f0b2b40a952bb2c4d0e5b655a5e03b455e682d3909b1dc5477c3  A/summary.json
+02e6f4f6fd33b3d0cec88ed0eee27a45768d2251406d00a3c522de1908cfe96a  A/summary.json
 910faf859d7e85ff3249dda4dba33c6082ab3521a68b6d2ad890c5e26442c2f3  B/records.jsonl
 6958f4cc18deea447c2926306ffbce4cfa568e3369180dcc7b2206515f759277  B/judgements.jsonl
 a50ff451f3317e5c6b50005295f9d692b10ef82c255cc72bd1c1cb3d846a574a  B/run.json
-aaa8df063f642365382e1842113ab3e6a5bfdc04d3f4c3d29092acfe4dbbd545  B/summary.json
+9dcc4eae9fac5913b4275806cf931eea2b913fc35578ac95ddf15ea8c141b675  B/summary.json
 ```
+The hashes are of the committed (LF) files. The scratch scripts write with Python `write_text`, which gives CRLF on
+Windows; git normalizes to LF (`.gitattributes` `eol=lf`), so compare after `sed -i 's/$//'` or via `git diff` (the re-run
+check gave byte-identical CRLF output before normalization).
 Frozen question files unchanged: `eval-v1.jsonl` `3436870e…`, `dev-v1.jsonl` `37d349e5…` (= snapshot).
 
 ## Unverified / open
