@@ -16,6 +16,8 @@ Policy (ADR-0004 amendment 2026-09-26, OD-11):
     describes the answer model's failure and mentions the fallback's. Unusable model output stays a GenerationError
     (not retried, no fallback).
 The SDK's own retry is left off (`retry_options` unset = one attempt), so attempts are counted here and only here.
+`on_provider_error(model, failure)` is an optional observer, called for every failed attempt before any retry (EVAL-003a:
+it keeps the first real 429/5xx bodies of an evaluation run); it changes no behaviour and is unset by default.
 """
 import logging
 import random
@@ -105,6 +107,7 @@ class GeminiLLM:
         sleep: Callable[[float], None] = time.sleep,
         jitter: Callable[[], float] = random.random,
         throttles: Mapping[str, SlidingWindowThrottle] | None = None,
+        on_provider_error: Callable[[str, Failure], None] | None = None,
     ) -> None:
         self._settings = settings or get_answer_settings()
         self._client = client
@@ -117,6 +120,7 @@ class GeminiLLM:
         self.last_usage: dict[str, int | None] = {}  # token counts of the last answer, incl. thinking tokens
         self.last_finish_reason: str | None = None
         self._logged_first_429 = False  # the first 429's raw body is logged once per instance
+        self._on_provider_error = on_provider_error  # (model, Failure) of every failed attempt, retried or not
 
     @property
     def model(self) -> str:
@@ -189,6 +193,8 @@ class GeminiLLM:
             if failure.status == 429 and not self._logged_first_429:
                 self._logged_first_429 = True
                 logger.warning("first HTTP 429 of this run (model %s), raw error body: %s", model, failure.body)
+            if self._on_provider_error is not None:
+                self._on_provider_error(model, failure)
             return _Attempt(failure=failure, error=error, config=config)
         return _Attempt(response=response, latency_ms=(self._clock() - start) * 1000.0, config=config)
 

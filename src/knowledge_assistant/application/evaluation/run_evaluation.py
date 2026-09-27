@@ -221,8 +221,10 @@ class RunEvaluation:
         """Cost of running `cases` now. `missing_embeddings(questions)` returns the unique texts not in the cache.
 
         Questions whose embedding is cached are retrieved for real (no API request) to see whether the gate stops
-        them; the others stay unknown. Nothing is spent and nothing is written.
+        them; the others stay unknown. Nothing is spent and nothing is written. Like `run`, it refuses a run whose
+        recorded settings differ (a finished run has nothing left to run, so this is where the caller learns of it).
         """
+        self._check_resumable(self._store.read_manifest())
         done = self._ok_keys()
         pending = [case for case in cases if self._key(case) not in done]
         missing = set(missing_embeddings([case["question"] for case in pending])) if pending else set()
@@ -417,14 +419,7 @@ class RunEvaluation:
                 "invocations": [],
             }
         else:
-            recorded = manifest["config"]
-            differing = sorted(key for key in config.keys() | recorded.keys() if config.get(key) != recorded.get(key))
-            if manifest.get("run_id") != self._run_id or differing:
-                raise RunConfigMismatch(
-                    f"run {self._run_id} was started with different settings, so it cannot be resumed: "
-                    + "; ".join(f"{key}: recorded {recorded.get(key)!r}, now {config.get(key)!r}" for key in differing)
-                    + " (start a new run instead)"
-                )
+            self._check_resumable(manifest)
         invocation = {
             "started_at": stamp, "finished_at": None, "git_commit": environment.git_commit,
             "git_dirty": environment.git_dirty, "git_dirty_files": list(environment.git_dirty_files),
@@ -434,6 +429,19 @@ class RunEvaluation:
         manifest["invocations"].append(invocation)
         self._store.write_manifest(manifest)  # written first: a killed process still leaves its invocation behind
         return manifest, invocation
+
+    def _check_resumable(self, manifest: dict | None) -> None:
+        """A recorded run continues only with the settings it started with (git state and times are not settings)."""
+        if manifest is None:
+            return
+        config, recorded = self._config.to_dict(), manifest["config"]
+        differing = sorted(key for key in config.keys() | recorded.keys() if config.get(key) != recorded.get(key))
+        if manifest.get("run_id") != self._run_id or differing:
+            raise RunConfigMismatch(
+                f"run {self._run_id} was started with different settings, so it cannot be resumed: "
+                + "; ".join(f"{key}: recorded {recorded.get(key)!r}, now {config.get(key)!r}" for key in differing)
+                + " (start a new run instead)"
+            )
 
     def _close(self, manifest: dict, invocation: dict, tally: _Tally, selected: int) -> None:
         stamp = self._stamp()

@@ -16,6 +16,7 @@ from knowledge_assistant.application.evaluation.records import (
 from knowledge_assistant.application.evaluation.run_evaluation import RunConfig, RunEnvironment, RunEvaluation
 from knowledge_assistant.core.exceptions import (
     EmbeddingError,
+    EvaluationError,
     GenerationError,
     LLMQuotaError,
     LLMRequestError,
@@ -27,6 +28,7 @@ from knowledge_assistant.core.exceptions import (
 )
 from tests.eval_fakes import (
     ANSWER_MODEL,
+    ENVIRONMENT,
     MemoryRecordStore,
     ScriptedLLM,
     ScriptedRetriever,
@@ -34,23 +36,11 @@ from tests.eval_fakes import (
     make_answerer,
     make_case,
     make_cases,
+    make_config,
     response,
 )
 
-ENVIRONMENT = RunEnvironment(git_commit="abc1234", git_dirty=False, git_dirty_files=())
 FIXED_NOW = datetime(2026, 9, 27, 10, 0, 0, tzinfo=timezone.utc)
-
-
-def make_config(**overrides) -> RunConfig:
-    values = dict(
-        arm="A", mode="full", split="dev", answer_model=ANSWER_MODEL, fallback_model="test-fallback-model",
-        allow_fallback=False, embedding_model="test-embedding", embedding_dim=8, throttle_rpm=13, threshold=0.5,
-        prompt_version="answer_v2", prompt_sha256="0" * 64, top_k=5, overfetch=10,
-        freeze_tag="eval-freeze-v1", freeze_tag_commit="1" * 40,
-        question_files={"eval-v1.jsonl": "a" * 64, "dev-v1.jsonl": "b" * 64},
-    )
-    values.update(overrides)
-    return RunConfig(**values)
 
 
 class Run:
@@ -322,6 +312,16 @@ def test_an_answer_from_the_fallback_or_another_model_aborts_the_run_and_is_not_
     assert run.store.manifest["invocations"][0]["stopped"] == "aborted"
 
 
+def test_a_gate_decision_that_disagrees_with_the_llm_call_aborts_instead_of_being_recorded():
+    """If the runner's threshold and the answerer's ever drift apart, gate_fired would be wrong in every record."""
+    retriever, llm = ScriptedRetriever(), ScriptedLLM()
+    answerer = make_answerer(retriever, llm, 0.5)
+    evaluation = RunEvaluation("run-1", make_config(), MemoryRecordStore(), retriever, answerer)
+    answerer.threshold = 0.99  # the answerer's gate now stops a case (top-1 0.8) that the runner thinks passes
+    with pytest.raises(EvaluationError, match="disagree"):
+        evaluation.run([make_case(1)], ENVIRONMENT)
+
+
 def test_the_gate_answer_is_not_a_purity_violation_although_no_model_answered():
     run = Run(retriever=ScriptedRetriever(top_scores={make_case(1)["question"]: 0.1}))
     assert run.run([make_case(1)]).ok == 1
@@ -358,6 +358,16 @@ def test_resuming_with_different_settings_aborts_before_anything_is_written_or_c
             other.run(make_cases(5))
         assert other.llm.requests == [] and other.retriever.calls == []
     assert (json.dumps(run.store.manifest), len(run.store.records)) == before
+
+
+def test_the_estimate_of_a_finished_run_with_different_settings_is_refused_too():
+    """A finished run has nothing left to run, so only the estimate can tell the caller its settings differ."""
+    run = Run()
+    run.run(make_cases(2))
+    other = Run(store=run.store, config=make_config(prompt_sha256="f" * 64))
+    with pytest.raises(RunConfigMismatch, match="prompt_sha256"):
+        other.evaluation.estimate(make_cases(2), lambda texts: [])
+    assert run.store.manifest["config"]["prompt_sha256"] == "0" * 64 and len(run.store.manifest["invocations"]) == 1
 
 
 def test_resuming_after_a_new_commit_is_allowed_and_records_the_new_commit_per_invocation():

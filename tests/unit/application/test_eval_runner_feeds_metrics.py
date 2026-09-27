@@ -24,8 +24,16 @@ from knowledge_assistant.application.evaluation.metrics.spans import EXPECTED, E
 from knowledge_assistant.application.evaluation.records import latest_records
 from knowledge_assistant.application.evaluation.run_evaluation import RunEnvironment, RunEvaluation
 from knowledge_assistant.infrastructure.persistence.jsonl_record_store import JsonlRecordStore
-from tests.eval_fakes import ScriptedLLM, ScriptedRetriever, answer_json, make_answerer, make_case, response
-from tests.unit.application.test_run_evaluation import ENVIRONMENT, make_config
+from tests.eval_fakes import (
+    ENVIRONMENT,
+    ScriptedLLM,
+    ScriptedRetriever,
+    answer_json,
+    make_answerer,
+    make_case,
+    make_config,
+    response,
+)
 
 
 def _run(tmp_path, cases, llm=None, retriever=None, mode="full"):

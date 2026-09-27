@@ -2,6 +2,7 @@
 import json
 from pathlib import Path
 
+from knowledge_assistant.application.evaluation.run_evaluation import RunConfig, RunEnvironment
 from knowledge_assistant.application.generation.answer_question import AnswerQuestion, load_messages
 from knowledge_assistant.application.generation.prompt_builder import PromptBuilder
 from knowledge_assistant.application.retrieval.retrieve import RetrievalResult
@@ -12,6 +13,19 @@ from tests.fakes import make_chunk
 ROOT = Path(__file__).resolve().parents[1]
 ANSWER_MODEL = "test-answer-model"
 PROMPT_VERSION = "answer_v2"
+ENVIRONMENT = RunEnvironment(git_commit="abc1234", git_dirty=False, git_dirty_files=())
+
+
+def make_config(**overrides) -> RunConfig:
+    values = dict(
+        arm="A", mode="full", split="dev", answer_model=ANSWER_MODEL, fallback_model="test-fallback-model",
+        allow_fallback=False, embedding_model="test-embedding", embedding_dim=8, throttle_rpm=13, threshold=0.5,
+        prompt_version=PROMPT_VERSION, prompt_sha256="0" * 64, top_k=5, overfetch=10,
+        freeze_tag="eval-freeze-v1", freeze_tag_commit="1" * 40,
+        question_files={"eval-v1.jsonl": "a" * 64, "dev-v1.jsonl": "b" * 64},
+    )
+    values.update(overrides)
+    return RunConfig(**values)
 
 
 def make_case(n: int, answerable: bool = True, language: str = "en") -> dict:
