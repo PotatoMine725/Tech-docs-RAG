@@ -98,24 +98,30 @@ def reciprocal_rank(chunks: list[RankedChunk], spans: list[ExpectedSpan], k: int
     return 0.0
 
 
+def _case_label(case: dict) -> str:
+    """The case id for error messages: a dataset case has `id`, a runner record (EVAL-003a) has `case_id`."""
+    return case.get("id") or case.get("case_id", "?")
+
+
 def required_point_quotes(case: dict) -> dict[str, list[str]]:
     """{required answer point id: the evidence quotes whose `supports` lists it}, in eval-v1 order.
 
     Optional points are left out. A quote supporting several points counts for each of them. Every evidence quote
     counts, also the few that lie in an approved alternate section (EVAL-003b-pre report, decision 5).
+    `case` is a dataset case or an EVAL-003a run record: both carry `answerable`, `answer_points` and `evidence`.
     """
     if not case["answerable"]:
-        raise ValueError(f"{case['id']}: corpus-insufficient cases are excluded from retrieval metrics")
+        raise ValueError(f"{_case_label(case)}: corpus-insufficient cases are excluded from retrieval metrics")
     points = {point["id"]: [] for point in case["answer_points"] if point["required"]}
     if not points:
-        raise ValueError(f"{case['id']}: no required answer point")
+        raise ValueError(f"{_case_label(case)}: no required answer point")
     for evidence in case["evidence"]:
         for point_id in evidence["supports"]:
             if point_id in points:
                 points[point_id].append(evidence["quote"])
     missing = [point_id for point_id, quotes in points.items() if not quotes]
     if missing:
-        raise ValueError(f"{case['id']}: required points without an evidence quote: {missing}")
+        raise ValueError(f"{_case_label(case)}: required points without an evidence quote: {missing}")
     return points
 
 

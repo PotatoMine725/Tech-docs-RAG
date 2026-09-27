@@ -4,8 +4,10 @@ Percentiles use the nearest-rank method: sort the n values ascending; the p-th p
 value at 1-based rank ceil(p / 100 * n). No interpolation, so every reported percentile is a measured value.
 The main table uses only records with `retry_count == 0 and not fallback_used`; retried or fallback records are
 counted and summarized separately (evaluation-spec.md: "retried calls are reported separately").
-Record shape (EVAL-003a; confirmed by EVAL-003b proper): {"latency_ms": {stage: float | None}, "retry_count": int,
-"fallback_used": bool}. A missing or None stage value is skipped, so `n` can differ between stages.
+Record shape (fixed by EVAL-003a, which writes these records; tests/unit/application/test_eval_runner_feeds_metrics.py
+feeds real runner records into this function): {"latency_ms": {stage: float | None}, "retry_count": int,
+"fallback_used": bool}. A record without an LLM call has retry_count 0 and fallback_used false, so it is clean. A
+missing or None stage value is skipped, so `n` can differ between stages.
 """
 import math
 from fractions import Fraction

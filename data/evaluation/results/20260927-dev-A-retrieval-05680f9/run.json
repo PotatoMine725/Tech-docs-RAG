@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927-dev-A-retrieval-05680f9",
+  "config": {
+    "arm": "A",
+    "mode": "retrieval",
+    "split": "dev",
+    "answer_model": "gemini-3.5-flash-lite",
+    "fallback_model": "gemini-3.5-flash",
+    "allow_fallback": false,
+    "embedding_model": "gemini-embedding-001",
+    "embedding_dim": 768,
+    "throttle_rpm": 13,
+    "threshold": 0.686,
+    "prompt_version": "answer_v2",
+    "prompt_sha256": "dfe37f535ab176028d89c73733d9e4199d8cacf693531a373bb378e4d5db7a6f",
+    "top_k": 5,
+    "overfetch": 10,
+    "freeze_tag": "eval-freeze-v1",
+    "freeze_tag_commit": "739676fbd5ad4ad83ef5ba411855dd6902ee59fd",
+    "question_files": {
+      "eval-v1.jsonl": "3436870ef02dfc2c25bd9d403ec6c8dd44cb46dfacbf02d586161dedd1252937",
+      "dev-v1.jsonl": "37d349e5a7fa43a179755d1c7993ef5a8438954f995bedcaee07bcfbf4da21d6"
+    }
+  },
+  "git_commit": "05680f971c48cebf828d871a855aa8c253c6cd06",
+  "git_dirty": false,
+  "git_dirty_files": [],
+  "started_at": "2026-09-27T00:48:55.785+00:00",
+  "finished_at": "2026-09-27T00:48:55.907+00:00",
+  "invocations": [
+    {
+      "started_at": "2026-09-27T00:48:55.785+00:00",
+      "finished_at": "2026-09-27T00:48:55.907+00:00",
+      "git_commit": "05680f971c48cebf828d871a855aa8c253c6cd06",
+      "git_dirty": false,
+      "git_dirty_files": [],
+      "max_llm_calls": 200,
+      "selected": 3,
+      "skipped": 0,
+      "ok": 3,
+      "errors": 0,
+      "llm_requests": 0,
+      "stopped": null,
+      "detail": null,
+      "embedding_requests": 0,
+      "embedding_cache_hits": 3,
+      "embedding_cache_misses": 0
+    }
+  ]
+}

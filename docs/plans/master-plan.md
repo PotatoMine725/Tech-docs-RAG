@@ -184,6 +184,7 @@ Exit gate **G5A = M1 ground truth frozen**:
 - [ ] After the freeze, any change is a logged amendment (what, why, date), never a quiet edit.
 
 **Stage B — runner, metrics, runs, report.** **When:** Mon 28 – Tue 29 Sep · **Phase:** 3 · **Tasks:** EVAL-003a (`09a`, runner), EVAL-003b (`09b`, metrics + judge), EVAL-003c (`09c`, tables + spot-check tools), EVAL-004 (`11`, runs + spot-check + report)
+*Status 2026-09-27: EVAL-003a (runner) **done, pending `99-VERIFY`** ([report](../reports/execution/EVAL-003a.md)); EVAL-003b-pre verified 2026-09-26; 09b, 09c and EVAL-004 not started. Status of each task: [ledger](task-ledger.md).*
 Deliverables:
 - Resumable, checkpointed runner (can stop and continue without repeating paid calls) → `data/evaluation/results/`. One record per case per arm: generated answer, retrieved chunk IDs and ranks, citations, model used, retry/fallback count, latency per stage (embed query, retrieve, generate), judge verdict, result.
 - Metrics (ADR-0003 D8, ADR-0004 D12): source hit@5, section hit@5, MRR (retrieval-only, run first); answer quality by rubric using the `gemini-3.5-flash-lite` judge; citation quality (does the cited chunk contain the evidence; method OD-12); latency, with retried calls reported separately.
