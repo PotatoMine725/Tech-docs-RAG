@@ -145,6 +145,17 @@ def test_a_case_the_gate_answers_has_no_llm_call_and_still_counts_as_clean_for_l
     assert len(record["retrieved"]) == 5  # kept: the gate decision can be audited
 
 
+def test_a_top_score_equal_to_the_threshold_passes_the_gate_in_both_modes():
+    """The gate is `score < threshold` (AnswerQuestion); the runner's gate_fired must use the same comparison."""
+    question = make_case(1)["question"]
+    full = Run(retriever=ScriptedRetriever(top_scores={question: 0.5}))
+    full.run([make_case(1)])
+    assert full.store.records[0]["gate_fired"] is False and len(full.llm.requests) == 1
+    retrieval = Run(mode="retrieval", retriever=ScriptedRetriever(top_scores={question: 0.5}))
+    retrieval.run([make_case(1)])
+    assert retrieval.store.records[0]["gate_fired"] is False
+
+
 def test_retrieval_mode_never_calls_the_llm_and_fills_only_the_retrieval_fields():
     retriever = ScriptedRetriever(top_scores={make_case(2)["question"]: 0.3})
     run = Run(mode="retrieval", retriever=retriever)
