@@ -2,7 +2,7 @@
 
 Task: `agents/prompts/09a-EVAL-003a-runner.md` with the owner's addendum of 2026-09-27 (verbatim in
 [the prompt log](../../prompt-log/claude-code/EVAL-003a.md)). Branch `eval-003a` from `dev` (`dcdea66`), in a separate git
-worktree; PR into `dev`, not merged. Status: done, awaiting `99-VERIFY`. Date: 2026-09-27. Tool: Claude Code, Claude Sonnet 5.
+worktree; PR #16 into `dev`, not merged. Status: done, awaiting `99-VERIFY`. Date: 2026-09-27. Tool: Claude Code, Claude Sonnet 5.
 
 ## Summary
 
