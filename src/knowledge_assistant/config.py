@@ -156,6 +156,44 @@ def get_answer_settings() -> AnswerSettings:
 
 
 @dataclass(frozen=True)
+class JudgeSettings:
+    """LLM judge (EVAL-003b; ADR-0004 D12: the judge is `gemini-3.5-flash-lite`, the same model as the answers, so its
+    verdicts get a manual spot-check). Temperature 0 and no fallback are fixed, not configurable: a judgement from any
+    other model is rejected. The prompt version is the file name (without .md) in `prompts_dir`."""
+
+    model: str
+    prompt_version: str
+    prompts_dir: Path
+    max_attempts: int
+    timeout_s: float
+    max_output_tokens: int
+    limits: ModelLimits  # of `model`; the throttle is 13 RPM like the answer model's
+
+
+def get_judge_settings() -> JudgeSettings:
+    max_attempts = int(os.getenv("JUDGE_MAX_ATTEMPTS", "3"))
+    if max_attempts < 1:
+        raise ConfigurationError(f"JUDGE_MAX_ATTEMPTS={max_attempts} must be at least 1")
+    max_output_tokens = int(os.getenv("JUDGE_MAX_OUTPUT_TOKENS", "2048"))
+    if max_output_tokens < 1:
+        raise ConfigurationError(f"JUDGE_MAX_OUTPUT_TOKENS={max_output_tokens} must be at least 1")
+    return JudgeSettings(
+        model=os.getenv("JUDGE_MODEL", "gemini-3.5-flash-lite"),
+        prompt_version=os.getenv("JUDGE_PROMPT_VERSION", "judge_v1"),
+        prompts_dir=resolve_project_path(os.getenv("PROMPTS_DIR", "config/prompts")),
+        max_attempts=max_attempts,
+        timeout_s=float(os.getenv("JUDGE_TIMEOUT_S", "60")),
+        max_output_tokens=max_output_tokens,
+        limits=_model_limits("JUDGE", rpm=15, tpm=250_000, rpd=500, throttle_rpm=13),
+    )
+
+
+def get_pricing_path() -> Path:
+    """Token prices for the cost estimate (EVAL-003b §4); null prices mean "not available", never a guess."""
+    return resolve_project_path(os.getenv("PRICING_PATH", "config/pricing.json"))
+
+
+@dataclass(frozen=True)
 class RetrievalSettings:
     """top_k = 5 for both arms (ADR-0003 D7). The threshold is the OD-9 retrieval gate, tuned on the dev set, Arm A,
     used for both arms (retrieval-spec.md; RAG-002, 2026-09-26)."""

@@ -1,4 +1,5 @@
-"""RecordStore on disk: `run.json`, `records.jsonl` and `errors.jsonl` in one run directory (EVAL-003a).
+"""RecordStore on disk: `run.json`, `records.jsonl` and `errors.jsonl` in one run directory (EVAL-003a), plus the
+judge's `judgements.jsonl` (JudgementStore, EVAL-003b).
 
 Every write is one newline-terminated line, flushed and fsynced before the call returns, so a killed process loses at
 most the line being written. Only newline-terminated lines are records: an unterminated tail is a torn write, ignored by
@@ -16,6 +17,7 @@ from knowledge_assistant.core.exceptions import EvaluationError
 MANIFEST = "run.json"
 RECORDS = "records.jsonl"
 ERRORS = "errors.jsonl"
+JUDGEMENTS = "judgements.jsonl"  # EVAL-003b: the judge's cache, written by scripts/evaluation/judge_run.py
 
 
 class JsonlRecordStore:
@@ -38,7 +40,14 @@ class JsonlRecordStore:
         os.replace(temporary, self._dir / MANIFEST)  # atomic: a reader sees the old or the new manifest, never half
 
     def read_records(self) -> list[dict]:
-        path = self._dir / RECORDS
+        return self._read(RECORDS)
+
+    def read_judgements(self) -> list[dict]:
+        """`judgements.jsonl` (EVAL-003b): same torn-tail and corruption rules as the records."""
+        return self._read(JUDGEMENTS)
+
+    def _read(self, name: str) -> list[dict]:
+        path = self._dir / name
         if not path.exists():
             return []
         *complete, _torn_tail = path.read_bytes().split(b"\n")  # the piece after the last newline is not a record
@@ -47,11 +56,14 @@ class JsonlRecordStore:
             try:
                 records.append(json.loads(line.decode("utf-8")))
             except ValueError as error:  # JSONDecodeError and UnicodeDecodeError
-                raise EvaluationError(f"{path} {RECORDS} line {number} is not valid JSON: {error}") from error
+                raise EvaluationError(f"{path} {name} line {number} is not valid JSON: {error}") from error
         return records
 
     def append_record(self, record: dict) -> None:
         self._append(RECORDS, record)
+
+    def append_judgement(self, entry: dict) -> None:
+        self._append(JUDGEMENTS, entry)
 
     def append_error(self, entry: dict) -> None:
         self._append(ERRORS, entry)
