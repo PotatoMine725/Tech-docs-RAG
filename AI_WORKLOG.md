@@ -463,6 +463,21 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 - *Human decision:* the whole addendum of 2026-09-27: OD-12 = both checks, evidence_hit per required point, lenient headline, the duplicate rule, the judge settings, the refusal-check key, no guessed labels, cited prices or null, ≤ 3 live judge calls, and the spot-check task in ledger row 11. The owner also decided, during the task, the duplicate rule's scope: section level only; source metrics use the kept chunk's own document; the actual count is reported after EVAL-004. OD-13 remains open.
 - *Verifier findings* ([99-VERIFY](docs/reviews/evaluation/EVAL-003b-verify.md), 2026-09-27, own worktree, zero Gemini requests): **ACCEPT**, 0 FAIL, 0 UNVERIFIED. Independently re-ran mutations M2/M2b (duplicate rule off / at source level) and 4 mutations not in the report (points matched by position instead of id, the model/fallback rejection removed, temperature changed from 0, `allow_fallback` flipped in `judge_run.py`) — all killed by exactly the tests the report implies. Built an independent 6-record hand fixture (2 correct, 1 partial, 1 false_refusal, 1 correct_refusal, 1 hallucination, plus a judge-missing/runner-error variant) and reproduced every accuracy/lenient-accuracy/groundedness/points-covered/refusal-rate/citation number by hand before running the real `score_record`/`summarize_*` functions; all matched. Confirmed the committed `judgements.jsonl` matches the report byte-for-byte, and that the cost formula's `thoughts_tokens` term is real (mutating it out fails 2 tests). Three non-blocking nits, none changing a number: (1) the audit-scope claim "changed ONLY in `_hits`" undersells the disclosed-but-broader `RankedChunk`/`from_record` surface; (2) the Explain-it-back citation-disagreement example says "wrong section" where it means "wrong document" (`unsupported_citation` requires both source and section to miss); (3) a duplicated-citation-marker case and the answerable-vs-answered denominator split have no dedicated test/spec line (code is already correct).
 
+### 2026-09-28 EVAL-004a: evaluation runs and judging, both arms (branch `eval-004`, PR into `dev`)
+- *AI did:*
+  - Merged PR #17 on the owner's instruction, then ran both arms in full on the eval split from one clean commit (`491f137`). Order: estimate, arm A, re-estimate arm B, arm B, judge A, judge B. Every step ran in the background, and the next one started only after the previous one exited.
+  - Quota: 36 embedding and 122 LLM requests (budget 40 / 170). 0 fallback, 0 × 429/5xx.
+  - Scored both runs with `scoring.py` (scratch script, pasted in the report) and built the blind 10-record owner spot-check plus a separate key file ([report](docs/reports/execution/EVAL-004a.md)).
+- *AI got wrong:*
+  - **Candidate count.** The report draft said 58 spot-check candidates (A 29, B 29); arm B has 30 ok judgements, so the right number is 59.
+  - **Import path.** The first scoring-script run failed with `ModuleNotFoundError: scripts`: the metrics module imports `scripts.evaluation`, which needs the repo root on the path. No data was affected.
+- *How found:* Candidate count: re-checking the report's claims against the judgement files before the commit. Import path: the traceback.
+- *Fix:* Candidate count corrected in the report. Import path: `PYTHONPATH="src;."`. Both scripts were re-run and gave byte-identical outputs.
+- *Human decision:*
+  - Merge PR #17 and branch from it.
+  - **judge_error rule**, applied to both arms: exactly one resume with the identical config; if it fails again, leave it unlabelled and list it. Report the count before and after, the raw reason, and format errors per judge call.
+  - No config, prompt or code change after seeing eval results.
+
 ## Summary: how AI helped
 
 To be filled at QC-001.
