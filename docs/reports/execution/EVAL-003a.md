@@ -9,11 +9,13 @@ worktree; PR into `dev`, not merged. Status: done, awaiting `99-VERIFY`. Date: 2
 - **What exists:** `scripts/evaluation/run_eval.py` (wiring and CLI guards) over the application use case `RunEvaluation`
   (`application/evaluation/run_evaluation.py`), the record schema (`records.py`), the frozen-hash check (`integrity.py`), a
   `RecordStore` port and its JSONL implementation (crash-safe append, redaction on every line).
-- **Tests:** `569 passed, 1 deselected` on `dev` before, `653 passed, 1 deselected` after (84 new; per-file counts in "Tests"). 19 mutations of the new code, all killed, files restored byte for byte.
+- **Tests:** `569 passed, 1 deselected` on `dev` before, `653 passed, 1 deselected` after (84 new; per-file counts in "Tests"). 20 mutations of the new code (M1-M19, with M3 also run as M3b), all killed, files restored byte for byte.
 - **Live dry run (dev split, arm A, 3 cases per mode):** retrieval mode 3 ok, 0 LLM requests, 0 embedding requests; full mode
   3 ok, **2 LLM requests** (the third case was answered by the retrieval gate), **0 embedding requests**, 0 provider errors;
   re-running the finished run spent nothing. **No eval-split run of any kind** (not even `--estimate-only`).
-- **Addendum items:** all six are done; the places where I chose between readings are listed in "Design decisions" (10 items).
+- **Addendum items:** the addendum has items 0-6. Items 1-6 are done; item 0 (branch from `dev`, standard git block, PR into `dev`, do not
+  merge, stop for `99-VERIFY`) is done with the PR named in the header. The places where I chose between readings are listed in
+  "Design decisions" (10 items).
 - **Not seen live:** a real 429 or 5xx. The capture of their raw bodies is proven offline only (see Unverified).
 - Frozen question files unchanged: `sha256sum` equals `docs/snapshots/evaluation/eval-v1.md`, and `git diff dcdea66 --` on both
   files and the snapshot is empty.
@@ -49,7 +51,8 @@ New:
 | 8 test files | see "Tests" |
 | `data/evaluation/results/20260927-dev-A-{retrieval,full}-05680f9/` | the two dry-run outputs (dev split; **not evaluation results**) |
 
-Modified (existing code, all with GitNexus impact analysis LOW):
+Modified (existing code). GitNexus impact analysis ran for `GeminiLLM` and `required_point_quotes` (both LOW); the new classes
+appended to `core/exceptions/__init__.py` and the docstring in `latency.py` edit no existing symbol:
 
 | File | Change |
 |---|---|
@@ -144,19 +147,23 @@ script sets `OPENBLAS_NUM_THREADS=1` if unset (a Windows memory failure at numpy
 | `tests/unit/test_eval_arm_b_reuses_query_embeddings.py` | 1 | real `CachingEmbedder` + `Retriever` + `RunEvaluation`: arm A sends 4 questions to the provider, arm B sends 0 (4 cache hits) |
 
 **What was seen failing first and what was not** (no red run was staged afterwards):
-- Every new test module was first run before its code existed (collection error: module or class missing), including all of
-  `test_run_evaluation.py`; then all 29 tests passed on the first run of the implementation. Because a first-run pass proves little,
-  I ran the mutations below.
+- Seen failing before the code existed (collection error: module or class missing): `test_jsonl_record_store.py`,
+  `test_eval_integrity.py`, `test_eval_records.py`, `test_run_evaluation.py`, `test_provider_error_log.py`, `test_run_eval_cli.py`. Then
+  all 29 tests of `test_run_evaluation.py` passed on the first run of the implementation. Because a first-run pass proves little, I ran
+  the mutations below.
+- **Written after the code they test:** `test_eval_runner_feeds_metrics.py` (first run: 5 passed, 1 failed with `KeyError: 'id'`, then
+  the `required_point_quotes` fix; covered by mutations M5 and M12) and `test_eval_arm_b_reuses_query_embeddings.py` (first run failed on
+  my own wrong expectation of the hit counter, the core assertion passed; no mutation applies, it tests the existing `CachingEmbedder`
+  through the runner). So "test first" holds for six of the eight files, not for these two.
 - Seen failing for a behavioural reason: `required_point_quotes` on a record (`KeyError: 'id'`); the estimate on a finished run with
   other settings (`DID NOT RAISE`, found through a failing CLI test).
-- Written after the code and seen only passing, then covered by a mutation: the threshold-boundary test (M15), the gate/LLM
-  disagreement test (M18), the Ctrl-C test (M19), the arm-B reuse test (its first run failed on my own wrong expectation of the hit
-  counter; the core assertion, provider texts staying at 4, passed).
+- Added after the code and seen only passing, then covered by a mutation: the threshold-boundary test (M15), the gate/LLM
+  disagreement test (M18), the Ctrl-C test (M19).
 
 ### Mutation proofs
 
-Each mutation edits one committed file, runs the named test files (`-x`), and restores the file; `sha256` before and after are equal in
-every case. Harness kept in the session scratchpad, not committed.
+Twenty mutations (M1-M19; M3 is also run in a second variant, M3b). Each edits one committed file, runs the named test files (`-x`),
+and restores the file; `sha256` before and after are equal in every case. Harness kept in the session scratchpad, not committed.
 
 | # | Mutation | Result |
 |---|---|---|
@@ -323,12 +330,13 @@ the two result folders, the prompt log and this report).
 
 - Impact analysis before editing existing symbols (upstream): `GeminiLLM` **LOW** (1 importer, its package `__init__`, 0 processes),
   `required_point_quotes` **LOW** (0 callers besides tests). No HIGH or CRITICAL. The other changes are new files.
-- `detect_changes` was run (`scope: compare`, `base_ref: dev`) but the index `Tech-docs-RAG` is registered for the main checkout, not
-  this worktree: it returned 30 changed symbols in 20 files, **all from the other session's uncommitted work in the main checkout**
-  (GUI files, `AGENTS.md`, `CLAUDE.md`, docs) and none of mine. The scope of this branch was checked with
-  `git diff --name-status dcdea66 HEAD`, which lists only the files of the "Files" section (added files, and the four modified
-  files named there); no file of the other session appears. The same limitation was reported in EVAL-003b-pre. The index is stale (`dcdea66`); I did not run `npx gitnexus analyze`, which would rewrite
-  `AGENTS.md` and `CLAUDE.md` in the main checkout.
+- `detect_changes` was run **once**, before the first commit (`fe91d95`), with `scope: compare`, `base_ref: dev`. The index
+  `Tech-docs-RAG` is registered for the main checkout, not this worktree, so it returned 30 changed symbols in 20 files, **all from the
+  other session's uncommitted work in the main checkout** (GUI files, `AGENTS.md`, `CLAUDE.md`, docs) and none of mine. It was **not
+  re-run** before `c4e4ccc` (which edited `GeminiLLM`) or any later commit, for the same reason. The scope check of every commit was
+  `git diff --name-status`, as in EVAL-003b-pre: it lists only the files of the "Files" section (added files, and the four modified
+  files named there), and no file of the other session appears. The index is stale (`dcdea66`); I did not run `npx gitnexus analyze`,
+  which would rewrite `AGENTS.md` and `CLAUDE.md` in the main checkout.
 
 ## Unverified / open
 
@@ -345,6 +353,13 @@ the two result folders, the prompt log and this report).
 - Two runs of the same command at different commits get different default ids (the sha is part of the id); resuming after a commit
   needs the explicit `--run-id`, which the printed resume command contains.
 - Windows console: the script reconfigures stdout and stderr to UTF-8 when run as a script; the tests do not cover a real console.
+- **Throttle sharing is in-process only.** `Services.throttles` is one mapping per process. A judge (09b) that runs as a separate process
+  while a runner process is still live has its own 13-RPM window, and together they can exceed the model's 15 RPM. Run them one after the
+  other, or drive the judge in the same process with `Services.throttles`.
+- **Committed dev dry-run results.** I committed the two folders under `data/evaluation/results/` as evidence for the verifier; they are
+  dev cases, not evaluation results. Keep or delete is the owner's choice (also asked in the PR). Records carry no `split` field, so
+  EVAL-003c must read `run.json` (`config.split`) and must not glob every run directory blindly.
+- Commit `4e7912d` (the Ctrl-C test) has no Co-Authored-By line; it is pushed, so history was not rewritten.
 
 ## Deviations from the prompt
 
@@ -364,15 +379,14 @@ the two result folders, the prompt log and this report).
 - **Why a record holds ground truth verbatim plus the retrieved text.** The metric functions already exist and read `evidence[].supports`,
   `answer_points[].required` and `display_text`; the record has the same shape, so a test can hand a record from disk straight to them.
   No adapter means no second place where the two shapes can drift apart.
-- **Why the model-purity guard aborts and does not just filter.** If the fallback model answers even a few cases, arm A and arm B are
-  no longer measured with the same model and the comparison is unfair. The fallback is off by construction (config validation, the script
-  forces it, `run.json` records it), and a record that still came from another model stops the run and is kept out of `records.jsonl`.
 - **Why the adapter got a hook instead of the runner parsing logs.** The 429 that a retry fixes never reaches the caller, and the
   adapter never logs a 5xx body, so only an observer inside the retry loop sees every failed attempt. It is optional, unset by default,
   and the evidence matters because the daily-quota detection was written from the documented error shape and never checked on a real body.
-- **Why resume compares settings and not the git commit.** Mixing a threshold, a prompt or a model inside one run would make its numbers
-  meaningless, so those (with the prompt file's hash and both question-file hashes) must match. The commit changes with every fix, so each
-  invocation records its own instead.
+- **Why a run refuses to mix models or settings.** If the fallback model answers even a few cases, arm A and arm B are no longer measured
+  with the same model, and a changed threshold, prompt or model inside one run makes its numbers meaningless. So the fallback is off by
+  construction (config validation, the script forces it, `run.json` records it), a record that still came from another model stops the
+  run and is kept out of `records.jsonl`, and a resume must match the recorded settings, the prompt file's hash and both question-file
+  hashes included. The git commit is not compared, because it changes with every fix; each invocation records its own.
 
 ## Lines for the owner (not applied; `agents/prompts/` and the specs are yours)
 

@@ -388,12 +388,12 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - `RunEvaluation` (application) and `scripts/evaluation/run_eval.py`: resume (ok skipped, error retried, settings mismatch refused), a request-counted LLM budget, quota stop with a resume command, model-purity abort, estimate before a run, frozen-hash check of both question files, `eval-freeze-v1` in `run.json`, fallback forced off, throttles built once.
   - The record schema with the owner's extra fields; `display_text` per retrieved chunk so runner records go into the EVAL-003b-pre latency and retrieval functions with no adapter; a `RecordStore` port and a crash-safe JSONL store.
   - An optional `on_provider_error` hook on `GeminiLLM` and `FirstProviderErrors`, which keeps the first real 429 and 5xx body.
-  - 84 new offline tests (653 passed), 19 mutations, all killed; live dry run on dev, arm A: 2 LLM requests, 0 embedding requests, 0 × 429; no eval-split run ([report](docs/reports/execution/EVAL-003a.md)).
+  - 84 new offline tests (653 passed), 20 mutations, all killed; live dry run on dev, arm A: 2 LLM requests, 0 embedding requests, 0 × 429; no eval-split run ([report](docs/reports/execution/EVAL-003a.md)).
 - *AI got wrong:*
   - **Shared checkout.** My first `git switch -c eval-003a` ran in the main checkout while another session had uncommitted GUI work there, so it moved that checkout's HEAD for a few seconds.
   - **Resume check skipped.** The "nothing to run" shortcut skipped the settings check that lived only in `run()`, so a finished run could be resumed with other settings.
   - **Two flawed tests before their first run.** The fallback-purity test replied `"{}"`, which `AnswerQuestion` rejects while parsing, before the purity check can see the answer; the default-run-id test never asserted on the ids it listed.
-  - **Test double against the guard.** The CLI tests' fake LLM answered as `test-answer-model`, not the configured model, so the purity guard aborted every CLI test.
+  - **Test double against the guard.** The CLI tests' fake LLM answered as `test-answer-model`, not the configured model, so the purity guard aborted 4 of the 15 CLI tests at that point (the full-mode ones that answer).
   - **Wrong counter assumption.** The arm-B cache test assumed `missing()` counts cache hits.
   - **Live test by mistake.** I ran `pytest -m gemini` to "confirm it stays deselected"; that option selects the live test.
   - **Test count.** The first report draft said 83 new tests.
