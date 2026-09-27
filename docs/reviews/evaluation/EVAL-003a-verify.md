@@ -94,3 +94,32 @@ Everything the owner asked to be proven is proven except the two items above. Sc
 5. **(LOW, optional)** Count the requests of a purity-aborted case in the invocation's `llm_requests`, or note in the report that `llm_http_requests` is the authoritative count; qualify the "never costs a second answer" line in "Explain it back".
 
 Re-verify after the fixes (scope: fix commits only).
+
+## Re-verify of the fix commit `792b691` (2026-09-27)
+
+Scope: `git diff 5b01edb..HEAD` (HEAD `1eafb73`), own worktree `verify-eval-003a` fast-forwarded to `origin/eval-003a`, mutations on a `git archive` copy in the scratchpad. `OPENBLAS_NUM_THREADS=1`. **0 Gemini requests, no `GEMINI_API_KEY` in the environment, `.env` never opened.**
+
+**Verdict: ACCEPT.** 0 FAIL. Still UNVERIFIED, unchanged: no real 429/5xx body has been seen, so the capture is proven offline only.
+
+| # | Check | Result | Evidence |
+|---|---|---|---|
+| 1a | A raising hook behaves like no hook | **PASS** | Probe through the real `GeminiLLM` on the test fakes, hook `raise OSError("disk full")` against no hook, 6 scripts: `ok`; `429,ok`; `429,503,ok`; `400`; `503 x3` then fallback ok; everything fails. Result, model-call list, request count and fake clock are equal in all 6 (`MISMATCHES: 0`); `429,503,ok` now gives `ok` after 3 requests (before the fix: `OSError` after 1). |
+| 1b | A test exists | **PASS** | `test_a_hook_that_raises_changes_neither_retry_nor_result` (`test_provider_error_log.py`): compares with a hook-less run, asserts `retry_count == 2`, 3 requests, the warning text, and that the exception message is not logged. Mutation: the guard removed on the scratch copy fails exactly this test (`1 failed, 516 passed`). |
+| 2a | `run()` refuses on a question-hash mismatch | **PASS** | `test_run_refuses_to_resume_when_either_question_file_hash_differs` (both files, through `run()`, asserts nothing called and nothing written). My earlier mutation (drop `question_files` from `_check_resumable`) now gives `1 failed, 516 passed`, killed by that test. |
+| 2b | `run()` refuses on a prompt-hash mismatch | **PASS** | `test_run_refuses_to_resume_when_the_prompt_file_hash_differs`; mutation dropping `prompt_sha256` gives `2 failed` (that test and the `estimate()` one). |
+| 3a | `split` is in every new record | **PASS** | `IDENTITY_FIELDS` and `assemble` carry it, `run_evaluation.py` passes `config.split`; `test_every_record_carries_the_split_of_the_run_config_error_records_too` covers ok and error records for `eval` and `dev`; hard-coding `"eval"` on the scratch copy fails 2 tests. The metric functions still take a record unchanged (`test_eval_runner_feeds_metrics.py` passes). |
+| 3b | The committed dry-run records | **PASS, as documented** | Neither deleted nor regenerated (my fix prompt offered both). Both folders (`20260927-dev-A-full-05680f9`, `...-retrieval-05680f9`, 3 records each) have no `split` on the records; each `run.json` has `config.split: "dev"`. The report (Design decisions) and the ledger note say so: EVAL-003c reads `split` from the record and from `run.json` only for pre-fix records. Regenerating would cost 2 LLM requests, which the executor did not spend. Acceptable: both are dev evidence, not results. |
+| 4a | `AI_WORKLOG.md`: every entry from both sides, none duplicated | **PASS** | Merge `d249e8a` has 22 `###` entries (dev 21, eval 21, merge base 20); no header twice, none missing. Every non-blank line added by either side after the merge base is in the merged file exactly once (dev 15, eval 31, missing 0), and the merge holds no line that is in neither parent. |
+| 4b | Ledger 09b note present | **PASS** | Row `09b` says "Resolved by EVAL-003a (2026-09-27, pending its verify): the latency record shape and the `RankedChunk` adapter", next to the untouched EVAL-003b-pre text. Row 10 (GUI-001) from `dev` is intact. |
+| 4c | The merge touches only files from `dev`, plus the resolutions | **PASS** | `git diff d249e8a^1 d249e8a` lists 18 files, all of them GUI-001 files from `dev`; of these, 15 are byte-identical to `9d90a8f`, the other 3 are the resolved `AI_WORKLOG.md`, `task-ledger.md` and `master-plan.md` (the last one adds the EVAL-003a status line). Nothing else of the branch was changed by the merge. Commit `1eafb73` merges only my own review commit (3 files). |
+| 5a | Offline suite | **PASS** | `685 passed, 1 deselected` on the merged branch (597 `dev` + 84 + 4 tests added by the fixes: split 1, refusals 2, raising hook 1). The estimate in my fix prompt (681) predates the 4th added test. Structure test alone: `9 passed`. |
+| 5b | `AIza` + 35 scan | **PASS** | `git grep -E "AIza[0-9A-Za-z_-]{35}" HEAD`: 0 matches; `.env` is not tracked. |
+| 5c | Eval firewall | **PASS** | The 25 files changed since `5b01edb`, whole-file and whitespace-collapsed: 0 of the 36 eval question texts; `Q-EVAL-n` / `BP-EVAL-n` in added lines: 0. |
+| 5d | Frozen hashes | **PASS** | `eval-v1.jsonl` `3436870e...`, `dev-v1.jsonl` `37d349e5...` (unchanged from the first review); each full hash appears once in `docs/snapshots/evaluation/eval-v1.md`; `git diff eval-freeze-v1 HEAD -- data/evaluation/questions docs/snapshots/evaluation corpus` shows only `expected-spans-v1.json` (added by EVAL-003b-pre). Model names outside `config.py`: none. No eval-split run directory exists. |
+| 6 | Fix 5 (LOW) | **PASS** | The report now says `llm_http_requests` is the authoritative count and no longer says a crash "never" costs a second answer. |
+
+Mutations were made only on the scratch copy; the mutated files were restored and the `sha256` of the three touched files was equal before and after.
+
+**Notes (not blocking):**
+- The report's "Tests" table still says `653 passed` and "84 new" for the branch alone; with the fixes it is 657 (+4). Also `test_provider_error_log.py` is listed as 6 tests, which is right, so only the "Final" line and the summary count are stale. Fix at the next docs touch.
+- The new docstring line in `gemini_llm.py` is longer than the file's other docstring lines.

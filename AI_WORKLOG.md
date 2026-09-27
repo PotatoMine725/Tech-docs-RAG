@@ -416,6 +416,7 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - **Question-hash resume refusal untested.** Excluding `question_files` from the settings comparison on a scratch copy left the whole suite green (652 passed); the prompt-hash refusal is tested only through `estimate()`.
   - Records carry no `split` field (owner wants one); `AI_WORKLOG.md` conflicts with `dev` (PR #15 merged since); a purity-aborted case's request is missing from that invocation's `llm_requests` (the adapter counter in the same manifest is right).
   - The report's numbers, the pasted record (only `display_text` and `passage_hash` shortened, as stated), the per-file test counts, the frozen hashes and the firewall counts all reproduced. No real 429/5xx was ever seen, so the body capture stays proven offline only.
+  - Re-verify of fix commit `792b691` and the `dev` merge (2026-09-27, 0 Gemini requests) → ACCEPT: a raising hook now gives the same result, model calls and request count as no hook in 6 scripts; dropping `question_files` or `prompt_sha256` from the resume comparison, unguarding the hook and dropping `split` each fail a test; 685 offline tests pass on the merged branch; the two committed dry-run folders were left as they are and documented as lacking `split`. ([addendum](docs/reviews/evaluation/EVAL-003a-verify.md#re-verify-of-the-fix-commit-792b691-2026-09-27))
   - The test expects the hits of arm B only.
   - Removed the empty git-ignored cache file the run created.
   - The report says 84.
