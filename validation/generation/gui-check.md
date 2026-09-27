@@ -7,6 +7,7 @@ Setup, from the repo root, PowerShell (one BLAS thread avoids the OpenBLAS memor
 
 ```
 $env:OPENBLAS_NUM_THREADS = "1"
+$env:PYTHONPATH = "src"   # the package is not pip-installed in .venv; pytest gets this from pyproject.toml
 .venv\Scripts\python.exe -m knowledge_assistant.presentation.desktop.app          # real app (Part A)
 .venv\Scripts\python.exe -m knowledge_assistant.presentation.desktop.app --fake   # offline demo (Part B)
 ```
