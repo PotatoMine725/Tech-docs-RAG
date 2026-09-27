@@ -1,5 +1,5 @@
 """RAG-002 addendum 2: a real core AnswerResult maps onto the GUI-001-pre contract without losing a field the GUI
-shows. The mapping below is a test-only sketch; the real adapter belongs to GUI-001 wiring (report lists mismatches)."""
+shows. The mapping is now the real adapter (GUI-001); test_core_adapter.py covers each mismatch."""
 import dataclasses
 import json
 from pathlib import Path
@@ -9,27 +9,10 @@ from knowledge_assistant.application.generation.prompt_builder import PromptBuil
 from knowledge_assistant.application.retrieval.retrieve import Retriever
 from knowledge_assistant.core.models import AnswerResult
 from knowledge_assistant.presentation.desktop.viewmodels import contracts
+from knowledge_assistant.presentation.desktop.viewmodels.core_ask_question import to_gui_result as to_gui
 from tests.fakes import FakeEmbedder, FakeLLM, InMemoryVectorStore, make_chunk
 
 ROOT = Path(__file__).resolve().parents[3]
-
-
-def to_gui(result: AnswerResult) -> contracts.AnswerResult:
-    return contracts.AnswerResult(
-        question=result.question,
-        language=result.language,
-        answer=result.answer,
-        insufficient=result.insufficient,
-        insufficient_reason=result.insufficient_reason,
-        missing_information=result.missing_information,
-        citations=tuple(
-            contracts.Citation(c.marker, c.document_name, c.location, c.excerpt, c.source_url,
-                               related_only=result.insufficient)
-            for c in result.citations
-        ),
-        latency_ms=dict(result.latency_ms),
-        model_used=result.llm.model_used if result.llm else None,
-    )
 
 
 def _ask(reply: dict) -> AnswerResult:
@@ -50,7 +33,7 @@ def test_every_gui_field_is_filled_from_the_core_result():
     gui = to_gui(core)
     gui_fields = {f.name for f in dataclasses.fields(contracts.AnswerResult)}
     core_fields = {f.name for f in dataclasses.fields(AnswerResult)}
-    assert gui_fields - core_fields == {"model_used"}  # flattened from AnswerResult.llm
+    assert gui_fields - core_fields == {"model_used", "fallback_used"}  # flattened from AnswerResult.llm
     assert [(c.marker, c.location, c.source_url, c.related_only) for c in gui.citations] == [
         (1, "Doc > Section", "https://example.invalid/01", False),
         (2, "Doc > Section", "https://example.invalid/02", False),

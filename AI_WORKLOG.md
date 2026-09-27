@@ -9,6 +9,7 @@ A record of how AI tools were used in this project, required by the submission (
 | Claude Code (CLI) | Claude Sonnet 5 (commit `3d5a606`, co-author trailer) | SETUP-001: project skeleton, specs, corpus migration |
 | Claude Code (CLI) | Claude Opus 5.5 (`claude-opus-5-5`; commits `490068f` onward) | ADR drafting, master plan, corpus analysis, repo hygiene, evaluation design |
 | Claude Code (CLI) | Claude Sonnet 5 (`claude-sonnet-5`; RAG-003 commits, co-author trailer) | RAG-003: retry/fallback adapter, error classification, CLI, smoke checks |
+| Claude Code (CLI) | Claude Sonnet 5 (`claude-sonnet-5`; GUI-001 commit, co-author trailer) | GUI-001: adapter, wiring, tests, owner checklist |
 | GitNexus (`npx gitnexus`) | local code index | Impact analysis before edits, change detection before commits |
 | Chunking consultation (`docs/plans/chunking-consultation-handoff.md`, cited as context by ADR-0003) | — | A handoff written by Claude Code so another agent could advise on chunking before ADR-0003 |
 | Google Gemini API | `gemini-embedding-001` (from RAG-001a, 2026-09-26); `gemini-3.5-flash-lite` (answers, from RAG-002, 2026-09-26); `gemini-3.5-flash` fallback (RAG-003 smoke check: 1 direct call; ADR-0004) | Embeddings, answers (2 dev answers in RAG-002, 3 in the RAG-003 smoke checks), LLM judge (from EPIC-05) |
@@ -382,6 +383,21 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - The first live attempt was re-run once with one BLAS thread, and one hung full `pytest` run (10 minutes, no CPU) was killed and re-run once (546 passed in 16 s); both logged in the report.
 - *Human decision:* the whole addendum: OD-11 policy, the 13 / 4 RPM throttle and limits, `ALLOW_FALLBACK` and the eval runner's use of it (ledger note for 09a), the smoke design and its budget (at most 5 LLM and 0 embedding requests), `--gate-off` as a diagnostic. Open for the owner at `99-VERIFY`: the choices listed in the [report](docs/reports/execution/RAG-003.md) ("Decisions and open choices").
 - *Verifier findings* (99-VERIFY, 2026-09-26, Windows 3.13.3, 0 Gemini requests, [RAG-003-verify](docs/reviews/code/RAG-003-verify.md) → ACCEPT WITH FIXES): 546 offline tests pass (dev 383); the embedder's RAG-001a tests pass unchanged against the branch; no test assertion was deleted or loosened; three mutations (retry count, daily-quota fast path, `ALLOW_FALLBACK` guard) each fail tests (9, 3, 5) and the files were restored byte for byte. Defects: (1) **502 is not retried**: `RETRYABLE_STATUS` is the embedder's `{429, 500, 503, 504}`, but the owner's list includes 502; a probe showed a 502 skips the retries and spends one of the fallback's 20 daily requests, and the ADR note that lists the embedder's set does not mention the omission. (2) The `--json` output schema is documented only in code and one test, not in the spec, `--help` or the docstring. (3) The parametrized error-boundary test lacks the persistent 500 and 400 cases (500 and 400 behave correctly in a probe and in other tests). Unverified: whether thinking tokens count against `max_output_tokens` (the installed google-genai 1.75.0 does not say; the adapter sets no `thinking_config`; default `max_output_tokens` is 1024; the fallback used 370 thinking tokens in the smoke check).
+
+### 2026-09-27 GUI-001: desktop window wired to the real use case (branch `gui-001`, PR into `dev`)
+- *AI did:*
+  - One adapter (`core_ask_question.py`) for the 7 RAG-002 mismatches and the error kinds, `wiring.py` as the only presentation module touching `composition`/`infrastructure` (structure test added), `ALLOW_FALLBACK` forced on, fallback shown in the model line, N2 (fake reads `config/messages.json`).
+  - New offline tests (597 passed in total); 2 mutations killed. Live run of the real window (offscreen) on 3 dev questions: 2 LLM requests, the gate refusal 0.
+  - Rewrote `validation/generation/gui-check.md` (real app + fake errors) for the owner to tick.
+- *AI got wrong:*
+  - **Thread affinity.** The plan was one long-lived cached embedder per arm; the embedding cache is a `sqlite3` connection bound to its creating thread while the Qt pool uses any worker. Caught by reading the cache code before running anything; replaced by a per-call embedder.
+  - **Pinned model name.** The fake's fallback demo first used a real model name; `test_model_names_appear_in_no_source_file_except_config` failed; renamed to `fake-fallback-model`.
+  - **Stale test sketch.** `test_answer_result_mapping.py` had a test-only mapping and asserted the exact extra-field set; the new `fallback_used` field broke it (fixed by using the real adapter).
+  - **Useless screenshots.** The offscreen Qt platform has no fonts, so the first screenshot was all boxes; deleted, listed as owner moments instead.
+  - The first GitNexus impact calls failed for a missing `repo` argument (retried with `Tech-docs-RAG`), and one long shell command failed to parse and wrote nothing (redone as file writes).
+- *How found:* code reading (1), the full suite (2, 3), looking at the image (4).
+- *Fix:* as above.
+- *Human decision:* OD-14 (arm selector, latency + model line, copy) pre-approved; the live budget and dev-only rule; the owner ticks the manual check.
 
 ## Summary: how AI helped
 
