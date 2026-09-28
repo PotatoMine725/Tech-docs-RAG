@@ -161,16 +161,16 @@ Sample: 10 judged records, seed 42, stratified by arm and result label (rule in
 
 | Item | Owner | Note |
 |---|---|---|
-| P1 covered |  |  |
-| P2 covered |  |  |
-| P3 covered |  |  |
-| contradicts ground truth |  |  |
-| unsupported claims |  |  |
-| citation [3] supports its claim |  |  |
-| citation [5] supports its claim |  |  |
-| citation [1] supports its claim |  |  |
-| citation [2] supports its claim |  |  |
-| citation [4] supports its claim |  |  |
+| P1 covered | yes |  |
+| P2 covered | yes |  |
+| P3 covered | no |  |
+| contradicts ground truth | no |  |
+| unsupported claims | no |  |
+| citation [3] supports its claim | yes |  |
+| citation [5] supports its claim | yes |  |
+| citation [1] supports its claim | yes |  |
+| citation [2] supports its claim | yes |  |
+| citation [4] supports its claim | yes |  |
 | agree with the judge? (fill after opening the key) |  |  |
 
 ## S02 (refusal check)
@@ -282,7 +282,7 @@ Sample: 10 judged records, seed 42, stratified by arm and result label (rule in
 
 | Item | Owner | Note |
 |---|---|---|
-| presents_related_as_answer |  |  |
+| presents_related_as_answer | false |  |
 | agree with the judge? (fill after opening the key) |  |  |
 
 ## S03 (answer check)
@@ -350,13 +350,13 @@ Sample: 10 judged records, seed 42, stratified by arm and result label (rule in
 
 | Item | Owner | Note |
 |---|---|---|
-| P1 covered |  |  |
-| P2 covered |  |  |
-| P3 covered |  |  |
-| contradicts ground truth |  |  |
-| unsupported claims |  |  |
-| citation [1] supports its claim |  |  |
-| citation [2] supports its claim |  |  |
+| P1 covered | partial |  |
+| P2 covered | no |  |
+| P3 covered | yes |  |
+| contradicts ground truth | no |  |
+| unsupported claims | no |  |
+| citation [1] supports its claim | yes |  |
+| citation [2] supports its claim | yes |  |
 | agree with the judge? (fill after opening the key) |  |  |
 
 ## S04 (refusal check)
@@ -405,7 +405,7 @@ Sample: 10 judged records, seed 42, stratified by arm and result label (rule in
 
 | Item | Owner | Note |
 |---|---|---|
-| presents_related_as_answer |  |  |
+| presents_related_as_answer | false |  |
 | agree with the judge? (fill after opening the key) |  |  |
 
 ## S05 (answer check)
@@ -453,11 +453,11 @@ Sample: 10 judged records, seed 42, stratified by arm and result label (rule in
 
 | Item | Owner | Note |
 |---|---|---|
-| P1 covered |  |  |
-| P2 covered |  |  |
-| contradicts ground truth |  |  |
-| unsupported claims |  |  |
-| citation [1] supports its claim |  |  |
+| P1 covered | yes |  |
+| P2 covered | yes |  |
+| contradicts ground truth | no |  |
+| unsupported claims | no |  |
+| citation [1] supports its claim | yes |  |
 | agree with the judge? (fill after opening the key) |  |  |
 
 ## S06 (answer check)
@@ -511,12 +511,12 @@ Sample: 10 judged records, seed 42, stratified by arm and result label (rule in
 
 | Item | Owner | Note |
 |---|---|---|
-| P1 covered |  |  |
-| P2 covered |  |  |
-| contradicts ground truth |  |  |
-| unsupported claims |  |  |
-| citation [1] supports its claim |  |  |
-| citation [2] supports its claim |  |  |
+| P1 covered | yes |  |
+| P2 covered | yes |  |
+| contradicts ground truth | no |  |
+| unsupported claims | no |  |
+| citation [1] supports its claim | yes |  |
+| citation [2] supports its claim | yes |  |
 | agree with the judge? (fill after opening the key) |  |  |
 
 ## S07 (answer check)
@@ -671,16 +671,16 @@ Sample: 10 judged records, seed 42, stratified by arm and result label (rule in
 
 | Item | Owner | Note |
 |---|---|---|
-| P1 covered |  |  |
-| P2 covered |  |  |
-| contradicts ground truth |  |  |
-| unsupported claims |  |  |
-| citation [1] supports its claim |  |  |
-| citation [2] supports its claim |  |  |
-| citation [3] supports its claim |  |  |
-| citation [4] supports its claim |  |  |
-| citation [5] supports its claim |  |  |
-| agree with the judge? (fill after opening the key) |  |  |
+| P1 covered | yes |  |
+| P2 covered | yes |  |
+| contradicts ground truth | no |  |
+| unsupported claims | no |  |
+| citation [1] supports its claim | yes |  |
+| citation [2] supports its claim | yes |  |
+| citation [3] supports its claim | yes |  |
+| citation [4] supports its claim | yes |  |
+| citation [5] supports its claim | yes |  |
+| agree with the judge? (fill after opening the key) |  | this question appeared **TWICE** in the whole document |
 
 ## S08 (answer check)
 
@@ -910,16 +910,16 @@ Sample: 10 judged records, seed 42, stratified by arm and result label (rule in
 
 | Item | Owner | Note |
 |---|---|---|
-| P1 covered |  |  |
-| P2 covered |  |  |
-| P3 covered |  |  |
-| contradicts ground truth |  |  |
-| unsupported claims |  |  |
-| citation [4] supports its claim |  |  |
-| citation [5] supports its claim |  |  |
-| citation [3] supports its claim |  |  |
-| citation [1] supports its claim |  |  |
-| citation [2] supports its claim |  |  |
+| P1 covered | yes |  |
+| P2 covered | yes |  |
+| P3 covered | yes |  |
+| contradicts ground truth | no |  |
+| unsupported claims | no |  |
+| citation [4] supports its claim | yes |  |
+| citation [5] supports its claim | yes |  |
+| citation [3] supports its claim | yes |  |
+| citation [1] supports its claim | yes |  |
+| citation [2] supports its claim | yes |  |
 | agree with the judge? (fill after opening the key) |  |  |
 
 ## S09 (answer check)
@@ -975,12 +975,12 @@ Sample: 10 judged records, seed 42, stratified by arm and result label (rule in
 
 | Item | Owner | Note |
 |---|---|---|
-| P1 covered |  |  |
-| P2 covered |  |  |
-| P3 covered |  |  |
-| contradicts ground truth |  |  |
-| unsupported claims |  |  |
-| citation [1] supports its claim |  |  |
+| P1 covered | yes |  |
+| P2 covered | yes |  |
+| P3 covered | yes |  |
+| contradicts ground truth | no |  |
+| unsupported claims | no |  |
+| citation [1] supports its claim | yes |  |
 | agree with the judge? (fill after opening the key) |  |  |
 
 ## S10 (answer check)
@@ -1162,13 +1162,13 @@ Sample: 10 judged records, seed 42, stratified by arm and result label (rule in
 
 | Item | Owner | Note |
 |---|---|---|
-| P1 covered |  |  |
-| P2 covered |  |  |
-| P3 covered |  |  |
-| contradicts ground truth |  |  |
-| unsupported claims |  |  |
-| citation [2] supports its claim |  |  |
-| citation [1] supports its claim |  |  |
-| citation [4] supports its claim |  |  |
-| citation [3] supports its claim |  |  |
+| P1 covered | yes |  |
+| P2 covered | yes |  |
+| P3 covered | yes |  |
+| contradicts ground truth | no |  |
+| unsupported claims | no |  |
+| citation [2] supports its claim | yes |  |
+| citation [1] supports its claim | yes |  |
+| citation [4] supports its claim | yes |  |
+| citation [3] supports its claim | yes |  |
 | agree with the judge? (fill after opening the key) |  |  |
