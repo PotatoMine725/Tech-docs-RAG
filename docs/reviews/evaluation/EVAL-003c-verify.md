@@ -262,6 +262,57 @@ EVAL-003c fixes (from docs/reviews/evaluation/EVAL-003c-verify.md). Zero Gemini 
    - Update ledger row 09c and re-run 99-VERIFY on the fixes.
 ```
 
+## Limited re-verify of the fixes (2026-09-28, two passes, own worktrees, zero Gemini requests)
+
+After the fixes above were applied (commits `13a5f3f`, `36a42fd`, `961d86c`, `6f77f26`), the owner asked for a
+**limited** re-verify (not a full 99-VERIFY) rather than a fresh ground-up review.
+
+### Pass 1 — re-verify against `6f77f26` (worktree `verify-eval-003c`, detached at `6f77f26`)
+
+| # | Check | Result |
+|---|---|---|
+| 0 | Scope: `git diff origin/dev...HEAD` clean merge with `origin/dev`, no drift into `src/`, `corpus`, or frozen question files | PASS |
+| 1 | Spot-check numbers re-derived against the real owner-graded sheet | PASS — rule-based 8/10 (κ = 0.6875), holistic 9/10, disagreements S09/S10, matching EVAL-004a's corrected row 11 |
+| 2 | Blinding: the regenerated `judge-spot-check.md` carries no run id / arm leak | PASS |
+| 3 | Judge-prompt-version drift guard present in `score_row`/`eval_report_data.py` | PASS |
+| 4 | Mutants a3 (caption exclusions), b2 (per-case cell order), b3 (lenient↔strict columns) | PASS — all 3 now killed |
+| 5 | Citation-denominator test (`test_an_unlabelled_answered_record_stays_in_the_citation_denominator_but_not_accuracy`) actually pins `judge_class_n` / `support_rate` | **FAIL** — the test asserted `source_precision`/`section_precision` `n == 2` but never asserted `judge_class_n` or `support_rate`'s `n`. Mutating `summarize_citations` (`scoring.py`) to `judged = answered` (dropping the `judge_class is not None` filter) passed the full targeted suite: the gap was real, not theoretical. |
+| 6 | Spec/notes text (`evaluation-spec.md` denominator sentence, `EVAL-003b.md` correction) | PASS |
+| 7 | Offline suite | PASS — 848 passed, 1 deselected |
+| 8 | Secret scan (`AIza[0-9A-Za-z_-]{35}` over HEAD tree) | PASS — 0 matches |
+
+**Verdict: NOT ACCEPT** — check 5 was a real, mutation-proven gap. Fix required before merge.
+
+### Fix (same session, commit `3b57469`)
+
+`tests/unit/application/test_eval_scoring.py` extended with two assertions on the existing test (no new test
+added): `summary["citation"]["judge_class_n"] == 1` and `summary["citation"]["support_rate"]["n"] == 1`, alongside
+a comment noting the unlabelled (`judge_error`) record is excluded from judge-dependent citation metrics. Mutation
+re-run in that session reported the mutant killed; full offline suite re-run on branch `eval-003c`. Commit made;
+push was left pending at the end of that session (per the owner's "stop here" instruction).
+
+### Pass 2 — this mini re-verify against `HEAD` = `3b57469` (worktree `verify-eval-003c-mini`, own copy of
+`origin/eval-003c`), independently re-confirming the check-5 fix only. Zero Gemini requests; no `.env` opened; no
+`run_eval.py`/`judge_run.py` imported.
+
+1. **Scope of the fix commit.** `git diff 6f77f26..HEAD --stat` → **1 file changed, 5 insertions(+), 0 deletions(-)**:
+   only `tests/unit/application/test_eval_scoring.py`. No production code, report, ledger, or worklog line changed
+   in this commit (a narrower diff than the check-5 fix description implied — nothing else needed touching).
+2. **Mutation re-applied for real** (not just described): `scoring.py:240`, `summarize_citations`, changed
+   `judged = [c for c in answered if c["judge_class"] is not None]` → `judged = answered`. Ran
+   `tests/unit/application/test_eval_scoring.py` (25 tests): **1 failed** —
+   `test_an_unlabelled_answered_record_stays_in_the_citation_denominator_but_not_accuracy`, `assert 2 == 1` on
+   `summary["citation"]["judge_class_n"]` (24 other tests in the file still passed). The new assertions kill the
+   mutant. File then restored to the original line; `git diff` on the worktree is empty (no pending changes).
+3. **Full offline suite**: `848 passed, 1 deselected in 24.37s` (`-m "not gemini"`) — same count as pass 1, since
+   the fix extended an existing test rather than adding one. `tests/unit/test_project_structure.py` run standalone:
+   **9 passed** (layer-boundary checks green).
+
+**Verdict: ACCEPT.** The check-5 gap identified in pass 1 is closed: the assertions that previously fell short
+now exist and are proven, by mutation, to catch the regression they're meant to catch. Combined with pass 1's
+checks 0–4 and 6–8 (all PASS, unchanged by this commit), **all limited re-verify checks now pass.** Ledger row
+09c moves from "pending limited re-verify" to **verified**.
+
 ## Appendix A: `equiv.py` (check 2, real eval-004 runs, verbatim)
 
 Run: `python equiv.py <verify worktree> <scratch root with origin/eval-004 files> "<main checkout>/data/processed/chunks"`.
