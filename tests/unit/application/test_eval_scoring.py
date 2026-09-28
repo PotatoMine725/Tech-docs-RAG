@@ -125,6 +125,11 @@ def test_an_unlabelled_answered_record_stays_in_the_citation_denominator_but_not
     assert summary["answer"]["groundedness_rate"]["n"] == 1
     assert summary["citation"]["answered"] == 2
     assert summary["citation"]["presence_rate"] == {"n": 2, "count": 2, "value": 1.0}
+    assert summary["citation"]["source_precision"]["n"] == 2
+    assert summary["citation"]["section_precision"]["n"] == 2
+    # judge-dependent citation metrics exclude the unlabelled (judge_error) record.
+    assert summary["citation"]["judge_class_n"] == 1
+    assert summary["citation"]["support_rate"]["n"] == 1
 
 
 # --- answer labels ------------------------------------------------------------------------------------------
