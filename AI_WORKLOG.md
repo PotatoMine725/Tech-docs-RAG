@@ -10,6 +10,7 @@ A record of how AI tools were used in this project, required by the submission (
 | Claude Code (CLI) | Claude Opus 5.5 (`claude-opus-5-5`; commits `490068f` onward) | ADR drafting, master plan, corpus analysis, repo hygiene, evaluation design |
 | Claude Code (CLI) | Claude Sonnet 5 (`claude-sonnet-5`; RAG-003 commits, co-author trailer) | RAG-003: retry/fallback adapter, error classification, CLI, smoke checks |
 | Claude Code (CLI) | Claude Sonnet 5 (`claude-sonnet-5`; GUI-001 commit, co-author trailer) | GUI-001: adapter, wiring, tests, owner checklist |
+| Claude Code (CLI, background job) | Claude Sonnet 5 (`claude-sonnet-5`; EVAL-003c commit, co-author trailer) | EVAL-003c: report/spot-check tooling, EVAL-003b-verify housekeeping fixes |
 | GitNexus (`npx gitnexus`) | local code index | Impact analysis before edits, change detection before commits |
 | Chunking consultation (`docs/plans/chunking-consultation-handoff.md`, cited as context by ADR-0003) | — | A handoff written by Claude Code so another agent could advise on chunking before ADR-0003 |
 | Google Gemini API | `gemini-embedding-001` (from RAG-001a, 2026-09-26); `gemini-3.5-flash-lite` (answers, from RAG-002, 2026-09-26); `gemini-3.5-flash` fallback (RAG-003 smoke check: 1 direct call; ADR-0004) | Embeddings, answers (2 dev answers in RAG-002, 3 in the RAG-003 smoke checks), LLM judge (2 dev judgements in EVAL-003b) (from EPIC-05) |
@@ -462,6 +463,73 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - Untested guards: mutations M6a and M6b, both killed.
 - *Human decision:* the whole addendum of 2026-09-27: OD-12 = both checks, evidence_hit per required point, lenient headline, the duplicate rule, the judge settings, the refusal-check key, no guessed labels, cited prices or null, ≤ 3 live judge calls, and the spot-check task in ledger row 11. The owner also decided, during the task, the duplicate rule's scope: section level only; source metrics use the kept chunk's own document; the actual count is reported after EVAL-004. OD-13 remains open.
 - *Verifier findings* ([99-VERIFY](docs/reviews/evaluation/EVAL-003b-verify.md), 2026-09-27, own worktree, zero Gemini requests): **ACCEPT**, 0 FAIL, 0 UNVERIFIED. Independently re-ran mutations M2/M2b (duplicate rule off / at source level) and 4 mutations not in the report (points matched by position instead of id, the model/fallback rejection removed, temperature changed from 0, `allow_fallback` flipped in `judge_run.py`) — all killed by exactly the tests the report implies. Built an independent 6-record hand fixture (2 correct, 1 partial, 1 false_refusal, 1 correct_refusal, 1 hallucination, plus a judge-missing/runner-error variant) and reproduced every accuracy/lenient-accuracy/groundedness/points-covered/refusal-rate/citation number by hand before running the real `score_record`/`summarize_*` functions; all matched. Confirmed the committed `judgements.jsonl` matches the report byte-for-byte, and that the cost formula's `thoughts_tokens` term is real (mutating it out fails 2 tests). Three non-blocking nits, none changing a number: (1) the audit-scope claim "changed ONLY in `_hits`" undersells the disclosed-but-broader `RankedChunk`/`from_record` surface; (2) the Explain-it-back citation-disagreement example says "wrong section" where it means "wrong document" (`unsupported_citation` requires both source and section to miss); (3) a duplicated-citation-marker case and the answerable-vs-answered denominator split have no dedicated test/spec line (code is already correct).
+
+### 2026-09-28 EVAL-003c: report/spot-check tooling, housekeeping fixes (branch `eval-003c`, PR into `dev`)
+- *AI did:*
+  - `scripts/evaluation/make_tables.py`, `make_spot_check.py`, `score_spot_check.py` and shared
+    `eval_report_data.py`: turned EVAL-003b's scoring functions into markdown tables (lenient headline + strict next
+    to it, judge_error/runner-error records listed, gate refusals on answerable cases, the duplicate-rule change
+    count), a summary JSON and a per-run CSV; a seeded, reproducible stratified spot-check sample; and a scorer for
+    the filled sheet (agreement, Cohen's κ, confusion matrix, disagreements), refusing while any `human_result` is
+    blank ([report](docs/reports/execution/EVAL-003c.md)).
+  - Ran both generator scripts for real against the two committed dev dry-run runs (zero Gemini/embedding requests):
+    `docs/reports/epics/EPIC-05-evaluation.md`, `summary-*.json`, two `eval-table-*.csv`, one spot-check sheet with
+    real (already-committed) judge output, `human_result` left blank for the owner.
+  - Housekeeping from the EVAL-003b-verify non-blocking items: `evaluation-spec.md` now states the
+    answerable/unanswerable/answered denominators and the nearest-rank percentile method in prose; a test proves a
+    duplicated citation marker can never be parsed by the judge; fixed "wrong section" → "wrong document" in
+    `EVAL-003b.md`'s Explain-it-back.
+  - 42 new offline tests (817 total): marker idempotency, text-outside-untouched, a marker body with regex special
+    characters, CSV columns, the stratified sampler's seed-reproducibility and per-stratum coverage, a hand-computed
+    2×2 Cohen's κ example, `score_row`'s three branches, `parse_sheet`'s resistance to an embedded `## ` mid-line,
+    and one end-to-end + one determinism test per script.
+- *AI got wrong:*
+  - **Missed `expected-spans-v1.json`'s eval-split-only coverage at first.** The first draft called
+    `scoring.score_record` directly against the dev dry-run data; it raised `ValueError` on `Q-DEV-001`/`Q-DEV-002`
+    (dev-split answerable cases, never in that file by design), which would have crashed the whole report on the
+    only data this task is supposed to develop and demonstrate against.
+  - **`sys.path` gap.** `make_tables.py` (via `scoring.py` → `metrics/retrieval.py`) imports
+    `scripts.evaluation.validate_questions`; `judge_run.py`'s own `sys.path` setup (`src/` only) does not cover this,
+    since `judge_run.py` never imports `scoring.py`. Running the new script directly failed with
+    `ModuleNotFoundError: No module named 'scripts'` until the project root was also added.
+  - **`retrieval_table` assumed every metric key always exists.** `summarize_retrieval` only adds metric keys when at
+    least one row was scored; a group with zero scored retrieval rows (the dev dry-run data, once the exclusion
+    above is applied) raised `KeyError: 'source_hit@1'`.
+  - **Duplicated excluded-case ids in the first report caption.** Both the full-mode and retrieval-mode records of
+    the same excluded case were listed separately (`Q-DEV-001:A, Q-DEV-001:A, ...`), since the exclusion set was
+    built without deduplication.
+- *How found:*
+  - Missed span coverage and the `sys.path` gap: both surfaced immediately on the first real run of
+    `make_tables.py` against the committed dev dry-run folders (a real traceback each time, not a guess).
+  - `retrieval_table`'s `KeyError`: same real run, next traceback after the span-coverage fix.
+  - Duplicated ids: read back the generated report by eye before writing it up.
+- *Fix:*
+  - Span coverage: `eval_report_data.score_row` recomposes `scoring.score_record`'s exact steps (same functions,
+    same order) with one added guard - an answerable record outside `expected-spans-v1.json` skips retrieval/citation
+    but is still scored for `answer` (which needs no spans) and is flagged `spans_unavailable`. `scoring.score_record`
+    itself is untouched; when every case_id is covered (the real eval-split runs), the two paths agree exactly
+    (tested directly: `tests/unit/test_eval_report_data.py`).
+    **Correction (2026-09-28 fixes): that test only checked the `spans_unavailable` flag, not the equivalence - the
+    "tested directly" claim became true only once the fixes pinned `score_row` to call `scoring.score_record`
+    directly for covered records (see `EVAL-003c-verify.md` check 2 and `EVAL-003c.md`'s "Fixes" section).**
+  - `sys.path`: added the project root alongside `src/` in both `eval_report_data.py` and `make_tables.py`; verified
+    by re-running the script, not just re-reading the code.
+  - `retrieval_table`: a `_mean_of(summary, key)` helper defaults to a zero-record placeholder instead of indexing
+    directly; covered by `test_retrieval_table_on_an_empty_summary_shows_zero_n_not_a_key_error`.
+  - Duplicated ids: the exclusion set is built as a `set` before sorting; re-ran the report and confirmed each
+    excluded case appears once.
+- *Human decision:* none new for this task - it executes prompt `09c-EVAL-003c-report-generator.md` plus the
+  owner's addendum (worktree/git block, the three housekeeping items, the report-content requirements), no OD-x
+  decision was open for it.
+- *Verifier findings* ([99-VERIFY](docs/reviews/evaluation/EVAL-003c-verify.md), 2026-09-28, own worktree, zero Gemini requests): **ACCEPT WITH FIXES**, 6 FAIL, 0 UNVERIFIED; no committed number changes.
+  - *Confirmed correct:* the 5 committed artefacts regenerate byte-identical (twice), and the suite went 775 → 817.
+  - *Scoring equivalence:* `score_row` equals `score_record` field by field on all 72 real eval-004 records (also against the committed `summary.json` rows and the full-chunk-index path) and on 22 synthetic eval-split records.
+  - *Real defects:*
+    1. The equivalence was claimed as "tested directly: `tests/unit/test_eval_report_data.py`" above. No such test exists; the two paths are duplicated logic with nothing pinning them together.
+    2. The dev dry-run report was written to the real report path `docs/reports/epics/EPIC-05-evaluation.md` with no top banner, and the report claimed it "could not be mistaken" for a result.
+    3. `score_spot_check.py` cannot read the sheet the owner actually graded in EVAL-004a (exit 3, `cannot parse a case heading: '## S01 (answer check)'`). By design it compares a hand-typed label, i.e. the holistic route that ignores `map_result`. The rule-based figure through a scratch adapter is 8/10, κ 0.6875, disagreements S09/S10; the holistic column gives 9/10.
+    4. Three surviving mutants show untested behaviour: caption exclusion list removed, per-case table cells swapped, retrieval lenient↔strict columns swapped.
+    5. The new `evaluation-spec.md` sentence says unlabelled records are excluded from every denominator. They are counted in the citation denominators: one ok + one judge_error answered record gives citation n=2 vs accuracy n=1.
 
 ### 2026-09-28 EVAL-004a: evaluation runs and judging, both arms (branch `eval-004`, PR into `dev`)
 - *AI did:*

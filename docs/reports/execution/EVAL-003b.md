@@ -580,7 +580,7 @@ judgements file and every doc of this task; final run after all docs were writte
   one retry on the next invocation; a mis-assigned grade would never be noticed.
 - **Why two citation checks (OD-12).** The span check is automatic and cheap: did the cited chunk come from the expected
   section? But it cannot see whether the text supports the sentence. The judge check reads the text but shares the answer
-  model's biases. Reporting both separately shows where they disagree, for example a chunk from the wrong section that
+  model's biases. Reporting both separately shows where they disagree, for example a chunk from the wrong document that
   still supports the claim (`unsupported_citation` by span, `correct_evidence` by judge). A single blended number would hide that.
 - **Why the duplicate rule.** The retriever keeps one chunk per identical passage (RAG-002). When #12 and #13 contain the
   same paragraph, it may keep the #12 copy while the ground truth names #13. Without the rule, a retrieval that found

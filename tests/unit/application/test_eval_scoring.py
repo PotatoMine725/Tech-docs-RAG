@@ -25,6 +25,7 @@ from knowledge_assistant.application.evaluation.scoring import (
     estimate_usd,
     retrieval_scores,
     score_record,
+    summarize,
     summarize_answers,
     summarize_citations,
     summarize_judge_latency,
@@ -104,6 +105,31 @@ def test_citation_summary_excludes_insufficient_records_and_counts_related_citat
     assert summary["answered"] == 1 and summary["related_citation_count"] == 3
     assert summary["presence_rate"]["value"] == 1.0 and summary["support_rate"]["value"] == 1.0
     assert summary["auto_class"][CORRECT_EVIDENCE] == 1 and summary["judge_class"][CORRECT_EVIDENCE] == 1
+
+
+# --- denominators: an unlabelled record stays in citation-presence numbers, not judge-dependent ones -----------
+# (evaluation-spec.md § Answer and citation scoring, 2026-09-28 fix: the old prose said unlabelled records are
+# excluded from every denominator; `summarize_citations` never filters by label, so that was wrong.)
+
+def test_an_unlabelled_answered_record_stays_in_the_citation_denominator_but_not_accuracy():
+    ok = make_record(1, cited=(1,))
+    err = make_record(2, cited=(1,))
+    judgements = latest_judgements([
+        judgement(ok, answer_verdict(markers=((1, "yes"),))),
+        judgement(err, "", status=JUDGE_ERROR),
+    ])
+    rows = [score_record(r, SPANS_BY_CASE, None, judgements, "judge_v1") for r in (ok, err)]
+    summary = summarize(rows)
+    assert summary["answer"]["unlabelled"] == ["Q-TEST-002:A"]
+    assert summary["answer"]["accuracy"]["n"] == 1
+    assert summary["answer"]["groundedness_rate"]["n"] == 1
+    assert summary["citation"]["answered"] == 2
+    assert summary["citation"]["presence_rate"] == {"n": 2, "count": 2, "value": 1.0}
+    assert summary["citation"]["source_precision"]["n"] == 2
+    assert summary["citation"]["section_precision"]["n"] == 2
+    # judge-dependent citation metrics exclude the unlabelled (judge_error) record.
+    assert summary["citation"]["judge_class_n"] == 1
+    assert summary["citation"]["support_rate"]["n"] == 1
 
 
 # --- answer labels ------------------------------------------------------------------------------------------
