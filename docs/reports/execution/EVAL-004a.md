@@ -23,8 +23,9 @@ EVAL-004b, after EVAL-003c (09c).
 - **First 429/5xx body:** none captured (no `errors.jsonl` was created), so RAG-003's open question stays open.
 - **Spot-check:** `validation/evaluation/judge-spot-check.md` (blind, 10 records) and
   `validation/evaluation/judge-spot-check-judge.md` (the judge's verdicts and the S-id mapping). The owner graded blind,
-  then cross-checked against the key: **agrees with the judge on 9 of 10**; S03 disagrees on one point, same label (see
-  "Owner spot-check").
+  then cross-checked against the key. Same rule applied to both sides (owner's per-point grades → `map_result`) vs. the
+  judge: **8 of 10** agree (S03, S09, S10 disagree); the owner's own holistic "agree?" answer: **9 of 10** (S03 only).
+  n = 10 (see "Owner spot-check").
 - **Summaries:** `data/evaluation/results/<run>/summary.json` for both runs, computed with `scoring.py` (numbers only).
 
 ## Entry condition, environment
@@ -157,25 +158,40 @@ Interpretation, tables and narrative are EVAL-004b.
 ### Owner result (2026-09-28)
 
 The owner filled the owner columns blind (`3b19dd7`), then opened the key and marked "agree with the judge?" per item
-(`ce51d08`, S04 in `fb74118`). Grading is done, so the S-id is named here for the one disagreement.
+(`ce51d08`, S04 in `fb74118`). Grading is done, so the S-id is named here for the disagreements.
+
+**Headline: label agreement using the same rule for both sides.** Feeding the owner's own blind per-point grades
+through `map_result` (`application/evaluation/metrics/mapping.py`) and comparing the result to the judge's label gives
+**8 of 10**. Reported alongside it: the owner's own holistic "agree with the judge?" answers give **9 of 10** — a
+different question (subjective overall agreement, not a re-derivation of the label from the point grades), so both
+numbers are kept, not smoothed into one. n = 10 (small sample; wide uncertainty — OD-13, sample size, is still open).
 
 | | Count |
 |---|---|
 | Items graded | 10 |
-| Owner agrees with the judge | **9** (S01, S02, S04–S10) |
-| Owner disagrees | **1** (S03) |
+| Label agreement — owner's per-point grades → `map_result` vs. the judge | **8** |
+| Label agreement — owner's holistic "agree with the judge?" vs. the judge | **9** |
 
-- **S03** (`Q-EVAL-012`, arm A, answer check, judge label `partially_correct`). The owner's note: "agree with judge on
-  P1 but no on P2, as the answer didn't give any clue about the generator silently skips validation for the type". The
-  judge gave P2 `partial`; the owner gives `no`. The label does not change: with P1 `yes`, P2 `no`, P3 `yes` and no
-  contradiction, `map_result` still returns `partially_correct` (at least one required point `yes`/`partial`, not all
-  `yes`). So the disagreement is at point level only; the reported label for this record is unaffected.
-- On P1 the owner's blind grade was `partial`; after reading the key the owner agreed with the judge's `yes`. Recorded as
-  written in the sheet; the blind column is kept unchanged.
+**Disagreements**
+
+- **S03** (`Q-EVAL-012`, arm A, answer check, judge label `partially_correct`). Owner's note: "agree with judge on P1
+  but no on P2, as the answer didn't give any clue about the generator silently skips validation for the type" — the
+  judge credited a claim the answer doesn't make. The judge gave P2 `partial`; the owner gives `no`. Under both
+  readings the record still maps to `partially_correct` (P1 `yes`, P2 `no`, P3 `yes`, no contradiction), so this
+  disagreement is at point level only and doesn't move either count above.
+- **S09** (`Q-EVAL-020`, arm B) and **S10** (`Q-EVAL-017`, arm B): the owner's holistic "agree?" answer is `yes` for
+  both, but the owner's own blind per-point grades disagree with the judge on one required point each (S09 P2, S10 P3:
+  owner `yes`, judge `partial`), and running the owner's own grades through `map_result` gives `correct` where the
+  judge gave `partially_correct`. The owner's holistic column doesn't surface this — it's a legitimate subjective read
+  ("good enough overall"), but it answers a different question than the mechanical recompute. These are the two cases
+  the 9/10 holistic count doesn't catch and the 8/10 rule-based count does; that is the whole gap between the two
+  headline numbers.
+- On P1 (S03) the owner's blind grade was `partial`; after reading the key the owner agreed with the judge's `yes`.
+  Recorded as written in the sheet; the blind column is kept unchanged.
 - The owner's note on S07 ("this question appeared **TWICE**") refers to S05/S07: the same case in both arms, which the
   per-arm stratification allows (also S01/S10 and S02/S04). Not a defect of the sample.
-- Reading: 9 of 10 agree at item level, on a small sample (10 of 59 judged records). This is the owner's check of the
-  judge, not a measured error rate; whether 10 is enough is OD-13. Interpretation is EVAL-004b.
+- Reading: 8 of 10 (rule-based) / 9 of 10 (holistic) at item level, on a small sample (10 of 59 judged records). This is
+  the owner's check of the judge, not a measured error rate; whether 10 is enough is OD-13. Interpretation is EVAL-004b.
 
 ## Eval firewall
 
@@ -262,6 +278,12 @@ No existing symbol was edited, so no impact analysis was needed. `detect_changes
   own style. The owner grades first without seeing the judge's verdict, so the judge's answer cannot anchor theirs.
   Round-robin over (arm, label) makes sure the rare labels (refusals, partials) are in the sample, not only the 46
   "correct" ones.
+- **Why the rule-based comparison (8/10), not the holistic one (9/10), is the headline.** The judge's label was never a
+  holistic call — it came from feeding per-point verdicts through the one fixed `map_result` table. Comparing it to the
+  owner's *holistic* "agree?" answer scores two different kinds of judgement against each other. Comparing it to the
+  owner's own per-point grades run through that same table scores the judge against the owner with the one rule both
+  are supposed to follow, so a gap there (S09, S10) is a real, mechanically-found disagreement rather than a difference
+  in how "good enough" was read.
 
 ## Appendix A: `score_runs.py` (scratch, verbatim)
 
