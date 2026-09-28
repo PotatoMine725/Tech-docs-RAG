@@ -145,6 +145,18 @@ def test_malformed_refusal_verdicts_raise(text):
         parse_verdict(REFUSAL_CHECK, text, make_record(answerable=False))
 
 
+@pytest.mark.parametrize("markers", [((1, "yes"), (1, "yes")), ((1, "yes"), (2, "yes"))])
+def test_a_duplicated_citation_marker_on_the_record_can_never_be_parsed(markers):
+    """A record whose own `citations` repeats a marker (dead code in the real pipeline: `citations.py` dedupes
+    markers with `dict.fromkeys` before a record is ever assembled, EVAL-003b-verify.md checks 4/7/9) makes every
+    possible judge reply a judge_error: the parser requires the reply's markers to equal the record's markers
+    (here `[1, 1]`) as a set-sized list, which no list containing a repeat can ever satisfy."""
+    record = make_record(points=TWO_POINTS, cited=(1, 1))
+    text = answer_verdict(points=(("P1", "yes"), ("P2", "yes")), markers=markers)
+    with pytest.raises(JudgeOutputError):
+        parse_verdict(ANSWER_CHECK, text, record)
+
+
 # --- the run: cache, errors, model, budget ------------------------------------------------------------------
 
 def test_one_call_per_record_temperature_0_and_the_check_schema():
