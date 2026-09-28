@@ -583,7 +583,24 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 - *Fix:* both corrected in-session, before any commit; no user correction was needed.
 - *Human decision:* none needed during the task — the owner's numbered invocation (prompt log) and the already-built
   EVAL-003c tools fully determined scope and method.
-- *Verifier findings:* pending `99-VERIFY`.
+- *Verifier findings* (99-VERIFY, 2026-09-28, own worktree `verify-eval-004b`, zero Gemini requests): **ACCEPT WITH
+  FIXES**, 1 FAIL, 0 UNVERIFIED. Scope (docs + generated data only), full reproducibility (`make_tables.py` +
+  `score_spot_check.py` re-run byte-identical, SHA-256 matches the report's own table), appendix (5/72 rows
+  cross-checked against `eval-v1.jsonl`/`records.jsonl`/`summary.json`), judge reliability (S03 wording matches
+  EVAL-004a verbatim), cost (`thoughts_tokens` confirmed folded into output cost in `scoring.py:313`) and latency
+  (`throttle_wait` figures confirmed against raw `records.jsonl`) all check out. **FAIL:** EPIC-05's "Dataset" section
+  cites the first index build as 2026-09-26 14:55:42 +0700 (commit `a998b68`, the PR #10 merge) — that is the commit
+  time for the *later, zero-cost rebuild* into `data/chroma/`, not the first build. The real first index (Arm A) was
+  written live to `D:\ChromaDB` starting 2026-09-26 09:12:06 +0700 (`validation/retrieval/indexing-log.jsonl` first
+  entry; RAG-001b execution report "Arm A, live" 09:12:04-09:19:13 UTC+7). The freeze-before-index conclusion still
+  holds (07:31:08/07:33:41 freeze precedes 09:12:06 build), but the cited time and the "7 h 22 min" gap are wrong —
+  the real gap is ≈ 1 h 39 min. Also flagged (non-blocking): EPIC-05 cites the freeze as commit `1dd3b88d`/07:33:41
+  (the PR #8 merge), while the `eval-freeze-v1` tag itself points to `739676f`/07:31:08 ("EVAL-002: freeze eval-v1"),
+  2m33s earlier; and EPIC-05 never states that its own per-arm numbers (e.g. `summary.json`
+  `breakdown/arm/A/answer/accuracy` = 23/32 = 0.719) are unpaired single-run figures that will legitimately differ
+  from EPIC-06's paired McNemar table (22/31 = 0.710 for Arm A) — EPIC-06 already explains this on its own side, but
+  EPIC-05 doesn't cross-reference it, which could read as a contradiction to someone comparing the two reports.
+  Full review: [EVAL-004b-verify](docs/reviews/evaluation/EVAL-004b-verify.md).
 
 ## Summary: how AI helped
 
