@@ -528,6 +528,25 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
     4. Three surviving mutants show untested behaviour: caption exclusion list removed, per-case table cells swapped, retrieval lenient↔strict columns swapped.
     5. The new `evaluation-spec.md` sentence says unlabelled records are excluded from every denominator. They are counted in the citation denominators: one ok + one judge_error answered record gives citation n=2 vs accuracy n=1.
 
+### 2026-09-28 EVAL-004a: evaluation runs and judging, both arms (branch `eval-004`, PR into `dev`)
+- *AI did:*
+  - Merged PR #17 on the owner's instruction, then ran both arms in full on the eval split from one clean commit (`491f137`). Order: estimate, arm A, re-estimate arm B, arm B, judge A, judge B. Every step ran in the background, and the next one started only after the previous one exited.
+  - Quota: 36 embedding and 122 LLM requests (budget 40 / 170). 0 fallback, 0 × 429/5xx.
+  - Scored both runs with `scoring.py` (scratch script, pasted in the report) and built the blind 10-record owner spot-check plus a separate key file ([report](docs/reports/execution/EVAL-004a.md)).
+- *AI got wrong:*
+  - **Candidate count.** The report draft said 58 spot-check candidates (A 29, B 29); arm B has 30 ok judgements, so the right number is 59.
+  - **Import path.** The first scoring-script run failed with `ModuleNotFoundError: scripts`: the metrics module imports `scripts.evaluation`, which needs the repo root on the path. No data was affected.
+  - **Wrong hashes (CRLF).** The report first listed the Windows working-copy hashes of the two `summary.json` files. Python wrote them with CRLF, while git commits LF, so the listed hashes did not match the committed blobs.
+  - **Blinding leak.** The report listed the S-id → case/arm mapping of the spot-check. With the committed `summary.json` labels, anyone reading the report could look up the judge's label for each blind item.
+- *How found:* Candidate count: re-checking the report's claims against the judgement files before the commit. Import path: the traceback. Hashes: git's CRLF warning at commit time. Blinding leak: the advisor's final review.
+- *Fix:* Candidate count corrected in the report. Import path: `PYTHONPATH="src;."`. Both scripts were re-run and gave byte-identical outputs. Hashes: files normalized to LF and the report fixed (`07264fc`). Blinding leak: the mapping is removed from the report and kept only in the key file; the limits of the blinding are stated.
+- *Human decision:*
+  - Merge PR #17 and branch from it.
+  - **judge_error rule**, applied to both arms: exactly one resume with the identical config; if it fails again, leave it unlabelled and list it. Report the count before and after, the raw reason, and format errors per judge call.
+  - No config, prompt or code change after seeing eval results.
+  - **Owner spot-check** (after the PR opened): the owner graded the 10 items blind, then cross-checked against the judge's key: agrees on 9 of 10. S03 (Q-EVAL-012:A): the owner grades P2 `no` where the judge gave `partial`; the label stays `partially_correct`. AI committed the owner's sheet as written and recorded the result in the report and ledger.
+- *Verifier findings* ([99-VERIFY](docs/reviews/evaluation/EVAL-004a-verify.md), 2026-09-28, own worktree, zero Gemini requests): **ACCEPT WITH FIXES**. Every run/quota/judge/duplicate-rule/scoring number independently reproduced (byte-identical `summary.json` and spot-check key after re-running the report's pasted scripts; independent read-only re-derivation of the duplicate rule confirming every dropped duplicate falls at overfetch ranks 6–13; the Q-EVAL-002/B marker-22 hypothesis confirmed by rebuilding the actual judge prompt offline and showing "22" appears only as the cited chunk's source id, never as a marker). One finding: the execution report's "Owner spot-check" section states only the owner's self-reported 9/10 "agree with the judge?" answers; recomputing `map_result` from the owner's own **blind** per-point grades gives **8/10** label agreement — S09 (`Q-EVAL-020:B`) and S10 (`Q-EVAL-017:B`) also disagree (owner rated a required point `yes` where the judge rated it `partial`, which flips the mapped label from `partially_correct` to `correct`), undocumented in the report or ledger. Full point-level agreement is 6/10; citation-support agreement is 25/25 markers but the sample has no case testing whether the judge would catch a bad citation. Fix is docs-only (the execution report and ledger row 11's open items); the owner's graded sheet is not touched.
+
 ## Summary: how AI helped
 
 To be filled at QC-001.
