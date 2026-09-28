@@ -406,7 +406,7 @@ Sample: 10 judged records, seed 42, stratified by arm and result label (rule in
 | Item | Owner | Note |
 |---|---|---|
 | presents_related_as_answer | false |  |
-| agree with the judge? (fill after opening the key) |  |  |
+| agree with the judge? (fill after opening the key) | yes |  |
 
 ## S05 (answer check)
 
