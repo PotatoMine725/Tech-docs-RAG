@@ -67,9 +67,15 @@ Held constant (from both `run.json` files; `compare_arms.py` refuses to run if a
   its own n:
   - **Retrieval rows** use all 32 answerable cases.
   - **Answer-level rows** use the cases labelled in both arms. `Q-EVAL-002:B` is unlabelled: the judge returned a
-    format error twice, so that case is out of every answer-level pair. That leaves 35 labelled cases: 31 answerable
-    for accuracy, lenient accuracy and false refusal, and 4 corpus-insufficient for correct refusal and hallucination.
-    Groundedness (27) and citation rows (27/28) need an answer check in both arms.
+    format error twice, so that case is out of every **judge-dependent** answer-level pair (accuracy, lenient
+    accuracy, false refusal, groundedness, correct refusal, hallucination, citation support rate). That leaves 35
+    labelled cases: 31 answerable for accuracy, lenient accuracy and false refusal, and 4 corpus-insufficient for
+    correct refusal and hallucination. Groundedness (27) and citation support rate (27) need an answer check in both
+    arms. `citation_section_precision` does **not** need the judge — it is a deterministic span check over the
+    answer's citations, so `Q-EVAL-002:B`'s `section_precision = 1.0` is included there even though the case is
+    unlabelled. That is why the citation_section_precision row's n runs one higher than citation_support_rate's
+    wherever `Q-EVAL-002:B` would otherwise be counted (overall 28 vs 27, vi 13 vs 12, parallel 13 vs 12; the
+    English-only table is unaffected since `Q-EVAL-002` is a VI question) — see the note under §3's results tables.
   - **Generate latency and tokens** use the 30 cases where the LLM was called in both arms.
   - Because of this pairing, Arm A's accuracy in the table is 22/31 = 0.710, while `summary.json`'s unpaired figure
     is 23/32 = 0.719: `Q-EVAL-002:A` is correct but has no B partner.
@@ -155,6 +161,12 @@ Overall. Retrieval rows: n = 32 answerable. Answer rows: paired n as stated. Lat
 | tokens_output | 149.8 | 162.7 | 12.9 | [1.6, 28.1] | Wilcoxon (n≠0 = 30) | 0.113 | 30 |
 | tokens_total | 1778.3 | 2285.2 | 506.9 | [432.6, 579.1] | Wilcoxon (n≠0 = 30) | <0.001 | 30 |
 <!-- /AUTO:results-overall -->
+
+**`citation_section_precision` n vs `citation_support_rate` n.** `Q-EVAL-002:B` is unlabelled (judge format error),
+so it is out of `citation_support_rate` (n=27 overall, 12 vi, 12 parallel). `citation_section_precision` is a
+deterministic span check that does not need the judge, so `Q-EVAL-002:B`'s `section_precision = 1.0` is counted,
+giving that row one more n wherever the case applies (n=28 overall, 13 vi, 13 parallel; unaffected in the
+English-only table, since `Q-EVAL-002` is a VI question). See §2.
 
 **Strict vs lenient.** Lenient counts an owner-approved alternate section as a hit; strict counts expected sections
 only. Only rows where strict and lenient differ are shown. The flip is in **section hit@1**:
@@ -560,8 +572,10 @@ These are errors or noise in the measurement, not in the assistant.
 
 **Decisions I would make now** (none applied here: the rule for this task is no parameter change; any change needs an
 ADR):
-- Keep **Arm A (header-aware)** as the default. Answer quality is equivalent at this n, and A is cheaper per answer
-  (−494 prompt tokens), keeps code blocks whole (3 % vs 45 % fence cuts) and gives section-aligned citations. B does avoid one A failure by design: its windows cross the
+- Keep **Arm A (header-aware)** as the default. No statistically reliable difference in answer quality at n = 31
+  (accuracy Δ +0.032, 95 % CI [−0.097, +0.161]): the data are consistent with anything from a ~10-point loss to a
+  ~16-point gain, so equivalence is not shown. A is cheaper per answer (−494 prompt tokens), keeps code blocks whole
+  (3 % vs 45 % fence cuts) and gives section-aligned citations. B does avoid one A failure by design: its windows cross the
   boundary between sibling sections (022). A's own failures (001 gate, 012 generation, 022 near-duplicate variants) are
   addressed by the next experiments (per-arm threshold, diversified hybrid retrieval), not by switching chunkers.
 - Treat the gate threshold as **per-arm**. A threshold tuned on one arm's score distribution should not be used to

@@ -504,6 +504,32 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - an evaluation-side failures section;
   - the 5-point report with 2–3 next experiments.
 
+### 2026-09-28 EXP-001 follow-up: fixes from verify (branch `exp-001`, PR #20)
+- *AI did:* fixed the two docs-only findings of [EXP-001-verify](docs/reviews/evaluation/EXP-001-verify.md) and
+  produced the mutation evidence the verifier could not re-run.
+  - EPIC-06 §2: the `Q-EVAL-002:B` paragraph now says the case is out of every **judge-dependent** answer-level pair,
+    and explains that `citation_section_precision` is a deterministic span check that legitimately includes it —
+    added a note under the §3 results-overall table spelling out the n's (28/13/13 vs `citation_support_rate`'s
+    27/12/12; the English-only table is unaffected).
+  - EPIC-06 §5: "Answer quality is equivalent at this n" replaced with "No statistically reliable difference in
+    answer quality at n = 31 (... the data are consistent with anything from a ~10-point loss to a ~16-point gain, so
+    equivalence is not shown)", following the report's own §2 wording rule. Grepped the report, execution report and
+    this log for `equivalent`/`equal`/`same quality`: the only other hits are either the correctly hedged sentence
+    already in §2/the execution report, or per-case descriptions of two arms retrieving the literally same chunk
+    (020, 026, and worked example 1) — factual, not a statistical claim, so left as-is.
+  - Mutation evidence (M1–M4): re-applied on a disposable git worktree (`git worktree add <scratch> HEAD --detach`,
+    never the `exp-001` branch files), one exact-line mutation at a time, running
+    `pytest -q --color=no -rf tests/unit/application/test_eval_experiment.py` after each. All 4 killed: M1 →
+    `test_gate_false_refusal_is_refusal_with_chunking_kept_as_secondary`; M2 →
+    `test_rule_3_ranking_needs_a_cited_wrong_chunk_above_the_first_hit`; M3 →
+    `test_language_tag_needs_a_passing_english_twin`; M4 → `test_binary_row_reports_mcnemar_counts_and_cases`.
+    SHA-256 of `experiment.py` was identical before the run and after every revert
+    (`d52ba136f42d9427eabc395706f73a37b5c51e14b58b3f3239479b80596283c2`); the `exp-001` worktree's own copy hashed the
+    same and was never opened. Scratch worktree removed after. Results pasted into the execution report.
+  - Full offline suite: 793 passed, 1 deselected (unchanged — docs-only diff).
+- *Human decision:* the owner's fix prompt scoped exactly these two doc edits plus the mutation evidence, no number
+  or code change; commit and push to `exp-001`, do not merge.
+
 ## Summary: how AI helped
 
 To be filled at QC-001.
