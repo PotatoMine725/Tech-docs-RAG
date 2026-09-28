@@ -595,8 +595,20 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
     (`d52ba136f42d9427eabc395706f73a37b5c51e14b58b3f3239479b80596283c2`); the `exp-001` worktree's own copy hashed the
     same and was never opened. Scratch worktree removed after. Results pasted into the execution report.
   - Full offline suite: 793 passed, 1 deselected (unchanged — docs-only diff).
+- *AI got wrong:* claimed `exp-001` was "already based on current `dev`" without checking. It was not:
+  `exp-001` branched from `aa270a9` (PR #18) and never picked up PR #19 (`c863ea0`, EVAL-003c → `dev`), so the 793
+  count above was against the pre-#19 base. Caught by the owner.
+- *Fix (2026-09-28, same session):* `git fetch`, then `git merge origin/dev --no-edit` into `exp-001` — a real merge
+  commit (`fa522c2`), no rebase/force. `AI_WORKLOG.md`, `docs/plans/master-plan.md` and `docs/plans/task-ledger.md`
+  auto-merged with no conflict markers (git's `ort` strategy resolved all three line-wise; every entry from both
+  sides — this branch's EXP-001 rows and `dev`'s EVAL-003c rows — is present). No other file conflicted.
+  Re-ran `compare_arms.py` with the same run ids/report path: identical console output ("discordant cases: 23;
+  failures A 9, B 9"), and all 8 `data/experiments/exp-001/*` output files plus the report's AUTO-block content
+  hashed byte-identical to before the merge — PR #19 does not change any EXP-001 number. Full offline suite after
+  the merge: **866 passed, 1 deselected** (848 + 18, matching `dev`'s new baseline).
 - *Human decision:* the owner's fix prompt scoped exactly these two doc edits plus the mutation evidence, no number
-  or code change; commit and push to `exp-001`, do not merge.
+  or code change; commit and push to `exp-001`, do not merge. The owner's follow-up correction added the dev-merge
+  step (0) with the conflict-resolution rule (keep every entry chronologically in the three log/plan files).
 
 ## Summary: how AI helped
 
