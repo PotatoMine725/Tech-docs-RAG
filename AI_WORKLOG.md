@@ -518,6 +518,15 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 - *Human decision:* none new for this task - it executes prompt `09c-EVAL-003c-report-generator.md` plus the
   owner's addendum (worktree/git block, the three housekeeping items, the report-content requirements), no OD-x
   decision was open for it.
+- *Verifier findings* ([99-VERIFY](docs/reviews/evaluation/EVAL-003c-verify.md), 2026-09-28, own worktree, zero Gemini requests): **ACCEPT WITH FIXES**, 6 FAIL, 0 UNVERIFIED; no committed number changes.
+  - *Confirmed correct:* the 5 committed artefacts regenerate byte-identical (twice), and the suite went 775 → 817.
+  - *Scoring equivalence:* `score_row` equals `score_record` field by field on all 72 real eval-004 records (also against the committed `summary.json` rows and the full-chunk-index path) and on 22 synthetic eval-split records.
+  - *Real defects:*
+    1. The equivalence was claimed as "tested directly: `tests/unit/test_eval_report_data.py`" above. No such test exists; the two paths are duplicated logic with nothing pinning them together.
+    2. The dev dry-run report was written to the real report path `docs/reports/epics/EPIC-05-evaluation.md` with no top banner, and the report claimed it "could not be mistaken" for a result.
+    3. `score_spot_check.py` cannot read the sheet the owner actually graded in EVAL-004a (exit 3, `cannot parse a case heading: '## S01 (answer check)'`). By design it compares a hand-typed label, i.e. the holistic route that ignores `map_result`. The rule-based figure through a scratch adapter is 8/10, κ 0.6875, disagreements S09/S10; the holistic column gives 9/10.
+    4. Three surviving mutants show untested behaviour: caption exclusion list removed, per-case table cells swapped, retrieval lenient↔strict columns swapped.
+    5. The new `evaluation-spec.md` sentence says unlabelled records are excluded from every denominator. They are counted in the citation denominators: one ok + one judge_error answered record gives citation n=2 vs accuracy n=1.
 
 ## Summary: how AI helped
 
