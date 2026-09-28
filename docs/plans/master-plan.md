@@ -208,8 +208,8 @@ Deliverables:
 - Experiment report → `docs/reports/epics/` answering the brief's 5 points: what changed, how each arm was evaluated, results, why they differ, what was learned. Supporting files in `data/experiments/`, snapshot in `docs/snapshots/experiments/`.
 
 Exit gate **G6**:
-- [ ] All 5 points answered, each claim backed by case IDs or results files.
-- [ ] No parameter changed after seeing results without a new ADR.
+- [x] All 5 points answered, each claim backed by case IDs or results files. (EXP-001, 28 Sep: [EPIC-06 report](../reports/epics/EPIC-06-experiment.md), tables generated into it by `compare_arms.py` from the committed runs; pending 99-VERIFY.)
+- [x] No parameter changed after seeing results without a new ADR. (EXP-001, 28 Sep: `git diff dev -- config/` empty, 0 Gemini requests; decisions proposed in report §5, none applied; pending 99-VERIFY.)
 
 ### EPIC-07 Final QC
 **When:** Wed 30 Sep – Thu 1 Oct · **Phase:** 4 · **Task:** QC-001 (`14`) · **Roles:** verifier, quality-controller
