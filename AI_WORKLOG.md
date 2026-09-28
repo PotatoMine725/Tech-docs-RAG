@@ -479,6 +479,7 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - Merge PR #17 and branch from it.
   - **judge_error rule**, applied to both arms: exactly one resume with the identical config; if it fails again, leave it unlabelled and list it. Report the count before and after, the raw reason, and format errors per judge call.
   - No config, prompt or code change after seeing eval results.
+  - **Owner spot-check** (after the PR opened): the owner graded the 10 items blind, then cross-checked against the judge's key: agrees on 9 of 10. S03 (Q-EVAL-012:A): the owner grades P2 `no` where the judge gave `partial`; the label stays `partially_correct`. AI committed the owner's sheet as written and recorded the result in the report and ledger.
 
 ## Summary: how AI helped
 

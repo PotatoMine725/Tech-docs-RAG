@@ -49,3 +49,9 @@ EVAL-003c (09c) is merged. Read ledger rows 09a, 09b, 11 and the EVAL-003a/003b 
 ```text
 Option 1, as a rule that applies to BOTH arms equally:- every judge_error gets exactly one resume with the identical config (--max-llm-calls sized to the number of errors);- if it fails again, leave it unlabelled, list it, and stop retrying;- if arm A has any judge_error, apply the same single resume to it.Keep both attempts in judgements.jsonl. In the EVAL-004a report, record: the judge_error count before and afterthe resume per arm, the raw reason (marker 22 vs 1), and state it as a judge-reliability observation(format errors / total judge calls). Do not change the judge prompt or the parser.
 ```
+
+3. After the PR opened, the owner graded the spot-check. Owner messages, verbatim:
+   - "i have answered judge-spot-check.md in eval-004 worktree, commit it and wait for me to cross check the judge-spot-check-judge.md file"
+   - "i have crossed check and mark my last answer of each questions"
+   - "i filled #S04"
+   - "go ahead, update the report and push"

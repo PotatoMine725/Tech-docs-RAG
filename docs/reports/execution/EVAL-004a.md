@@ -21,8 +21,10 @@ EVAL-004b, after EVAL-003c (09c).
 - **Duplicate rule:** changed **0** case × arm values on both arms (owner's bound: at most 2, Q-EVAL-003/004 on arm A).
   Why: see "Sanity".
 - **First 429/5xx body:** none captured (no `errors.jsonl` was created), so RAG-003's open question stays open.
-- **Spot-check:** `validation/evaluation/judge-spot-check.md` (blind, 10 records, owner columns empty) and
-  `validation/evaluation/judge-spot-check-judge.md` (the judge's verdicts and the S-id mapping).
+- **Spot-check:** `validation/evaluation/judge-spot-check.md` (blind, 10 records) and
+  `validation/evaluation/judge-spot-check-judge.md` (the judge's verdicts and the S-id mapping). The owner graded blind,
+  then cross-checked against the key: **agrees with the judge on 9 of 10**; S03 disagrees on one point, same label (see
+  "Owner spot-check").
 - **Summaries:** `data/evaluation/results/<run>/summary.json` for both runs, computed with `scoring.py` (numbers only).
 
 ## Entry condition, environment
@@ -150,7 +152,30 @@ Interpretation, tables and narrative are EVAL-004b.
   no verdict, no reason, no arm and no case id (checked by grep: the only "correct"/"hallucination" hits are ground-truth
   and passage text).
 - **Key file** `judge-spot-check-judge.md`: S-id → case, arm, run, check, label and the judge's verdict JSON.
-- Owner columns are **not** filled. OD-13 (sample size) is still formally open; ~10 is the owner's addendum figure.
+- OD-13 (sample size) is still formally open; ~10 is the owner's addendum figure.
+
+### Owner result (2026-09-28)
+
+The owner filled the owner columns blind (`3b19dd7`), then opened the key and marked "agree with the judge?" per item
+(`ce51d08`, S04 in `fb74118`). Grading is done, so the S-id is named here for the one disagreement.
+
+| | Count |
+|---|---|
+| Items graded | 10 |
+| Owner agrees with the judge | **9** (S01, S02, S04–S10) |
+| Owner disagrees | **1** (S03) |
+
+- **S03** (`Q-EVAL-012`, arm A, answer check, judge label `partially_correct`). The owner's note: "agree with judge on
+  P1 but no on P2, as the answer didn't give any clue about the generator silently skips validation for the type". The
+  judge gave P2 `partial`; the owner gives `no`. The label does not change: with P1 `yes`, P2 `no`, P3 `yes` and no
+  contradiction, `map_result` still returns `partially_correct` (at least one required point `yes`/`partial`, not all
+  `yes`). So the disagreement is at point level only; the reported label for this record is unaffected.
+- On P1 the owner's blind grade was `partial`; after reading the key the owner agreed with the judge's `yes`. Recorded as
+  written in the sheet; the blind column is kept unchanged.
+- The owner's note on S07 ("this question appeared **TWICE**") refers to S05/S07: the same case in both arms, which the
+  per-arm stratification allows (also S01/S10 and S02/S04). Not a defect of the sample.
+- Reading: 9 of 10 agree at item level, on a small sample (10 of 59 judged records). This is the owner's check of the
+  judge, not a measured error rate; whether 10 is enough is OD-13. Interpretation is EVAL-004b.
 
 ## Eval firewall
 
@@ -196,7 +221,7 @@ Frozen question files unchanged: `eval-v1.jsonl` `3436870e…`, `dev-v1.jsonl` `
 
 - No real 429/5xx seen: RAG-003's open question stays open.
 - The cause of the judge's marker 22 (source id copied into the marker field) is a reading, not verified.
-- The judge's quality is not measured until the owner fills the spot-check.
+- The judge's quality is checked only on the 10-item owner spot-check (9 of 10 agree); OD-13 (sample size) is open.
 - `thoughts_tokens` is null on all 61 answer records and all judge lines (the model reports none), so the cost estimate
   counts thinking tokens as 0 and says so.
 - `scoring.py`'s module docstring still says the duplicate rule "applies to every span/source value"; the code applies it
