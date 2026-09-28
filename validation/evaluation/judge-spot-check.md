@@ -171,7 +171,7 @@ Sample: 10 judged records, seed 42, stratified by arm and result label (rule in
 | citation [1] supports its claim | yes |  |
 | citation [2] supports its claim | yes |  |
 | citation [4] supports its claim | yes |  |
-| agree with the judge? (fill after opening the key) |  |  |
+| agree with the judge? (fill after opening the key) | yes |  |
 
 ## S02 (refusal check)
 
@@ -283,7 +283,7 @@ Sample: 10 judged records, seed 42, stratified by arm and result label (rule in
 | Item | Owner | Note |
 |---|---|---|
 | presents_related_as_answer | false |  |
-| agree with the judge? (fill after opening the key) |  |  |
+| agree with the judge? (fill after opening the key) | yes |  |
 
 ## S03 (answer check)
 
@@ -357,7 +357,7 @@ Sample: 10 judged records, seed 42, stratified by arm and result label (rule in
 | unsupported claims | no |  |
 | citation [1] supports its claim | yes |  |
 | citation [2] supports its claim | yes |  |
-| agree with the judge? (fill after opening the key) |  |  |
+| agree with the judge? (fill after opening the key) | no | agree with judge on P1 but no on P2, as the answer didn't give any clue about the generator silently skips validation for the type|
 
 ## S04 (refusal check)
 
@@ -458,7 +458,7 @@ Sample: 10 judged records, seed 42, stratified by arm and result label (rule in
 | contradicts ground truth | no |  |
 | unsupported claims | no |  |
 | citation [1] supports its claim | yes |  |
-| agree with the judge? (fill after opening the key) |  |  |
+| agree with the judge? (fill after opening the key) | yes |  |
 
 ## S06 (answer check)
 
@@ -517,7 +517,7 @@ Sample: 10 judged records, seed 42, stratified by arm and result label (rule in
 | unsupported claims | no |  |
 | citation [1] supports its claim | yes |  |
 | citation [2] supports its claim | yes |  |
-| agree with the judge? (fill after opening the key) |  |  |
+| agree with the judge? (fill after opening the key) | yes |  |
 
 ## S07 (answer check)
 
@@ -680,7 +680,7 @@ Sample: 10 judged records, seed 42, stratified by arm and result label (rule in
 | citation [3] supports its claim | yes |  |
 | citation [4] supports its claim | yes |  |
 | citation [5] supports its claim | yes |  |
-| agree with the judge? (fill after opening the key) |  | this question appeared **TWICE** in the whole document |
+| agree with the judge? (fill after opening the key) | yes | this question appeared **TWICE** in the whole document |
 
 ## S08 (answer check)
 
@@ -920,7 +920,7 @@ Sample: 10 judged records, seed 42, stratified by arm and result label (rule in
 | citation [3] supports its claim | yes |  |
 | citation [1] supports its claim | yes |  |
 | citation [2] supports its claim | yes |  |
-| agree with the judge? (fill after opening the key) |  |  |
+| agree with the judge? (fill after opening the key) | yes |  |
 
 ## S09 (answer check)
 
@@ -981,7 +981,7 @@ Sample: 10 judged records, seed 42, stratified by arm and result label (rule in
 | contradicts ground truth | no |  |
 | unsupported claims | no |  |
 | citation [1] supports its claim | yes |  |
-| agree with the judge? (fill after opening the key) |  |  |
+| agree with the judge? (fill after opening the key) | yes |  |
 
 ## S10 (answer check)
 
@@ -1171,4 +1171,4 @@ Sample: 10 judged records, seed 42, stratified by arm and result label (rule in
 | citation [1] supports its claim | yes |  |
 | citation [4] supports its claim | yes |  |
 | citation [3] supports its claim | yes |  |
-| agree with the judge? (fill after opening the key) |  |  |
+| agree with the judge? (fill after opening the key) | yes |  |
