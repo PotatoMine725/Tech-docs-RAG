@@ -320,10 +320,10 @@ Chunk statistics (recomputed from the chunk files; equal to `data/processed/chun
    - The effect shows in **evidence hit@1**, "does the top chunk contain every required point's quote?": A 0.594 vs
      B 0.406, Δ −0.188, CI [−0.406, +0.062], McNemar b = 11, c = 5, p = 0.21. There is no statistically reliable
      difference at n = 32, but the 16 discordant cases split along one line:
-     - **A wins when the answer is one section.** In 009, 010, 013, 015, 018, 019, 021 and 027, A's rank-1 chunk covers
-       every required point, and B's rank-1 window holds only part of the section or a neighbour. For 009/010, B's
+     - **A wins when the answer is one section.** In 005, 009, 010, 013, 015, 016, 018, 019, 021, 027 and 031 (the 11
+       A-only cases), A's rank-1 chunk covers every required point, and B's rank-1 window holds only part of the section or a neighbour. For 009/010, B's
        rank-1 `03:fixed-1600:0012` cuts a fence and the section's points sit in `0011` at rank 3.
-     - **B wins when the answer spans two adjacent short sections.** In 003, 004, 011, 012 and 023, B's rank-1 window
+     - **B wins when the answer spans two adjacent short sections.** In 003, 004, 011, 012 and 023 (the 5 B-only cases), B's rank-1 window
        covers P1–P3, while A has P1–P2 in one section chunk and P3 in the next. Tiny doc #29 is the clearest case: A
        has 3 chunks ("title table" 201 chars, "Cause" 681, "How to fix" 396), and B has 1 chunk of 1,282 chars that
        holds everything.
@@ -561,8 +561,9 @@ These are errors or noise in the measurement, not in the assistant.
 **Decisions I would make now** (none applied here: the rule for this task is no parameter change; any change needs an
 ADR):
 - Keep **Arm A (header-aware)** as the default. Answer quality is equivalent at this n, and A is cheaper per answer
-  (−494 prompt tokens), keeps code blocks whole (3 % vs 45 % fence cuts) and gives section-aligned citations. It has no
-  failure that B avoids for a reason B's design would fix without new costs.
+  (−494 prompt tokens), keeps code blocks whole (3 % vs 45 % fence cuts) and gives section-aligned citations. B does avoid one A failure by design: its windows cross the
+  boundary between sibling sections (022). A's own failures (001 gate, 012 generation, 022 near-duplicate variants) are
+  addressed by the next experiments (per-arm threshold, diversified hybrid retrieval), not by switching chunkers.
 - Treat the gate threshold as **per-arm**. A threshold tuned on one arm's score distribution should not be used to
   judge another arm.
 - Do not use groundedness from this judge as a headline metric without a second grader. Both disagreements examined
