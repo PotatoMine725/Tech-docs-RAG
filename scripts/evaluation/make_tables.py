@@ -36,11 +36,13 @@ for _extra in (PROJECT_ROOT / "src", PROJECT_ROOT):  # "src" for knowledge_assis
 
 from knowledge_assistant.application.evaluation import scoring  # noqa: E402
 from knowledge_assistant.application.evaluation.metrics.latency import summarize_latency  # noqa: E402
+from knowledge_assistant.config import get_judge_settings  # noqa: E402
 from knowledge_assistant.core.exceptions import EvaluationError  # noqa: E402
 
 from scripts.evaluation.eval_report_data import (  # noqa: E402
     build_chunk_indexes,
     gate_refused_answerable,
+    judgements_and_prompt_version,
     load_pricing,
     load_runs,
     load_spans_by_case,
@@ -65,9 +67,13 @@ SECTION_ORDER = ("retrieval", "answer", "refusal", "citation", "latency", "cost"
 JUDGE_AGREEMENT_NAME = "judge_agreement"
 JUDGE_AGREEMENT_TITLE = "Judge spot-check agreement (owner)"
 JUDGE_AGREEMENT_PLACEHOLDER = (
-    "*(Owner judge spot-check not yet run. After the owner fills `human_result` in "
-    "`docs/reviews/evaluation/judge-spot-check-<run>.md`, run `scripts/evaluation/score_spot_check.py <file>` to "
-    "fill this section: agreement %, Cohen's kappa, the confusion matrix and the list of disagreements.)*"
+    "*(Owner judge spot-check not yet run. `scripts/evaluation/make_spot_check.py --run RUN_ID` writes a blind sheet "
+    "at `validation/evaluation/judge-spot-check-<run>.md` (no case id, arm or judge label - a per-point "
+    "`**Owner verdict**` table per case) and its key at `...-<run>-judge.md`. After the owner fills every `Owner "
+    "verdict` cell in the blind sheet, run `scripts/evaluation/score_spot_check.py <sheet> <key>` to fill this "
+    "section: rule-based agreement (the owner's grades run through `metrics.mapping.map_result`, the same function "
+    "the judge's own label came from), Cohen's kappa, the confusion matrix, the disagreements, and the holistic "
+    "self-reported agreement as a secondary line.)*"
 )
 CSV_COLUMNS = ("question", "expected_answer", "expected_source", "generated_answer", "result",
               "case_id", "arm", "language", "citations", "latency_total_ms")
@@ -307,6 +313,20 @@ def ensure_placeholder_section(text: str, name: str, title: str, placeholder: st
     return replace_or_append_section(text, name, title, placeholder)
 
 
+def prompt_version_mismatches(runs: list[dict], expected: str | None) -> list[tuple[str, str]]:
+    """[(run_id, derived_version), ...] for runs judged with a prompt version other than `expected`. `expected=None`
+    disables the check. A run with no judgements at all derives version `None` and never mismatches (VERIFY
+    EVAL-003c check 2: `score_row`'s drift risk also covers the version it looks judgements up by)."""
+    if expected is None:
+        return []
+    mismatches = []
+    for run in runs:
+        _, derived = judgements_and_prompt_version(run["judgement_lines"])
+        if derived is not None and derived != expected:
+            mismatches.append((run["run_id"], derived))
+    return mismatches
+
+
 # --- assembling one report -------------------------------------------------------------------------------------
 
 def build_report(runs: list[dict], spans_by_case: dict, chunk_indexes: dict, pricing: dict) -> dict:
@@ -424,6 +444,9 @@ def parse_args(argv):
                                      epilog=__doc__.split("\n\n", 1)[1], formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--runs", nargs="+", required=True, metavar="RUN_ID", help="one or more run ids under data/evaluation/results/")
     parser.add_argument("--out", type=Path, default=None, help=f"report path (default {DEFAULT_OUT})")
+    parser.add_argument("--judge-prompt-version", default=None,
+                        help="expected judge prompt version (default: config's JUDGE_PROMPT_VERSION, os.getenv only); "
+                             "aborts if any run's judgements.jsonl was judged with a different version")
     return parser.parse_args(argv)
 
 
@@ -436,6 +459,12 @@ def main(argv=None, *, root: Path = PROJECT_ROOT, out=None, err=None) -> int:
     out, err = out or sys.stdout, err or sys.stderr
     try:
         runs = load_runs(args.runs, root=root)
+        expected_version = args.judge_prompt_version or get_judge_settings().prompt_version
+        mismatches = prompt_version_mismatches(runs, expected_version)
+        if mismatches:
+            detail = ", ".join(f"{run_id} judged with {derived!r}" for run_id, derived in mismatches)
+            raise EvaluationError(f"judge prompt version mismatch (expected {expected_version!r}): {detail}. "
+                                  "Pass --judge-prompt-version to score against a different version.")
         spans_by_case = load_spans_by_case(root=root)
         chunk_indexes = build_chunk_indexes(runs)
         pricing = load_pricing(root=root)

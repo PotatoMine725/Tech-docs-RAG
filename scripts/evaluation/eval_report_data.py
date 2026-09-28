@@ -7,10 +7,11 @@ report shows traces back to `scoring.py` or `metrics/*.py`.
 `expected-spans-v1.json` covers the eval split only (EVAL-003b-pre); `scoring.score_record` therefore refuses (raises
 ValueError) to score an answerable record outside it. That is correct for the real eval-split runs EVAL-004 produces,
 but EVAL-003c is developed and demonstrated against the committed **dev** dry-run runs, whose answerable cases
-(Q-DEV-001/002/...) are never in that file. `score_row` below recomposes `score_record`'s steps (same functions, same
-order) with one added guard: an answerable record without span coverage is scored for `answer` (which needs no spans)
-but not for `retrieval` or `citation` (which do), and is flagged `spans_unavailable` so a report caption can list it
-as excluded, and why. When every case_id is covered (the eval split), `score_row` and `score_record` agree exactly.
+(Q-DEV-001/002/...) are never in that file. `score_row` below calls `score_record` directly for every covered record
+(pinned: `score_record` never raises on it, so any field `score_record` gains later reaches `score_row` too) and only
+hand-recomposes the uncovered branch: an answerable record without span coverage is scored for `answer` (which needs
+no spans) but not for `retrieval` or `citation` (which do), and is flagged `spans_unavailable` so a report caption can
+list it as excluded, and why.
 """
 import json
 import sys
@@ -103,29 +104,23 @@ def load_pricing(root: Path = PROJECT_ROOT) -> dict:
 
 
 def score_row(record: dict, spans_by_case: dict, index: dict | None, judgements: dict, prompt_version: str | None) -> dict:
-    """One row: identity, breakdown dimensions and every per-record score - `scoring.score_record`'s own fields, plus
-    `spans_unavailable`. See the module docstring for why this recomposes score_record instead of calling it."""
+    """One row: `scoring.score_record`'s own fields, plus `spans_unavailable`. When the record is covered (not
+    answerable, or answerable and in `spans_by_case`), this is `score_record`'s row verbatim - `score_record` never
+    raises on it, so every field it computes (present or future) reaches this row unchanged. Only the uncovered
+    branch (an answerable record outside `expected-spans-v1.json`, which covers the eval split only - EVAL-003b-pre)
+    recomposes `score_record`'s steps by hand, skipping retrieval/citation (which need spans) but still scoring
+    `answer` (which does not), and flags `spans_unavailable` so a report caption can list it, and why."""
+    has_spans = record["status"] != "ok" or (not record["answerable"]) or (record["case_id"] in spans_by_case)
+    if has_spans:
+        return {**scoring.score_record(record, spans_by_case, index, judgements, prompt_version), "spans_unavailable": False}
     tags = record["tags"]
-    row = {"case_id": record["case_id"], "arm": record["arm"], "mode": record["mode"], "status": record["status"],
-           "language": record["language"], "parallel_group_id": record["parallel_group_id"],
-           "answerable": record["answerable"], "size_class": tags.get("size_class"),
-           "difficulty": tags.get("difficulty"), "failure_mode": tags.get("failure_mode"),
-           "retrieval": None, "duplicate_rule_changed": None, "answer": None, "citation": None,
-           "spans_unavailable": False}
-    if record["status"] != "ok":
-        return row
-    has_spans = (not record["answerable"]) or (record["case_id"] in spans_by_case)
-    row["spans_unavailable"] = record["answerable"] and not has_spans
-    if record["answerable"] and has_spans:
-        spans = spans_by_case[record["case_id"]]
-        row["retrieval"] = scoring.retrieval_scores(record, spans, index)
-        row["duplicate_rule_changed"] = scoring.duplicate_rule_changes(scoring.ranked_chunks(record, index), spans)
-    if record["mode"] == "full":
-        judgement = scoring.find_judgement(record, judgements, prompt_version)
-        row["answer"] = scoring.answer_scores(record, judgement)
-        if has_spans:
-            row["citation"] = scoring.citation_scores(record, spans_by_case.get(record["case_id"]), index, judgement)
-    return row
+    return {"case_id": record["case_id"], "arm": record["arm"], "mode": record["mode"], "status": record["status"],
+            "language": record["language"], "parallel_group_id": record["parallel_group_id"],
+            "answerable": record["answerable"], "size_class": tags.get("size_class"),
+            "difficulty": tags.get("difficulty"), "failure_mode": tags.get("failure_mode"),
+            "retrieval": None, "duplicate_rule_changed": None, "citation": None, "spans_unavailable": True,
+            "answer": scoring.answer_scores(record, scoring.find_judgement(record, judgements, prompt_version))
+            if record["mode"] == "full" else None}
 
 
 def judgements_and_prompt_version(judgement_lines: list[dict]) -> tuple[dict, str | None]:

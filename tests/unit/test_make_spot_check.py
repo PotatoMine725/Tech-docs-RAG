@@ -60,17 +60,62 @@ def test_sample_of_no_eligible_records_is_empty():
     assert make_spot_check.sample_stratified([], fraction=0.2, seed=42) == []
 
 
-# --- rendering: fields are collapsed to one line so a case heading is never mistaken for the sheet's own markup
+# --- rendering: blind (no case id, arm or judge label), full ground truth, corpus text always blockquoted ------
 
-def test_a_multiline_cited_excerpt_is_collapsed_so_a_stray_heading_cannot_confuse_the_parser():
-    record = make_record(1, cited=(1,))
-    record["retrieved"][0]["display_text"] = "## Static classes\nA static class cannot be instantiated."
-    rendered = make_spot_check.render_case(record, {"answer": {"result": "correct"}}, {}, None)
-    assert "\n## Static classes" not in rendered  # never at the start of a rendered line
-    assert "## Static classes A static class cannot be instantiated." in rendered
+def test_quote_block_prefixes_every_line_so_a_stray_heading_can_never_be_mistaken_for_a_case_heading():
+    """Corpus text lives inside a `> ` blockquote; `## Static classes` at column 0 inside it would otherwise be
+    indistinguishable from a real `## Sxx` case heading when the sheet is split on `^## `."""
+    quoted = make_spot_check.quote_block("## Static classes\nA static class cannot be instantiated.")
+    assert quoted == "> ## Static classes\n> A static class cannot be instantiated."
+    assert "\n## Static classes" not in ("\n" + quoted)
 
 
-# --- end to end: builds a real sheet from a fake run, deterministically -------------------------------------
+def test_render_case_is_blind_no_case_id_arm_or_judge_label():
+    record = make_record(1, answerable=True, cited=(1,))
+    judgement = {"check": "answer", "verdict": {"required_points": [{"id": "P1", "covered": "yes"}]}}
+    rendered = make_spot_check.render_case("S01", record, judgement)
+    assert rendered.startswith("## S01 (answer check)")
+    assert "Q-TEST-001" not in rendered  # case id
+    assert "arm A" not in rendered and "arm" not in rendered.lower()
+    assert "partially_correct" not in rendered and "correct" not in rendered.lower()  # no judge label leaks in
+
+
+def test_render_case_answer_check_lists_only_required_points_and_every_cited_marker():
+    points = [{"id": "P1", "text": "Required thing.", "required": True},
+             {"id": "P2", "text": "Context only.", "required": False}]
+    record = make_record(1, answerable=True, cited=(1, 2), points=points)
+    judgement = {"check": "answer",
+                "verdict": {"required_points": [{"id": "P1", "covered": "yes"}]}}
+    rendered = make_spot_check.render_case("S01", record, judgement)
+    assert "| P1 covered |  |  |" in rendered
+    assert "| P2 covered |  |  |" not in rendered  # P2 is optional (context only), never a grading row
+    assert "- P1 (required): Required thing." in rendered  # ground truth text, from the record itself
+    assert "- P2 (optional, context only): Context only." in rendered
+    assert "| citation [1] supports its claim |  |  |" in rendered
+    assert "| citation [2] supports its claim |  |  |" in rendered
+    assert "| agree with the judge? (fill after opening the key) |  |  |" in rendered
+
+
+def test_render_case_refusal_check_has_only_the_presents_related_item():
+    record = make_record(1, answerable=False, insufficient=True, cited=())
+    judgement = {"check": "refusal", "verdict": {"presents_related_as_answer": False}}
+    rendered = make_spot_check.render_case("S02", record, judgement)
+    assert rendered.startswith("## S02 (refusal check)")
+    assert "| presents_related_as_answer |  |  |" in rendered
+    assert "P1 covered" not in rendered
+
+
+def test_render_key_entry_carries_case_id_arm_run_and_label():
+    record = make_record(1, answerable=True, cited=(1,))
+    judgement = {"check": "answer", "judge_model": "test-judge-model", "verdict": {"reason": "Fine."}}
+    entry = make_spot_check.render_key_entry("S01", "run-1", record, judgement, "correct")
+    assert "## S01" in entry
+    assert "- Case: `Q-TEST-001`, arm A, run `run-1`" in entry
+    assert "label: **correct**" in entry
+    assert '"reason": "Fine."' in entry
+
+
+# --- end to end: builds real sheet + key from a fake run, deterministically ------------------------------------
 
 def build_fixture(tmp_path):
     directory = write_manifest(tmp_path, "run-1", arm="A", mode="full", split="dev")
@@ -87,22 +132,49 @@ def build_fixture(tmp_path):
     return directory
 
 
-def test_main_writes_a_sheet_with_every_judge_checked_case(tmp_path):
+def test_main_writes_a_blind_sheet_and_a_separate_key_with_every_judge_checked_case(tmp_path):
     build_fixture(tmp_path)
     out, err = io.StringIO(), io.StringIO()
     code = make_spot_check.main(["--run", "run-1", "--fraction", "1.0", "--seed", "1"], root=tmp_path, out=out, err=err)
     assert code == make_spot_check.EXIT_OK, err.getvalue()
-    sheet_path = tmp_path / "docs" / "reviews" / "evaluation" / "judge-spot-check-run-1.md"
-    text = sheet_path.read_text(encoding="utf-8")
-    assert "Q-TEST-001" in text and "Q-TEST-002" in text
-    assert text.count("- **human_result:** ") == 2
-    assert "<!-- run_id: run-1 -->" in text
+    sheet_path = tmp_path / "validation" / "evaluation" / "judge-spot-check-run-1.md"
+    key_path = tmp_path / "validation" / "evaluation" / "judge-spot-check-run-1-judge.md"
+    sheet, key = sheet_path.read_text(encoding="utf-8"), key_path.read_text(encoding="utf-8")
+    assert "## S01" in sheet and "## S02" in sheet
+    assert sheet.count("Q-TEST-001") == 0 and sheet.count("Q-TEST-002") == 0  # blind: no case id
+    assert "Q-TEST-001" in key and "Q-TEST-002" in key  # the key carries the mapping
+    assert "<!-- run_id: run-1 -->" in sheet
 
 
 def test_running_main_twice_is_byte_identical(tmp_path):
     build_fixture(tmp_path)
-    sheet_path = tmp_path / "docs" / "reviews" / "evaluation" / "judge-spot-check-run-1.md"
+    sheet_path = tmp_path / "validation" / "evaluation" / "judge-spot-check-run-1.md"
+    key_path = tmp_path / "validation" / "evaluation" / "judge-spot-check-run-1-judge.md"
     make_spot_check.main(["--run", "run-1"], root=tmp_path, out=io.StringIO(), err=io.StringIO())
-    first = sheet_path.read_bytes()
-    make_spot_check.main(["--run", "run-1"], root=tmp_path, out=io.StringIO(), err=io.StringIO())
-    assert sheet_path.read_bytes() == first
+    first_sheet, first_key = sheet_path.read_bytes(), key_path.read_bytes()
+    make_spot_check.main(["--run", "run-1", "--force"], root=tmp_path, out=io.StringIO(), err=io.StringIO())
+    assert sheet_path.read_bytes() == first_sheet
+    assert key_path.read_bytes() == first_key
+
+
+def test_main_refuses_to_overwrite_an_existing_sheet_without_force(tmp_path):
+    build_fixture(tmp_path)
+    out, err = io.StringIO(), io.StringIO()
+    code = make_spot_check.main(["--run", "run-1"], root=tmp_path, out=out, err=err)
+    assert code == make_spot_check.EXIT_OK, err.getvalue()
+    sheet_path = tmp_path / "validation" / "evaluation" / "judge-spot-check-run-1.md"
+    sheet_path.write_text("HAND-GRADED WORK\n", encoding="utf-8")
+    code = make_spot_check.main(["--run", "run-1"], root=tmp_path, out=io.StringIO(), err=(err2 := io.StringIO()))
+    assert code == make_spot_check.EXIT_ABORTED
+    assert "--force" in err2.getvalue()
+    assert sheet_path.read_text(encoding="utf-8") == "HAND-GRADED WORK\n"  # untouched
+
+
+def test_main_with_force_overwrites_an_existing_sheet(tmp_path):
+    build_fixture(tmp_path)
+    sheet_path = tmp_path / "validation" / "evaluation" / "judge-spot-check-run-1.md"
+    sheet_path.parent.mkdir(parents=True, exist_ok=True)
+    sheet_path.write_text("stale\n", encoding="utf-8")
+    code = make_spot_check.main(["--run", "run-1", "--force"], root=tmp_path, out=io.StringIO(), err=io.StringIO())
+    assert code == make_spot_check.EXIT_OK
+    assert "stale" not in sheet_path.read_text(encoding="utf-8")

@@ -509,6 +509,9 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
     but is still scored for `answer` (which needs no spans) and is flagged `spans_unavailable`. `scoring.score_record`
     itself is untouched; when every case_id is covered (the real eval-split runs), the two paths agree exactly
     (tested directly: `tests/unit/test_eval_report_data.py`).
+    **Correction (2026-09-28 fixes): that test only checked the `spans_unavailable` flag, not the equivalence - the
+    "tested directly" claim became true only once the fixes pinned `score_row` to call `scoring.score_record`
+    directly for covered records (see `EVAL-003c-verify.md` check 2 and `EVAL-003c.md`'s "Fixes" section).**
   - `sys.path`: added the project root alongside `src/` in both `eval_report_data.py` and `make_tables.py`; verified
     by re-running the script, not just re-reading the code.
   - `retrieval_table`: a `_mean_of(summary, key)` helper defaults to a zero-record placeholder instead of indexing

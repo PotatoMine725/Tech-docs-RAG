@@ -1,4 +1,5 @@
 """EVAL-003c: `scripts/evaluation/eval_report_data.py` - loading and scoring glue. Offline, made-up records."""
+from knowledge_assistant.application.evaluation import scoring
 from knowledge_assistant.application.evaluation.metrics.spans import EXPECTED, ExpectedSpan
 from scripts.evaluation.eval_report_data import gate_refused_answerable, judgements_and_prompt_version, score_row
 from tests.judge_fakes import make_record
@@ -54,6 +55,45 @@ def test_gate_refused_answerable_lists_case_id_arm_of_ok_answerable_gate_fired_r
     unanswerable_fired["gate_fired"] = True
     run = {"records": [fired, not_fired, unanswerable_fired]}
     assert gate_refused_answerable([run]) == ["Q-TEST-001:A"]
+
+
+# --- pinned to scoring.score_record (VERIFY EVAL-003c check 2/4): every covered record is score_record's own row,
+# plus spans_unavailable=False, never a hand-recomposed copy that could silently drift from it -------------------
+
+def test_a_covered_answerable_record_equals_score_record_plus_spans_unavailable_false():
+    record = make_record(1, answerable=True, cited=(1,))
+    spans = {"Q-TEST-001": [SPAN]}
+    row = score_row(record, spans, index=None, judgements={}, prompt_version=None)
+    assert row["spans_unavailable"] is False
+    expected = scoring.score_record(record, spans, None, {}, None)
+    assert {k: v for k, v in row.items() if k != "spans_unavailable"} == expected
+
+
+def test_an_unanswerable_record_equals_score_record_plus_spans_unavailable_false():
+    record = make_record(1, answerable=False, insufficient=True, cited=())
+    row = score_row(record, {}, index=None, judgements={}, prompt_version=None)
+    assert row["spans_unavailable"] is False
+    expected = scoring.score_record(record, {}, None, {}, None)
+    assert {k: v for k, v in row.items() if k != "spans_unavailable"} == expected
+
+
+def test_a_non_ok_record_equals_score_record_plus_spans_unavailable_false():
+    record = make_record(1, answerable=True, cited=(1,), status="error")
+    row = score_row(record, {}, index=None, judgements={}, prompt_version=None)
+    assert row["spans_unavailable"] is False
+    expected = scoring.score_record(record, {}, None, {}, None)
+    assert {k: v for k, v in row.items() if k != "spans_unavailable"} == expected
+
+
+def test_the_uncovered_branch_has_the_same_keys_as_a_covered_score_record_row():
+    """Guards against `scoring.score_record` gaining a field the hand-recomposed uncovered branch would silently
+    drop: a mutant adding a field to `score_record`'s row must change this set, since the covered branch (which
+    spreads `score_record`'s dict directly) gains it automatically and the uncovered branch does not."""
+    covered = score_row(make_record(1, answerable=True, cited=(1,)), {"Q-TEST-001": [SPAN]}, index=None,
+                        judgements={}, prompt_version=None)
+    uncovered = score_row(make_record(1, answerable=True, cited=(1,)), spans_by_case={}, index=None,
+                          judgements={}, prompt_version=None)
+    assert set(uncovered) == set(covered)
 
 
 def test_judgements_and_prompt_version_is_none_when_more_than_one_version_is_present():

@@ -157,5 +157,5 @@ Runs: `20260927-dev-A-full-05680f9` (arm A, mode full, split dev, 3 record(s)); 
 ## Judge spot-check agreement (owner)
 
 <!-- AUTO:judge_agreement -->
-*(Owner judge spot-check not yet run. After the owner fills `human_result` in `docs/reviews/evaluation/judge-spot-check-<run>.md`, run `scripts/evaluation/score_spot_check.py <file>` to fill this section: agreement %, Cohen's kappa, the confusion matrix and the list of disagreements.)*
+*(Owner judge spot-check not yet run. `scripts/evaluation/make_spot_check.py --run RUN_ID` writes a blind sheet at `validation/evaluation/judge-spot-check-<run>.md` (no case id, arm or judge label - a per-point `**Owner verdict**` table per case) and its key at `...-<run>-judge.md`. After the owner fills every `Owner verdict` cell in the blind sheet, run `scripts/evaluation/score_spot_check.py <sheet> <key>` to fill this section: rule-based agreement (the owner's grades run through `metrics.mapping.map_result`, the same function the judge's own label came from), Cohen's kappa, the confusion matrix, the disagreements, and the holistic self-reported agreement as a secondary line.)*
 <!-- /AUTO:judge_agreement -->

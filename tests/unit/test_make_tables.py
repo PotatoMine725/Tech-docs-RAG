@@ -159,3 +159,116 @@ def test_a_missing_run_aborts_instead_of_crashing(tmp_path):
     out, err = io.StringIO(), io.StringIO()
     code = make_tables.main(["--runs", "no-such-run"], root=tmp_path, out=out, err=err)
     assert code == make_tables.EXIT_ABORTED and "no-such-run" in err.getvalue()
+
+
+# --- judge prompt-version drift guard (VERIFY EVAL-003c check 2/4) -------------------------------------------
+
+def test_prompt_version_mismatches_ignores_a_run_with_no_judgements():
+    run = {"run_id": "r1", "judgement_lines": []}
+    assert make_tables.prompt_version_mismatches([run], "judge_v1") == []
+
+
+def test_prompt_version_mismatches_flags_a_run_judged_with_a_different_version():
+    run = {"run_id": "r1", "judgement_lines": [
+        {"case_id": "c", "arm": "A", "answer_sha256": "h", "judge_prompt_version": "judge_v0"}]}
+    assert make_tables.prompt_version_mismatches([run], "judge_v1") == [("r1", "judge_v0")]
+
+
+def test_prompt_version_mismatches_disabled_when_expected_is_none():
+    run = {"run_id": "r1", "judgement_lines": [
+        {"case_id": "c", "arm": "A", "answer_sha256": "h", "judge_prompt_version": "judge_v0"}]}
+    assert make_tables.prompt_version_mismatches([run], None) == []
+
+
+def test_main_aborts_when_a_run_was_judged_with_an_unexpected_prompt_version(tmp_path):
+    directory = write_manifest(tmp_path, "run-1", arm="A", mode="full", split="dev")
+    r1 = make_record(1, answerable=True, cited=(1,))
+    write_records(directory, [r1])
+    write_judgements(directory, [judgement_line(r1, "answer", answer_verdict(), prompt_version="judge_v2")])
+    write_spans_file(tmp_path, {"Q-TEST-001": {"answerable": True, "slots": {"S1": [span_dict("01", "Doc > Part 1")]}}})
+    write_pricing(tmp_path)
+    out, err = io.StringIO(), io.StringIO()
+    code = make_tables.main(["--runs", "run-1", "--judge-prompt-version", "judge_v1"], root=tmp_path, out=out, err=err)
+    assert code == make_tables.EXIT_ABORTED
+    assert "judge_v1" in err.getvalue() and "judge_v2" in err.getvalue() and "run-1" in err.getvalue()
+
+
+def test_main_accepts_an_explicit_judge_prompt_version_matching_the_run(tmp_path):
+    build_fixture(tmp_path)  # judged with judge_v1 (the default in judgement_line)
+    out, err = io.StringIO(), io.StringIO()
+    code = make_tables.main(["--runs", "run-1", "--judge-prompt-version", "judge_v1"], root=tmp_path, out=out, err=err)
+    assert code == make_tables.EXIT_OK, err.getvalue()
+
+
+# --- caption/table content (VERIFY EVAL-003c check 3/6): kills the surviving mutants a3, b2, b3 -----------------
+
+def test_base_caption_names_every_spans_unavailable_case_id_arm():
+    rows = [{"case_id": "Q-A", "arm": "A", "spans_unavailable": True},
+           {"case_id": "Q-B", "arm": "B", "spans_unavailable": False},
+           {"case_id": "Q-C", "arm": "A", "spans_unavailable": True}]
+    runs = [{"run_id": "run-1", "split": "eval", "manifest": {"config": {"arm": "A", "mode": "full"}}, "records": []}]
+    caption = make_tables.base_caption(runs, rows)
+    assert "Q-A:A" in caption and "Q-C:A" in caption and "Q-B:B" not in caption
+
+
+def test_base_caption_flags_a_dev_split_run():
+    runs = [{"run_id": "run-1", "split": "dev", "manifest": {"config": {"arm": "A", "mode": "full"}}, "records": []}]
+    caption = make_tables.base_caption(runs, [])
+    assert "run-1" in caption and "dev split" in caption and "dry-run" in caption
+
+
+def test_every_section_caption_names_the_excluded_case(tmp_path):
+    directory = write_manifest(tmp_path, "run-1", arm="A", mode="full", split="dev")
+    r1 = make_record(1, answerable=True, cited=(1,))  # covered: Q-TEST-001 is in the spans file below
+    r2 = make_record(2, answerable=True, cited=(1,))  # uncovered: Q-TEST-002 is not
+    write_records(directory, [r1, r2])
+    write_judgements(directory, [judgement_line(r1, "answer", answer_verdict()),
+                                 judgement_line(r2, "answer", answer_verdict())])
+    write_spans_file(tmp_path, {"Q-TEST-001": {"answerable": True, "slots": {"S1": [span_dict("01", "Doc > Part 1")]}}})
+    write_pricing(tmp_path)
+    out_path = tmp_path / "report.md"
+    code = make_tables.main(["--runs", "run-1", "--out", str(out_path)], root=tmp_path,
+                            out=io.StringIO(), err=io.StringIO())
+    assert code == make_tables.EXIT_OK
+    report = out_path.read_text(encoding="utf-8")
+    for name in make_tables.SECTION_ORDER:
+        start = report.index(f"<!-- AUTO:{name} -->")
+        end = report.index(f"<!-- /AUTO:{name} -->", start)
+        assert "Q-TEST-002:A" in report[start:end], f"{name} section is missing the excluded case"
+
+
+def test_per_case_table_places_result_and_citation_auto_class_in_the_correct_columns():
+    record = {"case_id": "Q-X", "arm": "A", "mode": "full", "language": "en", "status": "ok",
+             "latency_ms": {"total": 123.4}, "gate_fired": False}
+    row = {"split": "eval", "answer": {"result": "correct", "points_covered": 1.0},
+          "citation": {"auto_class": "citation_missing"}, "spans_unavailable": False}
+    table = make_tables.per_case_table([(record, row)])
+    headers = [h.strip() for h in table.splitlines()[0].strip("|").split("|")]
+    cells = [c.strip() for c in table.splitlines()[2].strip("|").split("|")]
+    row_by_header = dict(zip(headers, cells))
+    assert row_by_header["result"] == "correct"
+    assert row_by_header["citation_auto_class"] == "citation_missing"
+
+
+def test_retrieval_table_puts_lenient_in_its_column_and_strict_in_its_own():
+    summary = {"duplicate_rule_changed": {"n": 0, "count": 0, "cases": []},
+              "source_hit@1": {"n": 2, "value": 1.0}, "source_hit@1:strict": {"n": 2, "value": 0.5}}
+    table = make_tables.retrieval_table(summary)
+    lines = table.splitlines()
+    headers = [h.strip() for h in lines[0].strip("|").split("|")]
+    cells = [c.strip() for c in lines[2].strip("|").split("|")]  # first data row: source_hit@1
+    row_by_header = dict(zip(headers, cells))
+    assert row_by_header["metric"] == "source_hit@1"
+    assert row_by_header["lenient (headline)"] == "1.000 (n=2)"
+    assert row_by_header["strict"] == "0.500 (n=2)"
+
+
+def test_main_never_aborts_on_a_retrieval_mode_run_with_no_judgements(tmp_path):
+    directory = write_manifest(tmp_path, "run-1", arm="A", mode="retrieval", split="dev")
+    write_records(directory, [make_record(1, answerable=True, cited=(1,), mode="retrieval")])
+    write_spans_file(tmp_path, {"Q-TEST-001": {"answerable": True, "slots": {"S1": [span_dict("01", "Doc > Part 1")]}}})
+    write_pricing(tmp_path)
+    out, err = io.StringIO(), io.StringIO()
+    code = make_tables.main(["--runs", "run-1", "--judge-prompt-version", "some-other-version"], root=tmp_path,
+                            out=out, err=err)
+    assert code == make_tables.EXIT_OK, err.getvalue()
