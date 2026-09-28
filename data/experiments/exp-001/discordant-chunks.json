@@ -1,0 +1,4582 @@
+{
+ "Q-EVAL-001": {
+  "reasons": [
+   "label false_refusal -> correct"
+  ],
+  "slots": {
+   "S1": [
+    "#22 Querying Data (expected)"
+   ]
+  },
+  "A": {
+   "result": "false_refusal",
+   "top1_score": 0.677908718585968,
+   "gate_fired": true,
+   "cited": [],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "22:header-1600:0000",
+     "source_id": "22",
+     "heading_path": "Querying Data",
+     "score": 0.677908718585968,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 2,
+     "evidence_quotes_total": 2,
+     "points_covered": [
+      "P1"
+     ],
+     "cuts_code_fence": false,
+     "head": "# Querying Data\n\nEntity Framework Core uses Language-Integrated Query (LINQ) to query data from the database. LINQ allows you to use C# (or your .NET language of choice) to write strongly typed querie"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "22:header-1600:0001",
+     "source_id": "22",
+     "heading_path": "Querying Data > Loading all data",
+     "score": 0.6470180153846741,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "## Loading all data\n\n```\nusing (var context = new BloggingContext())\n{\n    var blogs = await context.Blogs.ToListAsync();\n}\n```\n\n## Loading a single entity\n\n```\nusing (var context = new BloggingContex"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "22:header-1600:0002",
+     "source_id": "22",
+     "heading_path": "Querying Data > Further readings",
+     "score": 0.6251327991485596,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "## Further readings\n\n- Learn more about [LINQ query expressions](/en-us/dotnet/csharp/programming-guide/concepts/linq/basic-linq-query-operations)\n- For more detailed information on how a query is pro"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "02:header-1600:0017",
+     "source_id": "02",
+     "heading_path": "Asynchronous programming scenarios > Review considerations for asynchronous programming > Use caution with asynchronous lambdas in LINQ",
+     "score": 0.5736568570137024,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "### Use caution with asynchronous lambdas in LINQ\n\nIt's important to use caution when you implement asynchronous lambdas in LINQ expressions. Lambda expressions in LINQ use deferred execution, which m"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "10:header-1600:0020",
+     "source_id": "10",
+     "heading_path": "Dependency injection in ASP.NET Core > Constructor injection behavior",
+     "score": 0.5672290325164795,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "## Constructor injection behavior\n\nFor more information on constructor injection behavior, see the following resources:\n\n- [Constructor injection behavior](/en-us/dotnet/core/extensions/dependency-inj"
+    }
+   ]
+  },
+  "B": {
+   "result": "correct",
+   "top1_score": 0.6908349990844727,
+   "gate_fired": false,
+   "cited": [
+    "22:fixed-1600:0000"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "22:fixed-1600:0000",
+     "source_id": "22",
+     "heading_path": "Querying Data",
+     "score": 0.6908349990844727,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 2,
+     "evidence_quotes_total": 2,
+     "points_covered": [
+      "P1"
+     ],
+     "cuts_code_fence": false,
+     "head": "# Querying Data\n\nEntity Framework Core uses Language-Integrated Query (LINQ) to query data from the database. LINQ allows you to use C# (or your .NET language of choice) to write strongly typed querie"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "22:fixed-1600:0001",
+     "source_id": "22",
+     "heading_path": "Querying Data > Further readings",
+     "score": 0.6444579362869263,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "arp/programming-guide/concepts/linq/basic-linq-query-operations)\n- For more detailed information on how a query is processed in EF Core, see [How queries Work](how-query-works).\n\n---\n\n## Additional re"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "10:fixed-1600:0016",
+     "source_id": "10",
+     "heading_path": "Dependency injection in ASP.NET Core > Constructor injection behavior",
+     "score": 0.5698975920677185,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "n-us/dotnet/core/extensions/dependency-injection/overview#constructor-injection-behavior)\n- [ASP.NET Core Blazor dependency injection](../blazor/fundamentals/dependency-injection?view=aspnetcore-10.0#"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "02:fixed-1600:0000",
+     "source_id": "02",
+     "heading_path": "Asynchronous programming scenarios",
+     "score": 0.5564142465591431,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "# Asynchronous programming scenarios\n\nIf your code implements I/O-bound scenarios to support network data requests, database access, or file system read/writes, asynchronous programming is the best ap"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "02:fixed-1600:0011",
+     "source_id": "02",
+     "heading_path": "Asynchronous programming scenarios > Review considerations for asynchronous programming > Use caution with asynchronous lambdas in LINQ",
+     "score": 0.5532615184783936,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "powerful, but these techniques should be used together as carefully and clearly as possible.\n\n### Yield for tasks in a nonblocking manner\n\nIf your program needs the result of a task, write code that i"
+    }
+   ]
+  }
+ },
+ "Q-EVAL-003": {
+  "reasons": [
+   "evidence_hit@1 0 -> 1",
+   "evidence_hit@3 0 -> 1"
+  ],
+  "slots": {
+   "S1": [
+    "#12 Handle errors in ASP.NET Core APIs > Developer Exception Page (alternate)",
+    "#13 Handle errors in ASP.NET Core > Developer Exception Page (alternate)",
+    "#13 Handle errors in ASP.NET Core > Developer exception page (expected)"
+   ]
+  },
+  "A": {
+   "result": "correct",
+   "top1_score": 0.7635274529457092,
+   "gate_fired": false,
+   "cited": [
+    "13:header-1600:0001",
+    "13:header-1600:0054",
+    "12:header-1600:0001",
+    "13:header-1600:0087",
+    "13:header-1600:0065"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "13:header-1600:0001",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > Developer exception page",
+     "score": 0.7635274529457092,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 4,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P1",
+      "P2"
+     ],
+     "cuts_code_fence": false,
+     "head": "## Developer exception page\n\nThe *Developer Exception Page* displays detailed information about unhandled request exceptions. It uses [DeveloperExceptionPageMiddleware](/en-us/dotnet/api/microsoft.asp"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "13:header-1600:0087",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > Developer Exception Page",
+     "score": 0.7583492398262024,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 6,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "## Developer Exception Page\n\nThe *Developer Exception Page* displays detailed information about request exceptions. The ASP.NET Core templates generate the following code:\n\n```\nif (env.IsDevelopment()"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "13:header-1600:0054",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > Developer exception page",
+     "score": 0.7577179670333862,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 2,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P1"
+     ],
+     "cuts_code_fence": false,
+     "head": "## Developer exception page\n\nThe *Developer Exception Page* displays detailed information about unhandled request exceptions. ASP.NET Core apps enable the developer exception page by default when both"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "12:header-1600:0001",
+     "source_id": "12",
+     "heading_path": "Handle errors in ASP.NET Core APIs > Developer Exception Page",
+     "score": 0.7566322088241577,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 4,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P1",
+      "P2"
+     ],
+     "cuts_code_fence": false,
+     "head": "## Developer Exception Page\n\nThe *Developer Exception Page* displays detailed information about unhandled request exceptions. It uses [DeveloperExceptionPageMiddleware](/en-us/dotnet/api/microsoft.asp"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "13:header-1600:0065",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > Developer Exception Page",
+     "score": 0.7551153302192688,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "## Developer Exception Page\n\nThe *Developer Exception Page* displays detailed information about unhandled request exceptions. The ASP.NET Core templates generate the following code:\n\n```\npublic void C"
+    }
+   ]
+  },
+  "B": {
+   "result": "correct",
+   "top1_score": 0.7719535827636719,
+   "gate_fired": false,
+   "cited": [
+    "13:fixed-1600:0035",
+    "13:fixed-1600:0068",
+    "12:fixed-1600:0001",
+    "13:fixed-1600:0100",
+    "13:fixed-1600:0141"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "13:fixed-1600:0035",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > Developer exception page",
+     "score": 0.7719535827636719,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 4,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P1",
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "ption page by default when both:\n\n- Running in the [`Development` environment](environments?view=aspnetcore-10.0).\n- The app was created with the current templates, that is, by using [WebApplication.C"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "13:fixed-1600:0068",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > Developer exception page",
+     "score": 0.7603862881660461,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P1"
+     ],
+     "cuts_code_fence": false,
+     "head": "SP.NET Core apps enable the developer exception page by default when both:\n\n- Running in the [`Development` environment](environments?view=aspnetcore-10.0).\n- App created with the current templates, t"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "12:fixed-1600:0001",
+     "source_id": "12",
+     "heading_path": "Handle errors in ASP.NET Core APIs > Developer Exception Page",
+     "score": 0.7594184279441833,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 3,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P1",
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "`Development` environment](environments?view=aspnetcore-10.0).\n- The app was created with the current templates, that is, by using [WebApplication.CreateBuilder](/en-us/dotnet/api/microsoft.aspnetcore"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "13:fixed-1600:0100",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > Developer exception page",
+     "score": 0.756121814250946,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 6,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "App created with the current templates, that is, using [WebApplication.CreateBuilder](/en-us/dotnet/api/microsoft.aspnetcore.builder.webapplication.createbuilder). Apps created using the [`WebHost.Cre"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "13:fixed-1600:0141",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > Developer Exception Page",
+     "score": 0.7422769069671631,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "e) early in the middleware pipeline so that it can catch unhandled exceptions thrown in middleware that follows.\n\nThe preceding code enables the Developer Exception Page ***only*** when the app runs i"
+    }
+   ]
+  }
+ },
+ "Q-EVAL-004": {
+  "reasons": [
+   "evidence_hit@1 0 -> 1",
+   "evidence_hit@3 0 -> 1"
+  ],
+  "slots": {
+   "S1": [
+    "#12 Handle errors in ASP.NET Core APIs > Developer Exception Page (alternate)",
+    "#13 Handle errors in ASP.NET Core > Developer Exception Page (alternate)",
+    "#13 Handle errors in ASP.NET Core > Developer exception page (expected)"
+   ]
+  },
+  "A": {
+   "result": "correct",
+   "top1_score": 0.773932158946991,
+   "gate_fired": false,
+   "cited": [
+    "13:header-1600:0001",
+    "13:header-1600:0054",
+    "12:header-1600:0001",
+    "13:header-1600:0087",
+    "13:header-1600:0065"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "13:header-1600:0001",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > Developer exception page",
+     "score": 0.773932158946991,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 4,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P1",
+      "P2"
+     ],
+     "cuts_code_fence": false,
+     "head": "## Developer exception page\n\nThe *Developer Exception Page* displays detailed information about unhandled request exceptions. It uses [DeveloperExceptionPageMiddleware](/en-us/dotnet/api/microsoft.asp"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "13:header-1600:0054",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > Developer exception page",
+     "score": 0.7719473242759705,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 2,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P1"
+     ],
+     "cuts_code_fence": false,
+     "head": "## Developer exception page\n\nThe *Developer Exception Page* displays detailed information about unhandled request exceptions. ASP.NET Core apps enable the developer exception page by default when both"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "13:header-1600:0087",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > Developer Exception Page",
+     "score": 0.7714688777923584,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 6,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "## Developer Exception Page\n\nThe *Developer Exception Page* displays detailed information about request exceptions. The ASP.NET Core templates generate the following code:\n\n```\nif (env.IsDevelopment()"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "13:header-1600:0065",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > Developer Exception Page",
+     "score": 0.7691442966461182,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "## Developer Exception Page\n\nThe *Developer Exception Page* displays detailed information about unhandled request exceptions. The ASP.NET Core templates generate the following code:\n\n```\npublic void C"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "12:header-1600:0001",
+     "source_id": "12",
+     "heading_path": "Handle errors in ASP.NET Core APIs > Developer Exception Page",
+     "score": 0.7663792967796326,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 4,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P1",
+      "P2"
+     ],
+     "cuts_code_fence": false,
+     "head": "## Developer Exception Page\n\nThe *Developer Exception Page* displays detailed information about unhandled request exceptions. It uses [DeveloperExceptionPageMiddleware](/en-us/dotnet/api/microsoft.asp"
+    }
+   ]
+  },
+  "B": {
+   "result": "correct",
+   "top1_score": 0.7857872843742371,
+   "gate_fired": false,
+   "cited": [
+    "13:fixed-1600:0035",
+    "13:fixed-1600:0068",
+    "13:fixed-1600:0100",
+    "12:fixed-1600:0001",
+    "13:fixed-1600:0001"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "13:fixed-1600:0035",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > Developer exception page",
+     "score": 0.7857872843742371,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 4,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P1",
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "ption page by default when both:\n\n- Running in the [`Development` environment](environments?view=aspnetcore-10.0).\n- The app was created with the current templates, that is, by using [WebApplication.C"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "13:fixed-1600:0068",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > Developer exception page",
+     "score": 0.776675820350647,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P1"
+     ],
+     "cuts_code_fence": false,
+     "head": "SP.NET Core apps enable the developer exception page by default when both:\n\n- Running in the [`Development` environment](environments?view=aspnetcore-10.0).\n- App created with the current templates, t"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "13:fixed-1600:0100",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > Developer exception page",
+     "score": 0.7740278244018555,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 6,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "App created with the current templates, that is, using [WebApplication.CreateBuilder](/en-us/dotnet/api/microsoft.aspnetcore.builder.webapplication.createbuilder). Apps created using the [`WebHost.Cre"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "12:fixed-1600:0001",
+     "source_id": "12",
+     "heading_path": "Handle errors in ASP.NET Core APIs > Developer Exception Page",
+     "score": 0.7719718217849731,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 3,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P1",
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "`Development` environment](environments?view=aspnetcore-10.0).\n- The app was created with the current templates, that is, by using [WebApplication.CreateBuilder](/en-us/dotnet/api/microsoft.aspnetcore"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "13:fixed-1600:0001",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > Developer exception page",
+     "score": 0.7632143497467041,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P3"
+     ],
+     "cuts_code_fence": true,
+     "head": "ilder), can enable the developer exception page by calling [`app.UseDeveloperExceptionPage`](/en-us/dotnet/api/microsoft.aspnetcore.builder.developerexceptionpageextensions.usedeveloperexceptionpage#m"
+    }
+   ]
+  }
+ },
+ "Q-EVAL-005": {
+  "reasons": [
+   "grounded 0 -> 1",
+   "section_hit@1:strict 1 -> 0",
+   "evidence_hit@1 1 -> 0",
+   "mrr:strict 1 -> 0.5"
+  ],
+  "slots": {
+   "S1": [
+    "#02 Asynchronous programming scenarios > Explore the asynchronous programming model (alternate)",
+    "#02 Asynchronous programming scenarios > Explore the asynchronous programming model > CPU-bound example: Run game calculation (alternate)",
+    "#02 Asynchronous programming scenarios > Explore the asynchronous programming model > I/O-bound example: Download data from web service (alternate)",
+    "#02 Asynchronous programming scenarios > Recognize CPU-bound and I/O-bound scenarios (expected)"
+   ]
+  },
+  "A": {
+   "result": "correct",
+   "top1_score": 0.741112470626831,
+   "gate_fired": false,
+   "cited": [
+    "02:header-1600:0005",
+    "02:header-1600:0000"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "02:header-1600:0005",
+     "source_id": "02",
+     "heading_path": "Asynchronous programming scenarios > Recognize CPU-bound and I/O-bound scenarios",
+     "score": 0.741112470626831,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 3,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P1",
+      "P2"
+     ],
+     "cuts_code_fence": false,
+     "head": "## Recognize CPU-bound and I/O-bound scenarios\n\nThe previous examples demonstrate how to use the `async` modifier and `await` expression for I/O-bound and CPU-bound work. An example for each scenario "
+    },
+    {
+     "rank": 2,
+     "chunk_id": "02:header-1600:0003",
+     "source_id": "02",
+     "heading_path": "Asynchronous programming scenarios > Explore the asynchronous programming model > I/O-bound example: Download data from web service",
+     "score": 0.7388714551925659,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "### I/O-bound example: Download data from web service\n\nIn this example, when the user selects a button, the app downloads data from a web service. You don't want to block the UI thread for the app dur"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "01:header-1600:0009",
+     "source_id": "01",
+     "heading_path": "Asynchronous programming with async and await > Don't block, await instead",
+     "score": 0.7385525703430176,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "the tasks in roughly the same amount of time as the initial synchronous version. For the full method implementations, see the [final version of the code](#review-final-code) later in this article.\n\nLe"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "02:header-1600:0001",
+     "source_id": "02",
+     "heading_path": "Asynchronous programming scenarios > Explore the asynchronous programming model",
+     "score": 0.7271533608436584,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "## Explore the asynchronous programming model\n\nThe `Task` and `Task<T>` objects represent the core of asynchronous programming. These objects are used to model asynchronous operations by supporting th"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "02:header-1600:0000",
+     "source_id": "02",
+     "heading_path": "Asynchronous programming scenarios",
+     "score": 0.7186530828475952,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "# Asynchronous programming scenarios\n\nIf your code implements I/O-bound scenarios to support network data requests, database access, or file system read/writes, asynchronous programming is the best ap"
+    }
+   ]
+  },
+  "B": {
+   "result": "correct",
+   "top1_score": 0.7370284199714661,
+   "gate_fired": false,
+   "cited": [
+    "02:fixed-1600:0000",
+    "02:fixed-1600:0004",
+    "02:fixed-1600:0002"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "02:fixed-1600:0000",
+     "source_id": "02",
+     "heading_path": "Asynchronous programming scenarios",
+     "score": 0.7370284199714661,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "# Asynchronous programming scenarios\n\nIf your code implements I/O-bound scenarios to support network data requests, database access, or file system read/writes, asynchronous programming is the best ap"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "02:fixed-1600:0005",
+     "source_id": "02",
+     "heading_path": "Asynchronous programming scenarios > Recognize CPU-bound and I/O-bound scenarios",
+     "score": 0.7354648113250732,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "n.\n\n## Explore other examples\n\nThe examples in this section demonstrate several ways you can write asynchronous code in C#. They cover a few scenarios you might encounter.\n\n### Extract data from a net"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "02:fixed-1600:0004",
+     "source_id": "02",
+     "heading_path": "Asynchronous programming scenarios > Recognize CPU-bound and I/O-bound scenarios",
+     "score": 0.7349852323532104,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 3,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P1",
+      "P2"
+     ],
+     "cuts_code_fence": false,
+     "head": "or I/O-bound and CPU-bound work. An example for each scenario showcases how the code is different based on where the operation is bound. To prepare for your implementation, you need to understand how "
+    },
+    {
+     "rank": 4,
+     "chunk_id": "02:fixed-1600:0002",
+     "source_id": "02",
+     "heading_path": "Asynchronous programming scenarios > Explore the asynchronous programming model > Review underlying concepts",
+     "score": 0.7341830730438232,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "model, there are several key concepts to understand:\n\n- You can use asynchronous code for both I/O-bound and CPU-bound code, but the implementation is different.\n- Asynchronous code uses `Task<T>` and"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "02:fixed-1600:0017",
+     "source_id": "02",
+     "heading_path": "Asynchronous programming scenarios > Review the complete example",
+     "score": 0.7272639274597168,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "thread is free to perform other work.\n            var damageResult = await Task.Run(() => CalculateDamageDone());\n            DisplayDamage(damageResult);\n        };\n    }\n\n    private static void Dis"
+    }
+   ]
+  }
+ },
+ "Q-EVAL-006": {
+  "reasons": [
+   "section_hit@3:strict 1 -> 0",
+   "evidence_hit@3 1 -> 0",
+   "mrr:strict 0.333 -> 0.2"
+  ],
+  "slots": {
+   "S1": [
+    "#02 Asynchronous programming scenarios > Explore the asynchronous programming model (alternate)",
+    "#02 Asynchronous programming scenarios > Explore the asynchronous programming model > CPU-bound example: Run game calculation (alternate)",
+    "#02 Asynchronous programming scenarios > Explore the asynchronous programming model > I/O-bound example: Download data from web service (alternate)",
+    "#02 Asynchronous programming scenarios > Recognize CPU-bound and I/O-bound scenarios (expected)"
+   ]
+  },
+  "A": {
+   "result": "correct",
+   "top1_score": 0.7522571086883545,
+   "gate_fired": false,
+   "cited": [
+    "02:header-1600:0005"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "02:header-1600:0003",
+     "source_id": "02",
+     "heading_path": "Asynchronous programming scenarios > Explore the asynchronous programming model > I/O-bound example: Download data from web service",
+     "score": 0.7522571086883545,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "### I/O-bound example: Download data from web service\n\nIn this example, when the user selects a button, the app downloads data from a web service. You don't want to block the UI thread for the app dur"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "01:header-1600:0009",
+     "source_id": "01",
+     "heading_path": "Asynchronous programming with async and await > Don't block, await instead",
+     "score": 0.7507048845291138,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "the tasks in roughly the same amount of time as the initial synchronous version. For the full method implementations, see the [final version of the code](#review-final-code) later in this article.\n\nLe"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "02:header-1600:0005",
+     "source_id": "02",
+     "heading_path": "Asynchronous programming scenarios > Recognize CPU-bound and I/O-bound scenarios",
+     "score": 0.7465522289276123,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 3,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P1",
+      "P2"
+     ],
+     "cuts_code_fence": false,
+     "head": "## Recognize CPU-bound and I/O-bound scenarios\n\nThe previous examples demonstrate how to use the `async` modifier and `await` expression for I/O-bound and CPU-bound work. An example for each scenario "
+    },
+    {
+     "rank": 4,
+     "chunk_id": "02:header-1600:0001",
+     "source_id": "02",
+     "heading_path": "Asynchronous programming scenarios > Explore the asynchronous programming model",
+     "score": 0.7372144460678101,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "## Explore the asynchronous programming model\n\nThe `Task` and `Task<T>` objects represent the core of asynchronous programming. These objects are used to model asynchronous operations by supporting th"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "02:header-1600:0027",
+     "source_id": "02",
+     "heading_path": "Asynchronous programming scenarios > Review the complete example",
+     "score": 0.732422411441803,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "            // This line will yield control to the UI as the request\n            // from the web service is happening.\n            //\n            // The UI thread is now free to perform other work.\n  "
+    }
+   ]
+  },
+  "B": {
+   "result": "correct",
+   "top1_score": 0.7534877061843872,
+   "gate_fired": false,
+   "cited": [
+    "02:fixed-1600:0000",
+    "02:fixed-1600:0002",
+    "02:fixed-1600:0004"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "02:fixed-1600:0000",
+     "source_id": "02",
+     "heading_path": "Asynchronous programming scenarios",
+     "score": 0.7534877061843872,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "# Asynchronous programming scenarios\n\nIf your code implements I/O-bound scenarios to support network data requests, database access, or file system read/writes, asynchronous programming is the best ap"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "02:fixed-1600:0002",
+     "source_id": "02",
+     "heading_path": "Asynchronous programming scenarios > Explore the asynchronous programming model > Review underlying concepts",
+     "score": 0.751176118850708,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "model, there are several key concepts to understand:\n\n- You can use asynchronous code for both I/O-bound and CPU-bound code, but the implementation is different.\n- Asynchronous code uses `Task<T>` and"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "01:fixed-1600:0007",
+     "source_id": "01",
+     "heading_path": "Asynchronous programming with async and await > Don't block, await instead",
+     "score": 0.7427431344985962,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "letion times. The code processes the tasks in roughly the same amount of time as the initial synchronous version. For the full method implementations, see the [final version of the code](#review-final"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "02:fixed-1600:0017",
+     "source_id": "02",
+     "heading_path": "Asynchronous programming scenarios > Review the complete example",
+     "score": 0.739201545715332,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "thread is free to perform other work.\n            var damageResult = await Task.Run(() => CalculateDamageDone());\n            DisplayDamage(damageResult);\n        };\n    }\n\n    private static void Dis"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "02:fixed-1600:0004",
+     "source_id": "02",
+     "heading_path": "Asynchronous programming scenarios > Recognize CPU-bound and I/O-bound scenarios",
+     "score": 0.7387056350708008,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 3,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P1",
+      "P2"
+     ],
+     "cuts_code_fence": false,
+     "head": "or I/O-bound and CPU-bound work. An example for each scenario showcases how the code is different based on where the operation is bound. To prepare for your implementation, you need to understand how "
+    }
+   ]
+  }
+ },
+ "Q-EVAL-009": {
+  "reasons": [
+   "evidence_hit@1 1 -> 0"
+  ],
+  "slots": {
+   "S1": [
+    "#03 Unit testing best practices for .NET > Best practices > Avoid multiple Act tasks (expected)"
+   ]
+  },
+  "A": {
+   "result": "correct",
+   "top1_score": 0.7326510548591614,
+   "gate_fired": false,
+   "cited": [
+    "03:header-1600:0020"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "03:header-1600:0020",
+     "source_id": "03",
+     "heading_path": "Unit testing best practices for .NET > Best practices > Avoid multiple Act tasks",
+     "score": 0.7326510548591614,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 4,
+     "evidence_quotes_total": 4,
+     "points_covered": [
+      "P1",
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "### Avoid multiple Act tasks\n\nWhen you write your tests, try to include only one Act task per test. Some common approaches for implementing a single Act task include creating a separate test for each "
+    },
+    {
+     "rank": 2,
+     "chunk_id": "03:header-1600:0017",
+     "source_id": "03",
+     "heading_path": "Unit testing best practices for .NET > Best practices > Avoid coding logic in unit tests",
+     "score": 0.6849749088287354,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 4,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "### Avoid coding logic in unit tests\n\nWhen you write your unit tests, avoid manual string concatenation, logical conditions, such as `if`, `while`, `for`, and `switch`, and other conditions. If you in"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "03:header-1600:0018",
+     "source_id": "03",
+     "heading_path": "Unit testing best practices for .NET > Best practices > Use helper methods instead of Setup and Teardown",
+     "score": 0.6693962812423706,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 4,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "### Use helper methods instead of Setup and Teardown\n\nIf you require a similar object or state for your tests, use a helper method rather than `Setup` and `Teardown` attributes, if they exist. Helper "
+    },
+    {
+     "rank": 4,
+     "chunk_id": "03:header-1600:0014",
+     "source_id": "03",
+     "heading_path": "Unit testing best practices for .NET > Best practices > Arrange your tests",
+     "score": 0.6569796204566956,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 4,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "### Arrange your tests\n\nThe \"Arrange, Act, Assert\" pattern is a common approach for writing unit tests. As the name implies, the pattern consists of three main tasks:\n\n- **Arrange** your objects, crea"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "03:header-1600:0019",
+     "source_id": "03",
+     "heading_path": "Unit testing best practices for .NET > Best practices > Use helper methods instead of Setup and Teardown",
+     "score": 0.6552456021308899,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 4,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "```\n// More tests...\n```\n\n```\n// More tests...\n```\n\n```\n[Fact]\npublic void Add_TwoNumbers_ReturnsSumOfNumbers()\n{\n    var result = stringCalculator.Add(\"0,1\");\n\n    Assert.Equal(1, result);\n}\n```\n\n```"
+    }
+   ]
+  },
+  "B": {
+   "result": "correct",
+   "top1_score": 0.7286608219146729,
+   "gate_fired": false,
+   "cited": [
+    "03:fixed-1600:0012",
+    "03:fixed-1600:0011"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "03:fixed-1600:0012",
+     "source_id": "03",
+     "heading_path": "Unit testing best practices for .NET > Best practices > Avoid multiple Act tasks",
+     "score": 0.7286608219146729,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 4,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "be individually asserted, and you can't guarantee that all Assert tasks execute. In most unit testing frameworks, after an Assert task fails in a unit test, all subsequent tests are automatically cons"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "03:fixed-1600:0010",
+     "source_id": "03",
+     "heading_path": "Unit testing best practices for .NET > Best practices > Avoid coding logic in unit tests",
+     "score": 0.6961509585380554,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 4,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "var testCases = new[]\n    {\n        \"0,0,0\",\n        \"0,1,2\",\n        \"1,2,3\"\n    };\n\n    foreach (var test in testCases)\n    {\n        Assert.Equal(expected, stringCalculator.Add(test));\n        expe"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "03:fixed-1600:0011",
+     "source_id": "03",
+     "heading_path": "Unit testing best practices for .NET > Best practices > Use helper methods instead of Setup and Teardown",
+     "score": 0.6857813000679016,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 3,
+     "evidence_quotes_total": 4,
+     "points_covered": [
+      "P1",
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "attribute forces you to use the exact same requirements for each test.\n\nNote\n\nThe `SetUp` and `TearDown` attributes are removed in [xUnit](https://xunit.net/) version 2.x and later.\n\n**Original code**"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "03:fixed-1600:0007",
+     "source_id": "03",
+     "heading_path": "Unit testing best practices for .NET > Best practices > Arrange your tests",
+     "score": 0.6651315093040466,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 4,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "rn also helps to reduce the opportunity for assertions to intermix with code in the Act task.\n\nReadability is one of the most important aspects when writing a unit test. Separating each pattern action"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "03:fixed-1600:0000",
+     "source_id": "03",
+     "heading_path": "Unit testing best practices for .NET",
+     "score": 0.6566961407661438,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 4,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "# Unit testing best practices for .NET\n\nThere are numerous benefits of writing unit tests. They help with regression, provide documentation, and facilitate good design. But when unit tests are hard to"
+    }
+   ]
+  }
+ },
+ "Q-EVAL-010": {
+  "reasons": [
+   "evidence_hit@1 1 -> 0"
+  ],
+  "slots": {
+   "S1": [
+    "#03 Unit testing best practices for .NET > Best practices > Avoid multiple Act tasks (expected)"
+   ]
+  },
+  "A": {
+   "result": "partially_correct",
+   "top1_score": 0.7477635741233826,
+   "gate_fired": false,
+   "cited": [
+    "03:header-1600:0020"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "03:header-1600:0020",
+     "source_id": "03",
+     "heading_path": "Unit testing best practices for .NET > Best practices > Avoid multiple Act tasks",
+     "score": 0.7477635741233826,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 4,
+     "evidence_quotes_total": 4,
+     "points_covered": [
+      "P1",
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "### Avoid multiple Act tasks\n\nWhen you write your tests, try to include only one Act task per test. Some common approaches for implementing a single Act task include creating a separate test for each "
+    },
+    {
+     "rank": 2,
+     "chunk_id": "03:header-1600:0017",
+     "source_id": "03",
+     "heading_path": "Unit testing best practices for .NET > Best practices > Avoid coding logic in unit tests",
+     "score": 0.7072131037712097,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 4,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "### Avoid coding logic in unit tests\n\nWhen you write your unit tests, avoid manual string concatenation, logical conditions, such as `if`, `while`, `for`, and `switch`, and other conditions. If you in"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "03:header-1600:0018",
+     "source_id": "03",
+     "heading_path": "Unit testing best practices for .NET > Best practices > Use helper methods instead of Setup and Teardown",
+     "score": 0.6832406520843506,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 4,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "### Use helper methods instead of Setup and Teardown\n\nIf you require a similar object or state for your tests, use a helper method rather than `Setup` and `Teardown` attributes, if they exist. Helper "
+    },
+    {
+     "rank": 4,
+     "chunk_id": "03:header-1600:0014",
+     "source_id": "03",
+     "heading_path": "Unit testing best practices for .NET > Best practices > Arrange your tests",
+     "score": 0.681647002696991,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 4,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "### Arrange your tests\n\nThe \"Arrange, Act, Assert\" pattern is a common approach for writing unit tests. As the name implies, the pattern consists of three main tasks:\n\n- **Arrange** your objects, crea"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "03:header-1600:0019",
+     "source_id": "03",
+     "heading_path": "Unit testing best practices for .NET > Best practices > Use helper methods instead of Setup and Teardown",
+     "score": 0.678869903087616,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 4,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "```\n// More tests...\n```\n\n```\n// More tests...\n```\n\n```\n[Fact]\npublic void Add_TwoNumbers_ReturnsSumOfNumbers()\n{\n    var result = stringCalculator.Add(\"0,1\");\n\n    Assert.Equal(1, result);\n}\n```\n\n```"
+    }
+   ]
+  },
+  "B": {
+   "result": "partially_correct",
+   "top1_score": 0.7455089688301086,
+   "gate_fired": false,
+   "cited": [
+    "03:fixed-1600:0012",
+    "03:fixed-1600:0011",
+    "03:fixed-1600:0010"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "03:fixed-1600:0012",
+     "source_id": "03",
+     "heading_path": "Unit testing best practices for .NET > Best practices > Avoid multiple Act tasks",
+     "score": 0.7455089688301086,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 4,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "be individually asserted, and you can't guarantee that all Assert tasks execute. In most unit testing frameworks, after an Assert task fails in a unit test, all subsequent tests are automatically cons"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "03:fixed-1600:0010",
+     "source_id": "03",
+     "heading_path": "Unit testing best practices for .NET > Best practices > Avoid coding logic in unit tests",
+     "score": 0.7205853462219238,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 4,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "var testCases = new[]\n    {\n        \"0,0,0\",\n        \"0,1,2\",\n        \"1,2,3\"\n    };\n\n    foreach (var test in testCases)\n    {\n        Assert.Equal(expected, stringCalculator.Add(test));\n        expe"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "03:fixed-1600:0011",
+     "source_id": "03",
+     "heading_path": "Unit testing best practices for .NET > Best practices > Use helper methods instead of Setup and Teardown",
+     "score": 0.7071013450622559,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 3,
+     "evidence_quotes_total": 4,
+     "points_covered": [
+      "P1",
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "attribute forces you to use the exact same requirements for each test.\n\nNote\n\nThe `SetUp` and `TearDown` attributes are removed in [xUnit](https://xunit.net/) version 2.x and later.\n\n**Original code**"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "03:fixed-1600:0007",
+     "source_id": "03",
+     "heading_path": "Unit testing best practices for .NET > Best practices > Arrange your tests",
+     "score": 0.6933037042617798,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 4,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "rn also helps to reduce the opportunity for assertions to intermix with code in the Act task.\n\nReadability is one of the most important aspects when writing a unit test. Separating each pattern action"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "03:fixed-1600:0000",
+     "source_id": "03",
+     "heading_path": "Unit testing best practices for .NET",
+     "score": 0.6792607307434082,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 4,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "# Unit testing best practices for .NET\n\nThere are numerous benefits of writing unit tests. They help with regression, provide documentation, and facilitate good design. But when unit tests are hard to"
+    }
+   ]
+  }
+ },
+ "Q-EVAL-011": {
+  "reasons": [
+   "evidence_hit@1 0 -> 1"
+  ],
+  "slots": {
+   "S1": [
+    "#29 ASP0033: `[ValidatableType]` is applied to an inaccessible type > Cause (alternate)",
+    "#29 ASP0033: `[ValidatableType]` is applied to an inaccessible type > How to fix violations (expected)",
+    "#29 ASP0033: `[ValidatableType]` is applied to an inaccessible type > Rule description (expected)"
+   ]
+  },
+  "A": {
+   "result": "correct",
+   "top1_score": 0.7771809697151184,
+   "gate_fired": false,
+   "cited": [
+    "29:header-1600:0001",
+    "29:header-1600:0002"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "29:header-1600:0001",
+     "source_id": "29",
+     "heading_path": "ASP0033: `[ValidatableType]` is applied to an inaccessible type > Cause",
+     "score": 0.7771809697151184,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 2,
+     "points_covered": [
+      "P1",
+      "P2"
+     ],
+     "cuts_code_fence": false,
+     "head": "## Cause\n\nThe <xref:Microsoft.Extensions.Validation.ValidatableTypeAttribute> attribute is applied to a type that the validation source generator can't access. The type, or one of its containing types"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "29:header-1600:0002",
+     "source_id": "29",
+     "heading_path": "ASP0033: `[ValidatableType]` is applied to an inaccessible type > How to fix violations",
+     "score": 0.7519831657409668,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 2,
+     "points_covered": [
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "## How to fix violations\n\nMake the attributed type and each of its containing types public or internal. For example, change `Asp0033FileLocalValidatableType` to an internal type:\n\n```csharp\n[Validatab"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "29:header-1600:0000",
+     "source_id": "29",
+     "heading_path": "ASP0033: `[ValidatableType]` is applied to an inaccessible type",
+     "score": 0.714892566204071,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "# ASP0033: `[ValidatableType]` is applied to an inaccessible type\n\n|              | Value   |\n| -            | -       |\n| **Rule ID**  | ASP0033 |\n| **Category** | Usage   |\n| **Severity** | Warning "
+    },
+    {
+     "rank": 4,
+     "chunk_id": "21:header-1600:0031",
+     "source_id": "21",
+     "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Closed hierarchy patterns",
+     "score": 0.6286852359771729,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "assembly doesn't:\n\n```\n// Assembly 1\npublic closed record class Shape;\npublic record class Circle(double Radius) : Shape;\ninternal record class Triangle(double Base, double Height) : Shape;\n```\n\n```\n/"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "03:header-1600:0021",
+     "source_id": "03",
+     "heading_path": "Unit testing best practices for .NET > Best practices > Validate private methods with public methods",
+     "score": 0.6262723803520203,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "### Validate private methods with public methods\n\nIn most cases, you don't need to test a private method in your code. Private methods are an implementation detail and never exist in isolation. At som"
+    }
+   ]
+  },
+  "B": {
+   "result": "correct",
+   "top1_score": 0.7573314905166626,
+   "gate_fired": false,
+   "cited": [
+    "29:fixed-1600:0000"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "29:fixed-1600:0000",
+     "source_id": "29",
+     "heading_path": "ASP0033: `[ValidatableType]` is applied to an inaccessible type",
+     "score": 0.7573314905166626,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 2,
+     "evidence_quotes_total": 2,
+     "points_covered": [
+      "P1",
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "# ASP0033: `[ValidatableType]` is applied to an inaccessible type\n\n|              | Value   |\n| -            | -       |\n| **Rule ID**  | ASP0033 |\n| **Category** | Usage   |\n| **Severity** | Warning "
+    },
+    {
+     "rank": 2,
+     "chunk_id": "21:fixed-1600:0021",
+     "source_id": "21",
+     "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Closed hierarchy patterns",
+     "score": 0.6267272233963013,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "record class Triangle(double Base, double Height) : Shape;\n```\n\n```\n// Same assembly: 'Triangle' is visible, so the switch is exhaustive.\ninternal static double Area(Shape shape) => shape switch\n{\n   "
+    },
+    {
+     "rank": 3,
+     "chunk_id": "03:fixed-1600:0013",
+     "source_id": "03",
+     "heading_path": "Unit testing best practices for .NET > Best practices > Validate private methods with public methods",
+     "score": 0.6165889501571655,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "owing code scenario:\n\n```\npublic string ParseLogLine(string input)\n{\n    var sanitizedInput = TrimInput(input);\n    return sanitizedInput;\n}\n\nprivate string TrimInput(string input)\n{\n    return input."
+    },
+    {
+     "rank": 4,
+     "chunk_id": "23:fixed-1600:0058",
+     "source_id": "23",
+     "heading_path": "Routing in ASP.NET Core > Route groups",
+     "score": 0.6006826162338257,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "\")\n    .MapTodosApi()\n    .WithTags(\"Public\");\n\napp.MapGroup(\"/private/todos\")\n    .MapTodosApi()\n    .WithTags(\"Private\")\n    .AddEndpointFilterFactory(QueryPrivateTodos)\n    .RequireAuthorization();"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "12:fixed-1600:0016",
+     "source_id": "12",
+     "heading_path": "Handle errors in ASP.NET Core APIs > Additional error handling features > Validation failure error response",
+     "score": 0.597808837890625,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "h an implementation that also supports formatting responses as XML, in `Program.cs`:\n\n```\nbuilder.Services.AddControllers()\n    .ConfigureApiBehaviorOptions(options =>\n    {\n        options.InvalidMod"
+    }
+   ]
+  }
+ },
+ "Q-EVAL-012": {
+  "reasons": [
+   "label partially_correct -> correct",
+   "evidence_hit@1 0 -> 1"
+  ],
+  "slots": {
+   "S1": [
+    "#29 ASP0033: `[ValidatableType]` is applied to an inaccessible type > Cause (alternate)",
+    "#29 ASP0033: `[ValidatableType]` is applied to an inaccessible type > How to fix violations (expected)",
+    "#29 ASP0033: `[ValidatableType]` is applied to an inaccessible type > Rule description (expected)"
+   ]
+  },
+  "A": {
+   "result": "partially_correct",
+   "top1_score": 0.7709404230117798,
+   "gate_fired": false,
+   "cited": [
+    "29:header-1600:0001",
+    "29:header-1600:0002"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "29:header-1600:0001",
+     "source_id": "29",
+     "heading_path": "ASP0033: `[ValidatableType]` is applied to an inaccessible type > Cause",
+     "score": 0.7709404230117798,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 2,
+     "points_covered": [
+      "P1",
+      "P2"
+     ],
+     "cuts_code_fence": false,
+     "head": "## Cause\n\nThe <xref:Microsoft.Extensions.Validation.ValidatableTypeAttribute> attribute is applied to a type that the validation source generator can't access. The type, or one of its containing types"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "29:header-1600:0002",
+     "source_id": "29",
+     "heading_path": "ASP0033: `[ValidatableType]` is applied to an inaccessible type > How to fix violations",
+     "score": 0.7540273070335388,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 2,
+     "points_covered": [
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "## How to fix violations\n\nMake the attributed type and each of its containing types public or internal. For example, change `Asp0033FileLocalValidatableType` to an internal type:\n\n```csharp\n[Validatab"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "29:header-1600:0000",
+     "source_id": "29",
+     "heading_path": "ASP0033: `[ValidatableType]` is applied to an inaccessible type",
+     "score": 0.716092586517334,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "# ASP0033: `[ValidatableType]` is applied to an inaccessible type\n\n|              | Value   |\n| -            | -       |\n| **Rule ID**  | ASP0033 |\n| **Category** | Usage   |\n| **Severity** | Warning "
+    },
+    {
+     "rank": 4,
+     "chunk_id": "12:header-1600:0022",
+     "source_id": "12",
+     "heading_path": "Handle errors in ASP.NET Core APIs > Additional error handling features > Validation failure error response",
+     "score": 0.6251772046089172,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "### Validation failure error response\n\nFor web API controllers, MVC responds with a [ValidationProblemDetails](/en-us/dotnet/api/microsoft.aspnetcore.mvc.validationproblemdetails) response type when m"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "03:header-1600:0021",
+     "source_id": "03",
+     "heading_path": "Unit testing best practices for .NET > Best practices > Validate private methods with public methods",
+     "score": 0.6248914003372192,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "### Validate private methods with public methods\n\nIn most cases, you don't need to test a private method in your code. Private methods are an implementation detail and never exist in isolation. At som"
+    }
+   ]
+  },
+  "B": {
+   "result": "correct",
+   "top1_score": 0.7516645789146423,
+   "gate_fired": false,
+   "cited": [
+    "29:fixed-1600:0000"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "29:fixed-1600:0000",
+     "source_id": "29",
+     "heading_path": "ASP0033: `[ValidatableType]` is applied to an inaccessible type",
+     "score": 0.7516645789146423,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 2,
+     "evidence_quotes_total": 2,
+     "points_covered": [
+      "P1",
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "# ASP0033: `[ValidatableType]` is applied to an inaccessible type\n\n|              | Value   |\n| -            | -       |\n| **Rule ID**  | ASP0033 |\n| **Category** | Usage   |\n| **Severity** | Warning "
+    },
+    {
+     "rank": 2,
+     "chunk_id": "03:fixed-1600:0013",
+     "source_id": "03",
+     "heading_path": "Unit testing best practices for .NET > Best practices > Validate private methods with public methods",
+     "score": 0.6150687336921692,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "owing code scenario:\n\n```\npublic string ParseLogLine(string input)\n{\n    var sanitizedInput = TrimInput(input);\n    return sanitizedInput;\n}\n\nprivate string TrimInput(string input)\n{\n    return input."
+    },
+    {
+     "rank": 3,
+     "chunk_id": "21:fixed-1600:0021",
+     "source_id": "21",
+     "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Closed hierarchy patterns",
+     "score": 0.606715202331543,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "record class Triangle(double Base, double Height) : Shape;\n```\n\n```\n// Same assembly: 'Triangle' is visible, so the switch is exhaustive.\ninternal static double Area(Shape shape) => shape switch\n{\n   "
+    },
+    {
+     "rank": 4,
+     "chunk_id": "07:fixed-1600:0003",
+     "source_id": "07",
+     "heading_path": "C# classes > Constructors and initialization",
+     "score": 0.6056890487670898,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "ner(int capacity)\n{\n    private int _capacity = capacity;\n}\n```\n\nPrimary constructors and field initializers can work together: the field initializer `_capacity = capacity` uses the primary-constructo"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "07:fixed-1600:0000",
+     "source_id": "07",
+     "heading_path": "C# classes",
+     "score": 0.6050398349761963,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "# C# classes\n\nTip\n\n**New to developing software?** Start with the [Get started](../../tour-of-csharp/tutorials/) tutorials first. You'll encounter classes once you need to model objects with behavior "
+    }
+   ]
+  }
+ },
+ "Q-EVAL-013": {
+  "reasons": [
+   "source_hit@1:strict 1 -> 0",
+   "section_hit@1:strict 1 -> 0",
+   "evidence_hit@1 1 -> 0",
+   "mrr:strict 1 -> 0.5"
+  ],
+  "slots": {
+   "S1": [
+    "#10 Dependency injection in ASP.NET Core > Lifetime and registration options (alternate)",
+    "#10 Dependency injection in ASP.NET Core > Service lifetimes (expected)",
+    "#11 Factory-based middleware activation in ASP.NET Core (alternate)",
+    "#11 Factory-based middleware activation in ASP.NET Core > Additional resources (alternate)",
+    "#11 Factory-based middleware activation in ASP.NET Core > IMiddleware (alternate)"
+   ]
+  },
+  "A": {
+   "result": "correct",
+   "top1_score": 0.7589528560638428,
+   "gate_fired": false,
+   "cited": [
+    "10:header-1600:0016",
+    "11:header-1600:0000"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "10:header-1600:0016",
+     "source_id": "10",
+     "heading_path": "Dependency injection in ASP.NET Core > Service lifetimes",
+     "score": 0.7589528560638428,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 3,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P1",
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "## Service lifetimes\n\nFor general guidance on service lifetimes, see [Service lifetimes](/en-us/dotnet/core/extensions/dependency-injection/service-lifetimes). For additional service lifetime guidance"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "11:header-1600:0011",
+     "source_id": "11",
+     "heading_path": "Factory-based middleware activation in ASP.NET Core > Additional resources",
+     "score": 0.754349410533905,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "middleware\n\n[IMiddleware](/en-us/dotnet/api/microsoft.aspnetcore.http.imiddleware) is activated per client request (connection), so scoped services can be injected into the middleware's constructor.\n\n"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "11:header-1600:0000",
+     "source_id": "11",
+     "heading_path": "Factory-based middleware activation in ASP.NET Core",
+     "score": 0.7414407134056091,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "# Factory-based middleware activation in ASP.NET Core\n\n[IMiddlewareFactory](/en-us/dotnet/api/microsoft.aspnetcore.http.imiddlewarefactory)/[IMiddleware](/en-us/dotnet/api/microsoft.aspnetcore.http.im"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "11:header-1600:0010",
+     "source_id": "11",
+     "heading_path": "Factory-based middleware activation in ASP.NET Core > Additional resources",
+     "score": 0.7366827726364136,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "## Additional resources\n\n- [ASP.NET Core middleware](./?view=aspnetcore-10.0)\n- [Middleware activation with a third-party container in ASP.NET Core](extensibility-third-party-container?view=aspnetcore"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "11:header-1600:0006",
+     "source_id": "11",
+     "heading_path": "Factory-based middleware activation in ASP.NET Core > Additional resources",
+     "score": 0.735812783241272,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "in the app's service container.\n\nBenefits:\n\n- Activation per client request (injection of scoped services)\n- Strong typing of middleware\n\n[IMiddleware](/en-us/dotnet/api/microsoft.aspnetcore.http.imid"
+    }
+   ]
+  },
+  "B": {
+   "result": "correct",
+   "top1_score": 0.7376394867897034,
+   "gate_fired": false,
+   "cited": [
+    "10:fixed-1600:0012",
+    "11:fixed-1600:0004",
+    "11:fixed-1600:0000",
+    "11:fixed-1600:0008"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "11:fixed-1600:0004",
+     "source_id": "11",
+     "heading_path": "Factory-based middleware activation in ASP.NET Core > Additional resources",
+     "score": 0.7376394867897034,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "iddleware](/en-us/dotnet/api/microsoft.aspnetcore.builder.usemiddlewareextensions.usemiddleware) extension methods check if a middleware's registered type implements [IMiddleware](/en-us/dotnet/api/mi"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "10:fixed-1600:0012",
+     "source_id": "10",
+     "heading_path": "Dependency injection in ASP.NET Core > Service lifetimes",
+     "score": 0.7333968877792358,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 3,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P1",
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "s, see [ASP.NET Core Blazor dependency injection](../blazor/fundamentals/dependency-injection?view=aspnetcore-10.0#utility-base-component-classes-to-manage-a-di-scope).\n\nTo use scoped services in midd"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "11:fixed-1600:0000",
+     "source_id": "11",
+     "heading_path": "Factory-based middleware activation in ASP.NET Core",
+     "score": 0.7290431261062622,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "# Factory-based middleware activation in ASP.NET Core\n\n[IMiddlewareFactory](/en-us/dotnet/api/microsoft.aspnetcore.http.imiddlewarefactory)/[IMiddleware](/en-us/dotnet/api/microsoft.aspnetcore.http.im"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "10:fixed-1600:0020",
+     "source_id": "10",
+     "heading_path": "Dependency injection in ASP.NET Core > Lifetime and registration options",
+     "score": 0.7244645357131958,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": ".OperationId}\");\n        _logger.LogInformation($\"Singleton: {_singletonOperation.OperationId}\");\n\n        await _next(context);\n    }\n}\n```\n\nIn the app processing pipeline of the `Program` file (.NET"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "11:fixed-1600:0008",
+     "source_id": "11",
+     "heading_path": "Factory-based middleware activation in ASP.NET Core > Additional resources",
+     "score": 0.7238180637359619,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "tcore-10.0)\n- [Middleware activation with a third-party container in ASP.NET Core](extensibility-third-party-container?view=aspnetcore-10.0)\n\n[IMiddlewareFactory](/en-us/dotnet/api/microsoft.aspnetcor"
+    }
+   ]
+  }
+ },
+ "Q-EVAL-015": {
+  "reasons": [
+   "section_hit@1 1 -> 0",
+   "section_hit@1:strict 1 -> 0",
+   "evidence_hit@1 1 -> 0",
+   "mrr 1 -> 0.5",
+   "mrr:strict 1 -> 0.5"
+  ],
+  "slots": {
+   "S1": [
+    "#01 Asynchronous programming with async and await > Async/await vs ContinueWith (alternate)",
+    "#01 Asynchronous programming with async and await > Async/await vs ContinueWith > Why async/await is preferred (expected)"
+   ]
+  },
+  "A": {
+   "result": "correct",
+   "top1_score": 0.7748993635177612,
+   "gate_fired": false,
+   "cited": [
+    "01:header-1600:0029",
+    "01:header-1600:0026",
+    "01:header-1600:0027",
+    "01:header-1600:0028"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "01:header-1600:0029",
+     "source_id": "01",
+     "heading_path": "Asynchronous programming with async and await > Async/await vs ContinueWith > Why async/await is preferred",
+     "score": 0.7748993635177612,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 3,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P1",
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "### Why async/await is preferred\n\nThe `async`/`await` approach offers several advantages:\n\n- **Readability**: The code reads like synchronous code, making it easier to understand the flow of operation"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "01:header-1600:0026",
+     "source_id": "01",
+     "heading_path": "Asynchronous programming with async and await > Async/await vs ContinueWith",
+     "score": 0.7616119384765625,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "## Async/await vs ContinueWith\n\nThe `async` and `await` keywords provide syntactic simplification over using [Task.ContinueWith](/en-us/dotnet/api/system.threading.tasks.task.continuewith) directly. W"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "01:header-1600:0027",
+     "source_id": "01",
+     "heading_path": "Asynchronous programming with async and await > Async/await vs ContinueWith > Using ContinueWith",
+     "score": 0.7473281025886536,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "### Using ContinueWith\n\nWith `ContinueWith`, each step in a sequence of asynchronous operations requires nested continuations:\n\n```\n// Using ContinueWith - demonstrates the complexity when chaining op"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "01:header-1600:0028",
+     "source_id": "01",
+     "heading_path": "Asynchronous programming with async and await > Async/await vs ContinueWith > Using async/await",
+     "score": 0.7418485879898071,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "### Using async/await\n\nThe same sequence of operations using `async`/`await` reads much more naturally:\n\n```\n// Using async/await - much cleaner and easier to read\nstatic async Task MakeBreakfastWithA"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "01:header-1600:0006",
+     "source_id": "01",
+     "heading_path": "Asynchronous programming with async and await",
+     "score": 0.6971939206123352,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "want to block threads that might be serving other requests. Using synchronous code when asynchronous alternatives exist hurts your ability to scale out less expensively. You pay for blocked threads.\n\n"
+    }
+   ]
+  },
+  "B": {
+   "result": "correct",
+   "top1_score": 0.7691145539283752,
+   "gate_fired": false,
+   "cited": [
+    "01:fixed-1600:0023",
+    "01:fixed-1600:0024",
+    "01:fixed-1600:0021"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "01:fixed-1600:0022",
+     "source_id": "01",
+     "heading_path": "Asynchronous programming with async and await > Async/await vs ContinueWith > Using ContinueWith",
+     "score": 0.7691145539283752,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "n chaining operations\nstatic Task MakeBreakfastWithContinueWith()\n{\n    return StartCookingEggsAsync()\n        .ContinueWith(eggsTask =>\n        {\n            var eggs = eggsTask.Result;\n            C"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "01:fixed-1600:0023",
+     "source_id": "01",
+     "heading_path": "Asynchronous programming with async and await > Async/await vs ContinueWith > Using async/await",
+     "score": 0.761955738067627,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 3,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P1",
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": true,
+     "head": "ync Task MakeBreakfastWithAsyncAwait()\n{\n    var eggs = await StartCookingEggsAsync();\n    Console.WriteLine(\"Eggs ready, starting bacon...\");\n    \n    var bacon = await StartCookingBaconAsync();\n    "
+    },
+    {
+     "rank": 3,
+     "chunk_id": "01:fixed-1600:0024",
+     "source_id": "01",
+     "heading_path": "Asynchronous programming with async and await > Async/await vs ContinueWith > Why async/await is preferred",
+     "score": 0.7426811456680298,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "ht be manageable with `ContinueWith`, sequences of 3-4 or more asynchronous operations quickly become difficult to read and maintain. This pattern, known as \"monadic do-notation\" in functional program"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "01:fixed-1600:0021",
+     "source_id": "01",
+     "heading_path": "Asynchronous programming with async and await > Apply await expressions to tasks efficiently > Review final code",
+     "score": 0.7267707586288452,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "ding the code. You can read the final code the same way you read the list of instructions for making a breakfast, as shown at the beginning of the article. The language features for the `async` and `a"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "01:fixed-1600:0005",
+     "source_id": "01",
+     "heading_path": "Asynchronous programming with async and await",
+     "score": 0.7114650011062622,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "n asynchronous alternatives exist hurts your ability to scale out less expensively. You pay for blocked threads.\n\nSuccessful modern apps require asynchronous code. Without language support, writing as"
+    }
+   ]
+  }
+ },
+ "Q-EVAL-016": {
+  "reasons": [
+   "evidence_hit@1 1 -> 0",
+   "evidence_hit@3 1 -> 0",
+   "evidence_hit@5 1 -> 0"
+  ],
+  "slots": {
+   "S1": [
+    "#07 C# classes (alternate)",
+    "#07 C# classes > Create objects (alternate)",
+    "#26 The C# type system > Value types and reference types (expected)"
+   ]
+  },
+  "A": {
+   "result": "false_refusal",
+   "top1_score": 0.626899242401123,
+   "gate_fired": true,
+   "cited": [],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "26:header-1600:0003",
+     "source_id": "26",
+     "heading_path": "The C# type system > Value types and reference types",
+     "score": 0.626899242401123,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 2,
+     "evidence_quotes_total": 2,
+     "points_covered": [
+      "P1"
+     ],
+     "cuts_code_fence": false,
+     "head": "## Value types and reference types\n\nEvery type in C# is either a *value type* or a *reference type*. This distinction determines how variables store data and how assignment works.\n\n**Value types** hol"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "07:header-1600:0000",
+     "source_id": "07",
+     "heading_path": "C# classes",
+     "score": 0.6046930551528931,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "# C# classes\n\nTip\n\n**New to developing software?** Start with the [Get started](../../tour-of-csharp/tutorials/) tutorials first. You'll encounter classes once you need to model objects with behavior "
+    },
+    {
+     "rank": 3,
+     "chunk_id": "07:header-1600:0003",
+     "source_id": "07",
+     "heading_path": "C# classes > Create objects",
+     "score": 0.6035609841346741,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "## Create objects\n\nA class defines a type, but it isn't an object itself. You create an object (an *instance* of the class) with the `new` keyword:\n\n```\nvar customer = new Customer(\"Allison\");\nConsole"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "20:header-1600:0000",
+     "source_id": "20",
+     "heading_path": "A tour of the C# language",
+     "score": 0.6004489660263062,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "# A tour of the C# language\n\nThis article gives you a high-level overview of the C# language. Whether you're writing your first program or you're an experienced developer exploring C#, you'll find the"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "05:header-1600:0000",
+     "source_id": "05",
+     "heading_path": "C# language documentation",
+     "score": 0.59815514087677,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "# C# language documentation\n\nThe C# guide contains articles, tutorials, and code samples to help you get started with C# and the .NET platform. Experienced developers can learn about new features in t"
+    }
+   ]
+  },
+  "B": {
+   "result": "false_refusal",
+   "top1_score": 0.6245684027671814,
+   "gate_fired": true,
+   "cited": [],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "26:fixed-1600:0003",
+     "source_id": "26",
+     "heading_path": "The C# type system > Value types and reference types",
+     "score": 0.6245684027671814,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "through the other. Classes, arrays, delegates, and strings are reference types.\n\nThe following example shows the difference. The first block shows the definition for the `Coords` record struct, which "
+    },
+    {
+     "rank": 2,
+     "chunk_id": "26:fixed-1600:0000",
+     "source_id": "26",
+     "heading_path": "The C# type system",
+     "score": 0.6085715889930725,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "# The C# type system\n\nTip\n\n**New to developing software?** Start with the [Get started](../../tour-of-csharp/tutorials/) tutorials first. They walk you through writing programs and introduce types as "
+    },
+    {
+     "rank": 3,
+     "chunk_id": "07:fixed-1600:0000",
+     "source_id": "07",
+     "heading_path": "C# classes",
+     "score": 0.6057500839233398,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "# C# classes\n\nTip\n\n**New to developing software?** Start with the [Get started](../../tour-of-csharp/tutorials/) tutorials first. You'll encounter classes once you need to model objects with behavior "
+    },
+    {
+     "rank": 4,
+     "chunk_id": "04:fixed-1600:0000",
+     "source_id": "04",
+     "heading_path": "Built-in types and literals",
+     "score": 0.6045206785202026,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "# Built-in types and literals\n\nTip\n\n**New to developing software?** Start with the [Get started](../../tour-of-csharp/tutorials/) tutorials first. They introduce types as you write your first programs"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "20:fixed-1600:0000",
+     "source_id": "20",
+     "heading_path": "A tour of the C# language",
+     "score": 0.6044772267341614,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "# A tour of the C# language\n\nThis article gives you a high-level overview of the C# language. Whether you're writing your first program or you're an experienced developer exploring C#, you'll find the"
+    }
+   ]
+  }
+ },
+ "Q-EVAL-017": {
+  "reasons": [
+   "section_hit@1 0 -> 1",
+   "section_hit@3:strict 1 -> 0",
+   "mrr:strict 0.5 -> 1"
+  ],
+  "slots": {
+   "S1": [
+    "#11 Factory-based middleware activation in ASP.NET Core (expected)",
+    "#11 Factory-based middleware activation in ASP.NET Core > Additional resources (alternate)"
+   ],
+   "S2": [
+    "#10 Dependency injection in ASP.NET Core > Service lifetimes (alternate)",
+    "#11 Factory-based middleware activation in ASP.NET Core > IMiddleware (expected)"
+   ]
+  },
+  "A": {
+   "result": "partially_correct",
+   "top1_score": 0.7598770260810852,
+   "gate_fired": false,
+   "cited": [
+    "11:header-1600:0001",
+    "11:header-1600:0007",
+    "11:header-1600:0010",
+    "11:header-1600:0000",
+    "11:header-1600:0011"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "11:header-1600:0010",
+     "source_id": "11",
+     "heading_path": "Factory-based middleware activation in ASP.NET Core > Additional resources",
+     "score": 0.7598770260810852,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 2,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "## Additional resources\n\n- [ASP.NET Core middleware](./?view=aspnetcore-10.0)\n- [Middleware activation with a third-party container in ASP.NET Core](extensibility-third-party-container?view=aspnetcore"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "11:header-1600:0000",
+     "source_id": "11",
+     "heading_path": "Factory-based middleware activation in ASP.NET Core",
+     "score": 0.7492823004722595,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 2,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "# Factory-based middleware activation in ASP.NET Core\n\n[IMiddlewareFactory](/en-us/dotnet/api/microsoft.aspnetcore.http.imiddlewarefactory)/[IMiddleware](/en-us/dotnet/api/microsoft.aspnetcore.http.im"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "11:header-1600:0001",
+     "source_id": "11",
+     "heading_path": "Factory-based middleware activation in ASP.NET Core > IMiddleware",
+     "score": 0.7488619089126587,
+     "hits_section": true,
+     "slots_hit": [
+      "S2"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P1"
+     ],
+     "cuts_code_fence": false,
+     "head": "## IMiddleware\n\n[IMiddleware](/en-us/dotnet/api/microsoft.aspnetcore.http.imiddleware) defines middleware for the app's request pipeline. The [InvokeAsync(HttpContext, RequestDelegate)](/en-us/dotnet/"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "11:header-1600:0011",
+     "source_id": "11",
+     "heading_path": "Factory-based middleware activation in ASP.NET Core > Additional resources",
+     "score": 0.7428837418556213,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P2"
+     ],
+     "cuts_code_fence": false,
+     "head": "middleware\n\n[IMiddleware](/en-us/dotnet/api/microsoft.aspnetcore.http.imiddleware) is activated per client request (connection), so scoped services can be injected into the middleware's constructor.\n\n"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "11:header-1600:0007",
+     "source_id": "11",
+     "heading_path": "Factory-based middleware activation in ASP.NET Core > IMiddleware",
+     "score": 0.7424722909927368,
+     "hits_section": true,
+     "slots_hit": [
+      "S2"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "## IMiddleware\n\n[IMiddleware](/en-us/dotnet/api/microsoft.aspnetcore.http.imiddleware) defines middleware for the app's request pipeline. The [InvokeAsync(HttpContext, RequestDelegate)](/en-us/dotnet/"
+    }
+   ]
+  },
+  "B": {
+   "result": "partially_correct",
+   "top1_score": 0.7637980580329895,
+   "gate_fired": false,
+   "cited": [
+    "11:fixed-1600:0001",
+    "11:fixed-1600:0004",
+    "11:fixed-1600:0000",
+    "11:fixed-1600:0002"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "11:fixed-1600:0004",
+     "source_id": "11",
+     "heading_path": "Factory-based middleware activation in ASP.NET Core > Additional resources",
+     "score": 0.7637980580329895,
+     "hits_section": true,
+     "slots_hit": [
+      "S1",
+      "S2"
+     ],
+     "evidence_quotes_contained": 2,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "iddleware](/en-us/dotnet/api/microsoft.aspnetcore.builder.usemiddlewareextensions.usemiddleware) extension methods check if a middleware's registered type implements [IMiddleware](/en-us/dotnet/api/mi"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "11:fixed-1600:0001",
+     "source_id": "11",
+     "heading_path": "Factory-based middleware activation in ASP.NET Core > IMiddleware",
+     "score": 0.751643717288971,
+     "hits_section": true,
+     "slots_hit": [
+      "S2"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P1"
+     ],
+     "cuts_code_fence": false,
+     "head": ".imiddleware) defines middleware for the app's request pipeline. The [InvokeAsync(HttpContext, RequestDelegate)](/en-us/dotnet/api/microsoft.aspnetcore.http.imiddleware.invokeasync) method handles req"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "11:fixed-1600:0002",
+     "source_id": "11",
+     "heading_path": "Factory-based middleware activation in ASP.NET Core > IMiddleware",
+     "score": 0.7461603879928589,
+     "hits_section": true,
+     "slots_hit": [
+      "S2"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "Space(keyValue))\n        {\n            _dbContext.Requests.Add(new Request(\"Factory\", keyValue));\n\n            await _dbContext.SaveChangesAsync();\n        }\n\n        await next(context);\n    }\n}\n```\n"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "11:fixed-1600:0000",
+     "source_id": "11",
+     "heading_path": "Factory-based middleware activation in ASP.NET Core",
+     "score": 0.7449724078178406,
+     "hits_section": true,
+     "slots_hit": [
+      "S1",
+      "S2"
+     ],
+     "evidence_quotes_contained": 2,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "# Factory-based middleware activation in ASP.NET Core\n\n[IMiddlewareFactory](/en-us/dotnet/api/microsoft.aspnetcore.http.imiddlewarefactory)/[IMiddleware](/en-us/dotnet/api/microsoft.aspnetcore.http.im"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "11:fixed-1600:0008",
+     "source_id": "11",
+     "heading_path": "Factory-based middleware activation in ASP.NET Core > Additional resources",
+     "score": 0.7440460324287415,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 2,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "tcore-10.0)\n- [Middleware activation with a third-party container in ASP.NET Core](extensibility-third-party-container?view=aspnetcore-10.0)\n\n[IMiddlewareFactory](/en-us/dotnet/api/microsoft.aspnetcor"
+    }
+   ]
+  }
+ },
+ "Q-EVAL-018": {
+  "reasons": [
+   "evidence_hit@1 1 -> 0",
+   "evidence_hit@3 1 -> 0",
+   "evidence_hit@5 1 -> 0"
+  ],
+  "slots": {
+   "S1": [
+    "#21 Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Logical patterns > Precedence and order of checking (expected)",
+    "#21 Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Parenthesized pattern (alternate)"
+   ]
+  },
+  "A": {
+   "result": "false_refusal",
+   "top1_score": 0.6752709746360779,
+   "gate_fired": true,
+   "cited": [],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "21:header-1600:0014",
+     "source_id": "21",
+     "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Logical patterns > Precedence and order of checking",
+     "score": 0.6752709746360779,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 3,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P1",
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "### Precedence and order of checking\n\nThe pattern combinators check expressions in this order, based on the binding order of expressions:\n\n- `not`\n- `and`\n- `or`\n\nThe `not` pattern binds to its operan"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "21:header-1600:0015",
+     "source_id": "21",
+     "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Logical patterns > Precedence and order of checking",
+     "score": 0.6555011868476868,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "general, use parentheses to clarify your patterns for other developers, as the following example shows:\n\n```\nstatic bool IsLetter(char c) => c is (>= 'a' and <= 'z') or (>= 'A' and <= 'Z');\n```\n\nNote\n"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "21:header-1600:0010",
+     "source_id": "21",
+     "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Relational patterns",
+     "score": 0.628591775894165,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "## Relational patterns\n\nUse a *relational pattern* to compare an expression result with a constant, as the following example shows:\n\n```\nConsole.WriteLine(Classify(13));  // output: Too high\nConsole.W"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "21:header-1600:0026",
+     "source_id": "21",
+     "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Parenthesized pattern",
+     "score": 0.6284928917884827,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "## Parenthesized pattern\n\nYou can put parentheses around any pattern. Typically, you use parentheses to emphasize or change the precedence in [logical patterns](#logical-patterns), as the following ex"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "04:header-1600:0004",
+     "source_id": "04",
+     "heading_path": "Built-in types and literals > `bool`, `char`, and `string`",
+     "score": 0.6244077682495117,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "## `bool`, `char`, and `string`\n\nBeyond numbers, C# provides three other frequently used built-in types:\n\n```\nbool isValid = true;\nchar grade = 'A';\nstring greeting = \"Hello, world!\";\n```\n\n- **`bool`*"
+    }
+   ]
+  },
+  "B": {
+   "result": "false_refusal",
+   "top1_score": 0.6482640504837036,
+   "gate_fired": true,
+   "cited": [],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "21:fixed-1600:0010",
+     "source_id": "21",
+     "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Logical patterns > Precedence and order of checking",
+     "score": 0.6482640504837036,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P3"
+     ],
+     "cuts_code_fence": true,
+     "head": "he `>= 'a' and <= 'z'` expression:\n\n```\n// Correct pattern. Force `and` before `not`\nstatic bool IsNotLowerCaseLetterParentheses(char c) => c is not (>= 'a' and <= 'z');\n```\n\nAdding parentheses become"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "21:fixed-1600:0000",
+     "source_id": "21",
+     "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns",
+     "score": 0.618960440158844,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "# Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns\n\nUse the [`is` expression](is), the [switch statement](../statements/selection-statements#the-s"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "21:fixed-1600:0007",
+     "source_id": "21",
+     "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Relational patterns",
+     "score": 0.6173264384269714,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "stant expression can be of an [integer](../builtin-types/integral-numeric-types), [floating-point](../builtin-types/floating-point-numeric-types), [char](../builtin-types/char), or [enum](../builtin-t"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "21:fixed-1600:0006",
+     "source_id": "21",
+     "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Constant pattern",
+     "score": 0.6167633533477783,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "le to the constant type, with one exception: An expression whose type is `Span<char>` or `ReadOnlySpan<char>` can be matched against constant strings.\n\nUse a constant pattern to check for `null`, as t"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "21:fixed-1600:0008",
+     "source_id": "21",
+     "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Logical patterns",
+     "score": 0.6160173416137695,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "ation* `not` pattern that matches an expression when the negated pattern doesn't match the expression. The following example shows how you can negate a [constant](#constant-pattern) `null` pattern to "
+    }
+   ]
+  }
+ },
+ "Q-EVAL-019": {
+  "reasons": [
+   "evidence_hit@1 1 -> 0"
+  ],
+  "slots": {
+   "S1": [
+    "#21 Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > List patterns (expected)"
+   ]
+  },
+  "A": {
+   "result": "correct",
+   "top1_score": 0.8091204762458801,
+   "gate_fired": false,
+   "cited": [
+    "21:header-1600:0028",
+    "21:header-1600:0029"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "21:header-1600:0028",
+     "source_id": "21",
+     "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > List patterns",
+     "score": 0.8091204762458801,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 2,
+     "evidence_quotes_total": 2,
+     "points_covered": [
+      "P1",
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "examples match a whole input sequence against a list pattern. To match elements only at the start or end - or both - of an input sequence, use the *slice pattern* `..`, as the following example shows:"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "21:header-1600:0027",
+     "source_id": "21",
+     "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > List patterns",
+     "score": 0.7921154499053955,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "## List patterns\n\nYou can match an array or a list against a *sequence* of patterns, as the following example shows:\n\n```\nint[] numbers = { 1, 2, 3 };\n\nConsole.WriteLine(numbers is [1, 2, 3]);  // Tru"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "21:header-1600:0029",
+     "source_id": "21",
+     "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > List patterns",
+     "score": 0.7677735090255737,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "You can use at most one slice pattern in a list pattern. The slice pattern can only appear in a list pattern.\n\nYou can also nest a subpattern within a slice pattern, as the following example shows:\n\n`"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "21:header-1600:0020",
+     "source_id": "21",
+     "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Positional pattern",
+     "score": 0.7125648260116577,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "expressions of [tuple types](../builtin-types/value-tuples) against positional patterns. By using this approach, you can match multiple inputs against various patterns, as the following example shows:"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "21:header-1600:0021",
+     "source_id": "21",
+     "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Positional pattern",
+     "score": 0.7035648822784424,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "You can also extend a positional pattern in any of the following ways:\n\n- Add a run-time type check and a variable declaration, as the following example shows:\n\n  ```\n  public record Point2D(int X, in"
+    }
+   ]
+  },
+  "B": {
+   "result": "correct",
+   "top1_score": 0.79264235496521,
+   "gate_fired": false,
+   "cited": [
+    "21:fixed-1600:0019",
+    "21:fixed-1600:0018"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "21:fixed-1600:0018",
+     "source_id": "21",
+     "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > List patterns",
+     "score": 0.79264235496521,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 2,
+     "points_covered": [
+      "P3"
+     ],
+     "cuts_code_fence": true,
+     "head": "ist against a *sequence* of patterns, as the following example shows:\n\n```\nint[] numbers = { 1, 2, 3 };\n\nConsole.WriteLine(numbers is [1, 2, 3]);  // True\nConsole.WriteLine(numbers is [1, 2, 4]);  // "
+    },
+    {
+     "rank": 2,
+     "chunk_id": "21:fixed-1600:0019",
+     "source_id": "21",
+     "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > List patterns",
+     "score": 0.7914888262748718,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 2,
+     "evidence_quotes_total": 2,
+     "points_covered": [
+      "P1",
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": true,
+     "head": "WriteLine(new[] { 1, 2, 3, 4 } is [.., > 0, > 0]);  // True\nConsole.WriteLine(new[] { 2, 4 } is [.., > 0, 2, 4]);  // False\nConsole.WriteLine(new[] { 2, 4 } is [.., 2, 4]);  // True\n\nConsole.WriteLine"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "21:fixed-1600:0017",
+     "source_id": "21",
+     "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Discard pattern",
+     "score": 0.715578019618988,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": ".0m,\n    DayOfWeek.Saturday => 2.5m,\n    DayOfWeek.Sunday => 2.0m,\n    _ => 0.0m,\n};\n```\n\nIn the preceding example, a discard pattern handles `null` and any integer value that doesn't have the corresp"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "21:fixed-1600:0026",
+     "source_id": "21",
+     "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > C# language specification",
+     "score": 0.712986409664154,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "anguage-specification/patterns#11211-list-pattern)\n- [Slice pattern](../language-specification/patterns#11212-slice-pattern)\n- [Constant pattern](../language-specification/patterns#1123-constant-patte"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "21:fixed-1600:0014",
+     "source_id": "21",
+     "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Positional pattern",
+     "score": 0.7110283970832825,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "patterns.\n\nYou can use the names of tuple elements and `Deconstruct` parameters in a positional pattern, as the following example shows:\n\n```\nvar numbers = new List<int> { 1, 2, 3 };\nif (SumAndCount(n"
+    }
+   ]
+  }
+ },
+ "Q-EVAL-020": {
+  "reasons": [
+   "label correct -> partially_correct"
+  ],
+  "slots": {
+   "S1": [
+    "#16 Integral numeric types (C# reference) > Integer literals (expected)"
+   ]
+  },
+  "A": {
+   "result": "correct",
+   "top1_score": 0.7459556460380554,
+   "gate_fired": false,
+   "cited": [
+    "16:header-1600:0004"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "16:header-1600:0004",
+     "source_id": "16",
+     "heading_path": "Integral numeric types (C# reference) > Integer literals",
+     "score": 0.7459556460380554,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 3,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P1",
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "## Integer literals\n\nInteger literals can be:\n\n- *decimal*: without any prefix\n- *hexadecimal*: with the `0x` or `0X` prefix\n- *binary*: with the `0b` or `0B` prefix\n\nThe following code demonstrates a"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "04:header-1600:0006",
+     "source_id": "04",
+     "heading_path": "Built-in types and literals > Literal syntax > Integer literals",
+     "score": 0.7203016877174377,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "### Integer literals\n\n```\nint dec = 42;\nint hex = 0x2A;\nint bin = 0b_0010_1010;\nlong big = 1_000_000_000L;\n```\n\nUse the `0x` prefix for hexadecimal and `0b` for binary. Append `L` for `long`, `U` for "
+    },
+    {
+     "rank": 3,
+     "chunk_id": "16:header-1600:0005",
+     "source_id": "16",
+     "heading_path": "Integral numeric types (C# reference) > Integer literals",
+     "score": 0.7011293768882751,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "`uint`, `ulong`.\n- If the literal includes the `L` or `l` suffix, the compiler assigns the type as the first of the following types in which its value can be represented: `long`, `ulong`.\n\n  Note\n\n  Y"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "16:header-1600:0001",
+     "source_id": "16",
+     "heading_path": "Integral numeric types (C# reference) > Characteristics of the integral types",
+     "score": 0.6951098442077637,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "## Characteristics of the integral types\n\nC# supports the following predefined integral types:\n\n| C# type/keyword | Range | Size | .NET type |\n| --- | --- | --- | --- |\n| `sbyte` | -128 to 127 | Signe"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "04:header-1600:0005",
+     "source_id": "04",
+     "heading_path": "Built-in types and literals > Literal syntax",
+     "score": 0.6919394731521606,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "## Literal syntax\n\nA *literal* is a value you write directly in your code. The compiler assigns each literal a type based on its format and any suffix you provide. C# supports the following kinds of l"
+    }
+   ]
+  },
+  "B": {
+   "result": "partially_correct",
+   "top1_score": 0.7346429228782654,
+   "gate_fired": false,
+   "cited": [
+    "16:fixed-1600:0003"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "16:fixed-1600:0003",
+     "source_id": "16",
+     "heading_path": "Integral numeric types (C# reference) > Integer literals",
+     "score": 0.7346429228782654,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 3,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P1",
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": true,
+     "head": "r decimalLiteral = 42;\nvar hexLiteral = 0x2A;\nvar binaryLiteral = 0b_0010_1010;\n```\n\nThe preceding example also shows the use of `_` as a *digit separator*. You can use the digit separator with all ki"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "16:fixed-1600:0004",
+     "source_id": "16",
+     "heading_path": "Integral numeric types (C# reference) > Integer literals",
+     "score": 0.7072926759719849,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "used with the digit `1`. Use `L` for clarity.\n- If the literal includes one of the `UL`, `Ul`, `uL`, `ul`, `LU`, `Lu`, `lU`, or `lu` suffixes, the compiler assigns the type as `ulong`.\n\nIf the value r"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "16:fixed-1600:0002",
+     "source_id": "16",
+     "heading_path": "Integral numeric types (C# reference) > Characteristics of the integral types",
+     "score": 0.7068318128585815,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "d `nuint` contextual keywords to define *native-sized integers*. Native-sized integers are 32-bit integers when running in a 32-bit process, or 64-bit integers when running in a 64-bit process. Use th"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "16:fixed-1600:0001",
+     "source_id": "16",
+     "heading_path": "Integral numeric types (C# reference) > Characteristics of the integral types",
+     "score": 0.6987742781639099,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "-32,768 to 32,767 | Signed 16-bit integer | [System.Int16](/en-us/dotnet/api/system.int16) |\n| `ushort` | 0 to 65,535 | Unsigned 16-bit integer | [System.UInt16](/en-us/dotnet/api/system.uint16) |\n| `"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "04:fixed-1600:0003",
+     "source_id": "04",
+     "heading_path": "Built-in types and literals > Literal syntax",
+     "score": 0.6887751817703247,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "(`42`), hexadecimal (`0x2A`), and binary (`0b_0010_1010`).\n- **Floating-point literals** — `double` by default (`3.14`), `float` with the `f` suffix (`3.14f`), and `decimal` with `m` (`3.14m`).\n- **Ch"
+    }
+   ]
+  }
+ },
+ "Q-EVAL-021": {
+  "reasons": [
+   "evidence_hit@1 1 -> 0"
+  ],
+  "slots": {
+   "S1": [
+    "#20 A tour of the C# language > File-based apps (expected)"
+   ]
+  },
+  "A": {
+   "result": "partially_correct",
+   "top1_score": 0.7583850622177124,
+   "gate_fired": false,
+   "cited": [
+    "20:header-1600:0004"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "20:header-1600:0004",
+     "source_id": "20",
+     "heading_path": "A tour of the C# language > File-based apps",
+     "score": 0.7583850622177124,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 3,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P1",
+      "P2"
+     ],
+     "cuts_code_fence": false,
+     "head": "## File-based apps\n\nC# is a *compiled* language. In most C# programs, you use the [`dotnet build`](../../core/tools/dotnet-build) command to compile a group of source files into a binary package. Then"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "20:header-1600:0002",
+     "source_id": "20",
+     "heading_path": "A tour of the C# language > Hello world",
+     "score": 0.6847415566444397,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "## Hello world\n\nThe \"Hello, World\" program traditionally introduces a programming language. Here's the program in C#:\n\n```\n// This line prints \"Hello, World\"\nConsole.WriteLine(\"Hello, World\");\n```\n\nTh"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "20:header-1600:0003",
+     "source_id": "20",
+     "heading_path": "A tour of the C# language > Hello world",
+     "score": 0.6707383394241333,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "format:\n\n```\nusing System;\n﻿namespace TourOfCsharp;\n\nclass Program\n{\n    static void Main()\n    {\n        // This line prints \"Hello, World\" \n        Console.WriteLine(\"Hello, World\");\n    }\n}\n```\n\nTh"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "20:header-1600:0000",
+     "source_id": "20",
+     "heading_path": "A tour of the C# language",
+     "score": 0.6557163596153259,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "# A tour of the C# language\n\nThis article gives you a high-level overview of the C# language. Whether you're writing your first program or you're an experienced developer exploring C#, you'll find the"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "05:header-1600:0008",
+     "source_id": "05",
+     "heading_path": "C# language documentation > Build C# apps with the Visual Studio family",
+     "score": 0.6460444927215576,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "## Build C# apps with the Visual Studio family\n\nChoose Visual Studio or Visual Studio Code to build your C# applications.\n\n![](/en-us/visualstudio/media/vs-ide-2022.svg)\n\n[Visual Studio](/en-us/visual"
+    }
+   ]
+  },
+  "B": {
+   "result": "partially_correct",
+   "top1_score": 0.7313962578773499,
+   "gate_fired": false,
+   "cited": [
+    "20:fixed-1600:0003",
+    "20:fixed-1600:0004"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "20:fixed-1600:0003",
+     "source_id": "20",
+     "heading_path": "A tour of the C# language > Hello world",
+     "score": 0.7313962578773499,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 2,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P1"
+     ],
+     "cuts_code_fence": false,
+     "head": "m declares the `Program` class with a single member: the method named `Main`. Many existing C# samples and tutorials use this format. By convention, when there are no top-level statements, a static me"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "20:fixed-1600:0004",
+     "source_id": "20",
+     "heading_path": "A tour of the C# language > File-based apps",
+     "score": 0.7164610028266907,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P2"
+     ],
+     "cuts_code_fence": false,
+     "head": "ping `dotnet run hello-world.cs`:\n\n```\n#!/usr/bin/env dotnet\n\nConsole.WriteLine(\"Hello, World!\");\n```\n\nThe first line of the program contains the `#!` sequence (shebang) for unix operating systems. Th"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "20:fixed-1600:0002",
+     "source_id": "20",
+     "heading_path": "A tour of the C# language > Hello world",
+     "score": 0.6684970259666443,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "omatically references these libraries by default. Another program form requires you to declare the containing class and method for the program's entry point. The compiler synthesizes these elements wh"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "20:fixed-1600:0001",
+     "source_id": "20",
+     "heading_path": "A tour of the C# language",
+     "score": 0.662230372428894,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "ry#workload). Based on object-oriented principles, it incorporates many features from other paradigms, not least functional programming. Low-level features support high-efficiency scenarios without wr"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "20:fixed-1600:0000",
+     "source_id": "20",
+     "heading_path": "A tour of the C# language",
+     "score": 0.6555248498916626,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "# A tour of the C# language\n\nThis article gives you a high-level overview of the C# language. Whether you're writing your first program or you're an experienced developer exploring C#, you'll find the"
+    }
+   ]
+  }
+ },
+ "Q-EVAL-022": {
+  "reasons": [
+   "label false_refusal -> correct",
+   "section_hit@1 0 -> 1",
+   "section_hit@1:strict 0 -> 1",
+   "section_hit@3 0 -> 1",
+   "section_hit@3:strict 0 -> 1",
+   "section_hit@5 0 -> 1",
+   "section_hit@5:strict 0 -> 1"
+  ],
+  "slots": {
+   "S1": [
+    "#13 Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithRedirects (expected)",
+    "#13 Handle errors in ASP.NET Core > UseStatusCodePagesWithRedirects (alternate)"
+   ],
+   "S2": [
+    "#13 Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithReExecute (expected)",
+    "#13 Handle errors in ASP.NET Core > UseStatusCodePagesWithReExecute (alternate)"
+   ]
+  },
+  "A": {
+   "result": "false_refusal",
+   "top1_score": 0.7860071063041687,
+   "gate_fired": false,
+   "cited": [
+    "13:header-1600:0062",
+    "13:header-1600:0021",
+    "13:header-1600:0095",
+    "13:header-1600:0079"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "13:header-1600:0062",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithReExecute",
+     "score": 0.7860071063041687,
+     "hits_section": true,
+     "slots_hit": [
+      "S2"
+     ],
+     "evidence_quotes_contained": 2,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "### UseStatusCodePagesWithReExecute\n\nThe [UseStatusCodePagesWithReExecute](/en-us/dotnet/api/microsoft.aspnetcore.builder.statuscodepagesextensions.usestatuscodepageswithreexecute) extension method:\n\n"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "13:header-1600:0021",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithReExecute",
+     "score": 0.7816807627677917,
+     "hits_section": true,
+     "slots_hit": [
+      "S2"
+     ],
+     "evidence_quotes_contained": 4,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "### UseStatusCodePagesWithReExecute\n\nThe [UseStatusCodePagesWithReExecute](/en-us/dotnet/api/microsoft.aspnetcore.builder.statuscodepagesextensions.usestatuscodepageswithreexecute) extension method:\n\n"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "13:header-1600:0095",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > UseStatusCodePagesWithReExecute",
+     "score": 0.7811092734336853,
+     "hits_section": true,
+     "slots_hit": [
+      "S2"
+     ],
+     "evidence_quotes_contained": 2,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "## UseStatusCodePagesWithReExecute\n\nThe [UseStatusCodePagesWithReExecute](/en-us/dotnet/api/microsoft.aspnetcore.builder.statuscodepagesextensions.usestatuscodepageswithreexecute) extension method:\n\n-"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "13:header-1600:0079",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithReExecute",
+     "score": 0.7802444696426392,
+     "hits_section": true,
+     "slots_hit": [
+      "S2"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P2"
+     ],
+     "cuts_code_fence": false,
+     "head": "### UseStatusCodePagesWithReExecute\n\nThe [UseStatusCodePagesWithReExecute](/en-us/dotnet/api/microsoft.aspnetcore.builder.statuscodepagesextensions.usestatuscodepageswithreexecute) extension method:\n\n"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "13:header-1600:0080",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithReExecute",
+     "score": 0.7674471139907837,
+     "hits_section": true,
+     "slots_hit": [
+      "S2"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "in the [sample app](https://github.com/dotnet/AspNetCore.Docs/tree/main/aspnetcore/fundamentals/error-handling/samples/5.x).\n\nThis method is commonly used when the app should:\n\n- Process the request w"
+    }
+   ]
+  },
+  "B": {
+   "result": "correct",
+   "top1_score": 0.8126711249351501,
+   "gate_fired": false,
+   "cited": [
+    "13:fixed-1600:0134",
+    "13:fixed-1600:0080",
+    "13:fixed-1600:0015",
+    "13:fixed-1600:0108",
+    "13:fixed-1600:0151"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "13:fixed-1600:0108",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithRedirects",
+     "score": 0.8126711249351501,
+     "hits_section": true,
+     "slots_hit": [
+      "S1",
+      "S2"
+     ],
+     "evidence_quotes_contained": 4,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "d endpoint.\n- Shouldn't preserve and return the original status code with the initial redirect response.\n\n### UseStatusCodePagesWithReExecute\n\nThe [UseStatusCodePagesWithReExecute](/en-us/dotnet/api/m"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "13:fixed-1600:0151",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithRedirects",
+     "score": 0.8066574335098267,
+     "hits_section": true,
+     "slots_hit": [
+      "S1",
+      "S2"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P2"
+     ],
+     "cuts_code_fence": false,
+     "head": "rve and return the original status code with the initial redirect response.\n\nTo test `UseStatusCodePages` in the [sample app](https://github.com/dotnet/AspNetCore.Docs/tree/main/aspnetcore/fundamental"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "13:fixed-1600:0015",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithRedirects",
+     "score": 0.804590106010437,
+     "hits_section": true,
+     "slots_hit": [
+      "S1",
+      "S2"
+     ],
+     "evidence_quotes_contained": 5,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "), the `~` is replaced by the app's `PathBase`. When specifying an endpoint in the app, create an MVC view or Razor page for the endpoint.\n\nThis method is commonly used when the app:\n\n- Should redirec"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "13:fixed-1600:0134",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithRedirects",
+     "score": 0.7900818586349487,
+     "hits_section": true,
+     "slots_hit": [
+      "S1",
+      "S2"
+     ],
+     "evidence_quotes_contained": 2,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "to the error handling endpoint provided in the URL template. The error handling endpoint typically displays error information and returns HTTP 200.\n\n```\nvar app = builder.Build();\n\nif (!app.Environmen"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "13:fixed-1600:0080",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > UseStatusCodePages > UseStatusCodePagesWithRedirects",
+     "score": 0.788470983505249,
+     "hits_section": true,
+     "slots_hit": [
+      "S1",
+      "S2"
+     ],
+     "evidence_quotes_contained": 3,
+     "evidence_quotes_total": 6,
+     "points_covered": [
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "tus/302) status code to the client.\n- Redirects the client to the error handling endpoint provided in the URL template. The error handling endpoint typically displays error information and returns HTT"
+    }
+   ]
+  }
+ },
+ "Q-EVAL-023": {
+  "reasons": [
+   "evidence_hit@1 0 -> 1"
+  ],
+  "slots": {
+   "S1": [
+    "#13 Handle errors in ASP.NET Core > IExceptionHandler (expected)",
+    "#13 Handle errors in ASP.NET Core > IExceptionHandler > SuppressDiagnosticsCallback (alternate)"
+   ]
+  },
+  "A": {
+   "result": "correct",
+   "top1_score": 0.7689358592033386,
+   "gate_fired": false,
+   "cited": [
+    "13:header-1600:0049",
+    "13:header-1600:0011",
+    "13:header-1600:0016"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "13:header-1600:0049",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > IExceptionHandler",
+     "score": 0.7689358592033386,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 5,
+     "points_covered": [
+      "P1"
+     ],
+     "cuts_code_fence": false,
+     "head": "an exception, it can return `true` to stop processing. If an exception isn't handled by any exception handler, then control falls back to the default behavior and options from the middleware.\n\nNote\n\nI"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "13:header-1600:0016",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > IExceptionHandler > SuppressDiagnosticsCallback",
+     "score": 0.7608407139778137,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 5,
+     "points_covered": [
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "### SuppressDiagnosticsCallback\n\nStarting in .NET 10, you can control whether the exception handling middleware writes diagnostics for handled exceptions by configuring the `SuppressDiagnosticsCallbac"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "13:header-1600:0011",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > IExceptionHandler",
+     "score": 0.7541376948356628,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 3,
+     "evidence_quotes_total": 5,
+     "points_covered": [
+      "P1",
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "If `UseExceptionHandler` isn't called, the registered `IExceptionHandler` implementations are never called.\n\nException handling middleware iterates through registered exception handlers in order until"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "13:header-1600:0050",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > IExceptionHandler",
+     "score": 0.7470169067382812,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 5,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "default for handled exceptions. See [SuppressDiagnosticsCallback](error-handling?view=aspnetcore-10.0#suppressdiagnosticscallback).\n\nThe following example shows an `IExceptionHandler` implementation:\n"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "13:header-1600:0012",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > IExceptionHandler",
+     "score": 0.7414170503616333,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 5,
+     "points_covered": [
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "exception was handled. The default behavior can be changed by setting [SuppressDiagnosticsCallback](#suppressdiagnosticscallback).\n\nThe following example shows an `IExceptionHandler` implementation:\n\n"
+    }
+   ]
+  },
+  "B": {
+   "result": "correct",
+   "top1_score": 0.7717325091362,
+   "gate_fired": false,
+   "cited": [
+    "13:fixed-1600:0008",
+    "13:fixed-1600:0074",
+    "13:fixed-1600:0042",
+    "13:fixed-1600:0011"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "13:fixed-1600:0008",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > IExceptionHandler",
+     "score": 0.7717325091362,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 3,
+     "evidence_quotes_total": 5,
+     "points_covered": [
+      "P1",
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": true,
+     "head": ", indicating that the exception has been handled. If an exception handler handles an exception, it can return `true` to stop processing. If an exception isn't handled by any exception handler, then co"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "13:fixed-1600:0074",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > IExceptionHandler",
+     "score": 0.7565284371376038,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 5,
+     "points_covered": [
+      "P1"
+     ],
+     "cuts_code_fence": true,
+     "head": "ting that the exception has been handled. If an exception handler handles an exception, it can return `true` to stop processing. If an exception isn't handled by any exception handler, then control fa"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "13:fixed-1600:0011",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > IExceptionHandler > Configure `UseExceptionHandler` when using `IExceptionHandler`",
+     "score": 0.7533181309700012,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 5,
+     "points_covered": [
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "After logging the exception, the `TryHandleAsync` method returns `false`, so the [developer exception page](#developer-exception-page) is shown.\n\nIn other environments:\n\n- The `CustomExceptionHandler`"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "13:fixed-1600:0042",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > IExceptionHandler",
+     "score": 0.7417523264884949,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 5,
+     "points_covered": [
+      "P1"
+     ],
+     "cuts_code_fence": true,
+     "head": "eExceptionHandler` isn't called, the registered `IExceptionHandler` implementations are never called.\n\nException handling middleware iterates through registered exception handlers in order until one r"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "13:fixed-1600:0012",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > IExceptionHandler > SuppressDiagnosticsCallback",
+     "score": 0.7113741636276245,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 5,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "```\napp.UseExceptionHandler(new ExceptionHandlerOptions\n{\n    SuppressDiagnosticsCallback = context => context.Exception is ArgumentException\n});\n```\n\nWhen an exception isn't handled by any `IExceptio"
+    }
+   ]
+  }
+ },
+ "Q-EVAL-026": {
+  "reasons": [
+   "grounded 0 -> 1"
+  ],
+  "slots": {
+   "S1": [
+    "#15 How to create backend application using Asp.net C# Web API Core (expected)"
+   ]
+  },
+  "A": {
+   "result": "correct",
+   "top1_score": 0.7808268070220947,
+   "gate_fired": false,
+   "cited": [
+    "15:header-1600:0005",
+    "15:header-1600:0007",
+    "15:header-1600:0006"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "15:header-1600:0005",
+     "source_id": "15",
+     "heading_path": "How to create backend application using Asp.net C# Web API Core",
+     "score": 0.7808268070220947,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P1"
+     ],
+     "cuts_code_fence": false,
+     "head": "fill='hsl(179.20000000000002, 39%, 27%)' cx='32' cy='32' r='32' /%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23FFF' %3ECR%3C/text%3E%3C/svg%3E)\n\n   [coder roc"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "15:header-1600:0007",
+     "source_id": "15",
+     "heading_path": "How to create backend application using Asp.net C# Web API Core",
+     "score": 0.7456252574920654,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "8%, 22%)' cx='32' cy='32' r='32' /%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23FFF' %3EA%3C/text%3E%3C/svg%3E)\n\n   Anonymous\n\n   2024-05-20T02:13:19.64+00:00"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "15:header-1600:0006",
+     "source_id": "15",
+     "heading_path": "How to create backend application using Asp.net C# Web API Core",
+     "score": 0.6914249658584595,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P2"
+     ],
+     "cuts_code_fence": false,
+     "head": "8%, 22%)' cx='32' cy='32' r='32' /%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23FFF' %3EA%3C/text%3E%3C/svg%3E)\n\n   Anonymous\n\n   2024-05-17T09:35:47.32+00:00"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "15:header-1600:0008",
+     "source_id": "15",
+     "heading_path": "How to create backend application using Asp.net C# Web API Core",
+     "score": 0.6864983439445496,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "•\n\n   436\n   Reputation points\n\n   2024-05-22T19:06:46.2933333+00:00\n\n   Hi Brando, i have installed .NET 8 and also added below code\n\n   Program.cs\n\n   ```\n   using Microsoft.AspNetCore.Authenticatio"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "15:header-1600:0001",
+     "source_id": "15",
+     "heading_path": "How to create backend application using Asp.net C# Web API Core",
+     "score": 0.670377254486084,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "for building web applications and web services. Miscellaneous topics that do not fit into specific categories.\n\n0 comments\nNo comments\n\n---\n\n[Sign in to comment](#)\n\nAnswer accepted by question author"
+    }
+   ]
+  },
+  "B": {
+   "result": "correct",
+   "top1_score": 0.7844507098197937,
+   "gate_fired": false,
+   "cited": [
+    "15:fixed-1600:0005",
+    "15:fixed-1600:0006",
+    "15:fixed-1600:0004"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "15:fixed-1600:0004",
+     "source_id": "15",
+     "heading_path": "How to create backend application using Asp.net C# Web API Core",
+     "score": 0.7844507098197937,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P1"
+     ],
+     "cuts_code_fence": false,
+     "head": "the answer is the right solution, please click \"Accept Answer\" and kindly upvote it. If you have extra questions about this answer, please click \"Comment\". Note: Please follow the steps in our [docume"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "15:fixed-1600:0005",
+     "source_id": "15",
+     "heading_path": "How to create backend application using Asp.net C# Web API Core",
+     "score": 0.7586941719055176,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 2,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P2"
+     ],
+     "cuts_code_fence": false,
+     "head": "4'%3E%3Ccircle fill='hsl(128, 8%, 22%)' cx='32' cy='32' r='32' /%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23FFF' %3EA%3C/text%3E%3C/svg%3E)\n\n   Anonymous\n\n "
+    },
+    {
+     "rank": 3,
+     "chunk_id": "15:fixed-1600:0006",
+     "source_id": "15",
+     "heading_path": "How to create backend application using Asp.net C# Web API Core",
+     "score": 0.681725025177002,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "le='font: 600 30.11764705882353px \"SegoeUI\", Arial' width='64'%3E%3Ccircle fill='hsl(179.20000000000002, 39%, 27%)' cx='32' cy='32' r='32' /%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' te"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "15:fixed-1600:0001",
+     "source_id": "15",
+     "heading_path": "How to create backend application using Asp.net C# Web API Core",
+     "score": 0.6770021915435791,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "vices. Miscellaneous topics that do not fit into specific categories.\n\n0 comments\nNo comments\n\n---\n\n[Sign in to comment](#)\n\nAnswer accepted by question author\n\n![](data:image/svg+xml, %3Csvg xmlns='h"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "15:fixed-1600:0010",
+     "source_id": "15",
+     "heading_path": "How to create backend application using Asp.net C# Web API Core",
+     "score": 0.645836591720581,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "logintable like below\n\n   ```\n   UserName                                      Password\n\n   coder\t\t                                   Pass1234\n   ```\n\n   ![User's image](https://learn-attachment.micro"
+    }
+   ]
+  }
+ },
+ "Q-EVAL-027": {
+  "reasons": [
+   "label correct -> partially_correct",
+   "evidence_hit@1 1 -> 0",
+   "evidence_hit@3 1 -> 0",
+   "evidence_hit@5 1 -> 0"
+  ],
+  "slots": {
+   "S1": [
+    "#12 Handle errors in ASP.NET Core APIs > Additional error handling features > Key differences for controllers (alternate)",
+    "#12 Handle errors in ASP.NET Core APIs > Additional error handling features > Validation failure error response (expected)"
+   ]
+  },
+  "A": {
+   "result": "correct",
+   "top1_score": 0.7478113174438477,
+   "gate_fired": false,
+   "cited": [
+    "12:header-1600:0022",
+    "12:header-1600:0024"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "12:header-1600:0022",
+     "source_id": "12",
+     "heading_path": "Handle errors in ASP.NET Core APIs > Additional error handling features > Validation failure error response",
+     "score": 0.7478113174438477,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 3,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P1",
+      "P2"
+     ],
+     "cuts_code_fence": false,
+     "head": "### Validation failure error response\n\nFor web API controllers, MVC responds with a [ValidationProblemDetails](/en-us/dotnet/api/microsoft.aspnetcore.mvc.validationproblemdetails) response type when m"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "12:header-1600:0024",
+     "source_id": "12",
+     "heading_path": "Handle errors in ASP.NET Core APIs > Additional error handling features > Key differences for controllers",
+     "score": 0.7257781028747559,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "### Key differences for controllers\n\n- **Automatic model validation**: Controllers automatically validate model state and return `400 Bad Request` responses for validation failures\n- **Exception filte"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "12:header-1600:0006",
+     "source_id": "12",
+     "heading_path": "Handle errors in ASP.NET Core APIs > Exception handler",
+     "score": 0.6880811452865601,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "2. Configure a controller action to respond to the `/error` route:\n\n   ```\n   [Route(\"/error\")]\n   public IActionResult HandleError() =>\n       Problem();\n   ```\n\nThe preceding `HandleError` action se"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "12:header-1600:0014",
+     "source_id": "12",
+     "heading_path": "Handle errors in ASP.NET Core APIs > Problem details > Problem details service",
+     "score": 0.6859849095344543,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "### Problem details service\n\nASP.NET Core supports creating [Problem Details for HTTP APIs](https://www.rfc-editor.org/rfc/rfc9457) using the [IProblemDetailsService](/en-us/dotnet/api/microsoft.aspne"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "13:header-1600:0034",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > Problem details > Customize problem details",
+     "score": 0.6840018033981323,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "For example, an [`HTTP Status 400 Bad Request`](https://developer.mozilla.org/docs/Web/HTTP/Status/400) endpoint result produces the following problem details response body:\n\n```\n{\n  \"type\": \"https://"
+    }
+   ]
+  },
+  "B": {
+   "result": "partially_correct",
+   "top1_score": 0.7362551689147949,
+   "gate_fired": false,
+   "cited": [
+    "12:fixed-1600:0017",
+    "12:fixed-1600:0016"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "12:fixed-1600:0016",
+     "source_id": "12",
+     "heading_path": "Handle errors in ASP.NET Core APIs > Additional error handling features > Validation failure error response",
+     "score": 0.7362551689147949,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P2"
+     ],
+     "cuts_code_fence": true,
+     "head": "h an implementation that also supports formatting responses as XML, in `Program.cs`:\n\n```\nbuilder.Services.AddControllers()\n    .ConfigureApiBehaviorOptions(options =>\n    {\n        options.InvalidMod"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "12:fixed-1600:0007",
+     "source_id": "12",
+     "heading_path": "Handle errors in ASP.NET Core APIs > Client and Server error responses",
+     "score": 0.7003479599952698,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "ns.ClientErrorMapping](#use-apibehavioroptionsclienterrormapping)\n\nAn *error result* is defined as a result with an HTTP status code of 400 or higher. For web API controllers, MVC transforms an error "
+    },
+    {
+     "rank": 3,
+     "chunk_id": "12:fixed-1600:0017",
+     "source_id": "12",
+     "heading_path": "Handle errors in ASP.NET Core APIs > Additional error handling features > Use exceptions to modify the response",
+     "score": 0.6955912709236145,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "Executed(ActionExecutedContext context)\n       {\n           if (context.Exception is HttpResponseException httpResponseException)\n           {\n               context.Result = new ObjectResult(httpResp"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "13:fixed-1600:0086",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > Exception filters",
+     "score": 0.6926133632659912,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "fferently based on which MVC action is chosen.\n\n## Model state errors\n\nFor information about how to handle model state errors, see [Model binding](../mvc/models/model-binding?view=aspnetcore-10.0) and"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "12:fixed-1600:0011",
+     "source_id": "12",
+     "heading_path": "Handle errors in ASP.NET Core APIs > Problem details > IProblemDetailsService fallback",
+     "score": 0.6864367723464966,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "await httpContext.Response.WriteAsync(\"Fallback: An error occurred.\");\n        }\n    });\n});\n\napp.MapGet(\"/users/{id:int}\", (int id) =>\n{\n    return id <= 0 ? Results.BadRequest() : Results.Ok(new Use"
+    }
+   ]
+  }
+ },
+ "Q-EVAL-031": {
+  "reasons": [
+   "source_hit@5 1 -> 0",
+   "source_hit@5:strict 1 -> 0",
+   "section_hit@5 1 -> 0",
+   "section_hit@5:strict 1 -> 0",
+   "evidence_hit@1 1 -> 0"
+  ],
+  "slots": {
+   "S1": [
+    "#04 Built-in types and literals > `default` expressions (expected)"
+   ],
+   "S2": [
+    "#20 A tour of the C# language > Familiar C# features (alternate)",
+    "#26 The C# type system > Value types and reference types (expected)"
+   ]
+  },
+  "A": {
+   "result": "correct",
+   "top1_score": 0.7334744930267334,
+   "gate_fired": false,
+   "cited": [
+    "04:header-1600:0008"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "04:header-1600:0008",
+     "source_id": "04",
+     "heading_path": "Built-in types and literals > `default` expressions",
+     "score": 0.7334744930267334,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 2,
+     "points_covered": [
+      "P1"
+     ],
+     "cuts_code_fence": false,
+     "head": "## `default` expressions\n\nThe `default` expression produces the default value for a type: `0` for numeric types, `false` for `bool`, and `null` for reference types:\n\n```\nint defaultInt = default;     "
+    },
+    {
+     "rank": 2,
+     "chunk_id": "04:header-1600:0005",
+     "source_id": "04",
+     "heading_path": "Built-in types and literals > Literal syntax",
+     "score": 0.6747326850891113,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "## Literal syntax\n\nA *literal* is a value you write directly in your code. The compiler assigns each literal a type based on its format and any suffix you provide. C# supports the following kinds of l"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "06:header-1600:0004",
+     "source_id": "06",
+     "heading_path": "C# keywords",
+     "score": 0.650885283946991,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "[`sbyte`](../builtin-types/integral-numeric-types)  \n[`sealed`](sealed)  \n[`short`](../builtin-types/integral-numeric-types)  \n[`sizeof`](../operators/sizeof)  \n[`stackalloc`](../operators/stackalloc)"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "26:header-1600:0003",
+     "source_id": "26",
+     "heading_path": "The C# type system > Value types and reference types",
+     "score": 0.6481600403785706,
+     "hits_section": true,
+     "slots_hit": [
+      "S2"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 2,
+     "points_covered": [
+      "P1"
+     ],
+     "cuts_code_fence": false,
+     "head": "## Value types and reference types\n\nEvery type in C# is either a *value type* or a *reference type*. This distinction determines how variables store data and how assignment works.\n\n**Value types** hol"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "04:header-1600:0004",
+     "source_id": "04",
+     "heading_path": "Built-in types and literals > `bool`, `char`, and `string`",
+     "score": 0.6434403657913208,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "## `bool`, `char`, and `string`\n\nBeyond numbers, C# provides three other frequently used built-in types:\n\n```\nbool isValid = true;\nchar grade = 'A';\nstring greeting = \"Hello, world!\";\n```\n\n- **`bool`*"
+    }
+   ]
+  },
+  "B": {
+   "result": "correct",
+   "top1_score": 0.7155613899230957,
+   "gate_fired": false,
+   "cited": [
+    "04:fixed-1600:0005",
+    "04:fixed-1600:0004"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "04:fixed-1600:0005",
+     "source_id": "04",
+     "heading_path": "Built-in types and literals > `default` expressions",
+     "score": 0.7155613899230957,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "// 0\nbool defaultBool = default;        // false\nstring? defaultString = default;   // null\n\n// Use default in a conditional:\nvar limit = (args.Length > 0) ? int.Parse(args[0]) : default(int);\n```\n\nTh"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "04:fixed-1600:0003",
+     "source_id": "04",
+     "heading_path": "Built-in types and literals > Literal syntax",
+     "score": 0.6614246368408203,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "(`42`), hexadecimal (`0x2A`), and binary (`0b_0010_1010`).\n- **Floating-point literals** — `double` by default (`3.14`), `float` with the `f` suffix (`3.14f`), and `decimal` with `m` (`3.14m`).\n- **Ch"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "04:fixed-1600:0004",
+     "source_id": "04",
+     "heading_path": "Built-in types and literals > Literal syntax > Floating-point literals",
+     "score": 0.6559759378433228,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 2,
+     "points_covered": [
+      "P1"
+     ],
+     "cuts_code_fence": true,
+     "head": ",500,000\n```\n\nWithout a suffix, a numeric literal with a decimal point is `double`. Append `f` for `float` and `m` for `decimal`. Scientific notation (`1.5e6`) is also supported.\n\n### Character and st"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "06:fixed-1600:0002",
+     "source_id": "06",
+     "heading_path": "C# keywords",
+     "score": 0.6483295559883118,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "(../builtin-types/integral-numeric-types)  \n[`interface`](interface)  \n[`internal`](internal)  \n[`is`](../operators/is)  \n[`lock`](../statements/lock)  \n[`long`](../builtin-types/integral-numeric-type"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "04:fixed-1600:0000",
+     "source_id": "04",
+     "heading_path": "Built-in types and literals",
+     "score": 0.6418406963348389,
+     "hits_section": false,
+     "slots_hit": [],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 2,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "# Built-in types and literals\n\nTip\n\n**New to developing software?** Start with the [Get started](../../tour-of-csharp/tutorials/) tutorials first. They introduce types as you write your first programs"
+    }
+   ]
+  }
+ },
+ "Q-EVAL-032": {
+  "reasons": [
+   "source_hit@3 1 -> 0",
+   "source_hit@3:strict 1 -> 0",
+   "section_hit@3 1 -> 0",
+   "section_hit@3:strict 1 -> 0",
+   "evidence_hit@3 1 -> 0"
+  ],
+  "slots": {
+   "S1": [
+    "#13 Handle errors in ASP.NET Core > IExceptionHandler (expected)"
+   ],
+   "S2": [
+    "#10 Dependency injection in ASP.NET Core > Entity Framework contexts (expected)"
+   ]
+  },
+  "A": {
+   "result": "correct",
+   "top1_score": 0.7103476524353027,
+   "gate_fired": false,
+   "cited": [
+    "13:header-1600:0010",
+    "10:header-1600:0020"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "10:header-1600:0020",
+     "source_id": "10",
+     "heading_path": "Dependency injection in ASP.NET Core > Constructor injection behavior",
+     "score": 0.7103476524353027,
+     "hits_section": true,
+     "slots_hit": [
+      "S2"
+     ],
+     "evidence_quotes_contained": 2,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": false,
+     "head": "## Constructor injection behavior\n\nFor more information on constructor injection behavior, see the following resources:\n\n- [Constructor injection behavior](/en-us/dotnet/core/extensions/dependency-inj"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "13:header-1600:0010",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > IExceptionHandler",
+     "score": 0.7014645338058472,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P1"
+     ],
+     "cuts_code_fence": false,
+     "head": "## IExceptionHandler\n\n[IExceptionHandler](/en-us/dotnet/api/microsoft.aspnetcore.diagnostics.iexceptionhandler) is an interface that gives the developer a callback for handling known exceptions in a c"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "13:header-1600:0013",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > IExceptionHandler",
+     "score": 0.7008044123649597,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "The following example shows how to register an `IExceptionHandler` implementation for dependency injection and add the exception handling middleware that calls it:\n\n```\nusing ErrorHandlingSample;\n\nvar"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "13:header-1600:0012",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > IExceptionHandler",
+     "score": 0.697575032711029,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "exception was handled. The default behavior can be changed by setting [SuppressDiagnosticsCallback](#suppressdiagnosticscallback).\n\nThe following example shows an `IExceptionHandler` implementation:\n\n"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "13:header-1600:0050",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > IExceptionHandler",
+     "score": 0.6951984167098999,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": false,
+     "head": "default for handled exceptions. See [SuppressDiagnosticsCallback](error-handling?view=aspnetcore-10.0#suppressdiagnosticscallback).\n\nThe following example shows an `IExceptionHandler` implementation:\n"
+    }
+   ]
+  },
+  "B": {
+   "result": "correct",
+   "top1_score": 0.7104681134223938,
+   "gate_fired": false,
+   "cited": [
+    "13:fixed-1600:0007",
+    "10:fixed-1600:0016"
+   ],
+   "chunks": [
+    {
+     "rank": 1,
+     "chunk_id": "13:fixed-1600:0009",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > IExceptionHandler",
+     "score": 0.7104681134223938,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "essage}, Time of occurrence {time}\",\n                exceptionMessage, DateTime.UtcNow);\n            // Return false to continue with the default behavior\n            // - or - return true to signal t"
+    },
+    {
+     "rank": 2,
+     "chunk_id": "13:fixed-1600:0043",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > IExceptionHandler",
+     "score": 0.710345983505249,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "ics;\n\nnamespace ErrorHandlingSample\n{\n    public class CustomExceptionHandler : IExceptionHandler\n    {\n        private readonly ILogger<CustomExceptionHandler> logger;\n        public CustomExceptionH"
+    },
+    {
+     "rank": 3,
+     "chunk_id": "13:fixed-1600:0075",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > IExceptionHandler",
+     "score": 0.7100620269775391,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 0,
+     "evidence_quotes_total": 3,
+     "points_covered": [],
+     "cuts_code_fence": true,
+     "head": "er)\n        {\n            this.logger = logger;\n        }\n        public ValueTask<bool> TryHandleAsync(\n            HttpContext httpContext,\n            Exception exception,\n            CancellationT"
+    },
+    {
+     "rank": 4,
+     "chunk_id": "10:fixed-1600:0016",
+     "source_id": "10",
+     "heading_path": "Dependency injection in ASP.NET Core > Constructor injection behavior",
+     "score": 0.7015345096588135,
+     "hits_section": true,
+     "slots_hit": [
+      "S2"
+     ],
+     "evidence_quotes_contained": 2,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P2",
+      "P3"
+     ],
+     "cuts_code_fence": true,
+     "head": "n-us/dotnet/core/extensions/dependency-injection/overview#constructor-injection-behavior)\n- [ASP.NET Core Blazor dependency injection](../blazor/fundamentals/dependency-injection?view=aspnetcore-10.0#"
+    },
+    {
+     "rank": 5,
+     "chunk_id": "13:fixed-1600:0007",
+     "source_id": "13",
+     "heading_path": "Handle errors in ASP.NET Core > Exception handler lambda",
+     "score": 0.698474109172821,
+     "hits_section": true,
+     "slots_hit": [
+      "S1"
+     ],
+     "evidence_quotes_contained": 1,
+     "evidence_quotes_total": 3,
+     "points_covered": [
+      "P1"
+     ],
+     "cuts_code_fence": false,
+     "head": "ors is a security risk.\n\n## IExceptionHandler\n\n[IExceptionHandler](/en-us/dotnet/api/microsoft.aspnetcore.diagnostics.iexceptionhandler) is an interface that gives the developer a callback for handlin"
+    }
+   ]
+  }
+ }
+}

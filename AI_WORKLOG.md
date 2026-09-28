@@ -482,6 +482,27 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - **Owner spot-check** (after the PR opened): the owner graded the 10 items blind, then cross-checked against the judge's key: agrees on 9 of 10. S03 (Q-EVAL-012:A): the owner grades P2 `no` where the judge gave `partial`; the label stays `partially_correct`. AI committed the owner's sheet as written and recorded the result in the report and ledger.
 - *Verifier findings* ([99-VERIFY](docs/reviews/evaluation/EVAL-004a-verify.md), 2026-09-28, own worktree, zero Gemini requests): **ACCEPT WITH FIXES**. Every run/quota/judge/duplicate-rule/scoring number independently reproduced (byte-identical `summary.json` and spot-check key after re-running the report's pasted scripts; independent read-only re-derivation of the duplicate rule confirming every dropped duplicate falls at overfetch ranks 6–13; the Q-EVAL-002/B marker-22 hypothesis confirmed by rebuilding the actual judge prompt offline and showing "22" appears only as the cited chunk's source id, never as a marker). One finding: the execution report's "Owner spot-check" section states only the owner's self-reported 9/10 "agree with the judge?" answers; recomputing `map_result` from the owner's own **blind** per-point grades gives **8/10** label agreement — S09 (`Q-EVAL-020:B`) and S10 (`Q-EVAL-017:B`) also disagree (owner rated a required point `yes` where the judge rated it `partial`, which flips the mapped label from `partially_correct` to `correct`), undocumented in the report or ledger. Full point-level agreement is 6/10; citation-support agreement is 25/25 markers but the sample has no case testing whether the judge would catch a bad citation. Fix is docs-only (the execution report and ledger row 11's open items); the owner's graded sheet is not touched.
 
+### 2026-09-28 EXP-001: Arm A vs Arm B experiment and failure analysis (branch `exp-001`, PR into `dev`)
+- *AI did:*
+  - Built `application/evaluation/experiment.py` (pure: paired comparison rows on `stats.py`, discordant cases, chunk-level facts, the §2 failure rules, ADR-0003 failure-mode signals) and `scripts/experiments/compare_arms.py`. The script reads the committed EVAL-004a runs, hash-checks the git-ignored chunk files, writes `data/experiments/exp-001/` and fills the report's tables.
+  - Read every discordant case (23) and every failure (18) at chunk level and wrote the [EPIC-06 report](docs/reports/epics/EPIC-06-experiment.md) around the brief's 5 points. 0 Gemini requests, no config change ([execution report](docs/reports/execution/EXP-001.md)).
+- *AI got wrong:*
+  - **Slot numbering.** The report draft said Q-EVAL-030 misses slot S2 (#03); #03 is slot S1 (S2 is #28).
+  - **Latency claim.** The draft said Arm A's retrieve mean came from "a few slow early queries", which was not checked. The data shows one 414.6 ms cold start on the first query.
+  - **Surviving mutation.** Mutation M2 (ranking rule `rank >= 3` → `>= 2`) survived the first test set: no test had a first hit at rank 2.
+  - **Execution-report slips.** The first execution-report draft counted "two" rank-4/5 cases (there are three) and quoted unpaired accuracy counts it had not computed.
+  - **Stray file.** A shell `echo … >=2` created a stray file named `=2`.
+- *How found:* Slot numbering, latency claim and report slips: re-checking every report sentence against the per-chunk dump and the records before committing. Surviving mutation: the mutation run. Stray file: `git status`.
+- *Fix:* All four text errors corrected before the commit. Added a rank-2 boundary test (M2 is now killed). Deleted the stray file.
+- *Human decision:* The owner's addendum set the scope:
+  - EVAL-004a runs only and zero requests;
+  - reuse `stats.py`;
+  - paired n with Q-EVAL-002:B unlabelled;
+  - the four threat paragraphs;
+  - gate refusals classified as `refusal`;
+  - an evaluation-side failures section;
+  - the 5-point report with 2–3 next experiments.
+
 ## Summary: how AI helped
 
 To be filled at QC-001.
