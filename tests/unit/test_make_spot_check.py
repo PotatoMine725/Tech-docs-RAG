@@ -143,7 +143,7 @@ def test_main_writes_a_blind_sheet_and_a_separate_key_with_every_judge_checked_c
     assert "## S01" in sheet and "## S02" in sheet
     assert sheet.count("Q-TEST-001") == 0 and sheet.count("Q-TEST-002") == 0  # blind: no case id
     assert "Q-TEST-001" in key and "Q-TEST-002" in key  # the key carries the mapping
-    assert "<!-- run_id: run-1 -->" in sheet
+    assert "run-1" not in sheet  # blind: the sheet never shows the run id either (it can leak the arm)
 
 
 def test_running_main_twice_is_byte_identical(tmp_path):

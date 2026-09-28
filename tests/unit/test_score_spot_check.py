@@ -150,9 +150,25 @@ def test_check_filled_passes_when_every_cell_is_filled():
 
 def test_parse_key_reads_case_arm_run_label_and_the_verdicts_reason():
     key = score_spot_check.parse_key(KEY)
-    assert key["S01"] == {"case_id": "Q-TEST-001", "arm": "A", "run_id": "run-1", "check": "answer",
-                          "label": "correct", "reason": "P1 is fully covered."}
+    entry = key["S01"]
+    assert {k: v for k, v in entry.items() if k != "verdict"} == \
+        {"case_id": "Q-TEST-001", "arm": "A", "run_id": "run-1", "check": "answer",
+         "label": "correct", "reason": "P1 is fully covered."}
+    assert entry["verdict"]["required_points"] == [{"id": "P1", "covered": "yes"}]
     assert key["S02"]["label"] == "correct_refusal" and key["S02"]["reason"] == "Correctly refuses."
+
+
+def test_point_level_diffs_finds_the_specific_disagreeing_point():
+    grades = {"P1 covered": ("no", ""), "contradicts ground truth": ("no", ""), "unsupported claims": ("no", "")}
+    verdict = {"required_points": [{"id": "P1", "covered": "yes"}], "contradicts_ground_truth": False}
+    diffs = score_spot_check.point_level_diffs("answer", grades, verdict)
+    assert diffs == ["P1: owner='no', judge='yes'"]
+
+
+def test_point_level_diffs_empty_when_owner_and_judge_agree_on_every_point():
+    grades = {"P1 covered": ("yes", ""), "contradicts ground truth": ("no", ""), "unsupported claims": ("no", "")}
+    verdict = {"required_points": [{"id": "P1", "covered": "yes"}], "contradicts_ground_truth": False}
+    assert score_spot_check.point_level_diffs("answer", grades, verdict) == []
 
 
 # --- deriving the owner's rule-based label via metrics.mapping.map_result ----------------------------------------

@@ -1,7 +1,5 @@
 # Judge spot-check: owner grading sheet (blind)
 
-Run `20260927-dev-A-full-05680f9`. <!-- run_id: 20260927-dev-A-full-05680f9 -->
-
 Grade each item yourself **before** opening the key file. That file holds the judge's verdicts and the S-id -> case / arm mapping. This file shows no label, no judge verdict and no arm.
 
 Grade with the judge's own rules (`config/prompts/judge_v1.md`), using only the ground truth and the cited passages shown, not your own knowledge:

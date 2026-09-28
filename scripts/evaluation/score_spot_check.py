@@ -106,8 +106,9 @@ def check_filled(cases: dict[str, dict]) -> None:
 # --- parsing the key file ---------------------------------------------------------------------------------------
 
 def parse_key(text: str) -> dict[str, dict]:
-    """{sid: {case_id, arm, run_id, check, label, reason}} - one entry per `## Sxx` heading and its fenced json
-    judge verdict (`reason` is that verdict's own `reason` field)."""
+    """{sid: {case_id, arm, run_id, check, label, reason, verdict}} - one entry per `## Sxx` heading and its fenced
+    json judge verdict (`reason` is that verdict's own `reason` field; `verdict` is the full parsed json, kept for
+    point-level disagreement detail)."""
     matches = list(KEY_HEADER.finditer(text))
     if not matches:
         raise SpotCheckError("no `## Sxx` key entries found - not a make_spot_check.py key file?")
@@ -119,7 +120,8 @@ def parse_key(text: str) -> dict[str, dict]:
             raise SpotCheckError(f"{match['sid']}: no fenced json verdict block")
         verdict = json.loads(block.group(1))
         entries[match["sid"]] = {"case_id": match["case_id"], "arm": match["arm"], "run_id": match["run_id"],
-                                 "check": match["check"], "label": match["label"], "reason": verdict.get("reason", "")}
+                                 "check": match["check"], "label": match["label"], "reason": verdict.get("reason", ""),
+                                 "verdict": verdict}
     return entries
 
 
@@ -210,10 +212,36 @@ def confusion_matrix(pairs: list[tuple[str, str]]) -> tuple[list[str], dict[str,
     return labels, matrix
 
 
+def point_level_diffs(check: str, grades: dict[str, tuple[str, str]], verdict: dict) -> list[str]:
+    """The specific per-point/field values where the owner's grades differ from the judge's own verdict (matched
+    by point id, not position) - the concrete reason a case disagrees at the rule-based label, even when the
+    owner's own note (the holistic row) is blank."""
+    if check == "answer":
+        owner_points = {f"P{match.group(1)}": value for item, (value, _note) in grades.items()
+                       if (match := POINT_ITEM.match(item))}
+        diffs = [f"{point['id']}: owner={owner_points.get(point['id'])!r}, judge={point['covered']!r}"
+                for point in verdict.get("required_points", []) if owner_points.get(point["id"]) != point["covered"]]
+        owner_contradicts = grades["contradicts ground truth"][0].strip().lower() in ("yes", "true")
+        judge_contradicts = bool(verdict.get("contradicts_ground_truth"))
+        if owner_contradicts != judge_contradicts:
+            diffs.append(f"contradicts ground truth: owner={owner_contradicts}, judge={judge_contradicts}")
+        return diffs
+    owner_presents = grades["presents_related_as_answer"][0].strip().lower() in ("yes", "true")
+    judge_presents = bool(verdict.get("presents_related_as_answer"))
+    return [] if owner_presents == judge_presents else [f"presents_related_as_answer: owner={owner_presents}, judge={judge_presents}"]
+
+
 def disagreements(pairs: list[tuple[str, str, str]], cases: dict[str, dict], key: dict[str, dict]) -> list[dict]:
-    return [{"sid": sid, "judge_label": judge_label, "owner_label": owner_label_, "judge_reason": key[sid]["reason"],
-             "owner_note": cases[sid]["grades"][HOLISTIC_ITEM][1] or "(no note)"}
-           for sid, judge_label, owner_label_ in pairs if judge_label != owner_label_]
+    out = []
+    for sid, judge_label, owner_label_ in pairs:
+        if judge_label == owner_label_:
+            continue
+        case = cases[sid]
+        diffs = point_level_diffs(case["check"], case["grades"], key[sid]["verdict"])
+        owner_reason = "; ".join(diffs) if diffs else (case["grades"][HOLISTIC_ITEM][1] or "(no note)")
+        out.append({"sid": sid, "judge_label": judge_label, "owner_label": owner_label_,
+                   "judge_reason": key[sid]["reason"], "owner_note": owner_reason})
+    return out
 
 
 # --- rendering ---------------------------------------------------------------------------------------------

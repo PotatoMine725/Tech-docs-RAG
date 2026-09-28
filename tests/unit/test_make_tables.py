@@ -174,6 +174,18 @@ def test_prompt_version_mismatches_flags_a_run_judged_with_a_different_version()
     assert make_tables.prompt_version_mismatches([run], "judge_v1") == [("r1", "judge_v0")]
 
 
+def test_prompt_version_mismatches_flags_a_run_with_more_than_one_version_present():
+    """Two judgement lines with different `judge_prompt_version` values can legitimately coexist in one run's
+    `judgements.jsonl` (the cache key includes the version); `judgements_and_prompt_version` then derives `None`,
+    which must not be read as "no judgements" - that would let every record in the run silently score unlabelled."""
+    run = {"run_id": "r1", "judgement_lines": [
+        {"case_id": "a", "arm": "A", "answer_sha256": "h1", "judge_prompt_version": "judge_v1"},
+        {"case_id": "b", "arm": "A", "answer_sha256": "h2", "judge_prompt_version": "judge_v2"}]}
+    mismatches = make_tables.prompt_version_mismatches([run], "judge_v1")
+    assert len(mismatches) == 1 and mismatches[0][0] == "r1"
+    assert "judge_v1" in mismatches[0][1] and "judge_v2" in mismatches[0][1]
+
+
 def test_prompt_version_mismatches_disabled_when_expected_is_none():
     run = {"run_id": "r1", "judgement_lines": [
         {"case_id": "c", "arm": "A", "answer_sha256": "h", "judge_prompt_version": "judge_v0"}]}

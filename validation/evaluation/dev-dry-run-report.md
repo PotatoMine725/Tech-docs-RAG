@@ -47,7 +47,7 @@ Runs: `20260927-dev-A-full-05680f9` (arm A, mode full, split dev, 3 record(s)); 
 
 - labels (answerable): correct=2, partially_correct=0, incorrect=0, false_refusal=0.
 - runner-error records (no answer to label; excluded from every denominator in this report): (none).
-- unlabelled records (judge missing or judge_error; excluded from every denominator in this report): (none).
+- unlabelled records (judge missing or judge_error; excluded from this table's denominators and from citation support_rate/judge_class below, but still counted in citation presence_rate/source_precision/section_precision/auto_class, since the automatic span check needs no judge - `evaluation-spec.md` § Answer and citation scoring): (none).
 
 - answerable cases refused by the retrieval gate: (none).
 <!-- /AUTO:answer -->
@@ -78,6 +78,7 @@ Runs: `20260927-dev-A-full-05680f9` (arm A, mode full, split dev, 3 record(s)); 
 | section_precision | – (n=0) |
 | support_rate (judge support check, n=0) | – (n=0) |
 
+- presence_rate/source_precision/section_precision/auto_class use every answered answerable record (n=0, the automatic span check needs no judge); support_rate/judge_class use only the judged subset (n=0) - the unlabelled records excluded from it are listed in the answer table above.
 - auto_class (automatic span check): correct_evidence=0, correct_source_wrong_evidence=0, unsupported_citation=0, citation_missing=0.
 - judge_class (judge support check, n=0): correct_evidence=0, correct_source_wrong_evidence=0, unsupported_citation=0, citation_missing=0.
 - related_citation_count (citations on an insufficient answer; counted only, not scored): 0.

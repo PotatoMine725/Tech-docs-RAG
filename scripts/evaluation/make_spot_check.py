@@ -182,7 +182,6 @@ def build_sheets(run_id: str, fraction: float, seed: int, root: Path) -> tuple[s
 
     header = [
         "# Judge spot-check: owner grading sheet (blind)", "",
-        f"Run `{run_id}`. <!-- run_id: {run_id} -->", "",
     ] + PREAMBLE + [
         "",
         f"Stratified sample of judge-checked records (result x language), fraction {fraction}, seed {seed}, out of "

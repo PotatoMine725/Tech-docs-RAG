@@ -80,17 +80,20 @@ Changed (housekeeping only, no scoring-code change):
 
 ## Design decisions (for the verifier and owner)
 
-**`eval_report_data.score_row` recomposes `scoring.score_record` instead of calling it, for one reason: graceful
-degradation on missing span coverage.** `expected-spans-v1.json` covers the eval split only (EVAL-003b-pre,
-verified); `scoring.score_record` correctly *raises* `ValueError` if an answerable record's `case_id` is not in it —
-right for the runner/judge pipeline (a real eval-split run must never silently skip a case), wrong for a report
-generator that this task's own instructions require to run against dev dry-run data (whose answerable cases,
-`Q-DEV-001`/`Q-DEV-002`, are never in that file by design). `score_row` calls the exact same functions
-(`retrieval_scores`, `duplicate_rule_changes`, `answer_scores`, `citation_scores`) in the same order, adding one
-guard: an answerable record without span coverage skips `retrieval`/`citation` (both need spans) but is still scored
-for `answer` (which needs only a judge verdict, never spans), and is flagged `spans_unavailable` so every table
-caption can list it as excluded, and why. When every case_id is covered — the real eval-split runs EVAL-004
-produces — `score_row` and `score_record` agree exactly; nothing in EVAL-003b's verified scoring code changed.
+**`eval_report_data.score_row` handles missing span coverage instead of letting it raise.**
+[Superseded by Fixes §4 below — `score_row` now calls `scoring.score_record` directly for every *covered* record
+(the common case) instead of recomposing its steps by hand; only the genuinely different *uncovered* branch (an
+answerable record outside span coverage) still has its own logic, and a test now pins its key set to `score_record`'s
+own. The paragraph originally here described the pre-fix design, where both branches were hand-recomposed and
+nothing pinned either of them to `score_record` — see Fixes §4 for why that was a real drift risk, not just a style
+choice.] `expected-spans-v1.json` covers the eval split only (EVAL-003b-pre, verified); `scoring.score_record`
+correctly *raises* `ValueError` if an answerable record's `case_id` is not in it — right for the runner/judge
+pipeline (a real eval-split run must never silently skip a case), wrong for a report generator that this task's own
+instructions require to run against dev dry-run data (whose answerable cases, `Q-DEV-001`/`Q-DEV-002`, are never in
+that file by design). The uncovered-answerable branch skips `retrieval`/`citation` (both need spans) but is still
+scored for `answer` (which needs only a judge verdict, never spans), and is flagged `spans_unavailable` so every
+table caption can list it as excluded, and why. When every case_id is covered — the real eval-split runs EVAL-004
+produces — `score_row` and `score_record` agree exactly, by construction now, not just by argument.
 
 **The chunk index for the duplicate rule is built from the union of every chunk retrieved anywhere in the given
 runs, grouped by arm, not from a full corpus chunk file.** No such file is committed to the repo (chunk data lives
@@ -110,18 +113,20 @@ just following the prompt's "state run ids/n/exclusions" line: the alternative (
 answerable records with no note) would look, at a glance, identical to a real eval-split run scoring zero retrieval
 records — indistinguishable from a bug. The caption makes the reason legible.
 
-**Judge spot-check sheet fields are collapsed to one line (`collapse_whitespace`, the same whitespace normalization
-`validate_questions.py` and the retrieval metrics already use).** Two reasons: (1) the sheet's own case-heading
-parser splits on a line starting with `## `, and a generated answer or cited excerpt can contain a literal `##`
-(seen for real: chunk `07:header-1600:0006`'s `display_text` starts with `## Static classes`) — collapsing every
-field to one line means that `##` is never at the start of a line, so it can never be mistaken for the next case's
-heading; (2) it also keeps the sheet reviewable (one line per field) instead of open-ended attacker-controlled
-multi-line text interleaving with the sheet's own markup. `score_spot_check.py`'s parser relies on the same
-invariant and documents it.
+**Judge spot-check sheet: how a corpus `##` heading is kept from being mistaken for a case heading.**
+[Superseded by Fixes §2 below — the sheet format changed entirely (single-line collapsed fields → the blind
+per-point format EVAL-004a's owner sheet uses, with full multi-line ground truth and cited passages). The mechanism
+also changed: instead of collapsing every field to one line (`collapse_whitespace`), cited/quoted text is now
+rendered as a `> `-prefixed blockquote (`quote_block`), so a `##` inside it sits after `> `, never at column 0 - the
+same invariant, a different (and now format-matching) way of guaranteeing it. `collapse_whitespace` is no longer
+imported by either script.] The original one-line design: the sheet's own case-heading parser splits on a line
+starting with `## `, and a generated answer or cited excerpt can contain a literal `##` (seen for real: chunk
+`07:header-1600:0006`'s `display_text` starts with `## Static classes`) — collapsing every field to one line meant
+that `##` was never at the start of a line.
 
 **`make_tables.py`/`make_spot_check.py` add the project root, not just `src/`, to `sys.path`.** `judge_run.py` never
 needed this because it never imports `scoring.py`; `scoring.py` imports `metrics.retrieval`, which imports
-`scripts.evaluation.validate_questions` (for `collapse_whitespace`). Running either new script directly (not via
+`scripts.evaluation.validate_questions` (for a helper it needs). Running either new script directly (not via
 pytest, where `pyproject.toml`'s `pythonpath = ["src", "."]` already covers it) needs the project root on `sys.path`
 too, or that import fails with `ModuleNotFoundError: No module named 'scripts'` (caught by an actual run before the
 CLI tests were written — see "Deviations" below, it is not hypothetical).
@@ -188,10 +193,11 @@ New test coverage, matching the prompt's list exactly:
   `pytest.approx`; plus a chance-agreement case (κ=0) and an empty-input case (κ=`None`), in `test_score_spot_check.py`.
 
 Also (not explicitly asked, but load-bearing): `score_row`'s three branches (spans available / spans unavailable /
-corpus-insufficient, in `test_eval_report_data.py`); `check_filled`'s refusal on a blank or unrecognized
-`human_result`; `parse_sheet`'s resistance to an embedded `## ` mid-line (the real display_text case, reproduced
-verbatim in a test); one end-to-end CLI test per script against a fake run folder (not just unit-level functions);
-one determinism test per script (`main()` invoked twice, output compared byte-for-byte, not just argued).
+corpus-insufficient, in `test_eval_report_data.py`); `check_filled`'s refusal on a blank grade cell; `parse_owner_sheet`'s
+resistance to a blockquoted `## ` mid-line (the real display_text case, reproduced verbatim in a test - see Fixes §2
+below for the format change these two now target); one end-to-end CLI test per script against a fake run folder (not
+just unit-level functions); one determinism test per script (`main()` invoked twice, output compared byte-for-byte,
+not just argued).
 
 No mutation testing was done for this task — the prompt's own test list (quoted above) does not ask for it, unlike
 EVAL-003b's prompt which did. The pure functions this task adds (`sample_stratified`, `cohens_kappa`,
@@ -257,13 +263,14 @@ record for this task's actual changes.
 **2026-09-28 fixes:** `gitnexus_impact(target="score_row", direction="upstream")` run before editing (index
 refreshed with `npx gitnexus analyze` in this worktree first) - HIGH risk, 7 dependents, all within
 `scripts/evaluation/{eval_report_data,make_tables,make_spot_check}.py` (`score_run_pairs`, `build_report`, `main` ×2,
-`build_sheet`), i.e. this task's own report-generation toolchain, nothing in `src/`. `gitnexus_detect_changes` was
-attempted twice (`scope="unstaged"`, then `"staged"`) but the server-side classifier returned a transient error both
-times, not a risk verdict; per its own guidance, not retried further. Manual review stands in for it: no file under
-`src/knowledge_assistant/` changed in this fixes pass (confirmed by `git diff --stat` below), so no production
-symbol or execution flow is affected beyond the same evaluation-report scripts `score_row`'s own impact check
-already covered.
-record for this task's actual changes.
+`build_sheets`, renamed from `build_sheet` by Fixes §2), i.e. this task's own report-generation toolchain, nothing
+in `src/`. `gitnexus_detect_changes(scope="staged")` was attempted twice across the fixes pass: the first two calls
+returned a transient server-side classifier error, not a risk verdict; a third call (after this section's own edits
+were staged) succeeded - `risk_level: "high"` by symbol count (18 changed, across `EVAL-003c.md`'s doc sections,
+`make_tables.py`'s `render_sections`/`build_report`/`refusal_table`/`_stage_rows`, `score_spot_check.py`'s
+`cohens_kappa`/`confusion_matrix`, and two test files), but every changed/affected symbol resolves inside this
+task's own report-generation scripts and docs - confirmed by `git diff --stat -- src/` staying empty throughout.
+No file under `src/knowledge_assistant/` changed in either fixes pass.
 
 ## Unverified / open
 
@@ -271,9 +278,11 @@ record for this task's actual changes.
 - The duplicate-rule chunk-index limitation (an unresolvable `duplicate_chunk_ids` reference raises rather than
   degrading) is untested against a real unresolvable case — the committed data has none, and building one would
   need a hand-made fixture with an intentionally broken duplicate id, which the prompt's test list does not ask for.
-- `score_spot_check.py`'s confusion-matrix/agreement numbers on the real spot-check sheet are, correctly, never
-  computed in this report: the owner has not filled `human_result` yet (ledger row 11 / EVAL-004 addendum: the
-  owner's spot-check happens after the real runs).
+- ~~`score_spot_check.py`'s confusion-matrix/agreement numbers on the real spot-check sheet are, correctly, never
+  computed in this report~~: **now verified, not open.** By the time of the 2026-09-28 fixes the owner had graded
+  the real EVAL-004a sheet; `score_spot_check.py` computes 8/10 rule-based agreement (κ=0.6875) on it, matching
+  ledger row 11 exactly (Fixes §2 below). This report still never writes those numbers into its own tables (that
+  belongs to `EVAL-004b`'s real report, not this dev dry-run one).
 - OD-13 (spot-check sample size) is still open, unchanged by this task — `make_spot_check.py`'s `--fraction 0.2`
   default matches the prompt, not a new decision.
 
@@ -283,9 +292,11 @@ record for this task's actual changes.
   `judge_run.py` imports the live Gemini adapter package (`GeminiLLM`, `build_throttles`, ...) at module level; this
   task's zero-Gemini-requests instruction means `eval_report_data.py` must never import that module even
   transitively. The duplicated function is 6 lines, identical logic, documented at the copy site.
-- `eval_report_data.score_row` does not call `scoring.score_record` (see "Design decisions") — a deliberate,
-  documented deviation, not an oversight; the alternative was either fabricating span coverage for dev-split cases
-  (never do that) or crashing the whole report on the exact data the prompt says to develop against.
+- `eval_report_data.score_row` handles the uncovered-answerable case instead of letting `scoring.score_record`
+  raise on it (see "Design decisions") — a deliberate, documented deviation, not an oversight; the alternative was
+  either fabricating span coverage for dev-split cases (never do that) or crashing the whole report on the exact
+  data the prompt says to develop against. **Since the 2026-09-28 fixes, `score_row` does call `scoring.score_record`
+  directly for every other (covered) case — only this one uncovered branch still deviates.**
 - The task prompt shows `--runs RUN_A RUN_B` (exactly two); `make_tables.py` accepts `--runs RUN_ID [RUN_ID ...]`
   (one or more) since nothing in the metrics or the CSV/JSON naming actually requires exactly two, and the summary
   filename generalizes (`summary-<ids joined by "-">.json`) without any special-casing.
@@ -310,12 +321,13 @@ record for this task's actual changes.
   gap. Every one of the 9 auto-generated sections says, in the same sentence as the run ids and record count, which
   cases were excluded and the specific reason (missing span coverage, or "this run is dev-split, dry-run only").
   That turns a number that could be silently misread into one that explains itself.
-- **Why the sheet fields are collapsed to one line.** The judge spot-check sheet embeds real corpus text (cited
-  excerpts, generated answers) that this project does not control the shape of — and at least one real chunk in the
-  committed data starts its own text with `## Static classes`, which is exactly the sheet's own case-heading syntax.
-  Collapsing every field to a single line (the same whitespace normalization already used for evidence-quote
-  matching) means a `##` from quoted text can never land at the start of a line, so it can never be parsed as the
-  next case's heading. This was proven with the real chunk's text in a test, not argued abstractly.
+- **Why a corpus `##` heading can never be mistaken for the sheet's own case heading.** The judge spot-check sheet
+  embeds real corpus text (cited excerpts, generated answers) that this project does not control the shape of — and
+  at least one real chunk in the committed data starts its own text with `## Static classes`, which is exactly the
+  sheet's own case-heading syntax. Since the 2026-09-28 fixes (blind per-point format, Fixes §2), that text is
+  rendered as a `> `-prefixed blockquote, so the `##` sits after `> `, never at column 0; the original design
+  collapsed every field to one line instead, for the same reason. Both were proven with the real chunk's text in a
+  test, not argued abstractly.
 - **Why the chunk index for the duplicate rule is built from the runs' own retrieved chunks, not a corpus file.**
   No full-corpus chunk file is committed anywhere in this repository (chunk data lives in ChromaDB, which this
   offline tool never opens); every chunk actually retrieved by any case in the given runs already carries its own
@@ -345,22 +357,32 @@ Six FAILs from the verify, all fixed. Zero Gemini requests throughout.
 2. **`score_spot_check.py` now reads the format EVAL-004a's owner sheet actually uses.** Full rewrite:
    `parse_owner_sheet` reads the blind `## Sxx (answer|refusal check)` + `**Owner verdict**` table (no case id, arm
    or judge label); `parse_key` reads the separate `judge-spot-check-<run>-judge.md` key (`## Sxx` -> case/arm/run,
-   the judge's own label and its verdict's `reason`); the owner's label is derived by running the owner's per-point
+   the judge's own label and full verdict json); the owner's label is derived by running the owner's per-point
    grades through `metrics.mapping.map_result` - the same function the judge's own label came from - joined against
    the actual record (`answerable`/`insufficient`/`has_related_note`/`citations`) via `load_records_by_key`. Headline
-   is this rule-based agreement/Cohen's κ/confusion matrix/disagreements (with both sides' stated reasons); the
-   sheet's self-reported "agree with the judge?" column is now a secondary line only, since it ignores `map_result`.
-   Proven read-only against the real, committed `validation/evaluation/judge-spot-check.md` +
-   `judge-spot-check-judge.md` (owner-graded EVAL-004a sheet, untouched by this test):
-   `test_score_spot_check_on_the_real_eval_004a_sheet_matches_the_owners_corrected_figures` asserts 8/10 rule-based
-   agreement, κ = 0.6875, disagreements {S09, S10}, holistic 9/10 with S03 the odd one out - exactly ledger row 11's
-   corrected figures - and that the sheet/key bytes are unchanged before/after.
-   `make_spot_check.py` now emits that same blind sheet + separate key (ported from the scratch `build_spot_check.py`
-   in `EVAL-004a.md` Appendix B, not reinvented): full ground truth (`answer_points`/`acceptable_variations`/
-   `must_not_claim`/`citation_criteria`, all already on every record - the frozen question schema) and cited
-   passages as blockquotes (`quote_block`, so a corpus heading can never be mistaken for a `## Sxx` case heading -
-   the old sheet's `collapse_whitespace` one-line trick is no longer needed). Refuses to overwrite an existing
-   sheet/key without `--force`, so a re-run can never clobber already-graded owner work.
+   is this rule-based agreement/Cohen's κ/confusion matrix/disagreements; each disagreement's "owner" reason is the
+   specific point(s) where the owner's grade differs from the judge's own verdict (`point_level_diffs`, matched by
+   point id against the key's json - falling back to the owner's holistic-row note when every point agrees but the
+   label still differs), not just the sheet's self-reported "agree with the judge?" column, which is a secondary
+   line only since it ignores `map_result`.
+   Proven two ways, both read-only against the real, committed `validation/evaluation/judge-spot-check.md` +
+   `judge-spot-check-judge.md` (owner-graded EVAL-004a sheet - byte-identical before/after both):
+   (a) `test_score_spot_check_on_the_real_eval_004a_sheet_matches_the_owners_corrected_figures` asserts 8/10
+   rule-based agreement, κ = 0.6875, disagreements {S09, S10}, holistic 9/10 with S03 the odd one out - exactly
+   ledger row 11's corrected figures; (b) the CLI itself run against the real files with `--out` pointed at a
+   scratch file (not just the underlying functions) - the rendered section shows the same 8/10 (0.688 rounded) and
+   confusion matrix `[[4,0,0],[0,2,0],[2,0,2]]`, and now names the real disagreement: S09 `"P2: owner='yes',
+   judge='partial'"`, S10 `"P3: owner='yes', judge='partial'"` (the owner's holistic-row note for both was blank, so
+   without `point_level_diffs` this would have rendered `"(no note)"`).
+   `make_spot_check.py` now emits that same blind sheet + separate key (`build_sheets`, ported from the scratch
+   `build_spot_check.py` in `EVAL-004a.md` Appendix B, not reinvented): full ground truth (`answer_points`/
+   `acceptable_variations`/`must_not_claim`/`citation_criteria`, all already on every record - the frozen question
+   schema) and cited passages as blockquotes (`quote_block`, so a corpus heading can never be mistaken for a
+   `## Sxx` case heading - the old sheet's `collapse_whitespace` one-line trick is no longer needed). The sheet
+   prints no run id at all (an earlier draft did, in a visible "Run `<run_id>`." line; caught because the real run
+   ids embed the arm, e.g. `...-A-full-...`, contradicting the sheet's own "no arm" promise - the scorer only reads
+   the run id from the key, never from the sheet, so the line was pure leakage, removed). Refuses to overwrite an
+   existing sheet/key without `--force`, so a re-run can never clobber already-graded owner work.
    `JUDGE_AGREEMENT_PLACEHOLDER` (`make_tables.py`) updated to point at the new two-file, two-argument CLI.
 3. **Three surviving mutants killed.** New targeted tests in `test_make_tables.py`:
    `test_every_section_caption_names_the_excluded_case` (+ a pure `test_base_caption_...` pair) kills a3 (the
@@ -373,31 +395,47 @@ Six FAILs from the verify, all fixed. Zero Gemini requests throughout.
    `expected-spans-v1.json`) `score_row` now returns `{**scoring.score_record(...), "spans_unavailable": False}`
    directly - `score_record` never raises on a covered record, so any field it gains later reaches `score_row`
    automatically. Only the uncovered-answerable branch still hand-recomposes, and a new test
-   (`test_the_uncovered_branch_has_the_same_keys_as_a_covered_score_record_row`) pins its key set to a covered row's,
-   which is exactly what would fail if `score_record` gained a field the recomposed branch silently omitted (the
-   mutant the review named). Three more tests assert the covered branch equals `score_record`'s own row (plus
-   `spans_unavailable=False`) across answerable/unanswerable/non-ok shapes. `make_tables.py` also gained a
-   `prompt_version_mismatches` guard (`--judge-prompt-version`, default `get_judge_settings().prompt_version`,
-   `os.getenv` only): it aborts if any run's judgements were derived from a different judge prompt version, and
-   never flags a run with no judgements at all (a retrieval-mode run, or the dev dry-run's second, judge-free run).
-   Both real dev runs are `judge_v1`, matching the config default, so the regenerated dry-run report (fix 1) needed
-   no override.
+   (`test_the_uncovered_branch_has_the_same_keys_as_a_covered_score_record_row`) pins its key set to a covered row's.
+   **The mutant itself was run, not just described:** `"_mutant": None` was added to `score_record`'s row dict in
+   `scoring.py` (a scratch edit, restored after), and `test_eval_report_data.py` re-run: the parity test failed as
+   predicted (`set(uncovered) == set(covered)` - the extra key never reached the uncovered branch); the three
+   equality tests that compare the covered branch's output to `scoring.score_record(...)` directly still passed,
+   because both sides spread the same mutated dict - exactly the distinction the review drew between a real pin and
+   an argued one. `scoring.py`'s SHA-256 and `git diff -- src/` were checked empty after restoring. Three more tests
+   assert the covered branch equals `score_record`'s own row (plus `spans_unavailable=False`) across
+   answerable/unanswerable/non-ok shapes.
+   `make_tables.py` also gained a `prompt_version_mismatches` guard (`--judge-prompt-version`, default
+   `get_judge_settings().prompt_version`, `os.getenv` only): it aborts if any run's judgements were derived from a
+   different judge prompt version, and never flags a run with no judgements at all (a retrieval-mode run, or the
+   dev dry-run's second, judge-free run). **Closed a hole found while writing this:**
+   `judgements_and_prompt_version` returns `None` both for "no judgement lines" and for "more than one version
+   present" (legitimately possible - the cache key includes the version), and the first draft of the guard treated
+   both the same, so a run with mixed `judge_v1`/`judge_v2` judgements would have passed silently and every record
+   in it would have scored as unlabelled. Fixed by checking whether the run has any judgement lines at all before
+   trusting a `None` derived version; a new test pins the mixed-version case. Both real dev runs are `judge_v1`,
+   matching the config default, so the regenerated dry-run report (fix 1) needed no override.
 5. **`evaluation-spec.md` denominator sentence corrected.** Unlabelled (judge missing / `judge_error`) *answered*
    answerable records ARE counted in `presence_rate`, `source_precision`, `section_precision` and `auto_class` (the
    automatic span check needs no judge); they are excluded only from the judge-dependent rates
    (accuracy/lenient_accuracy/groundedness_rate/points_covered_mean/false_refusal_rate, support_rate, judge_class).
-   Dated amendment line added; a new test in `test_eval_judge.py`-style fixture pins the exact counts (one `ok` + one
-   `judge_error` answered record -> citation `answered` n=2, accuracy n=1). No scoring-code change - the code was
-   already correct, only the spec sentence was wrong.
+   Dated amendment line added; a new test in `tests/unit/application/test_eval_scoring.py` pins the exact counts
+   (one `ok` + one `judge_error` answered record -> citation `answered` n=2 and `presence_rate` n=2, accuracy n=1,
+   groundedness n=1). No scoring-code change - the code was already correct, only the spec sentence was wrong.
+   `make_tables.answer_table`'s/`citation_table`'s own generated-report notes repeated the same wrong claim ("excluded
+   from every denominator in this report") - the wording most likely to be read by EVAL-004b - fixed too, and the
+   dry-run report regenerated (summary JSON/CSVs stayed byte-identical, confirming the note text was the only
+   change).
 6. **Report/worklog corrections.** The two false claims in this report ("provably identical", "could not be mistaken
    for an actual evaluation result") are corrected in place above, not silently rewritten. `AI_WORKLOG.md`'s "tested
    directly: `tests/unit/test_eval_report_data.py`" line (2026-09-28 EVAL-003c entry) was argued, not tested, at the
    time it was written; it is left as written (historical record) with a dated correction note added directly below
-   it, true only from this fixes commit onward. Ledger row 09c updated to `verified` with this section linked.
+   it, true only from this fixes commit onward. Ledger row 09c updated to `fixes applied 2026-09-28; pending
+   limited re-verify` with this section linked - not marked `verified` here, since that call belongs to the
+   verifier, not to this fixes pass.
 
-Offline suite after the fixes: **845 passed, 1 deselected** (net +28 over the 817 baseline, per file:
-`test_eval_report_data.py` 6→10, `test_make_tables.py` 12→23 (includes the judge-prompt-version guard and the
-mutant-killing tests), `test_make_spot_check.py` 8→14, `test_score_spot_check.py` 14→20 - the last two are full
-rewrites for the blind format, not a simple addition, but net counts match exactly - plus 1 new denominator test in
-`tests/unit/application/test_eval_scoring.py` for fix 5). `tests/unit/test_project_structure.py`
+Offline suite after the fixes: **848 passed, 1 deselected** (net +31 over the 817 baseline, per file:
+`test_eval_report_data.py` 6→10, `test_make_tables.py` 12→24 (includes the judge-prompt-version guard, its
+mixed-version-ambiguity case, and the mutant-killing tests), `test_make_spot_check.py` 8→14, `test_score_spot_check.py`
+14→22 - the last two are full rewrites for the blind format, not a simple addition, but net counts match exactly -
+plus 1 new denominator test in `tests/unit/application/test_eval_scoring.py` for fix 5). `tests/unit/test_project_structure.py`
 still green. Zero Gemini/embedding requests; `AIza[0-9A-Za-z_-]{35}` over the changed tree: 0 matches.

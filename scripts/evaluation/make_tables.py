@@ -169,8 +169,10 @@ def answer_table(summary: dict) -> str:
         f"labels (answerable): {label_line}.",
         "runner-error records (no answer to label; excluded from every denominator in this report): "
         + (", ".join(summary["runner_errors"]) or "(none)") + ".",
-        "unlabelled records (judge missing or judge_error; excluded from every denominator in this report): "
-        + (", ".join(summary["unlabelled"]) or "(none)") + ".",
+        "unlabelled records (judge missing or judge_error; excluded from this table's denominators and from "
+        "citation support_rate/judge_class below, but still counted in citation presence_rate/source_precision/"
+        "section_precision/auto_class, since the automatic span check needs no judge - `evaluation-spec.md` § "
+        "Answer and citation scoring): " + (", ".join(summary["unlabelled"]) or "(none)") + ".",
     ]
     return table + "\n\n" + "\n".join(f"- {note}" for note in notes)
 
@@ -198,6 +200,10 @@ def citation_table(summary: dict) -> str:
     table = md_table((f"metric (denominator: answered answerable records, n={summary['answered']})", "value"), rows)
     auto, judge = summary["auto_class"], summary["judge_class"]
     notes = [
+        f"presence_rate/source_precision/section_precision/auto_class use every answered answerable record "
+        f"(n={summary['answered']}, the automatic span check needs no judge); support_rate/judge_class use only "
+        f"the judged subset (n={summary['judge_class_n']}) - the unlabelled records excluded from it are listed in "
+        "the answer table above.",
         "auto_class (automatic span check): " + ", ".join(f"{k}={auto[k]}" for k in scoring.CITATION_CLASSES) + ".",
         f"judge_class (judge support check, n={summary['judge_class_n']}): "
         + ", ".join(f"{k}={judge[k]}" for k in scoring.CITATION_CLASSES) + ".",
@@ -314,15 +320,24 @@ def ensure_placeholder_section(text: str, name: str, title: str, placeholder: st
 
 
 def prompt_version_mismatches(runs: list[dict], expected: str | None) -> list[tuple[str, str]]:
-    """[(run_id, derived_version), ...] for runs judged with a prompt version other than `expected`. `expected=None`
-    disables the check. A run with no judgements at all derives version `None` and never mismatches (VERIFY
-    EVAL-003c check 2: `score_row`'s drift risk also covers the version it looks judgements up by)."""
+    """[(run_id, derived_version_or_description), ...] for runs judged with a prompt version other than `expected`,
+    or whose judgements mix more than one version (ambiguous - every record would silently score as unlabelled).
+    `expected=None` disables the check. A run with no judgements at all derives version `None` too but never
+    mismatches - `judgements_and_prompt_version` returns `None` for both "no lines" and "more than one version"
+    (VERIFY EVAL-003c check 2: `score_row`'s drift risk also covers the version it looks judgements up by), so the
+    two must be told apart here by whether the run has any judgement lines at all."""
     if expected is None:
         return []
     mismatches = []
     for run in runs:
-        _, derived = judgements_and_prompt_version(run["judgement_lines"])
-        if derived is not None and derived != expected:
+        lines = run["judgement_lines"]
+        if not lines:
+            continue
+        _, derived = judgements_and_prompt_version(lines)
+        if derived is None:
+            versions = sorted({line["judge_prompt_version"] for line in lines})
+            mismatches.append((run["run_id"], f"ambiguous - multiple versions present: {versions}"))
+        elif derived != expected:
             mismatches.append((run["run_id"], derived))
     return mismatches
 
