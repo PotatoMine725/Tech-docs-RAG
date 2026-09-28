@@ -237,7 +237,7 @@ Frozen question files unchanged: `eval-v1.jsonl` `3436870e…`, `dev-v1.jsonl` `
 
 - No real 429/5xx seen: RAG-003's open question stays open.
 - The cause of the judge's marker 22 (source id copied into the marker field) is a reading, not verified.
-- The judge's quality is checked only on the 10-item owner spot-check (9 of 10 agree); OD-13 (sample size) is open.
+- The judge's quality is checked only on the 10-item owner spot-check (8/10 rule-based (9/10 holistic)); OD-13 (sample size) is open.
 - `thoughts_tokens` is null on all 61 answer records and all judge lines (the model reports none), so the cost estimate
   counts thinking tokens as 0 and says so.
 - `scoring.py`'s module docstring still says the duplicate rule "applies to every span/source value"; the code applies it

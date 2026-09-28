@@ -550,6 +550,41 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - **Owner spot-check** (after the PR opened): the owner graded the 10 items blind, then cross-checked against the judge's key: agrees on 9 of 10. S03 (Q-EVAL-012:A): the owner grades P2 `no` where the judge gave `partial`; the label stays `partially_correct`. AI committed the owner's sheet as written and recorded the result in the report and ledger.
 - *Verifier findings* ([99-VERIFY](docs/reviews/evaluation/EVAL-004a-verify.md), 2026-09-28, own worktree, zero Gemini requests): **ACCEPT WITH FIXES**. Every run/quota/judge/duplicate-rule/scoring number independently reproduced (byte-identical `summary.json` and spot-check key after re-running the report's pasted scripts; independent read-only re-derivation of the duplicate rule confirming every dropped duplicate falls at overfetch ranks 6–13; the Q-EVAL-002/B marker-22 hypothesis confirmed by rebuilding the actual judge prompt offline and showing "22" appears only as the cited chunk's source id, never as a marker). One finding: the execution report's "Owner spot-check" section states only the owner's self-reported 9/10 "agree with the judge?" answers; recomputing `map_result` from the owner's own **blind** per-point grades gives **8/10** label agreement — S09 (`Q-EVAL-020:B`) and S10 (`Q-EVAL-017:B`) also disagree (owner rated a required point `yes` where the judge rated it `partial`, which flips the mapped label from `partially_correct` to `correct`), undocumented in the report or ledger. Full point-level agreement is 6/10; citation-support agreement is 25/25 markers but the sample has no case testing whether the judge would catch a bad citation. Fix is docs-only (the execution report and ledger row 11's open items); the owner's graded sheet is not touched.
 
+### 2026-09-28 EVAL-004b: evaluation report — tables, judge reliability, appendix (branch `eval-004b`, PR into `dev`)
+- *AI did:*
+  - Branched `eval-004b` from `dev` at `c863ea0` (the PR #19 / EVAL-003c merge) in its own worktree, then ran the
+    already-built EVAL-003c tools against the two committed EVAL-004a run folders with no code/config/prompt change:
+    `make_tables.py` → `docs/reports/epics/EPIC-05-evaluation.md` (tables), `summary-<runs>.json`, two per-arm CSVs;
+    `score_spot_check.py` against the owner's real (already-graded) `judge-spot-check.md`/`-judge.md` to fill the
+    `judge_agreement` section for real, not the placeholder.
+  - Wrote the report's prose (dataset, per-metric "how measured" + observation, judge reliability, appendix,
+    measurement limitations) around the generated tables, citing case ids and checking each claim against the raw
+    `records.jsonl`/`summary.json` before writing it down.
+  - Joined the two generated per-arm CSVs into one 72-row Markdown appendix (`eval-table-eval-004-appendix.md`) with
+    a small scratch script (not committed as code), for the assignment brief's 5-column requirement across both arms.
+  - Fixed `EVAL-004a.md`'s stale "9 of 10 agree" line; updated `task-ledger.md` row 11, `master-plan.md` gate G5B
+    (all 3 boxes) and Stage B status, added `docs/snapshots/evaluation/2026-09-28.md`.
+- *AI got wrong:*
+  - **Worktree base branch.** `EnterWorktree` defaulted to branching from `origin/main`, not `dev` — the task needed
+    `eval-004b` from `dev` *after* PR #19. Caught immediately (`git log -1` showed an old commit, not `c863ea0`)
+    before any file was touched; fixed with `git reset --hard origin/dev` (clean tree, nothing to lose) and a branch
+    rename.
+  - **Latency root cause, first draft.** The first version of the "Latency" observation guessed the answer-model
+    `generate` tail was "free-tier server-side queueing" and that the judge's `total` tail had "no equivalent" in
+    `generate` — both written before checking the raw per-record `retry_wait`/`throttle_wait` fields. Checking
+    `records.jsonl` directly (a small scratch script) showed `throttle_wait` is in fact large and non-zero on the
+    slow answer records (e.g. Q-EVAL-014:B: `generate` 42441.8 ms of which `throttle_wait` is 40867.8 ms) — the tail
+    is this project's own client-side per-minute request throttle folded into the `generate` timer, the same
+    mechanism as the judge's tail, just attributed to a different stage by each script's own instrumentation. The
+    paragraph was rewritten before it reached the committed report.
+- *How found:* both caught by the AI itself before committing — the worktree branch by checking `git log` right
+  after `EnterWorktree`, the latency claim by verifying against `records.jsonl` instead of trusting the aggregate
+  table numbers alone (per the "execute, don't argue" habit from prior tasks' feedback).
+- *Fix:* both corrected in-session, before any commit; no user correction was needed.
+- *Human decision:* none needed during the task — the owner's numbered invocation (prompt log) and the already-built
+  EVAL-003c tools fully determined scope and method.
+- *Verifier findings:* pending `99-VERIFY`.
+
 ## Summary: how AI helped
 
 To be filled at QC-001.
