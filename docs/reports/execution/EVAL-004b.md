@@ -118,8 +118,10 @@ Note: `EPIC-05-evaluation.md`'s hash is only meaningful as of this commit — un
 authored content that could change in a future edit. It changed once already: the hash above is
 2026-09-29's, after the [EVAL-004b-verify](../../reviews/evaluation/EVAL-004b-verify.md) fix round (leakage-timeline
 citation corrected, EPIC-06 TODO line linked now that PR #20 merged, paired/unpaired note added) — the original
-2026-09-28 hash (`430a3b5f...94ef`) is superseded. The `summary-*`/CSV/appendix hashes above are unchanged by that
-fix round (re-ran `make_tables.py`, byte-identical).
+2026-09-28 hash (`430a3b5f...94ef`) is superseded. The `summary-*`/CSV hashes above are unchanged by that fix round
+(`make_tables.py` re-run, byte-identical); the appendix was not regenerated (`make_tables.py` doesn't produce it —
+it's a separate scratch-script join, Appendix A) and is absent from `git diff --name-status acae17f HEAD`, so its
+hash above is unaffected either way.
 
 ## Unverified / open
 
@@ -149,7 +151,7 @@ fix round (re-ran `make_tables.py`, byte-identical).
 - The worktree base-branch issue (`EnterWorktree` defaulting to `origin/main`) was a setup step, not part of the
   task's 5 items; fixed before any file was touched (see "Entry condition, environment").
 - **2026-09-29 fix round** (from [EVAL-004b-verify](../../reviews/evaluation/EVAL-004b-verify.md)'s fix prompt):
-  two numbers deviate from what the owner/verifier stated, both flagged here for the owner to approve. (1) The
+  two items deviate from what the owner/verifier stated, both flagged here for the owner to approve. (1) The
   owner's addendum gave "≈ 1 h 39 min" for the freeze-to-first-index gap; the report now states the precise
   figures instead — ≈ 1 h 41 min from the `eval-freeze-v1` tag (`739676f`, 07:31:08 +0700) and ≈ 1 h 38 min from
   the PR #8 merge (`1dd3b88d`, 07:33:41 +0700) to the first index build (09:12:06 +0700). (2) The verifier's fix

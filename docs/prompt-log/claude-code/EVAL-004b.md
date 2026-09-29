@@ -66,7 +66,8 @@ Execution notes:
   first), then merged `origin/dev` (PR #20 EXP-001, `81cb6da`). Two conflicts (`AI_WORKLOG.md`,
   `docs/plans/task-ledger.md`), both from independent same-day entries appended at the same anchor point;
   resolved by hand, keeping every entry from both sides, ordered by when each entry's content was last touched:
-  EXP-001's original entry (created `734e8ca` 14:19, last text `c7b440d` 14:21), EXP-001's post-verify follow-up
+  EXP-001's original entry (created `734e8ca` 14:19, its "Verifier findings" bullet added by `7cf6f6d` 19:17),
+  EXP-001's post-verify follow-up
   entry (created `f7a72ff` 19:37, last text — the `origin/dev` merge into `exp-001` — `181c6b2` 20:03), then
   EVAL-004b's entry (created `fbc7fce` 19:56, but its "Verifier findings" bullet was appended later by `55f8b73`
   at 20:37 — the latest touch of the three, so it goes last). `master-plan.md` auto-merged with no conflicts.

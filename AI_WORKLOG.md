@@ -667,7 +667,8 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - Step 0 (owner addendum): fast-forwarded `eval-004b` to `origin/eval-004b` (`55f8b73`, the verify commit), then
     merged `origin/dev` (PR #20 EXP-001, `81cb6da`) — merge commit `acae17f`. Two conflicts, both same-day entries
     appended at the same anchor: `AI_WORKLOG.md` and `docs/plans/task-ledger.md` row 11/12; resolved by hand keeping
-    every entry from both sides, ordered by actual commit timestamp. `master-plan.md` auto-merged, no conflict.
+    every entry from both sides, ordered by actual commit timestamp (order corrected in `e9594a1`; see below).
+    `master-plan.md` auto-merged, no conflict.
     866 passed, 1 deselected — matches the owner's expectation.
   - Applied [EVAL-004b-verify](docs/reviews/evaluation/EVAL-004b-verify.md)'s fix prompt to
     `docs/reports/epics/EPIC-05-evaluation.md`: corrected "Dataset" to cite the first index as Arm A's live build
