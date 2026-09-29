@@ -1,0 +1,146 @@
+# EVAL-002 question wording (the only hand-written input of the question files).
+# Everything else in eval-v1.jsonl / dev-v1.jsonl is copied from blueprint.yaml by
+# scripts/evaluation/build_question_files.py, so ground truth cannot drift from the approved blueprints.
+# Rules (evaluation-dataset-design.md §4, §17; evaluation-spec.md § Proposed):
+# - Vietnamese: natural phrasing a Vietnamese developer would type; API names, identifiers and
+#   common technical terms stay English (DbContext, middleware, route, unit test, Assert).
+# - No question copies the answer sentence or the exact heading it is filed under; symptoms over API names.
+# - Short code from the page is allowed where the blueprint asks for it (016, 018, 020), minus any
+#   output comment that gives the answer away.
+# Status: drafted by AI 2026-09-25, awaiting the owner's review (docs/reviews/evaluation/eval-v1-review.md).
+version: 1
+created: 2026-09-25
+cases:
+  - blueprint_id: BP-EVAL-001
+    id: Q-EVAL-001
+    question: "If the entities my EF Core query returns are already loaded in the DbContext, does EF Core still send the query to the database, or does it just hand me the objects it already has?"
+  - blueprint_id: BP-EVAL-002
+    id: Q-EVAL-002
+    question: "Nếu các entity mà query EF Core trả về đã được load sẵn trong DbContext rồi thì EF Core có còn gửi query xuống database nữa không, hay lấy luôn các object đang có?"
+  - blueprint_id: BP-EVAL-003
+    id: Q-EVAL-003
+    question: "How does the developer exception page get turned on in an ASP.NET Core app? Does a newly created app get it automatically, what do apps built from the older templates have to do, and in which environment should it be active?"
+  - blueprint_id: BP-EVAL-004
+    id: Q-EVAL-004
+    question: "Trong ASP.NET Core, Developer Exception Page được bật như thế nào? App mới tạo có tự bật sẵn không, app tạo từ template cũ thì phải làm gì, và chỉ nên bật nó ở môi trường nào?"
+  - blueprint_id: BP-EVAL-005
+    id: Q-EVAL-005
+    question: "My C# app has two jobs: downloading a file from a web service, and running an expensive calculation on the downloaded data. Should both be written the same way with async/await, or does one of them need to be handled differently?"
+  - blueprint_id: BP-EVAL-006
+    id: Q-EVAL-006
+    question: "App C# của mình có 2 việc: tải một file từ web service, và chạy một phép tính rất nặng trên dữ liệu vừa tải về. Hai việc này viết bằng async/await giống hệt nhau được không, hay có việc nào phải xử lý khác đi?"
+  - blueprint_id: BP-EVAL-007
+    id: Q-EVAL-007
+    question: "My ASP.NET Core API has a route like `api/products/{id:int}`. When a client sends a malformed id such as `abc`, it gets a 404 instead of an error saying the id is invalid. Why does that happen, and is relying on the route like this a good way to validate input?"
+  - blueprint_id: BP-EVAL-008
+    id: Q-EVAL-008
+    question: "API ASP.NET Core của mình có route kiểu `api/products/{id:int}`. Khi client gửi id sai định dạng như `abc` thì nhận về 404 chứ không phải lỗi báo id không hợp lệ. Tại sao lại vậy, và dựa vào route như thế để validate input có ổn không?"
+  - blueprint_id: BP-EVAL-009
+    id: Q-EVAL-009
+    question: "One of my unit tests calls the method under test twice, with two different inputs, and then asserts both results at the end. Is that a problem, and how should I structure the test instead?"
+  - blueprint_id: BP-EVAL-010
+    id: Q-EVAL-010
+    question: "Một unit test của mình gọi method cần test hai lần với hai input khác nhau, rồi cuối cùng mới Assert cả hai kết quả. Viết như vậy có vấn đề gì không, và nên tổ chức lại test thế nào?"
+  - blueprint_id: BP-EVAL-011
+    id: Q-EVAL-011
+    question: "I put `[ValidatableType]` on a model class that is declared private and nested inside another class. The app builds, but validation simply never runs for that model. What is going on, and how do I fix it?"
+  - blueprint_id: BP-EVAL-012
+    id: Q-EVAL-012
+    question: "Mình gắn `[ValidatableType]` cho một model class khai báo private, lồng bên trong một class khác. App vẫn build được nhưng validation cho model đó không bao giờ chạy. Nguyên nhân là gì và sửa thế nào?"
+  - blueprint_id: BP-EVAL-013
+    id: Q-EVAL-013
+    question: "My custom ASP.NET Core middleware takes a scoped service as a constructor parameter, and the app throws an exception at runtime. Why does this happen, and what are my options to fix it?"
+  - blueprint_id: BP-EVAL-014
+    id: Q-EVAL-014
+    question: "Middleware tự viết trong ASP.NET Core của mình nhận một service scoped qua constructor, và app bị throw exception lúc runtime. Tại sao lại vậy, và có những cách nào để sửa?"
+  - blueprint_id: BP-EVAL-015
+    id: Q-EVAL-015
+    question: "Our C# codebase chains asynchronous operations with ContinueWith. Why would we want to rewrite those chains to use await instead?"
+  - blueprint_id: BP-EVAL-016
+    id: Q-EVAL-016
+    question: |-
+      Đoạn code C# này in ra `list1.Count` bằng bao nhiêu, và tại sao?
+      ```csharp
+      var list1 = new List<int> { 1, 2, 3 };
+      var list2 = list1;
+      list2.Add(4);
+      Console.WriteLine($"list1 count: {list1.Count}");
+      ```
+  - blueprint_id: BP-EVAL-017
+    id: Q-EVAL-017
+    question: "In ASP.NET Core, what is the difference between how a conventional middleware and a middleware that implements IMiddleware get a scoped DbContext, and what extra setup does the IMiddleware one need in the app?"
+  - blueprint_id: BP-EVAL-018
+    id: Q-EVAL-018
+    question: "Mình muốn kiểm tra ký tự `c` không phải chữ thường nên viết `c is not >= 'a' and <= 'z'`, nhưng kết quả không như mong đợi. Sai ở đâu và sửa thế nào?"
+  - blueprint_id: BP-EVAL-019
+    id: Q-EVAL-019
+    question: "In a C# list pattern, what does `..` match, how many times can it appear in one pattern, and is `new[] { 2, 4 } is [.., 2, 4]` true?"
+  - blueprint_id: BP-EVAL-020
+    id: Q-EVAL-020
+    question: "Với `var x = 0xFF_FF_FF_FF;` thì x có kiểu gì và giá trị bao nhiêu? Nếu mình muốn lấy -1 kiểu int từ literal này thì phải viết thế nào?"
+  - blueprint_id: BP-EVAL-021
+    id: Q-EVAL-021
+    question: "How can I run a C# program that lives in a single .cs file without creating a project first?"
+  - blueprint_id: BP-EVAL-022
+    id: Q-EVAL-022
+    question: "Trong ASP.NET Core, UseStatusCodePagesWithRedirects và UseStatusCodePagesWithReExecute khác nhau thế nào? Cái nào giữ nguyên status code 404 gốc trả về cho client, và cái nào làm URL trên thanh địa chỉ trình duyệt đổi sang trang lỗi?"
+  - blueprint_id: BP-EVAL-023
+    id: Q-EVAL-023
+    question: "When my IExceptionHandler handles an exception and returns true, does ASP.NET Core still write logs and emit metrics for that exception? Can I change that?"
+  - blueprint_id: BP-EVAL-024
+    id: Q-EVAL-024
+    question: "Integration test viết bằng xUnit của mình load file theo đường dẫn tương đối với `Assembly.Location`, nhưng lúc chạy test thì không tìm thấy file. Nguyên nhân là gì và cấu hình thế nào để khắc phục?"
+  - blueprint_id: BP-EVAL-025
+    id: Q-EVAL-025
+    question: "Bots keep requesting /robots.txt and /favicon.ico on my ASP.NET Core app, which has neither file, and every one of those requests runs through the whole middleware pipeline, including authentication. How can I cheaply end these requests without running the rest of the pipeline?"
+  - blueprint_id: BP-EVAL-026
+    id: Q-EVAL-026
+    question: "Project của mình target net5.0, cài JwtBearer thì bị lỗi: `NU1202: Package Microsoft.AspNetCore.Authentication.JwtBearer 8.0.5 is not compatible with net5.0 (.NETCoreApp,Version=v5.0)`. Mình nên xử lý thế nào?"
+  - blueprint_id: BP-EVAL-027
+    id: Q-EVAL-027
+    question: "In an ASP.NET Core web API controller, what does the framework send back automatically when a posted model fails validation, and how can I change the format of that response?"
+  - blueprint_id: BP-EVAL-028
+    id: Q-EVAL-028
+    question: "Ngay từ đầu, C# có nhắm tới việc chạy nhanh và nhẹ ngang ngửa C hay assembly không?"
+  - blueprint_id: BP-EVAL-029
+    id: Q-EVAL-029
+    question: "In an ASP.NET Core app, when I inject my EF Core DbContext into a controller, what service lifetime does it have by default, and how do I use it to load the blog whose BlogId is 1?"
+  - blueprint_id: BP-EVAL-030
+    id: Q-EVAL-030
+    question: "Trong tutorial unit test C# bằng dotnet test và xUnit, test `[Theory]` được thêm vào để kiểm tra IsPrime với nhiều giá trị nhỏ hơn 2 có tên là gì, và tên đó có đúng quy tắc đặt tên unit test không?"
+  - blueprint_id: BP-EVAL-031
+    id: Q-EVAL-031
+    question: "In C#, what value does `s` hold after `string s = default;`, and why?"
+  - blueprint_id: BP-EVAL-032
+    id: Q-EVAL-032
+    question: "Mình viết một custom IExceptionHandler và muốn inject `AppDbContext` qua constructor để ghi lỗi vào database. Làm vậy có ổn không, vì sao?"
+  - blueprint_id: BP-EVAL-033
+    id: Q-EVAL-033
+    question: "My EF Core query is read-only: I only display the results. How do I make EF Core not keep track of the entities it returns?"
+  - blueprint_id: BP-EVAL-034
+    id: Q-EVAL-034
+    question: "Làm sao để giới hạn một endpoint ASP.NET Core, mỗi client chỉ được gọi tối đa 100 request mỗi phút (rate limiting)?"
+  - blueprint_id: BP-EVAL-035
+    id: Q-EVAL-035
+    question: "What does scope validation check in ASP.NET Core dependency injection, and when is it enabled?"
+  - blueprint_id: BP-EVAL-036
+    id: Q-EVAL-036
+    question: "Dùng Moq thì làm sao kiểm tra một method của mock được gọi đúng một lần?"
+  - blueprint_id: BP-DEV-001
+    id: Q-DEV-001
+    question: "What is a static class in C#, and can another class inherit from it?"
+  - blueprint_id: BP-DEV-002
+    id: Q-DEV-002
+    question: "nint và nuint trong C# là gì, và khi nào thì nên dùng chúng thay cho int hay long?"
+  - blueprint_id: BP-DEV-003
+    id: Q-DEV-003
+    question: "What makes a contextual keyword in C# different from an ordinary keyword?"
+  - blueprint_id: BP-DEV-004
+    id: Q-DEV-004
+    question: "Khi nào thì được dùng `async void` trong C#, và tại sao nên tránh nó ở những chỗ khác?"
+  - blueprint_id: BP-DEV-005
+    id: Q-DEV-005
+    question: "How do I issue refresh tokens and use them to renew JWT access tokens in ASP.NET Core?"
+  - blueprint_id: BP-DEV-006
+    id: Q-DEV-006
+    question: "Làm sao để version Web API trong ASP.NET Core, ví dụ cho v1 và v2 chạy song song?"

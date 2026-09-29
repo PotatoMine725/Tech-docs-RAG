@@ -1,1 +1,1 @@
-"""citation use cases (skeleton; depend on core interfaces only)."""
+"""Citation markers and citation building (pure functions; depend on core only)."""

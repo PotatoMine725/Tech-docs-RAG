@@ -9,7 +9,7 @@ Every prompt reads `_common.md` first (shared rules + end-of-task steps: prompt-
 | 00 | HOUSE-001 repo hygiene + submission reqs | Thu 24 | — | none | clean git, AI_WORKLOG.md |
 | 00R | REORIENT-001 sync repo state with this prompt set (one-off) | Thu 24 | 00, 01 done | none | task ledger, prompt CHANGELOG |
 | 01 | EVAL-001 design dataset | Thu 24–Fri 25 | 00 | none | blueprints, OD-4/5 |
-| 02 | EVAL-002 write + freeze | Fri 25 | 01 + **your review** + 00R verified | none | tag `eval-freeze-v1` (M1) |
+| 02 | EVAL-002 write + freeze | Fri 25 | 01 + **your review** + 00R + INGEST-004 verified | none | tag `eval-freeze-v1` (M1) |
 | 03 | INGEST-001 models, parser, normalize | Fri 25 | 00 + 00R verified (parallel with 01/02) | none | normalized.jsonl |
 | 04 | INGEST-002 chunkers + stats | Sat 26 | 03 | none | G2 |
 | 05 | INGEST-003 MarkItDown (cuttable) | Sat 26 | 03 | none | — |

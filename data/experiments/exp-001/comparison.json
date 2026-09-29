@@ -1,0 +1,7042 @@
+{
+ "inputs": {
+  "A": {
+   "run_id": "20260928-eval-A-full-491f137",
+   "records.jsonl": "0fa18da82e970675a4af83a1c166bd7b0fbdb82352fd8154eee8d7da6eba97e5",
+   "judgements.jsonl": "7f12dcb0344e87ee383be1a284ca80d2ed6bb022a14e3adfffca3133085a570e",
+   "summary.json": "02e6f4f6fd33b3d0cec88ed0eee27a45768d2251406d00a3c522de1908cfe96a",
+   "chunk_file": {
+    "name": "arm-a.jsonl",
+    "sha256": "9c3bcc6c9428d0746c6dddc5509eab79b84d9a2c4ba35bcbcf9dc45f5fcf229f"
+   }
+  },
+  "B": {
+   "run_id": "20260928-eval-B-full-491f137",
+   "records.jsonl": "910faf859d7e85ff3249dda4dba33c6082ab3521a68b6d2ad890c5e26442c2f3",
+   "judgements.jsonl": "6958f4cc18deea447c2926306ffbce4cfa568e3369180dcc7b2206515f759277",
+   "summary.json": "9dcc4eae9fac5913b4275806cf931eea2b913fc35578ac95ddf15ea8c141b675",
+   "chunk_file": {
+    "name": "arm-b.jsonl",
+    "sha256": "2bde1a0e3b42374f03d725f3a7c2b31225c0d6115aa5dc510f49c49a7edb7f2c"
+   }
+  }
+ },
+ "expected-spans-v1.json": "e7e143062c0bb776079016ed0375d9a314374d70acf9023914b4ce0a2d2c217f",
+ "held_constant": {
+  "embedding_model": "gemini-embedding-001",
+  "embedding_dim": 768,
+  "top_k": 5,
+  "overfetch": 10,
+  "threshold": 0.686,
+  "prompt_version": "answer_v2",
+  "prompt_sha256": "dfe37f535ab176028d89c73733d9e4199d8cacf693531a373bb378e4d5db7a6f",
+  "answer_model": "gemini-3.5-flash-lite",
+  "allow_fallback": false,
+  "mode": "full",
+  "split": "eval",
+  "freeze_tag": "eval-freeze-v1",
+  "question_files": {
+   "eval-v1.jsonl": "3436870ef02dfc2c25bd9d403ec6c8dd44cb46dfacbf02d586161dedd1252937",
+   "dev-v1.jsonl": "37d349e5a7fa43a179755d1c7993ef5a8438954f995bedcaee07bcfbf4da21d6"
+  }
+ },
+ "arm_config": {
+  "A": {
+   "chunker_config": "header-1600"
+  },
+  "B": {
+   "chunker_config": "fixed-1600"
+  }
+ },
+ "unlabelled": [
+  "Q-EVAL-002:B"
+ ],
+ "slices": {
+  "overall": [
+   {
+    "metric": "source_hit@1",
+    "kind": "binary",
+    "note": "",
+    "n": 32,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-016",
+     "Q-EVAL-017",
+     "Q-EVAL-018",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032"
+    ],
+    "a": 0.875,
+    "b": 0.875,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 0,
+    "a_only": [],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 32"
+   },
+   {
+    "metric": "source_hit@1:strict",
+    "kind": "binary",
+    "note": "",
+    "n": 32,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-016",
+     "Q-EVAL-017",
+     "Q-EVAL-018",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032"
+    ],
+    "a": 0.875,
+    "b": 0.84375,
+    "delta": -0.03125,
+    "ci": [
+     -0.09375,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 0,
+    "a_only": [
+     "Q-EVAL-013"
+    ],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 32"
+   },
+   {
+    "metric": "source_hit@3",
+    "kind": "binary",
+    "note": "",
+    "n": 32,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-016",
+     "Q-EVAL-017",
+     "Q-EVAL-018",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032"
+    ],
+    "a": 0.9375,
+    "b": 0.90625,
+    "delta": -0.03125,
+    "ci": [
+     -0.09375,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 0,
+    "a_only": [
+     "Q-EVAL-032"
+    ],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 32"
+   },
+   {
+    "metric": "source_hit@3:strict",
+    "kind": "binary",
+    "note": "",
+    "n": 32,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-016",
+     "Q-EVAL-017",
+     "Q-EVAL-018",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032"
+    ],
+    "a": 0.9375,
+    "b": 0.90625,
+    "delta": -0.03125,
+    "ci": [
+     -0.09375,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 0,
+    "a_only": [
+     "Q-EVAL-032"
+    ],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 32"
+   },
+   {
+    "metric": "source_hit@5",
+    "kind": "binary",
+    "note": "",
+    "n": 32,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-016",
+     "Q-EVAL-017",
+     "Q-EVAL-018",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032"
+    ],
+    "a": 0.96875,
+    "b": 0.9375,
+    "delta": -0.03125,
+    "ci": [
+     -0.09375,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 0,
+    "a_only": [
+     "Q-EVAL-031"
+    ],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 32"
+   },
+   {
+    "metric": "source_hit@5:strict",
+    "kind": "binary",
+    "note": "",
+    "n": 32,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-016",
+     "Q-EVAL-017",
+     "Q-EVAL-018",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032"
+    ],
+    "a": 0.96875,
+    "b": 0.9375,
+    "delta": -0.03125,
+    "ci": [
+     -0.09375,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 0,
+    "a_only": [
+     "Q-EVAL-031"
+    ],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 32"
+   },
+   {
+    "metric": "section_hit@1",
+    "kind": "binary",
+    "note": "",
+    "n": 32,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-016",
+     "Q-EVAL-017",
+     "Q-EVAL-018",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032"
+    ],
+    "a": 0.8125,
+    "b": 0.84375,
+    "delta": 0.03125,
+    "ci": [
+     -0.0625,
+     0.15625
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 2,
+    "a_only": [
+     "Q-EVAL-015"
+    ],
+    "b_only": [
+     "Q-EVAL-017",
+     "Q-EVAL-022"
+    ],
+    "wording": "no statistically reliable difference at n = 32"
+   },
+   {
+    "metric": "section_hit@1:strict",
+    "kind": "binary",
+    "note": "",
+    "n": 32,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-016",
+     "Q-EVAL-017",
+     "Q-EVAL-018",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032"
+    ],
+    "a": 0.78125,
+    "b": 0.71875,
+    "delta": -0.0625,
+    "ci": [
+     -0.1875,
+     0.0625
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 0.625,
+    "mcnemar_b": 3,
+    "mcnemar_c": 1,
+    "a_only": [
+     "Q-EVAL-005",
+     "Q-EVAL-013",
+     "Q-EVAL-015"
+    ],
+    "b_only": [
+     "Q-EVAL-022"
+    ],
+    "wording": "no statistically reliable difference at n = 32"
+   },
+   {
+    "metric": "section_hit@3",
+    "kind": "binary",
+    "note": "",
+    "n": 32,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-016",
+     "Q-EVAL-017",
+     "Q-EVAL-018",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032"
+    ],
+    "a": 0.90625,
+    "b": 0.90625,
+    "delta": 0.0,
+    "ci": [
+     -0.09375,
+     0.09375
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 1,
+    "a_only": [
+     "Q-EVAL-032"
+    ],
+    "b_only": [
+     "Q-EVAL-022"
+    ],
+    "wording": "no statistically reliable difference at n = 32"
+   },
+   {
+    "metric": "section_hit@3:strict",
+    "kind": "binary",
+    "note": "",
+    "n": 32,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-016",
+     "Q-EVAL-017",
+     "Q-EVAL-018",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032"
+    ],
+    "a": 0.90625,
+    "b": 0.84375,
+    "delta": -0.0625,
+    "ci": [
+     -0.1875,
+     0.0625
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 0.625,
+    "mcnemar_b": 3,
+    "mcnemar_c": 1,
+    "a_only": [
+     "Q-EVAL-006",
+     "Q-EVAL-017",
+     "Q-EVAL-032"
+    ],
+    "b_only": [
+     "Q-EVAL-022"
+    ],
+    "wording": "no statistically reliable difference at n = 32"
+   },
+   {
+    "metric": "section_hit@5",
+    "kind": "binary",
+    "note": "",
+    "n": 32,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-016",
+     "Q-EVAL-017",
+     "Q-EVAL-018",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032"
+    ],
+    "a": 0.9375,
+    "b": 0.9375,
+    "delta": 0.0,
+    "ci": [
+     -0.09375,
+     0.09375
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 1,
+    "a_only": [
+     "Q-EVAL-031"
+    ],
+    "b_only": [
+     "Q-EVAL-022"
+    ],
+    "wording": "no statistically reliable difference at n = 32"
+   },
+   {
+    "metric": "section_hit@5:strict",
+    "kind": "binary",
+    "note": "",
+    "n": 32,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-016",
+     "Q-EVAL-017",
+     "Q-EVAL-018",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032"
+    ],
+    "a": 0.9375,
+    "b": 0.9375,
+    "delta": 0.0,
+    "ci": [
+     -0.09375,
+     0.09375
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 1,
+    "a_only": [
+     "Q-EVAL-031"
+    ],
+    "b_only": [
+     "Q-EVAL-022"
+    ],
+    "wording": "no statistically reliable difference at n = 32"
+   },
+   {
+    "metric": "evidence_hit@1",
+    "kind": "binary",
+    "note": "",
+    "n": 32,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-016",
+     "Q-EVAL-017",
+     "Q-EVAL-018",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032"
+    ],
+    "a": 0.59375,
+    "b": 0.40625,
+    "delta": -0.1875,
+    "ci": [
+     -0.40625,
+     0.0625
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 0.210113525390625,
+    "mcnemar_b": 11,
+    "mcnemar_c": 5,
+    "a_only": [
+     "Q-EVAL-005",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-027",
+     "Q-EVAL-031"
+    ],
+    "b_only": [
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-023"
+    ],
+    "wording": "no statistically reliable difference at n = 32"
+   },
+   {
+    "metric": "evidence_hit@3",
+    "kind": "binary",
+    "note": "",
+    "n": 32,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-016",
+     "Q-EVAL-017",
+     "Q-EVAL-018",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032"
+    ],
+    "a": 0.875,
+    "b": 0.78125,
+    "delta": -0.09375,
+    "ci": [
+     -0.25,
+     0.0625
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 0.453125,
+    "mcnemar_b": 5,
+    "mcnemar_c": 2,
+    "a_only": [
+     "Q-EVAL-006",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-027",
+     "Q-EVAL-032"
+    ],
+    "b_only": [
+     "Q-EVAL-003",
+     "Q-EVAL-004"
+    ],
+    "wording": "no statistically reliable difference at n = 32"
+   },
+   {
+    "metric": "evidence_hit@5",
+    "kind": "binary",
+    "note": "",
+    "n": 32,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-016",
+     "Q-EVAL-017",
+     "Q-EVAL-018",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032"
+    ],
+    "a": 0.9375,
+    "b": 0.84375,
+    "delta": -0.09375,
+    "ci": [
+     -0.1875,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 0.25,
+    "mcnemar_b": 3,
+    "mcnemar_c": 0,
+    "a_only": [
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-027"
+    ],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 32"
+   },
+   {
+    "metric": "mrr",
+    "kind": "continuous",
+    "note": "",
+    "n": 32,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-016",
+     "Q-EVAL-017",
+     "Q-EVAL-018",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032"
+    ],
+    "a": 1.0,
+    "b": 0.984375,
+    "delta": -0.015625,
+    "ci": [
+     -0.046875,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 1.0,
+    "wilcoxon_n": 1,
+    "zeros_dropped": 31,
+    "w_plus": 0,
+    "w_minus": 1.0,
+    "a_p50": 1.0,
+    "a_p95": 1.0,
+    "b_p50": 1.0,
+    "b_p95": 1.0,
+    "wording": "no statistically reliable difference at n = 32"
+   },
+   {
+    "metric": "mrr:strict",
+    "kind": "continuous",
+    "note": "",
+    "n": 32,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-016",
+     "Q-EVAL-017",
+     "Q-EVAL-018",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032"
+    ],
+    "a": 0.9635416666666666,
+    "b": 0.928125,
+    "delta": -0.03541666666666665,
+    "ci": [
+     -0.09791666666666665,
+     0.027083333333333348
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 0.375,
+    "wilcoxon_n": 5,
+    "zeros_dropped": 27,
+    "w_plus": 3.5,
+    "w_minus": 11.5,
+    "a_p50": 1.0,
+    "a_p95": 1.0,
+    "b_p50": 1.0,
+    "b_p95": 1.0,
+    "wording": "no statistically reliable difference at n = 32"
+   },
+   {
+    "metric": "accuracy",
+    "kind": "binary",
+    "note": "answerable, labelled in both arms",
+    "n": 31,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-016",
+     "Q-EVAL-017",
+     "Q-EVAL-018",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032"
+    ],
+    "a": 0.7096774193548387,
+    "b": 0.7419354838709677,
+    "delta": 0.032258064516129004,
+    "ci": [
+     -0.09677419354838712,
+     0.16129032258064524
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 2,
+    "mcnemar_c": 3,
+    "a_only": [
+     "Q-EVAL-020",
+     "Q-EVAL-027"
+    ],
+    "b_only": [
+     "Q-EVAL-001",
+     "Q-EVAL-012",
+     "Q-EVAL-022"
+    ],
+    "wording": "no statistically reliable difference at n = 31"
+   },
+   {
+    "metric": "lenient_accuracy",
+    "kind": "binary",
+    "note": "correct or partially_correct",
+    "n": 31,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-016",
+     "Q-EVAL-017",
+     "Q-EVAL-018",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032"
+    ],
+    "a": 0.8709677419354839,
+    "b": 0.9354838709677419,
+    "delta": 0.06451612903225801,
+    "ci": [
+     0.0,
+     0.16129032258064524
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 0.5,
+    "mcnemar_b": 0,
+    "mcnemar_c": 2,
+    "a_only": [],
+    "b_only": [
+     "Q-EVAL-001",
+     "Q-EVAL-022"
+    ],
+    "wording": "no statistically reliable difference at n = 31"
+   },
+   {
+    "metric": "false_refusal",
+    "kind": "binary",
+    "note": "lower is better",
+    "n": 31,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-016",
+     "Q-EVAL-017",
+     "Q-EVAL-018",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032"
+    ],
+    "a": 0.12903225806451613,
+    "b": 0.06451612903225806,
+    "delta": -0.06451612903225806,
+    "ci": [
+     -0.16129032258064516,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 0.5,
+    "mcnemar_b": 2,
+    "mcnemar_c": 0,
+    "a_only": [
+     "Q-EVAL-001",
+     "Q-EVAL-022"
+    ],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 31"
+   },
+   {
+    "metric": "groundedness",
+    "kind": "binary",
+    "note": "answer-checked records judged in both arms",
+    "n": 27,
+    "cases": [
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032"
+    ],
+    "a": 0.9259259259259259,
+    "b": 1.0,
+    "delta": 0.07407407407407407,
+    "ci": [
+     0.0,
+     0.18518518518518523
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 0.5,
+    "mcnemar_b": 0,
+    "mcnemar_c": 2,
+    "a_only": [],
+    "b_only": [
+     "Q-EVAL-005",
+     "Q-EVAL-026"
+    ],
+    "wording": "no statistically reliable difference at n = 27"
+   },
+   {
+    "metric": "correct_refusal",
+    "kind": "binary",
+    "note": "corpus-insufficient cases",
+    "n": 4,
+    "cases": [
+     "Q-EVAL-033",
+     "Q-EVAL-034",
+     "Q-EVAL-035",
+     "Q-EVAL-036"
+    ],
+    "a": 1.0,
+    "b": 1.0,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 0,
+    "a_only": [],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 4"
+   },
+   {
+    "metric": "hallucination",
+    "kind": "binary",
+    "note": "corpus-insufficient; lower is better",
+    "n": 4,
+    "cases": [
+     "Q-EVAL-033",
+     "Q-EVAL-034",
+     "Q-EVAL-035",
+     "Q-EVAL-036"
+    ],
+    "a": 0.0,
+    "b": 0.0,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 0,
+    "a_only": [],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 4"
+   },
+   {
+    "metric": "citation_support_rate",
+    "kind": "continuous",
+    "note": "judge; answered in both arms",
+    "n": 27,
+    "cases": [
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032"
+    ],
+    "a": 0.9814814814814815,
+    "b": 0.9629629629629629,
+    "delta": -0.0185185185185186,
+    "ci": [
+     -0.07407407407407407,
+     0.03703703703703709
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 1.0,
+    "wilcoxon_n": 3,
+    "zeros_dropped": 24,
+    "w_plus": 2.0,
+    "w_minus": 4.0,
+    "a_p50": 1.0,
+    "a_p95": 1.0,
+    "b_p50": 1.0,
+    "b_p95": 1.0,
+    "wording": "no statistically reliable difference at n = 27"
+   },
+   {
+    "metric": "citation_section_precision",
+    "kind": "continuous",
+    "note": "span check; answered in both",
+    "n": 28,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032"
+    ],
+    "a": 0.9642857142857143,
+    "b": 0.9880952380952381,
+    "delta": 0.023809523809523836,
+    "ci": [
+     -0.023809523809523836,
+     0.0892857142857143
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 0.5,
+    "wilcoxon_n": 3,
+    "zeros_dropped": 25,
+    "w_plus": 5.0,
+    "w_minus": 1.0,
+    "a_p50": 1.0,
+    "a_p95": 1.0,
+    "b_p50": 1.0,
+    "b_p95": 1.0,
+    "wording": "no statistically reliable difference at n = 28"
+   },
+   {
+    "metric": "latency_retrieve_ms",
+    "kind": "continuous",
+    "note": "",
+    "n": 36,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-016",
+     "Q-EVAL-017",
+     "Q-EVAL-018",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032",
+     "Q-EVAL-033",
+     "Q-EVAL-034",
+     "Q-EVAL-035",
+     "Q-EVAL-036"
+    ],
+    "a": 15.675511111112428,
+    "b": 2.575483333338803,
+    "delta": -13.100027777773626,
+    "ci": [
+     -36.33110833332706,
+     -1.203558333331658
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 1.2543750926852226e-07,
+    "wilcoxon_n": 36,
+    "zeros_dropped": 0,
+    "w_plus": 35.0,
+    "w_minus": 631.0,
+    "a_p50": 3.883099999939077,
+    "a_p95": 11.169300000005933,
+    "b_p50": 2.3658999999724983,
+    "b_p95": 3.847100000029968,
+    "wording": "B lower than A (p = 1.25e-07, n = 36)"
+   },
+   {
+    "metric": "latency_generate_ms",
+    "kind": "continuous",
+    "note": "LLM called in both arms",
+    "n": 30,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032",
+     "Q-EVAL-035"
+    ],
+    "a": 3945.615380000004,
+    "b": 4211.2075133333365,
+    "delta": 265.59213333333264,
+    "ci": [
+     -4642.9873266666655,
+     5344.874306666665
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 0.7000329215079546,
+    "wilcoxon_n": 30,
+    "zeros_dropped": 0,
+    "w_plus": 213.0,
+    "w_minus": 252.0,
+    "a_p50": 1502.827600000046,
+    "a_p95": 36583.71889999989,
+    "b_p50": 1494.9930000000222,
+    "b_p95": 39423.23799999997,
+    "wording": "no statistically reliable difference at n = 30"
+   },
+   {
+    "metric": "latency_embed_query_ms",
+    "kind": "descriptive",
+    "note": "not comparable: arm B's query embeddings were cache hits",
+    "n": 36,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-016",
+     "Q-EVAL-017",
+     "Q-EVAL-018",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032",
+     "Q-EVAL-033",
+     "Q-EVAL-034",
+     "Q-EVAL-035",
+     "Q-EVAL-036"
+    ],
+    "a": 351.8269500000315,
+    "b": 0.1219999999761967,
+    "delta": null,
+    "ci": null,
+    "test": null,
+    "p": null,
+    "statistic": "median",
+    "wording": "not tested (not comparable: arm B's query embeddings were cache hits)"
+   },
+   {
+    "metric": "latency_total_ms",
+    "kind": "descriptive",
+    "note": "not comparable: includes embed_query",
+    "n": 36,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-016",
+     "Q-EVAL-017",
+     "Q-EVAL-018",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032",
+     "Q-EVAL-033",
+     "Q-EVAL-034",
+     "Q-EVAL-035",
+     "Q-EVAL-036"
+    ],
+    "a": 1856.7002500000171,
+    "b": 1484.519300000045,
+    "delta": null,
+    "ci": null,
+    "test": null,
+    "p": null,
+    "statistic": "median",
+    "wording": "not tested (not comparable: includes embed_query)"
+   },
+   {
+    "metric": "tokens_prompt",
+    "kind": "continuous",
+    "note": "LLM called in both arms",
+    "n": 30,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032",
+     "Q-EVAL-035"
+    ],
+    "a": 1628.5666666666666,
+    "b": 2122.5666666666666,
+    "delta": 494.0,
+    "ci": [
+     418.83333333333326,
+     567.2333333333333
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 1.862645149230957e-09,
+    "wilcoxon_n": 30,
+    "zeros_dropped": 0,
+    "w_plus": 465.0,
+    "w_minus": 0,
+    "a_p50": 1545,
+    "a_p95": 2445,
+    "b_p50": 2055,
+    "b_p95": 2847,
+    "wording": "B higher than A (p = 1.86e-09, n = 30)"
+   },
+   {
+    "metric": "tokens_output",
+    "kind": "continuous",
+    "note": "LLM called in both arms",
+    "n": 30,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032",
+     "Q-EVAL-035"
+    ],
+    "a": 149.76666666666668,
+    "b": 162.66666666666666,
+    "delta": 12.899999999999977,
+    "ci": [
+     1.6000000000000227,
+     28.066666666666663
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 0.112844068557024,
+    "wilcoxon_n": 30,
+    "zeros_dropped": 0,
+    "w_plus": 310.0,
+    "w_minus": 155.0,
+    "a_p50": 146,
+    "a_p95": 225,
+    "b_p50": 160,
+    "b_p95": 244,
+    "wording": "no statistically reliable difference at n = 30"
+   },
+   {
+    "metric": "tokens_total",
+    "kind": "continuous",
+    "note": "LLM called in both arms",
+    "n": 30,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-020",
+     "Q-EVAL-021",
+     "Q-EVAL-022",
+     "Q-EVAL-023",
+     "Q-EVAL-024",
+     "Q-EVAL-025",
+     "Q-EVAL-026",
+     "Q-EVAL-027",
+     "Q-EVAL-028",
+     "Q-EVAL-029",
+     "Q-EVAL-030",
+     "Q-EVAL-031",
+     "Q-EVAL-032",
+     "Q-EVAL-035"
+    ],
+    "a": 1778.3333333333333,
+    "b": 2285.233333333333,
+    "delta": 506.89999999999986,
+    "ci": [
+     432.63333333333344,
+     579.0999999999999
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 1.862645149230957e-09,
+    "wilcoxon_n": 30,
+    "zeros_dropped": 0,
+    "w_plus": 465.0,
+    "w_minus": 0,
+    "a_p50": 1693,
+    "a_p95": 2552,
+    "b_p50": 2216,
+    "b_p95": 3062,
+    "wording": "B higher than A (p = 1.86e-09, n = 30)"
+   }
+  ],
+  "en": [
+   {
+    "metric": "source_hit@1",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031"
+    ],
+    "a": 0.875,
+    "b": 0.875,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 0,
+    "a_only": [],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "source_hit@1:strict",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031"
+    ],
+    "a": 0.875,
+    "b": 0.8125,
+    "delta": -0.0625,
+    "ci": [
+     -0.1875,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 0,
+    "a_only": [
+     "Q-EVAL-013"
+    ],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "source_hit@3",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031"
+    ],
+    "a": 0.9375,
+    "b": 0.9375,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 0,
+    "a_only": [],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "source_hit@3:strict",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031"
+    ],
+    "a": 0.9375,
+    "b": 0.9375,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 0,
+    "a_only": [],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "source_hit@5",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031"
+    ],
+    "a": 1.0,
+    "b": 0.9375,
+    "delta": -0.0625,
+    "ci": [
+     -0.1875,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 0,
+    "a_only": [
+     "Q-EVAL-031"
+    ],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "source_hit@5:strict",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031"
+    ],
+    "a": 1.0,
+    "b": 0.9375,
+    "delta": -0.0625,
+    "ci": [
+     -0.1875,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 0,
+    "a_only": [
+     "Q-EVAL-031"
+    ],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "section_hit@1",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031"
+    ],
+    "a": 0.8125,
+    "b": 0.8125,
+    "delta": 0.0,
+    "ci": [
+     -0.1875,
+     0.1875
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 1,
+    "a_only": [
+     "Q-EVAL-015"
+    ],
+    "b_only": [
+     "Q-EVAL-017"
+    ],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "section_hit@1:strict",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031"
+    ],
+    "a": 0.8125,
+    "b": 0.625,
+    "delta": -0.1875,
+    "ci": [
+     -0.375,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 0.25,
+    "mcnemar_b": 3,
+    "mcnemar_c": 0,
+    "a_only": [
+     "Q-EVAL-005",
+     "Q-EVAL-013",
+     "Q-EVAL-015"
+    ],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "section_hit@3",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031"
+    ],
+    "a": 0.9375,
+    "b": 0.9375,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 0,
+    "a_only": [],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "section_hit@3:strict",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031"
+    ],
+    "a": 0.9375,
+    "b": 0.875,
+    "delta": -0.0625,
+    "ci": [
+     -0.1875,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 0,
+    "a_only": [
+     "Q-EVAL-017"
+    ],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "section_hit@5",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031"
+    ],
+    "a": 1.0,
+    "b": 0.9375,
+    "delta": -0.0625,
+    "ci": [
+     -0.1875,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 0,
+    "a_only": [
+     "Q-EVAL-031"
+    ],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "section_hit@5:strict",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031"
+    ],
+    "a": 1.0,
+    "b": 0.9375,
+    "delta": -0.0625,
+    "ci": [
+     -0.1875,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 0,
+    "a_only": [
+     "Q-EVAL-031"
+    ],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "evidence_hit@1",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031"
+    ],
+    "a": 0.625,
+    "b": 0.3125,
+    "delta": -0.3125,
+    "ci": [
+     -0.6875,
+     0.0625
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 0.2265625,
+    "mcnemar_b": 8,
+    "mcnemar_c": 3,
+    "a_only": [
+     "Q-EVAL-005",
+     "Q-EVAL-009",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-027",
+     "Q-EVAL-031"
+    ],
+    "b_only": [
+     "Q-EVAL-003",
+     "Q-EVAL-011",
+     "Q-EVAL-023"
+    ],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "evidence_hit@3",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031"
+    ],
+    "a": 0.9375,
+    "b": 0.9375,
+    "delta": 0.0,
+    "ci": [
+     -0.1875,
+     0.1875
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 1,
+    "a_only": [
+     "Q-EVAL-027"
+    ],
+    "b_only": [
+     "Q-EVAL-003"
+    ],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "evidence_hit@5",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031"
+    ],
+    "a": 1.0,
+    "b": 0.9375,
+    "delta": -0.0625,
+    "ci": [
+     -0.1875,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 0,
+    "a_only": [
+     "Q-EVAL-027"
+    ],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "mrr",
+    "kind": "continuous",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031"
+    ],
+    "a": 1.0,
+    "b": 0.96875,
+    "delta": -0.03125,
+    "ci": [
+     -0.09375,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 1.0,
+    "wilcoxon_n": 1,
+    "zeros_dropped": 15,
+    "w_plus": 0,
+    "w_minus": 1.0,
+    "a_p50": 1.0,
+    "a_p95": 1.0,
+    "b_p50": 1.0,
+    "b_p95": 1.0,
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "mrr:strict",
+    "kind": "continuous",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031"
+    ],
+    "a": 0.96875,
+    "b": 0.90625,
+    "delta": -0.0625,
+    "ci": [
+     -0.1875,
+     0.0625
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 0.625,
+    "wilcoxon_n": 4,
+    "zeros_dropped": 12,
+    "w_plus": 2.5,
+    "w_minus": 7.5,
+    "a_p50": 1.0,
+    "a_p95": 1.0,
+    "b_p50": 1.0,
+    "b_p95": 1.0,
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "accuracy",
+    "kind": "binary",
+    "note": "answerable, labelled in both arms",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031"
+    ],
+    "a": 0.8125,
+    "b": 0.8125,
+    "delta": 0.0,
+    "ci": [
+     -0.1875,
+     0.1875
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 1,
+    "a_only": [
+     "Q-EVAL-027"
+    ],
+    "b_only": [
+     "Q-EVAL-001"
+    ],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "lenient_accuracy",
+    "kind": "binary",
+    "note": "correct or partially_correct",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031"
+    ],
+    "a": 0.9375,
+    "b": 1.0,
+    "delta": 0.0625,
+    "ci": [
+     0.0,
+     0.1875
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 1,
+    "a_only": [],
+    "b_only": [
+     "Q-EVAL-001"
+    ],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "false_refusal",
+    "kind": "binary",
+    "note": "lower is better",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031"
+    ],
+    "a": 0.0625,
+    "b": 0.0,
+    "delta": -0.0625,
+    "ci": [
+     -0.1875,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 0,
+    "a_only": [
+     "Q-EVAL-001"
+    ],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "groundedness",
+    "kind": "binary",
+    "note": "answer-checked records judged in both arms",
+    "n": 15,
+    "cases": [
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031"
+    ],
+    "a": 0.9333333333333333,
+    "b": 1.0,
+    "delta": 0.06666666666666665,
+    "ci": [
+     0.0,
+     0.19999999999999996
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 1,
+    "a_only": [],
+    "b_only": [
+     "Q-EVAL-005"
+    ],
+    "wording": "no statistically reliable difference at n = 15"
+   },
+   {
+    "metric": "correct_refusal",
+    "kind": "binary",
+    "note": "corpus-insufficient cases",
+    "n": 2,
+    "cases": [
+     "Q-EVAL-033",
+     "Q-EVAL-035"
+    ],
+    "a": 1.0,
+    "b": 1.0,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 0,
+    "a_only": [],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 2"
+   },
+   {
+    "metric": "hallucination",
+    "kind": "binary",
+    "note": "corpus-insufficient; lower is better",
+    "n": 2,
+    "cases": [
+     "Q-EVAL-033",
+     "Q-EVAL-035"
+    ],
+    "a": 0.0,
+    "b": 0.0,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 0,
+    "a_only": [],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 2"
+   },
+   {
+    "metric": "citation_support_rate",
+    "kind": "continuous",
+    "note": "judge; answered in both arms",
+    "n": 15,
+    "cases": [
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031"
+    ],
+    "a": 0.9666666666666667,
+    "b": 0.9333333333333333,
+    "delta": -0.033333333333333326,
+    "ci": [
+     -0.1333333333333333,
+     0.06666666666666665
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 1.0,
+    "wilcoxon_n": 3,
+    "zeros_dropped": 12,
+    "w_plus": 2.0,
+    "w_minus": 4.0,
+    "a_p50": 1.0,
+    "a_p95": 1.0,
+    "b_p50": 1.0,
+    "b_p95": 1.0,
+    "wording": "no statistically reliable difference at n = 15"
+   },
+   {
+    "metric": "citation_section_precision",
+    "kind": "continuous",
+    "note": "span check; answered in both",
+    "n": 15,
+    "cases": [
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031"
+    ],
+    "a": 0.9333333333333333,
+    "b": 1.0,
+    "delta": 0.06666666666666665,
+    "ci": [
+     0.0,
+     0.16666666666666663
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 0.5,
+    "wilcoxon_n": 2,
+    "zeros_dropped": 13,
+    "w_plus": 3.0,
+    "w_minus": 0,
+    "a_p50": 1.0,
+    "a_p95": 1.0,
+    "b_p50": 1.0,
+    "b_p95": 1.0,
+    "wording": "no statistically reliable difference at n = 15"
+   },
+   {
+    "metric": "latency_retrieve_ms",
+    "kind": "continuous",
+    "note": "",
+    "n": 18,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031",
+     "Q-EVAL-033",
+     "Q-EVAL-035"
+    ],
+    "a": 27.54743888888495,
+    "b": 2.5152166666720808,
+    "delta": -25.03222222221287,
+    "ci": [
+     -71.18908888887492,
+     -1.3673388888517164
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 5.340576171875e-05,
+    "wilcoxon_n": 18,
+    "zeros_dropped": 0,
+    "w_plus": 4.0,
+    "w_minus": 167.0,
+    "a_p50": 3.883099999939077,
+    "a_p95": 414.6127000000206,
+    "b_p50": 2.269400000045607,
+    "b_p95": 3.875600000014856,
+    "wording": "B lower than A (p = 5.34e-05, n = 18)"
+   },
+   {
+    "metric": "latency_generate_ms",
+    "kind": "continuous",
+    "note": "LLM called in both arms",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031",
+     "Q-EVAL-035"
+    ],
+    "a": 3617.9052875000007,
+    "b": 3873.7770187499973,
+    "delta": 255.87173124999663,
+    "ci": [
+     -6465.272087499982,
+     7198.3233062499885
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 0.781951904296875,
+    "wilcoxon_n": 16,
+    "zeros_dropped": 0,
+    "w_plus": 74.0,
+    "w_minus": 62.0,
+    "a_p50": 1396.31200000008,
+    "a_p95": 36583.71889999989,
+    "b_p50": 1433.1585000001041,
+    "b_p95": 39423.23799999997,
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "latency_embed_query_ms",
+    "kind": "descriptive",
+    "note": "not comparable: arm B's query embeddings were cache hits",
+    "n": 18,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031",
+     "Q-EVAL-033",
+     "Q-EVAL-035"
+    ],
+    "a": 353.6161999999763,
+    "b": 0.11614999999665088,
+    "delta": null,
+    "ci": null,
+    "test": null,
+    "p": null,
+    "statistic": "median",
+    "wording": "not tested (not comparable: arm B's query embeddings were cache hits)"
+   },
+   {
+    "metric": "latency_total_ms",
+    "kind": "descriptive",
+    "note": "not comparable: includes embed_query",
+    "n": 18,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031",
+     "Q-EVAL-033",
+     "Q-EVAL-035"
+    ],
+    "a": 1814.0399999999772,
+    "b": 1451.541050000003,
+    "delta": null,
+    "ci": null,
+    "test": null,
+    "p": null,
+    "statistic": "median",
+    "wording": "not tested (not comparable: includes embed_query)"
+   },
+   {
+    "metric": "tokens_prompt",
+    "kind": "continuous",
+    "note": "LLM called in both arms",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031",
+     "Q-EVAL-035"
+    ],
+    "a": 1588.6875,
+    "b": 2089.625,
+    "delta": 500.9375,
+    "ci": [
+     401.6875,
+     596.875
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 3.0517578125e-05,
+    "wilcoxon_n": 16,
+    "zeros_dropped": 0,
+    "w_plus": 136.0,
+    "w_minus": 0,
+    "a_p50": 1544,
+    "a_p95": 2445,
+    "b_p50": 2055,
+    "b_p95": 2847,
+    "wording": "B higher than A (p = 3.05e-05, n = 16)"
+   },
+   {
+    "metric": "tokens_output",
+    "kind": "continuous",
+    "note": "LLM called in both arms",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031",
+     "Q-EVAL-035"
+    ],
+    "a": 143.4375,
+    "b": 149.375,
+    "delta": 5.9375,
+    "ci": [
+     -4.5625,
+     17.8125
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 0.641204833984375,
+    "wilcoxon_n": 16,
+    "zeros_dropped": 0,
+    "w_plus": 77.5,
+    "w_minus": 58.5,
+    "a_p50": 130,
+    "a_p95": 245,
+    "b_p50": 156,
+    "b_p95": 244,
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "tokens_total",
+    "kind": "continuous",
+    "note": "LLM called in both arms",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-003",
+     "Q-EVAL-005",
+     "Q-EVAL-007",
+     "Q-EVAL-009",
+     "Q-EVAL-011",
+     "Q-EVAL-013",
+     "Q-EVAL-015",
+     "Q-EVAL-017",
+     "Q-EVAL-019",
+     "Q-EVAL-021",
+     "Q-EVAL-023",
+     "Q-EVAL-025",
+     "Q-EVAL-027",
+     "Q-EVAL-029",
+     "Q-EVAL-031",
+     "Q-EVAL-035"
+    ],
+    "a": 1732.125,
+    "b": 2239.0,
+    "delta": 506.875,
+    "ci": [
+     406.5625,
+     601.75
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 3.0517578125e-05,
+    "wilcoxon_n": 16,
+    "zeros_dropped": 0,
+    "w_plus": 136.0,
+    "w_minus": 0,
+    "a_p50": 1665,
+    "a_p95": 2552,
+    "b_p50": 2216,
+    "b_p95": 2978,
+    "wording": "B higher than A (p = 3.05e-05, n = 16)"
+   }
+  ],
+  "vi": [
+   {
+    "metric": "source_hit@1",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 0.875,
+    "b": 0.875,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 0,
+    "a_only": [],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "source_hit@1:strict",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 0.875,
+    "b": 0.875,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 0,
+    "a_only": [],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "source_hit@3",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 0.9375,
+    "b": 0.875,
+    "delta": -0.0625,
+    "ci": [
+     -0.1875,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 0,
+    "a_only": [
+     "Q-EVAL-032"
+    ],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "source_hit@3:strict",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 0.9375,
+    "b": 0.875,
+    "delta": -0.0625,
+    "ci": [
+     -0.1875,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 0,
+    "a_only": [
+     "Q-EVAL-032"
+    ],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "source_hit@5",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 0.9375,
+    "b": 0.9375,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 0,
+    "a_only": [],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "source_hit@5:strict",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 0.9375,
+    "b": 0.9375,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 0,
+    "a_only": [],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "section_hit@1",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 0.8125,
+    "b": 0.875,
+    "delta": 0.0625,
+    "ci": [
+     0.0,
+     0.1875
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 1,
+    "a_only": [],
+    "b_only": [
+     "Q-EVAL-022"
+    ],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "section_hit@1:strict",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 0.75,
+    "b": 0.8125,
+    "delta": 0.0625,
+    "ci": [
+     0.0,
+     0.1875
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 1,
+    "a_only": [],
+    "b_only": [
+     "Q-EVAL-022"
+    ],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "section_hit@3",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 0.875,
+    "b": 0.875,
+    "delta": 0.0,
+    "ci": [
+     -0.1875,
+     0.1875
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 1,
+    "a_only": [
+     "Q-EVAL-032"
+    ],
+    "b_only": [
+     "Q-EVAL-022"
+    ],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "section_hit@3:strict",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 0.875,
+    "b": 0.8125,
+    "delta": -0.0625,
+    "ci": [
+     -0.25,
+     0.125
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 2,
+    "mcnemar_c": 1,
+    "a_only": [
+     "Q-EVAL-006",
+     "Q-EVAL-032"
+    ],
+    "b_only": [
+     "Q-EVAL-022"
+    ],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "section_hit@5",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 0.875,
+    "b": 0.9375,
+    "delta": 0.0625,
+    "ci": [
+     0.0,
+     0.1875
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 1,
+    "a_only": [],
+    "b_only": [
+     "Q-EVAL-022"
+    ],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "section_hit@5:strict",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 0.875,
+    "b": 0.9375,
+    "delta": 0.0625,
+    "ci": [
+     0.0,
+     0.1875
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 1,
+    "a_only": [],
+    "b_only": [
+     "Q-EVAL-022"
+    ],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "evidence_hit@1",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 0.5625,
+    "b": 0.5,
+    "delta": -0.0625,
+    "ci": [
+     -0.3125,
+     0.1875
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 3,
+    "mcnemar_c": 2,
+    "a_only": [
+     "Q-EVAL-010",
+     "Q-EVAL-016",
+     "Q-EVAL-018"
+    ],
+    "b_only": [
+     "Q-EVAL-004",
+     "Q-EVAL-012"
+    ],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "evidence_hit@3",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 0.8125,
+    "b": 0.625,
+    "delta": -0.1875,
+    "ci": [
+     -0.4375,
+     0.0625
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 0.375,
+    "mcnemar_b": 4,
+    "mcnemar_c": 1,
+    "a_only": [
+     "Q-EVAL-006",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-032"
+    ],
+    "b_only": [
+     "Q-EVAL-004"
+    ],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "evidence_hit@5",
+    "kind": "binary",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 0.875,
+    "b": 0.75,
+    "delta": -0.125,
+    "ci": [
+     -0.3125,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 0.5,
+    "mcnemar_b": 2,
+    "mcnemar_c": 0,
+    "a_only": [
+     "Q-EVAL-016",
+     "Q-EVAL-018"
+    ],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "mrr",
+    "kind": "continuous",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 1.0,
+    "b": 1.0,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 1.0,
+    "wilcoxon_n": 0,
+    "zeros_dropped": 16,
+    "w_plus": 0.0,
+    "w_minus": 0.0,
+    "a_p50": 1.0,
+    "a_p95": 1.0,
+    "b_p50": 1.0,
+    "b_p95": 1.0,
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "mrr:strict",
+    "kind": "continuous",
+    "note": "",
+    "n": 16,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 0.9583333333333334,
+    "b": 0.95,
+    "delta": -0.008333333333333415,
+    "ci": [
+     -0.025000000000000022,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 1.0,
+    "wilcoxon_n": 1,
+    "zeros_dropped": 15,
+    "w_plus": 0,
+    "w_minus": 1.0,
+    "a_p50": 1.0,
+    "a_p95": 1.0,
+    "b_p50": 1.0,
+    "b_p95": 1.0,
+    "wording": "no statistically reliable difference at n = 16"
+   },
+   {
+    "metric": "accuracy",
+    "kind": "binary",
+    "note": "answerable, labelled in both arms",
+    "n": 15,
+    "cases": [
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 0.6,
+    "b": 0.6666666666666666,
+    "delta": 0.06666666666666665,
+    "ci": [
+     -0.13333333333333341,
+     0.2666666666666667
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 2,
+    "a_only": [
+     "Q-EVAL-020"
+    ],
+    "b_only": [
+     "Q-EVAL-012",
+     "Q-EVAL-022"
+    ],
+    "wording": "no statistically reliable difference at n = 15"
+   },
+   {
+    "metric": "lenient_accuracy",
+    "kind": "binary",
+    "note": "correct or partially_correct",
+    "n": 15,
+    "cases": [
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 0.8,
+    "b": 0.8666666666666667,
+    "delta": 0.06666666666666665,
+    "ci": [
+     0.0,
+     0.20000000000000007
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 1,
+    "a_only": [],
+    "b_only": [
+     "Q-EVAL-022"
+    ],
+    "wording": "no statistically reliable difference at n = 15"
+   },
+   {
+    "metric": "false_refusal",
+    "kind": "binary",
+    "note": "lower is better",
+    "n": 15,
+    "cases": [
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 0.2,
+    "b": 0.13333333333333333,
+    "delta": -0.06666666666666668,
+    "ci": [
+     -0.2,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 0,
+    "a_only": [
+     "Q-EVAL-022"
+    ],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 15"
+   },
+   {
+    "metric": "groundedness",
+    "kind": "binary",
+    "note": "answer-checked records judged in both arms",
+    "n": 12,
+    "cases": [
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-020",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 0.9166666666666666,
+    "b": 1.0,
+    "delta": 0.08333333333333337,
+    "ci": [
+     0.0,
+     0.25
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 1,
+    "a_only": [],
+    "b_only": [
+     "Q-EVAL-026"
+    ],
+    "wording": "no statistically reliable difference at n = 12"
+   },
+   {
+    "metric": "correct_refusal",
+    "kind": "binary",
+    "note": "corpus-insufficient cases",
+    "n": 2,
+    "cases": [
+     "Q-EVAL-034",
+     "Q-EVAL-036"
+    ],
+    "a": 1.0,
+    "b": 1.0,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 0,
+    "a_only": [],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 2"
+   },
+   {
+    "metric": "hallucination",
+    "kind": "binary",
+    "note": "corpus-insufficient; lower is better",
+    "n": 2,
+    "cases": [
+     "Q-EVAL-034",
+     "Q-EVAL-036"
+    ],
+    "a": 0.0,
+    "b": 0.0,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 0,
+    "a_only": [],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 2"
+   },
+   {
+    "metric": "citation_support_rate",
+    "kind": "continuous",
+    "note": "judge; answered in both arms",
+    "n": 12,
+    "cases": [
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-020",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 1.0,
+    "b": 1.0,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 1.0,
+    "wilcoxon_n": 0,
+    "zeros_dropped": 12,
+    "w_plus": 0.0,
+    "w_minus": 0.0,
+    "a_p50": 1.0,
+    "a_p95": 1.0,
+    "b_p50": 1.0,
+    "b_p95": 1.0,
+    "wording": "no statistically reliable difference at n = 12"
+   },
+   {
+    "metric": "citation_section_precision",
+    "kind": "continuous",
+    "note": "span check; answered in both",
+    "n": 13,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-020",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 1.0,
+    "b": 0.9743589743589743,
+    "delta": -0.02564102564102566,
+    "ci": [
+     -0.07692307692307687,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 1.0,
+    "wilcoxon_n": 1,
+    "zeros_dropped": 12,
+    "w_plus": 0,
+    "w_minus": 1.0,
+    "a_p50": 1.0,
+    "a_p95": 1.0,
+    "b_p50": 1.0,
+    "b_p95": 1.0,
+    "wording": "no statistically reliable difference at n = 13"
+   },
+   {
+    "metric": "latency_retrieve_ms",
+    "kind": "continuous",
+    "note": "",
+    "n": 18,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032",
+     "Q-EVAL-034",
+     "Q-EVAL-036"
+    ],
+    "a": 3.8035833333399043,
+    "b": 2.6357500000055247,
+    "delta": -1.1678333333343796,
+    "ci": [
+     -1.7445944444476584,
+     -0.5982111111330188
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 0.00104522705078125,
+    "wilcoxon_n": 18,
+    "zeros_dropped": 0,
+    "w_plus": 15.0,
+    "w_minus": 156.0,
+    "a_p50": 3.723000000036336,
+    "a_p95": 5.464500000016415,
+    "b_p50": 2.4121999999806576,
+    "b_p95": 3.691799999955947,
+    "wording": "B lower than A (p = 0.00105, n = 18)"
+   },
+   {
+    "metric": "latency_generate_ms",
+    "kind": "continuous",
+    "note": "LLM called in both arms",
+    "n": 14,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 4320.141200000007,
+    "b": 4596.842364285724,
+    "delta": 276.7011642857169,
+    "ci": [
+     -7583.3216499999835,
+     8686.581971428568
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 0.5015869140625,
+    "wilcoxon_n": 14,
+    "zeros_dropped": 0,
+    "w_plus": 41.0,
+    "w_minus": 64.0,
+    "a_p50": 1671.4298000000554,
+    "a_p95": 37020.156199999976,
+    "b_p50": 1595.5344999999852,
+    "b_p95": 42441.7727,
+    "wording": "no statistically reliable difference at n = 14"
+   },
+   {
+    "metric": "latency_embed_query_ms",
+    "kind": "descriptive",
+    "note": "not comparable: arm B's query embeddings were cache hits",
+    "n": 18,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032",
+     "Q-EVAL-034",
+     "Q-EVAL-036"
+    ],
+    "a": 345.2509000000532,
+    "b": 0.13245000002370944,
+    "delta": null,
+    "ci": null,
+    "test": null,
+    "p": null,
+    "statistic": "median",
+    "wording": "not tested (not comparable: arm B's query embeddings were cache hits)"
+   },
+   {
+    "metric": "latency_total_ms",
+    "kind": "descriptive",
+    "note": "not comparable: includes embed_query",
+    "n": 18,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-016",
+     "Q-EVAL-018",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032",
+     "Q-EVAL-034",
+     "Q-EVAL-036"
+    ],
+    "a": 1923.6034000000473,
+    "b": 1506.0383000000002,
+    "delta": null,
+    "ci": null,
+    "test": null,
+    "p": null,
+    "statistic": "median",
+    "wording": "not tested (not comparable: includes embed_query)"
+   },
+   {
+    "metric": "tokens_prompt",
+    "kind": "continuous",
+    "note": "LLM called in both arms",
+    "n": 14,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 1674.142857142857,
+    "b": 2160.214285714286,
+    "delta": 486.07142857142867,
+    "ci": [
+     371.57142857142867,
+     596.9285714285716
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 0.0001220703125,
+    "wilcoxon_n": 14,
+    "zeros_dropped": 0,
+    "w_plus": 105.0,
+    "w_minus": 0,
+    "a_p50": 1545,
+    "a_p95": 2524,
+    "b_p50": 2054,
+    "b_p95": 3187,
+    "wording": "B higher than A (p = 0.000122, n = 14)"
+   },
+   {
+    "metric": "tokens_output",
+    "kind": "continuous",
+    "note": "LLM called in both arms",
+    "n": 14,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 157.0,
+    "b": 177.85714285714286,
+    "delta": 20.85714285714286,
+    "ci": [
+     2.357142857142861,
+     49.571428571428584
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 0.0701904296875,
+    "wilcoxon_n": 14,
+    "zeros_dropped": 0,
+    "w_plus": 81.5,
+    "w_minus": 23.5,
+    "a_p50": 160,
+    "a_p95": 225,
+    "b_p50": 173,
+    "b_p95": 316,
+    "wording": "no statistically reliable difference at n = 14"
+   },
+   {
+    "metric": "tokens_total",
+    "kind": "continuous",
+    "note": "LLM called in both arms",
+    "n": 14,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-004",
+     "Q-EVAL-006",
+     "Q-EVAL-008",
+     "Q-EVAL-010",
+     "Q-EVAL-012",
+     "Q-EVAL-014",
+     "Q-EVAL-020",
+     "Q-EVAL-022",
+     "Q-EVAL-024",
+     "Q-EVAL-026",
+     "Q-EVAL-028",
+     "Q-EVAL-030",
+     "Q-EVAL-032"
+    ],
+    "a": 1831.142857142857,
+    "b": 2338.0714285714284,
+    "delta": 506.92857142857133,
+    "ci": [
+     389.3571428571429,
+     615.0714285714284
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 0.0001220703125,
+    "wilcoxon_n": 14,
+    "zeros_dropped": 0,
+    "w_plus": 105.0,
+    "w_minus": 0,
+    "a_p50": 1693,
+    "a_p95": 2738,
+    "b_p50": 2199,
+    "b_p95": 3404,
+    "wording": "B higher than A (p = 0.000122, n = 14)"
+   }
+  ],
+  "parallel": [
+   {
+    "metric": "source_hit@1",
+    "kind": "binary",
+    "note": "",
+    "n": 14,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 1.0,
+    "b": 1.0,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 0,
+    "a_only": [],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 14"
+   },
+   {
+    "metric": "source_hit@1:strict",
+    "kind": "binary",
+    "note": "",
+    "n": 14,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 1.0,
+    "b": 0.9285714285714286,
+    "delta": -0.0714285714285714,
+    "ci": [
+     -0.2142857142857143,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 0,
+    "a_only": [
+     "Q-EVAL-013"
+    ],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 14"
+   },
+   {
+    "metric": "source_hit@3",
+    "kind": "binary",
+    "note": "",
+    "n": 14,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 1.0,
+    "b": 1.0,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 0,
+    "a_only": [],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 14"
+   },
+   {
+    "metric": "source_hit@3:strict",
+    "kind": "binary",
+    "note": "",
+    "n": 14,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 1.0,
+    "b": 1.0,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 0,
+    "a_only": [],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 14"
+   },
+   {
+    "metric": "source_hit@5",
+    "kind": "binary",
+    "note": "",
+    "n": 14,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 1.0,
+    "b": 1.0,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 0,
+    "a_only": [],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 14"
+   },
+   {
+    "metric": "source_hit@5:strict",
+    "kind": "binary",
+    "note": "",
+    "n": 14,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 1.0,
+    "b": 1.0,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 0,
+    "a_only": [],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 14"
+   },
+   {
+    "metric": "section_hit@1",
+    "kind": "binary",
+    "note": "",
+    "n": 14,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 1.0,
+    "b": 1.0,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 0,
+    "a_only": [],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 14"
+   },
+   {
+    "metric": "section_hit@1:strict",
+    "kind": "binary",
+    "note": "",
+    "n": 14,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 0.9285714285714286,
+    "b": 0.7857142857142857,
+    "delta": -0.1428571428571429,
+    "ci": [
+     -0.3571428571428571,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 0.5,
+    "mcnemar_b": 2,
+    "mcnemar_c": 0,
+    "a_only": [
+     "Q-EVAL-005",
+     "Q-EVAL-013"
+    ],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 14"
+   },
+   {
+    "metric": "section_hit@3",
+    "kind": "binary",
+    "note": "",
+    "n": 14,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 1.0,
+    "b": 1.0,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 0,
+    "a_only": [],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 14"
+   },
+   {
+    "metric": "section_hit@3:strict",
+    "kind": "binary",
+    "note": "",
+    "n": 14,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 1.0,
+    "b": 0.9285714285714286,
+    "delta": -0.0714285714285714,
+    "ci": [
+     -0.2142857142857143,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 0,
+    "a_only": [
+     "Q-EVAL-006"
+    ],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 14"
+   },
+   {
+    "metric": "section_hit@5",
+    "kind": "binary",
+    "note": "",
+    "n": 14,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 1.0,
+    "b": 1.0,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 0,
+    "a_only": [],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 14"
+   },
+   {
+    "metric": "section_hit@5:strict",
+    "kind": "binary",
+    "note": "",
+    "n": 14,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 1.0,
+    "b": 1.0,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 0,
+    "a_only": [],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 14"
+   },
+   {
+    "metric": "evidence_hit@1",
+    "kind": "binary",
+    "note": "",
+    "n": 14,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 0.6428571428571429,
+    "b": 0.6428571428571429,
+    "delta": 0.0,
+    "ci": [
+     -0.42857142857142855,
+     0.42857142857142855
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 4,
+    "mcnemar_c": 4,
+    "a_only": [
+     "Q-EVAL-005",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-013"
+    ],
+    "b_only": [
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-011",
+     "Q-EVAL-012"
+    ],
+    "wording": "no statistically reliable difference at n = 14"
+   },
+   {
+    "metric": "evidence_hit@3",
+    "kind": "binary",
+    "note": "",
+    "n": 14,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 0.8571428571428571,
+    "b": 0.9285714285714286,
+    "delta": 0.07142857142857151,
+    "ci": [
+     -0.1428571428571429,
+     0.2857142857142857
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 2,
+    "a_only": [
+     "Q-EVAL-006"
+    ],
+    "b_only": [
+     "Q-EVAL-003",
+     "Q-EVAL-004"
+    ],
+    "wording": "no statistically reliable difference at n = 14"
+   },
+   {
+    "metric": "evidence_hit@5",
+    "kind": "binary",
+    "note": "",
+    "n": 14,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 1.0,
+    "b": 1.0,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 0,
+    "a_only": [],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 14"
+   },
+   {
+    "metric": "mrr",
+    "kind": "continuous",
+    "note": "",
+    "n": 14,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 1.0,
+    "b": 1.0,
+    "delta": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 1.0,
+    "wilcoxon_n": 0,
+    "zeros_dropped": 14,
+    "w_plus": 0.0,
+    "w_minus": 0.0,
+    "a_p50": 1.0,
+    "a_p95": 1.0,
+    "b_p50": 1.0,
+    "b_p95": 1.0,
+    "wording": "no statistically reliable difference at n = 14"
+   },
+   {
+    "metric": "mrr:strict",
+    "kind": "continuous",
+    "note": "",
+    "n": 14,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 0.9523809523809524,
+    "b": 0.8714285714285713,
+    "delta": -0.08095238095238111,
+    "ci": [
+     -0.1880952380952382,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 0.25,
+    "wilcoxon_n": 3,
+    "zeros_dropped": 11,
+    "w_plus": 0,
+    "w_minus": 6.0,
+    "a_p50": 1.0,
+    "a_p95": 1.0,
+    "b_p50": 1.0,
+    "b_p95": 1.0,
+    "wording": "no statistically reliable difference at n = 14"
+   },
+   {
+    "metric": "accuracy",
+    "kind": "binary",
+    "note": "answerable, labelled in both arms",
+    "n": 13,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 0.7692307692307693,
+    "b": 0.9230769230769231,
+    "delta": 0.15384615384615385,
+    "ci": [
+     0.0,
+     0.3846153846153846
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 0.5,
+    "mcnemar_b": 0,
+    "mcnemar_c": 2,
+    "a_only": [],
+    "b_only": [
+     "Q-EVAL-001",
+     "Q-EVAL-012"
+    ],
+    "wording": "no statistically reliable difference at n = 13"
+   },
+   {
+    "metric": "lenient_accuracy",
+    "kind": "binary",
+    "note": "correct or partially_correct",
+    "n": 13,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 0.9230769230769231,
+    "b": 1.0,
+    "delta": 0.07692307692307687,
+    "ci": [
+     0.0,
+     0.23076923076923073
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 1,
+    "a_only": [],
+    "b_only": [
+     "Q-EVAL-001"
+    ],
+    "wording": "no statistically reliable difference at n = 13"
+   },
+   {
+    "metric": "false_refusal",
+    "kind": "binary",
+    "note": "lower is better",
+    "n": 13,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 0.07692307692307693,
+    "b": 0.0,
+    "delta": -0.07692307692307693,
+    "ci": [
+     -0.23076923076923078,
+     0.0
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 1,
+    "mcnemar_c": 0,
+    "a_only": [
+     "Q-EVAL-001"
+    ],
+    "b_only": [],
+    "wording": "no statistically reliable difference at n = 13"
+   },
+   {
+    "metric": "groundedness",
+    "kind": "binary",
+    "note": "answer-checked records judged in both arms",
+    "n": 12,
+    "cases": [
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 0.9166666666666666,
+    "b": 1.0,
+    "delta": 0.08333333333333337,
+    "ci": [
+     0.0,
+     0.25
+    ],
+    "statistic": "mean",
+    "test": "mcnemar_exact",
+    "p": 1.0,
+    "mcnemar_b": 0,
+    "mcnemar_c": 1,
+    "a_only": [],
+    "b_only": [
+     "Q-EVAL-005"
+    ],
+    "wording": "no statistically reliable difference at n = 12"
+   },
+   {
+    "metric": "correct_refusal",
+    "kind": "binary",
+    "note": "corpus-insufficient cases",
+    "n": 0,
+    "cases": [],
+    "a": null,
+    "b": null,
+    "delta": null,
+    "ci": null,
+    "test": null,
+    "p": null,
+    "wording": "no pairs"
+   },
+   {
+    "metric": "hallucination",
+    "kind": "binary",
+    "note": "corpus-insufficient; lower is better",
+    "n": 0,
+    "cases": [],
+    "a": null,
+    "b": null,
+    "delta": null,
+    "ci": null,
+    "test": null,
+    "p": null,
+    "wording": "no pairs"
+   },
+   {
+    "metric": "citation_support_rate",
+    "kind": "continuous",
+    "note": "judge; answered in both arms",
+    "n": 12,
+    "cases": [
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 0.9583333333333334,
+    "b": 0.9583333333333334,
+    "delta": 0.0,
+    "ci": [
+     -0.125,
+     0.125
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 1.0,
+    "wilcoxon_n": 2,
+    "zeros_dropped": 10,
+    "w_plus": 1.5,
+    "w_minus": 1.5,
+    "a_p50": 1.0,
+    "a_p95": 1.0,
+    "b_p50": 1.0,
+    "b_p95": 1.0,
+    "wording": "no statistically reliable difference at n = 12"
+   },
+   {
+    "metric": "citation_section_precision",
+    "kind": "continuous",
+    "note": "span check; answered in both",
+    "n": 13,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 0.9615384615384616,
+    "b": 0.9743589743589743,
+    "delta": 0.012820512820512775,
+    "ci": [
+     -0.07692307692307687,
+     0.11538461538461542
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 1.0,
+    "wilcoxon_n": 2,
+    "zeros_dropped": 11,
+    "w_plus": 2.0,
+    "w_minus": 1.0,
+    "a_p50": 1.0,
+    "a_p95": 1.0,
+    "b_p50": 1.0,
+    "b_p95": 1.0,
+    "wording": "no statistically reliable difference at n = 13"
+   },
+   {
+    "metric": "latency_retrieve_ms",
+    "kind": "continuous",
+    "note": "",
+    "n": 14,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 35.13114285714534,
+    "b": 2.332092857143055,
+    "delta": -32.79905000000229,
+    "ci": [
+     -91.6779499999864,
+     -2.749892857139003
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 0.0001220703125,
+    "wilcoxon_n": 14,
+    "zeros_dropped": 0,
+    "w_plus": 0,
+    "w_minus": 105.0,
+    "a_p50": 5.213700000012977,
+    "a_p95": 414.6127000000206,
+    "b_p50": 2.098999999930129,
+    "b_p95": 3.847100000029968,
+    "wording": "B lower than A (p = 0.000122, n = 14)"
+   },
+   {
+    "metric": "latency_generate_ms",
+    "kind": "continuous",
+    "note": "LLM called in both arms",
+    "n": 13,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 1711.9786846153952,
+    "b": 4633.071230769229,
+    "delta": 2921.092546153834,
+    "ci": [
+     -561.7596076922996,
+     9411.355276923088
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 0.541748046875,
+    "wilcoxon_n": 13,
+    "zeros_dropped": 0,
+    "w_plus": 36.0,
+    "w_minus": 55.0,
+    "a_p50": 1502.827600000046,
+    "a_p95": 3658.8365999999723,
+    "b_p50": 1464.0226000000212,
+    "b_p95": 42441.7727,
+    "wording": "no statistically reliable difference at n = 13"
+   },
+   {
+    "metric": "latency_embed_query_ms",
+    "kind": "descriptive",
+    "note": "not comparable: arm B's query embeddings were cache hits",
+    "n": 14,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 366.95775000004005,
+    "b": 0.11710000001130538,
+    "delta": null,
+    "ci": null,
+    "test": null,
+    "p": null,
+    "statistic": "median",
+    "wording": "not tested (not comparable: arm B's query embeddings were cache hits)"
+   },
+   {
+    "metric": "latency_total_ms",
+    "kind": "descriptive",
+    "note": "not comparable: includes embed_query",
+    "n": 14,
+    "cases": [
+     "Q-EVAL-001",
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 1910.4591500000083,
+    "b": 1532.746999999972,
+    "delta": null,
+    "ci": null,
+    "test": null,
+    "p": null,
+    "statistic": "median",
+    "wording": "not tested (not comparable: includes embed_query)"
+   },
+   {
+    "metric": "tokens_prompt",
+    "kind": "continuous",
+    "note": "LLM called in both arms",
+    "n": 13,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 1594.6153846153845,
+    "b": 2112.846153846154,
+    "delta": 518.2307692307693,
+    "ci": [
+     385.46153846153857,
+     648.6923076923076
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 0.000244140625,
+    "wilcoxon_n": 13,
+    "zeros_dropped": 0,
+    "w_plus": 91.0,
+    "w_minus": 0,
+    "a_p50": 1566,
+    "a_p95": 2082,
+    "b_p50": 2211,
+    "b_p95": 2847,
+    "wording": "B higher than A (p = 0.000244, n = 13)"
+   },
+   {
+    "metric": "tokens_output",
+    "kind": "continuous",
+    "note": "LLM called in both arms",
+    "n": 13,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 157.0,
+    "b": 162.3846153846154,
+    "delta": 5.384615384615387,
+    "ci": [
+     -4.230769230769226,
+     16.84615384615384
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 0.879638671875,
+    "wilcoxon_n": 13,
+    "zeros_dropped": 0,
+    "w_plus": 48.0,
+    "w_minus": 43.0,
+    "a_p50": 174,
+    "a_p95": 225,
+    "b_p50": 164,
+    "b_p95": 220,
+    "wording": "no statistically reliable difference at n = 13"
+   },
+   {
+    "metric": "tokens_total",
+    "kind": "continuous",
+    "note": "LLM called in both arms",
+    "n": 13,
+    "cases": [
+     "Q-EVAL-002",
+     "Q-EVAL-003",
+     "Q-EVAL-004",
+     "Q-EVAL-005",
+     "Q-EVAL-006",
+     "Q-EVAL-007",
+     "Q-EVAL-008",
+     "Q-EVAL-009",
+     "Q-EVAL-010",
+     "Q-EVAL-011",
+     "Q-EVAL-012",
+     "Q-EVAL-013",
+     "Q-EVAL-014"
+    ],
+    "a": 1751.6153846153845,
+    "b": 2275.230769230769,
+    "delta": 523.6153846153845,
+    "ci": [
+     390.9230769230769,
+     652.3076923076922
+    ],
+    "statistic": "mean",
+    "test": "wilcoxon_exact",
+    "p": 0.000244140625,
+    "wilcoxon_n": 13,
+    "zeros_dropped": 0,
+    "w_plus": 91.0,
+    "w_minus": 0,
+    "a_p50": 1724,
+    "a_p95": 2303,
+    "b_p50": 2397,
+    "b_p95": 3062,
+    "wording": "B higher than A (p = 0.000244, n = 13)"
+   }
+  ]
+ },
+ "strict_lenient": [
+  {
+   "lenient": "source_hit@1",
+   "strict": "source_hit@1:strict",
+   "a": [
+    0.875,
+    0.875
+   ],
+   "b": [
+    0.875,
+    0.84375
+   ],
+   "delta": [
+    0.0,
+    -0.03125
+   ],
+   "p": [
+    1.0,
+    1.0
+   ],
+   "a_only": [
+    [],
+    [
+     "Q-EVAL-013"
+    ]
+   ],
+   "b_only": [
+    [],
+    []
+   ],
+   "differs": true
+  },
+  {
+   "lenient": "source_hit@3",
+   "strict": "source_hit@3:strict",
+   "a": [
+    0.9375,
+    0.9375
+   ],
+   "b": [
+    0.90625,
+    0.90625
+   ],
+   "delta": [
+    -0.03125,
+    -0.03125
+   ],
+   "p": [
+    1.0,
+    1.0
+   ],
+   "a_only": [
+    [
+     "Q-EVAL-032"
+    ],
+    [
+     "Q-EVAL-032"
+    ]
+   ],
+   "b_only": [
+    [],
+    []
+   ],
+   "differs": false
+  },
+  {
+   "lenient": "source_hit@5",
+   "strict": "source_hit@5:strict",
+   "a": [
+    0.96875,
+    0.96875
+   ],
+   "b": [
+    0.9375,
+    0.9375
+   ],
+   "delta": [
+    -0.03125,
+    -0.03125
+   ],
+   "p": [
+    1.0,
+    1.0
+   ],
+   "a_only": [
+    [
+     "Q-EVAL-031"
+    ],
+    [
+     "Q-EVAL-031"
+    ]
+   ],
+   "b_only": [
+    [],
+    []
+   ],
+   "differs": false
+  },
+  {
+   "lenient": "section_hit@1",
+   "strict": "section_hit@1:strict",
+   "a": [
+    0.8125,
+    0.78125
+   ],
+   "b": [
+    0.84375,
+    0.71875
+   ],
+   "delta": [
+    0.03125,
+    -0.0625
+   ],
+   "p": [
+    1.0,
+    0.625
+   ],
+   "a_only": [
+    [
+     "Q-EVAL-015"
+    ],
+    [
+     "Q-EVAL-005",
+     "Q-EVAL-013",
+     "Q-EVAL-015"
+    ]
+   ],
+   "b_only": [
+    [
+     "Q-EVAL-017",
+     "Q-EVAL-022"
+    ],
+    [
+     "Q-EVAL-022"
+    ]
+   ],
+   "differs": true
+  },
+  {
+   "lenient": "section_hit@3",
+   "strict": "section_hit@3:strict",
+   "a": [
+    0.90625,
+    0.90625
+   ],
+   "b": [
+    0.90625,
+    0.84375
+   ],
+   "delta": [
+    0.0,
+    -0.0625
+   ],
+   "p": [
+    1.0,
+    0.625
+   ],
+   "a_only": [
+    [
+     "Q-EVAL-032"
+    ],
+    [
+     "Q-EVAL-006",
+     "Q-EVAL-017",
+     "Q-EVAL-032"
+    ]
+   ],
+   "b_only": [
+    [
+     "Q-EVAL-022"
+    ],
+    [
+     "Q-EVAL-022"
+    ]
+   ],
+   "differs": true
+  },
+  {
+   "lenient": "section_hit@5",
+   "strict": "section_hit@5:strict",
+   "a": [
+    0.9375,
+    0.9375
+   ],
+   "b": [
+    0.9375,
+    0.9375
+   ],
+   "delta": [
+    0.0,
+    0.0
+   ],
+   "p": [
+    1.0,
+    1.0
+   ],
+   "a_only": [
+    [
+     "Q-EVAL-031"
+    ],
+    [
+     "Q-EVAL-031"
+    ]
+   ],
+   "b_only": [
+    [
+     "Q-EVAL-022"
+    ],
+    [
+     "Q-EVAL-022"
+    ]
+   ],
+   "differs": false
+  },
+  {
+   "lenient": "mrr",
+   "strict": "mrr:strict",
+   "a": [
+    1.0,
+    0.9635416666666666
+   ],
+   "b": [
+    0.984375,
+    0.928125
+   ],
+   "delta": [
+    -0.015625,
+    -0.03541666666666665
+   ],
+   "p": [
+    1.0,
+    0.375
+   ],
+   "differs": true
+  },
+  {
+   "lenient": "lenient_accuracy",
+   "strict": "accuracy",
+   "a": [
+    0.8709677419354839,
+    0.7096774193548387
+   ],
+   "b": [
+    0.9354838709677419,
+    0.7419354838709677
+   ],
+   "delta": [
+    0.06451612903225801,
+    0.032258064516129004
+   ],
+   "p": [
+    0.5,
+    1.0
+   ],
+   "a_only": [
+    [],
+    [
+     "Q-EVAL-020",
+     "Q-EVAL-027"
+    ]
+   ],
+   "b_only": [
+    [
+     "Q-EVAL-001",
+     "Q-EVAL-022"
+    ],
+    [
+     "Q-EVAL-001",
+     "Q-EVAL-012",
+     "Q-EVAL-022"
+    ]
+   ],
+   "differs": true
+  }
+ ],
+ "section_hit@5": {
+  "a_only_hits": [
+   "Q-EVAL-031"
+  ],
+  "b_only_hits": [
+   "Q-EVAL-022"
+  ],
+  "both_miss": [
+   "Q-EVAL-030"
+  ]
+ },
+ "discordant": {
+  "Q-EVAL-001": [
+   "label false_refusal -> correct"
+  ],
+  "Q-EVAL-003": [
+   "evidence_hit@1 0 -> 1",
+   "evidence_hit@3 0 -> 1"
+  ],
+  "Q-EVAL-004": [
+   "evidence_hit@1 0 -> 1",
+   "evidence_hit@3 0 -> 1"
+  ],
+  "Q-EVAL-005": [
+   "grounded 0 -> 1",
+   "section_hit@1:strict 1 -> 0",
+   "evidence_hit@1 1 -> 0",
+   "mrr:strict 1 -> 0.5"
+  ],
+  "Q-EVAL-006": [
+   "section_hit@3:strict 1 -> 0",
+   "evidence_hit@3 1 -> 0",
+   "mrr:strict 0.333 -> 0.2"
+  ],
+  "Q-EVAL-009": [
+   "evidence_hit@1 1 -> 0"
+  ],
+  "Q-EVAL-010": [
+   "evidence_hit@1 1 -> 0"
+  ],
+  "Q-EVAL-011": [
+   "evidence_hit@1 0 -> 1"
+  ],
+  "Q-EVAL-012": [
+   "label partially_correct -> correct",
+   "evidence_hit@1 0 -> 1"
+  ],
+  "Q-EVAL-013": [
+   "source_hit@1:strict 1 -> 0",
+   "section_hit@1:strict 1 -> 0",
+   "evidence_hit@1 1 -> 0",
+   "mrr:strict 1 -> 0.5"
+  ],
+  "Q-EVAL-015": [
+   "section_hit@1 1 -> 0",
+   "section_hit@1:strict 1 -> 0",
+   "evidence_hit@1 1 -> 0",
+   "mrr 1 -> 0.5",
+   "mrr:strict 1 -> 0.5"
+  ],
+  "Q-EVAL-016": [
+   "evidence_hit@1 1 -> 0",
+   "evidence_hit@3 1 -> 0",
+   "evidence_hit@5 1 -> 0"
+  ],
+  "Q-EVAL-017": [
+   "section_hit@1 0 -> 1",
+   "section_hit@3:strict 1 -> 0",
+   "mrr:strict 0.5 -> 1"
+  ],
+  "Q-EVAL-018": [
+   "evidence_hit@1 1 -> 0",
+   "evidence_hit@3 1 -> 0",
+   "evidence_hit@5 1 -> 0"
+  ],
+  "Q-EVAL-019": [
+   "evidence_hit@1 1 -> 0"
+  ],
+  "Q-EVAL-020": [
+   "label correct -> partially_correct"
+  ],
+  "Q-EVAL-021": [
+   "evidence_hit@1 1 -> 0"
+  ],
+  "Q-EVAL-022": [
+   "label false_refusal -> correct",
+   "section_hit@1 0 -> 1",
+   "section_hit@1:strict 0 -> 1",
+   "section_hit@3 0 -> 1",
+   "section_hit@3:strict 0 -> 1",
+   "section_hit@5 0 -> 1",
+   "section_hit@5:strict 0 -> 1"
+  ],
+  "Q-EVAL-023": [
+   "evidence_hit@1 0 -> 1"
+  ],
+  "Q-EVAL-026": [
+   "grounded 0 -> 1"
+  ],
+  "Q-EVAL-027": [
+   "label correct -> partially_correct",
+   "evidence_hit@1 1 -> 0",
+   "evidence_hit@3 1 -> 0",
+   "evidence_hit@5 1 -> 0"
+  ],
+  "Q-EVAL-031": [
+   "source_hit@5 1 -> 0",
+   "source_hit@5:strict 1 -> 0",
+   "section_hit@5 1 -> 0",
+   "section_hit@5:strict 1 -> 0",
+   "evidence_hit@1 1 -> 0"
+  ],
+  "Q-EVAL-032": [
+   "source_hit@3 1 -> 0",
+   "source_hit@3:strict 1 -> 0",
+   "section_hit@3 1 -> 0",
+   "section_hit@3:strict 1 -> 0",
+   "evidence_hit@3 1 -> 0"
+  ]
+ },
+ "failure_counts": {
+  "retrieval_miss": {
+   "A": 2,
+   "B": 2
+  },
+  "chunking": {
+   "A": 0,
+   "B": 1
+  },
+  "ranking": {
+   "A": 0,
+   "B": 0
+  },
+  "refusal": {
+   "A": 3,
+   "B": 2
+  },
+  "generation": {
+   "A": 4,
+   "B": 4
+  },
+  "citation": {
+   "A": 0,
+   "B": 0
+  }
+ },
+ "citation_defects_on_correct_answers": [
+  {
+   "case_id": "Q-EVAL-005",
+   "arm": "A",
+   "section_precision": 0.5,
+   "support_rate": 0.5,
+   "auto_class": "correct_evidence",
+   "judge_class": "correct_evidence"
+  },
+  {
+   "case_id": "Q-EVAL-015",
+   "arm": "A",
+   "section_precision": 0.5,
+   "support_rate": 1.0,
+   "auto_class": "correct_evidence",
+   "judge_class": "correct_evidence"
+  },
+  {
+   "case_id": "Q-EVAL-009",
+   "arm": "B",
+   "section_precision": 1.0,
+   "support_rate": 0.5,
+   "auto_class": "correct_evidence",
+   "judge_class": "correct_evidence"
+  }
+ ],
+ "chunk_stats": {
+  "A": {
+   "chunks_total": 733,
+   "size_p50": 1178,
+   "size_p90": 1527,
+   "size_min": 89,
+   "size_max": 1600,
+   "chunks_cutting_code_fence": 24,
+   "pct_chunks_cutting_code_fence": 3.27,
+   "tiny_doc_chunks": {
+    "09": 4,
+    "22": 3,
+    "29": 3
+   },
+   "chunks_per_document": {
+    "01": 31,
+    "02": 32,
+    "03": 25,
+    "04": 13,
+    "05": 14,
+    "06": 7,
+    "07": 10,
+    "08": 9,
+    "09": 4,
+    "10": 41,
+    "11": 14,
+    "12": 26,
+    "13": 103,
+    "15": 16,
+    "16": 10,
+    "17": 132,
+    "18": 2,
+    "20": 14,
+    "21": 39,
+    "22": 3,
+    "23": 168,
+    "26": 8,
+    "28": 9,
+    "29": 3
+   }
+  },
+  "B": {
+   "chunks_total": 859,
+   "size_p50": 1600,
+   "size_p90": 1600,
+   "size_min": 207,
+   "size_max": 1600,
+   "chunks_cutting_code_fence": 387,
+   "pct_chunks_cutting_code_fence": 45.05,
+   "tiny_doc_chunks": {
+    "09": 1,
+    "22": 2,
+    "29": 1
+   },
+   "chunks_per_document": {
+    "01": 25,
+    "02": 21,
+    "03": 16,
+    "04": 8,
+    "05": 6,
+    "06": 5,
+    "07": 6,
+    "08": 3,
+    "09": 1,
+    "10": 31,
+    "11": 13,
+    "12": 19,
+    "13": 170,
+    "15": 13,
+    "16": 8,
+    "17": 185,
+    "18": 2,
+    "20": 12,
+    "21": 27,
+    "22": 2,
+    "23": 272,
+    "26": 6,
+    "28": 7,
+    "29": 1
+   }
+  }
+ },
+ "failure_mode_signals": {
+  "A": {
+   "Q-EVAL-001": {
+    "sources": [
+     "22",
+     "22",
+     "22",
+     "02",
+     "10"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-002": {
+    "sources": [
+     "22",
+     "22",
+     "22",
+     "10",
+     "17"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [
+     "17:header-1600:0015"
+    ],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-003": {
+    "sources": [
+     "13",
+     "13",
+     "13",
+     "12",
+     "13"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 2
+   },
+   "Q-EVAL-004": {
+    "sources": [
+     "13",
+     "13",
+     "13",
+     "13",
+     "12"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 2
+   },
+   "Q-EVAL-005": {
+    "sources": [
+     "02",
+     "02",
+     "01",
+     "02",
+     "02"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-006": {
+    "sources": [
+     "02",
+     "01",
+     "02",
+     "02",
+     "02"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-007": {
+    "sources": [
+     "23",
+     "23",
+     "23",
+     "23",
+     "23"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 3
+   },
+   "Q-EVAL-008": {
+    "sources": [
+     "23",
+     "23",
+     "23",
+     "23",
+     "23"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 3
+   },
+   "Q-EVAL-009": {
+    "sources": [
+     "03",
+     "03",
+     "03",
+     "03",
+     "03"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 1
+   },
+   "Q-EVAL-010": {
+    "sources": [
+     "03",
+     "03",
+     "03",
+     "03",
+     "03"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 1
+   },
+   "Q-EVAL-011": {
+    "sources": [
+     "29",
+     "29",
+     "29",
+     "21",
+     "03"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-012": {
+    "sources": [
+     "29",
+     "29",
+     "29",
+     "12",
+     "03"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-013": {
+    "sources": [
+     "10",
+     "11",
+     "11",
+     "11",
+     "11"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 2
+   },
+   "Q-EVAL-014": {
+    "sources": [
+     "10",
+     "11",
+     "11",
+     "11",
+     "11"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 2
+   },
+   "Q-EVAL-015": {
+    "sources": [
+     "01",
+     "01",
+     "01",
+     "01",
+     "01"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-016": {
+    "sources": [
+     "26",
+     "07",
+     "07",
+     "20",
+     "05"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-017": {
+    "sources": [
+     "11",
+     "11",
+     "11",
+     "11",
+     "11"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 2
+   },
+   "Q-EVAL-018": {
+    "sources": [
+     "21",
+     "21",
+     "21",
+     "21",
+     "04"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 1
+   },
+   "Q-EVAL-019": {
+    "sources": [
+     "21",
+     "21",
+     "21",
+     "21",
+     "21"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 3
+   },
+   "Q-EVAL-020": {
+    "sources": [
+     "16",
+     "04",
+     "16",
+     "16",
+     "04"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 1
+   },
+   "Q-EVAL-021": {
+    "sources": [
+     "20",
+     "20",
+     "20",
+     "20",
+     "05"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 1
+   },
+   "Q-EVAL-022": {
+    "sources": [
+     "13",
+     "13",
+     "13",
+     "13",
+     "13"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 3
+   },
+   "Q-EVAL-023": {
+    "sources": [
+     "13",
+     "13",
+     "13",
+     "13",
+     "13"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 3
+   },
+   "Q-EVAL-024": {
+    "sources": [
+     "17",
+     "17",
+     "17",
+     "17",
+     "17"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-025": {
+    "sources": [
+     "23",
+     "23",
+     "23",
+     "23",
+     "23"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 3
+   },
+   "Q-EVAL-026": {
+    "sources": [
+     "15",
+     "15",
+     "15",
+     "15",
+     "15"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 4
+   },
+   "Q-EVAL-027": {
+    "sources": [
+     "12",
+     "12",
+     "12",
+     "12",
+     "13"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [
+     "13:header-1600:0034"
+    ],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-028": {
+    "sources": [
+     "18",
+     "20",
+     "18",
+     "20",
+     "20"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 2
+   },
+   "Q-EVAL-029": {
+    "sources": [
+     "10",
+     "22",
+     "22",
+     "10",
+     "10"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-030": {
+    "sources": [
+     "28",
+     "28",
+     "28",
+     "28",
+     "28"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 2
+   },
+   "Q-EVAL-031": {
+    "sources": [
+     "04",
+     "04",
+     "06",
+     "26",
+     "04"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-032": {
+    "sources": [
+     "10",
+     "13",
+     "13",
+     "13",
+     "13"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 3
+   },
+   "Q-EVAL-033": {
+    "sources": [
+     "22",
+     "22",
+     "22",
+     "17",
+     "17"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [
+     "17:header-1600:0015",
+     "17:header-1600:0050"
+    ],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-034": {
+    "sources": [
+     "23",
+     "23",
+     "23",
+     "23",
+     "23"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [
+     "23:header-1600:0085",
+     "23:header-1600:0102",
+     "23:header-1600:0071",
+     "23:header-1600:0000",
+     "23:header-1600:0161"
+    ],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-035": {
+    "sources": [
+     "10",
+     "10",
+     "11",
+     "10",
+     "10"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-036": {
+    "sources": [
+     "03",
+     "03",
+     "03",
+     "03",
+     "03"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 2
+   }
+  },
+  "B": {
+   "Q-EVAL-001": {
+    "sources": [
+     "22",
+     "22",
+     "10",
+     "02",
+     "02"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-002": {
+    "sources": [
+     "22",
+     "22",
+     "10",
+     "17",
+     "17"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [
+     "17:fixed-1600:0151",
+     "17:fixed-1600:0091"
+    ],
+    "same_heading_repeats": 1
+   },
+   "Q-EVAL-003": {
+    "sources": [
+     "13",
+     "13",
+     "12",
+     "13",
+     "13"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 2
+   },
+   "Q-EVAL-004": {
+    "sources": [
+     "13",
+     "13",
+     "13",
+     "12",
+     "13"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 3
+   },
+   "Q-EVAL-005": {
+    "sources": [
+     "02",
+     "02",
+     "02",
+     "02",
+     "02"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 1
+   },
+   "Q-EVAL-006": {
+    "sources": [
+     "02",
+     "02",
+     "01",
+     "02",
+     "02"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-007": {
+    "sources": [
+     "23",
+     "23",
+     "23",
+     "23",
+     "23"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 3
+   },
+   "Q-EVAL-008": {
+    "sources": [
+     "23",
+     "23",
+     "23",
+     "23",
+     "23"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 3
+   },
+   "Q-EVAL-009": {
+    "sources": [
+     "03",
+     "03",
+     "03",
+     "03",
+     "03"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-010": {
+    "sources": [
+     "03",
+     "03",
+     "03",
+     "03",
+     "03"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-011": {
+    "sources": [
+     "29",
+     "21",
+     "03",
+     "23",
+     "12"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [
+     "23:fixed-1600:0058"
+    ],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-012": {
+    "sources": [
+     "29",
+     "03",
+     "21",
+     "07",
+     "07"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-013": {
+    "sources": [
+     "11",
+     "10",
+     "11",
+     "10",
+     "11"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 1
+   },
+   "Q-EVAL-014": {
+    "sources": [
+     "10",
+     "11",
+     "11",
+     "10",
+     "10"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 1
+   },
+   "Q-EVAL-015": {
+    "sources": [
+     "01",
+     "01",
+     "01",
+     "01",
+     "01"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-016": {
+    "sources": [
+     "26",
+     "26",
+     "07",
+     "04",
+     "20"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-017": {
+    "sources": [
+     "11",
+     "11",
+     "11",
+     "11",
+     "11"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 2
+   },
+   "Q-EVAL-018": {
+    "sources": [
+     "21",
+     "21",
+     "21",
+     "21",
+     "21"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-019": {
+    "sources": [
+     "21",
+     "21",
+     "21",
+     "21",
+     "21"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 1
+   },
+   "Q-EVAL-020": {
+    "sources": [
+     "16",
+     "16",
+     "16",
+     "16",
+     "04"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 2
+   },
+   "Q-EVAL-021": {
+    "sources": [
+     "20",
+     "20",
+     "20",
+     "20",
+     "20"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 2
+   },
+   "Q-EVAL-022": {
+    "sources": [
+     "13",
+     "13",
+     "13",
+     "13",
+     "13"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 4
+   },
+   "Q-EVAL-023": {
+    "sources": [
+     "13",
+     "13",
+     "13",
+     "13",
+     "13"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 2
+   },
+   "Q-EVAL-024": {
+    "sources": [
+     "17",
+     "17",
+     "17",
+     "17",
+     "17"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 2
+   },
+   "Q-EVAL-025": {
+    "sources": [
+     "23",
+     "23",
+     "23",
+     "23",
+     "23"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 2
+   },
+   "Q-EVAL-026": {
+    "sources": [
+     "15",
+     "15",
+     "15",
+     "15",
+     "15"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 4
+   },
+   "Q-EVAL-027": {
+    "sources": [
+     "12",
+     "12",
+     "12",
+     "13",
+     "12"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [
+     "13:fixed-1600:0086"
+    ],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-028": {
+    "sources": [
+     "18",
+     "18",
+     "20",
+     "20",
+     "20"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 2
+   },
+   "Q-EVAL-029": {
+    "sources": [
+     "10",
+     "22",
+     "10",
+     "10",
+     "10"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 1
+   },
+   "Q-EVAL-030": {
+    "sources": [
+     "28",
+     "28",
+     "28",
+     "28",
+     "28"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 2
+   },
+   "Q-EVAL-031": {
+    "sources": [
+     "04",
+     "04",
+     "04",
+     "06",
+     "04"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 0
+   },
+   "Q-EVAL-032": {
+    "sources": [
+     "13",
+     "13",
+     "13",
+     "10",
+     "13"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 2
+   },
+   "Q-EVAL-033": {
+    "sources": [
+     "22",
+     "22",
+     "17",
+     "17",
+     "17"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [
+     "17:fixed-1600:0150",
+     "17:fixed-1600:0149",
+     "17:fixed-1600:0010"
+    ],
+    "same_heading_repeats": 2
+   },
+   "Q-EVAL-034": {
+    "sources": [
+     "23",
+     "23",
+     "23",
+     "23",
+     "23"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [
+     "23:fixed-1600:0055",
+     "23:fixed-1600:0065",
+     "23:fixed-1600:0127",
+     "23:fixed-1600:0172",
+     "23:fixed-1600:0195"
+    ],
+    "same_heading_repeats": 1
+   },
+   "Q-EVAL-035": {
+    "sources": [
+     "10",
+     "10",
+     "10",
+     "10",
+     "10"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [],
+    "same_heading_repeats": 1
+   },
+   "Q-EVAL-036": {
+    "sources": [
+     "03",
+     "03",
+     "03",
+     "03",
+     "17"
+    ],
+    "link_list_noise": [],
+    "large_doc_off_target": [
+     "17:fixed-1600:0029"
+    ],
+    "same_heading_repeats": 1
+   }
+  }
+ }
+}

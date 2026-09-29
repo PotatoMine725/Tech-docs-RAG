@@ -1,0 +1,1209 @@
+{
+  "run_ids": [
+    "20260927-dev-A-full-05680f9",
+    "20260927-dev-A-retrieval-05680f9"
+  ],
+  "runs": [
+    {
+      "run_id": "20260927-dev-A-full-05680f9",
+      "arm": "A",
+      "mode": "full",
+      "split": "dev",
+      "records": 3
+    },
+    {
+      "run_id": "20260927-dev-A-retrieval-05680f9",
+      "arm": "A",
+      "mode": "retrieval",
+      "split": "dev",
+      "records": 3
+    }
+  ],
+  "gate_refused_answerable": [],
+  "breakdown": {
+    "overall": {
+      "records": 6,
+      "retrieval": {
+        "duplicate_rule_changed": {
+          "n": 0,
+          "count": 0,
+          "cases": []
+        }
+      },
+      "answer": {
+        "records": 3,
+        "runner_errors": [],
+        "unlabelled": [],
+        "labels": {
+          "correct": 2,
+          "partially_correct": 0,
+          "incorrect": 0,
+          "false_refusal": 0,
+          "correct_refusal": 1,
+          "hallucination": 0
+        },
+        "accuracy": {
+          "n": 2,
+          "count": 2,
+          "value": 1.0
+        },
+        "lenient_accuracy": {
+          "n": 2,
+          "count": 2,
+          "value": 1.0
+        },
+        "groundedness_rate": {
+          "n": 2,
+          "count": 2,
+          "value": 1.0
+        },
+        "points_covered_mean": {
+          "n": 2,
+          "value": 1.0
+        },
+        "correct_refusal_rate": {
+          "n": 1,
+          "count": 1,
+          "value": 1.0
+        },
+        "hallucination_rate": {
+          "n": 1,
+          "count": 0,
+          "value": 0.0
+        },
+        "false_refusal_rate": {
+          "n": 2,
+          "count": 0,
+          "value": 0.0
+        }
+      },
+      "citation": {
+        "answered": 0,
+        "presence_rate": {
+          "n": 0,
+          "count": 0,
+          "value": null
+        },
+        "source_precision": {
+          "n": 0,
+          "value": null
+        },
+        "section_precision": {
+          "n": 0,
+          "value": null
+        },
+        "support_rate": {
+          "n": 0,
+          "value": null
+        },
+        "auto_class": {
+          "correct_evidence": 0,
+          "correct_source_wrong_evidence": 0,
+          "unsupported_citation": 0,
+          "citation_missing": 0
+        },
+        "judge_class": {
+          "correct_evidence": 0,
+          "correct_source_wrong_evidence": 0,
+          "unsupported_citation": 0,
+          "citation_missing": 0
+        },
+        "judge_class_n": 0,
+        "related_citation_count": 0,
+        "answered_unanswerable_with_citations": 0
+      }
+    },
+    "parallel": {
+      "records": 0,
+      "retrieval": {
+        "duplicate_rule_changed": {
+          "n": 0,
+          "count": 0,
+          "cases": []
+        }
+      },
+      "answer": {
+        "records": 0,
+        "runner_errors": [],
+        "unlabelled": [],
+        "labels": {
+          "correct": 0,
+          "partially_correct": 0,
+          "incorrect": 0,
+          "false_refusal": 0,
+          "correct_refusal": 0,
+          "hallucination": 0
+        },
+        "accuracy": {
+          "n": 0,
+          "count": 0,
+          "value": null
+        },
+        "lenient_accuracy": {
+          "n": 0,
+          "count": 0,
+          "value": null
+        },
+        "groundedness_rate": {
+          "n": 0,
+          "count": 0,
+          "value": null
+        },
+        "points_covered_mean": {
+          "n": 0,
+          "value": null
+        },
+        "correct_refusal_rate": {
+          "n": 0,
+          "count": 0,
+          "value": null
+        },
+        "hallucination_rate": {
+          "n": 0,
+          "count": 0,
+          "value": null
+        },
+        "false_refusal_rate": {
+          "n": 0,
+          "count": 0,
+          "value": null
+        }
+      },
+      "citation": {
+        "answered": 0,
+        "presence_rate": {
+          "n": 0,
+          "count": 0,
+          "value": null
+        },
+        "source_precision": {
+          "n": 0,
+          "value": null
+        },
+        "section_precision": {
+          "n": 0,
+          "value": null
+        },
+        "support_rate": {
+          "n": 0,
+          "value": null
+        },
+        "auto_class": {
+          "correct_evidence": 0,
+          "correct_source_wrong_evidence": 0,
+          "unsupported_citation": 0,
+          "citation_missing": 0
+        },
+        "judge_class": {
+          "correct_evidence": 0,
+          "correct_source_wrong_evidence": 0,
+          "unsupported_citation": 0,
+          "citation_missing": 0
+        },
+        "judge_class_n": 0,
+        "related_citation_count": 0,
+        "answered_unanswerable_with_citations": 0
+      }
+    },
+    "language": {
+      "en": {
+        "records": 4,
+        "retrieval": {
+          "duplicate_rule_changed": {
+            "n": 0,
+            "count": 0,
+            "cases": []
+          }
+        },
+        "answer": {
+          "records": 2,
+          "runner_errors": [],
+          "unlabelled": [],
+          "labels": {
+            "correct": 1,
+            "partially_correct": 0,
+            "incorrect": 0,
+            "false_refusal": 0,
+            "correct_refusal": 1,
+            "hallucination": 0
+          },
+          "accuracy": {
+            "n": 1,
+            "count": 1,
+            "value": 1.0
+          },
+          "lenient_accuracy": {
+            "n": 1,
+            "count": 1,
+            "value": 1.0
+          },
+          "groundedness_rate": {
+            "n": 1,
+            "count": 1,
+            "value": 1.0
+          },
+          "points_covered_mean": {
+            "n": 1,
+            "value": 1.0
+          },
+          "correct_refusal_rate": {
+            "n": 1,
+            "count": 1,
+            "value": 1.0
+          },
+          "hallucination_rate": {
+            "n": 1,
+            "count": 0,
+            "value": 0.0
+          },
+          "false_refusal_rate": {
+            "n": 1,
+            "count": 0,
+            "value": 0.0
+          }
+        },
+        "citation": {
+          "answered": 0,
+          "presence_rate": {
+            "n": 0,
+            "count": 0,
+            "value": null
+          },
+          "source_precision": {
+            "n": 0,
+            "value": null
+          },
+          "section_precision": {
+            "n": 0,
+            "value": null
+          },
+          "support_rate": {
+            "n": 0,
+            "value": null
+          },
+          "auto_class": {
+            "correct_evidence": 0,
+            "correct_source_wrong_evidence": 0,
+            "unsupported_citation": 0,
+            "citation_missing": 0
+          },
+          "judge_class": {
+            "correct_evidence": 0,
+            "correct_source_wrong_evidence": 0,
+            "unsupported_citation": 0,
+            "citation_missing": 0
+          },
+          "judge_class_n": 0,
+          "related_citation_count": 0,
+          "answered_unanswerable_with_citations": 0
+        }
+      },
+      "vi": {
+        "records": 2,
+        "retrieval": {
+          "duplicate_rule_changed": {
+            "n": 0,
+            "count": 0,
+            "cases": []
+          }
+        },
+        "answer": {
+          "records": 1,
+          "runner_errors": [],
+          "unlabelled": [],
+          "labels": {
+            "correct": 1,
+            "partially_correct": 0,
+            "incorrect": 0,
+            "false_refusal": 0,
+            "correct_refusal": 0,
+            "hallucination": 0
+          },
+          "accuracy": {
+            "n": 1,
+            "count": 1,
+            "value": 1.0
+          },
+          "lenient_accuracy": {
+            "n": 1,
+            "count": 1,
+            "value": 1.0
+          },
+          "groundedness_rate": {
+            "n": 1,
+            "count": 1,
+            "value": 1.0
+          },
+          "points_covered_mean": {
+            "n": 1,
+            "value": 1.0
+          },
+          "correct_refusal_rate": {
+            "n": 0,
+            "count": 0,
+            "value": null
+          },
+          "hallucination_rate": {
+            "n": 0,
+            "count": 0,
+            "value": null
+          },
+          "false_refusal_rate": {
+            "n": 1,
+            "count": 0,
+            "value": 0.0
+          }
+        },
+        "citation": {
+          "answered": 0,
+          "presence_rate": {
+            "n": 0,
+            "count": 0,
+            "value": null
+          },
+          "source_precision": {
+            "n": 0,
+            "value": null
+          },
+          "section_precision": {
+            "n": 0,
+            "value": null
+          },
+          "support_rate": {
+            "n": 0,
+            "value": null
+          },
+          "auto_class": {
+            "correct_evidence": 0,
+            "correct_source_wrong_evidence": 0,
+            "unsupported_citation": 0,
+            "citation_missing": 0
+          },
+          "judge_class": {
+            "correct_evidence": 0,
+            "correct_source_wrong_evidence": 0,
+            "unsupported_citation": 0,
+            "citation_missing": 0
+          },
+          "judge_class_n": 0,
+          "related_citation_count": 0,
+          "answered_unanswerable_with_citations": 0
+        }
+      }
+    },
+    "arm": {
+      "A": {
+        "records": 6,
+        "retrieval": {
+          "duplicate_rule_changed": {
+            "n": 0,
+            "count": 0,
+            "cases": []
+          }
+        },
+        "answer": {
+          "records": 3,
+          "runner_errors": [],
+          "unlabelled": [],
+          "labels": {
+            "correct": 2,
+            "partially_correct": 0,
+            "incorrect": 0,
+            "false_refusal": 0,
+            "correct_refusal": 1,
+            "hallucination": 0
+          },
+          "accuracy": {
+            "n": 2,
+            "count": 2,
+            "value": 1.0
+          },
+          "lenient_accuracy": {
+            "n": 2,
+            "count": 2,
+            "value": 1.0
+          },
+          "groundedness_rate": {
+            "n": 2,
+            "count": 2,
+            "value": 1.0
+          },
+          "points_covered_mean": {
+            "n": 2,
+            "value": 1.0
+          },
+          "correct_refusal_rate": {
+            "n": 1,
+            "count": 1,
+            "value": 1.0
+          },
+          "hallucination_rate": {
+            "n": 1,
+            "count": 0,
+            "value": 0.0
+          },
+          "false_refusal_rate": {
+            "n": 2,
+            "count": 0,
+            "value": 0.0
+          }
+        },
+        "citation": {
+          "answered": 0,
+          "presence_rate": {
+            "n": 0,
+            "count": 0,
+            "value": null
+          },
+          "source_precision": {
+            "n": 0,
+            "value": null
+          },
+          "section_precision": {
+            "n": 0,
+            "value": null
+          },
+          "support_rate": {
+            "n": 0,
+            "value": null
+          },
+          "auto_class": {
+            "correct_evidence": 0,
+            "correct_source_wrong_evidence": 0,
+            "unsupported_citation": 0,
+            "citation_missing": 0
+          },
+          "judge_class": {
+            "correct_evidence": 0,
+            "correct_source_wrong_evidence": 0,
+            "unsupported_citation": 0,
+            "citation_missing": 0
+          },
+          "judge_class_n": 0,
+          "related_citation_count": 0,
+          "answered_unanswerable_with_citations": 0
+        }
+      }
+    },
+    "size_class": {
+      "medium": {
+        "records": 4,
+        "retrieval": {
+          "duplicate_rule_changed": {
+            "n": 0,
+            "count": 0,
+            "cases": []
+          }
+        },
+        "answer": {
+          "records": 2,
+          "runner_errors": [],
+          "unlabelled": [],
+          "labels": {
+            "correct": 2,
+            "partially_correct": 0,
+            "incorrect": 0,
+            "false_refusal": 0,
+            "correct_refusal": 0,
+            "hallucination": 0
+          },
+          "accuracy": {
+            "n": 2,
+            "count": 2,
+            "value": 1.0
+          },
+          "lenient_accuracy": {
+            "n": 2,
+            "count": 2,
+            "value": 1.0
+          },
+          "groundedness_rate": {
+            "n": 2,
+            "count": 2,
+            "value": 1.0
+          },
+          "points_covered_mean": {
+            "n": 2,
+            "value": 1.0
+          },
+          "correct_refusal_rate": {
+            "n": 0,
+            "count": 0,
+            "value": null
+          },
+          "hallucination_rate": {
+            "n": 0,
+            "count": 0,
+            "value": null
+          },
+          "false_refusal_rate": {
+            "n": 2,
+            "count": 0,
+            "value": 0.0
+          }
+        },
+        "citation": {
+          "answered": 0,
+          "presence_rate": {
+            "n": 0,
+            "count": 0,
+            "value": null
+          },
+          "source_precision": {
+            "n": 0,
+            "value": null
+          },
+          "section_precision": {
+            "n": 0,
+            "value": null
+          },
+          "support_rate": {
+            "n": 0,
+            "value": null
+          },
+          "auto_class": {
+            "correct_evidence": 0,
+            "correct_source_wrong_evidence": 0,
+            "unsupported_citation": 0,
+            "citation_missing": 0
+          },
+          "judge_class": {
+            "correct_evidence": 0,
+            "correct_source_wrong_evidence": 0,
+            "unsupported_citation": 0,
+            "citation_missing": 0
+          },
+          "judge_class_n": 0,
+          "related_citation_count": 0,
+          "answered_unanswerable_with_citations": 0
+        }
+      },
+      "none": {
+        "records": 2,
+        "retrieval": {
+          "duplicate_rule_changed": {
+            "n": 0,
+            "count": 0,
+            "cases": []
+          }
+        },
+        "answer": {
+          "records": 1,
+          "runner_errors": [],
+          "unlabelled": [],
+          "labels": {
+            "correct": 0,
+            "partially_correct": 0,
+            "incorrect": 0,
+            "false_refusal": 0,
+            "correct_refusal": 1,
+            "hallucination": 0
+          },
+          "accuracy": {
+            "n": 0,
+            "count": 0,
+            "value": null
+          },
+          "lenient_accuracy": {
+            "n": 0,
+            "count": 0,
+            "value": null
+          },
+          "groundedness_rate": {
+            "n": 0,
+            "count": 0,
+            "value": null
+          },
+          "points_covered_mean": {
+            "n": 0,
+            "value": null
+          },
+          "correct_refusal_rate": {
+            "n": 1,
+            "count": 1,
+            "value": 1.0
+          },
+          "hallucination_rate": {
+            "n": 1,
+            "count": 0,
+            "value": 0.0
+          },
+          "false_refusal_rate": {
+            "n": 0,
+            "count": 0,
+            "value": null
+          }
+        },
+        "citation": {
+          "answered": 0,
+          "presence_rate": {
+            "n": 0,
+            "count": 0,
+            "value": null
+          },
+          "source_precision": {
+            "n": 0,
+            "value": null
+          },
+          "section_precision": {
+            "n": 0,
+            "value": null
+          },
+          "support_rate": {
+            "n": 0,
+            "value": null
+          },
+          "auto_class": {
+            "correct_evidence": 0,
+            "correct_source_wrong_evidence": 0,
+            "unsupported_citation": 0,
+            "citation_missing": 0
+          },
+          "judge_class": {
+            "correct_evidence": 0,
+            "correct_source_wrong_evidence": 0,
+            "unsupported_citation": 0,
+            "citation_missing": 0
+          },
+          "judge_class_n": 0,
+          "related_citation_count": 0,
+          "answered_unanswerable_with_citations": 0
+        }
+      }
+    },
+    "difficulty": {
+      "easy": {
+        "records": 4,
+        "retrieval": {
+          "duplicate_rule_changed": {
+            "n": 0,
+            "count": 0,
+            "cases": []
+          }
+        },
+        "answer": {
+          "records": 2,
+          "runner_errors": [],
+          "unlabelled": [],
+          "labels": {
+            "correct": 2,
+            "partially_correct": 0,
+            "incorrect": 0,
+            "false_refusal": 0,
+            "correct_refusal": 0,
+            "hallucination": 0
+          },
+          "accuracy": {
+            "n": 2,
+            "count": 2,
+            "value": 1.0
+          },
+          "lenient_accuracy": {
+            "n": 2,
+            "count": 2,
+            "value": 1.0
+          },
+          "groundedness_rate": {
+            "n": 2,
+            "count": 2,
+            "value": 1.0
+          },
+          "points_covered_mean": {
+            "n": 2,
+            "value": 1.0
+          },
+          "correct_refusal_rate": {
+            "n": 0,
+            "count": 0,
+            "value": null
+          },
+          "hallucination_rate": {
+            "n": 0,
+            "count": 0,
+            "value": null
+          },
+          "false_refusal_rate": {
+            "n": 2,
+            "count": 0,
+            "value": 0.0
+          }
+        },
+        "citation": {
+          "answered": 0,
+          "presence_rate": {
+            "n": 0,
+            "count": 0,
+            "value": null
+          },
+          "source_precision": {
+            "n": 0,
+            "value": null
+          },
+          "section_precision": {
+            "n": 0,
+            "value": null
+          },
+          "support_rate": {
+            "n": 0,
+            "value": null
+          },
+          "auto_class": {
+            "correct_evidence": 0,
+            "correct_source_wrong_evidence": 0,
+            "unsupported_citation": 0,
+            "citation_missing": 0
+          },
+          "judge_class": {
+            "correct_evidence": 0,
+            "correct_source_wrong_evidence": 0,
+            "unsupported_citation": 0,
+            "citation_missing": 0
+          },
+          "judge_class_n": 0,
+          "related_citation_count": 0,
+          "answered_unanswerable_with_citations": 0
+        }
+      },
+      "medium": {
+        "records": 2,
+        "retrieval": {
+          "duplicate_rule_changed": {
+            "n": 0,
+            "count": 0,
+            "cases": []
+          }
+        },
+        "answer": {
+          "records": 1,
+          "runner_errors": [],
+          "unlabelled": [],
+          "labels": {
+            "correct": 0,
+            "partially_correct": 0,
+            "incorrect": 0,
+            "false_refusal": 0,
+            "correct_refusal": 1,
+            "hallucination": 0
+          },
+          "accuracy": {
+            "n": 0,
+            "count": 0,
+            "value": null
+          },
+          "lenient_accuracy": {
+            "n": 0,
+            "count": 0,
+            "value": null
+          },
+          "groundedness_rate": {
+            "n": 0,
+            "count": 0,
+            "value": null
+          },
+          "points_covered_mean": {
+            "n": 0,
+            "value": null
+          },
+          "correct_refusal_rate": {
+            "n": 1,
+            "count": 1,
+            "value": 1.0
+          },
+          "hallucination_rate": {
+            "n": 1,
+            "count": 0,
+            "value": 0.0
+          },
+          "false_refusal_rate": {
+            "n": 0,
+            "count": 0,
+            "value": null
+          }
+        },
+        "citation": {
+          "answered": 0,
+          "presence_rate": {
+            "n": 0,
+            "count": 0,
+            "value": null
+          },
+          "source_precision": {
+            "n": 0,
+            "value": null
+          },
+          "section_precision": {
+            "n": 0,
+            "value": null
+          },
+          "support_rate": {
+            "n": 0,
+            "value": null
+          },
+          "auto_class": {
+            "correct_evidence": 0,
+            "correct_source_wrong_evidence": 0,
+            "unsupported_citation": 0,
+            "citation_missing": 0
+          },
+          "judge_class": {
+            "correct_evidence": 0,
+            "correct_source_wrong_evidence": 0,
+            "unsupported_citation": 0,
+            "citation_missing": 0
+          },
+          "judge_class_n": 0,
+          "related_citation_count": 0,
+          "answered_unanswerable_with_citations": 0
+        }
+      }
+    },
+    "failure_mode": {
+      "none": {
+        "records": 6,
+        "retrieval": {
+          "duplicate_rule_changed": {
+            "n": 0,
+            "count": 0,
+            "cases": []
+          }
+        },
+        "answer": {
+          "records": 3,
+          "runner_errors": [],
+          "unlabelled": [],
+          "labels": {
+            "correct": 2,
+            "partially_correct": 0,
+            "incorrect": 0,
+            "false_refusal": 0,
+            "correct_refusal": 1,
+            "hallucination": 0
+          },
+          "accuracy": {
+            "n": 2,
+            "count": 2,
+            "value": 1.0
+          },
+          "lenient_accuracy": {
+            "n": 2,
+            "count": 2,
+            "value": 1.0
+          },
+          "groundedness_rate": {
+            "n": 2,
+            "count": 2,
+            "value": 1.0
+          },
+          "points_covered_mean": {
+            "n": 2,
+            "value": 1.0
+          },
+          "correct_refusal_rate": {
+            "n": 1,
+            "count": 1,
+            "value": 1.0
+          },
+          "hallucination_rate": {
+            "n": 1,
+            "count": 0,
+            "value": 0.0
+          },
+          "false_refusal_rate": {
+            "n": 2,
+            "count": 0,
+            "value": 0.0
+          }
+        },
+        "citation": {
+          "answered": 0,
+          "presence_rate": {
+            "n": 0,
+            "count": 0,
+            "value": null
+          },
+          "source_precision": {
+            "n": 0,
+            "value": null
+          },
+          "section_precision": {
+            "n": 0,
+            "value": null
+          },
+          "support_rate": {
+            "n": 0,
+            "value": null
+          },
+          "auto_class": {
+            "correct_evidence": 0,
+            "correct_source_wrong_evidence": 0,
+            "unsupported_citation": 0,
+            "citation_missing": 0
+          },
+          "judge_class": {
+            "correct_evidence": 0,
+            "correct_source_wrong_evidence": 0,
+            "unsupported_citation": 0,
+            "citation_missing": 0
+          },
+          "judge_class_n": 0,
+          "related_citation_count": 0,
+          "answered_unanswerable_with_citations": 0
+        }
+      }
+    }
+  },
+  "latency": {
+    "method": "nearest-rank",
+    "main": {
+      "count": 6,
+      "stages": {
+        "embed_query": {
+          "n": 6,
+          "mean": 0.10539999993852689,
+          "p50": 0.10599999950500205,
+          "p95": 0.12289999995118706,
+          "max": 0.12289999995118706
+        },
+        "retrieve": {
+          "n": 6,
+          "mean": 18.491033333248197,
+          "p50": 2.5623000001360197,
+          "p95": 98.80859999975655,
+          "max": 98.80859999975655
+        },
+        "generate": {
+          "n": 2,
+          "mean": 2141.2517999997362,
+          "p50": 1716.2075999995068,
+          "p95": 2566.2959999999657,
+          "max": 2566.2959999999657
+        },
+        "total": {
+          "n": 6,
+          "mean": 732.4441666667857,
+          "p50": 2.9284000002007815,
+          "p95": 2568.5049000003346,
+          "max": 2568.5049000003346
+        }
+      }
+    },
+    "retried_or_fallback": {
+      "count": 0,
+      "stages": {
+        "embed_query": {
+          "n": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "max": null
+        },
+        "retrieve": {
+          "n": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "max": null
+        },
+        "generate": {
+          "n": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "max": null
+        },
+        "total": {
+          "n": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "max": null
+        }
+      }
+    }
+  },
+  "judge_latency": {
+    "main": {
+      "count": 2,
+      "stages": {
+        "generate": {
+          "n": 2,
+          "mean": 12200.030200000016,
+          "p50": 2051.7247999998744,
+          "p95": 22348.335600000155,
+          "max": 22348.335600000155
+        },
+        "total": {
+          "n": 2,
+          "mean": 13311.025249999944,
+          "p50": 3152.2913999999673,
+          "p95": 23469.75909999992,
+          "max": 23469.75909999992
+        }
+      }
+    },
+    "retried_or_fallback": {
+      "count": 0,
+      "stages": {
+        "generate": {
+          "n": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "max": null
+        },
+        "total": {
+          "n": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "max": null
+        }
+      }
+    }
+  },
+  "cost": {
+    "note": "estimate: list price per 1M tokens; the runs used the free tier and were not billed",
+    "pricing_source": {
+      "url": "https://ai.google.dev/gemini-api/docs/pricing?hl=en",
+      "page_last_updated": "2026-09-24",
+      "retrieved": "2026-09-27",
+      "table": "Standard, Paid Tier, per 1M tokens in USD"
+    },
+    "stages": {
+      "answer": {
+        "calls": 2,
+        "models": [
+          "gemini-3.5-flash-lite"
+        ],
+        "prompt_tokens": 3235,
+        "output_tokens": 327,
+        "thoughts_tokens": 0,
+        "calls_without_prompt_tokens": 0,
+        "calls_without_output_tokens": 0,
+        "calls_without_thoughts_tokens": 2,
+        "per_question": {
+          "prompt_tokens": 1617.5,
+          "output_tokens": 163.5,
+          "thoughts_tokens": 0.0
+        },
+        "estimate": {
+          "usd": 0.001788,
+          "reason": "estimate: list price per 1M tokens; the runs used the free tier and were not billed; 2 call(s) reported no thinking-token count (counted as 0)"
+        }
+      },
+      "judge": {
+        "calls": 2,
+        "models": [
+          "gemini-3.5-flash-lite"
+        ],
+        "prompt_tokens": 2180,
+        "output_tokens": 435,
+        "thoughts_tokens": 0,
+        "calls_without_prompt_tokens": 0,
+        "calls_without_output_tokens": 0,
+        "calls_without_thoughts_tokens": 2,
+        "per_question": {
+          "prompt_tokens": 1090.0,
+          "output_tokens": 217.5,
+          "thoughts_tokens": 0.0
+        },
+        "estimate": {
+          "usd": 0.0017415,
+          "reason": "estimate: list price per 1M tokens; the runs used the free tier and were not billed; 2 call(s) reported no thinking-token count (counted as 0)"
+        }
+      }
+    }
+  },
+  "per_case": [
+    {
+      "case_id": "Q-DEV-001",
+      "arm": "A",
+      "mode": "full",
+      "split": "dev",
+      "language": "en",
+      "status": "ok",
+      "result": "correct",
+      "points_covered": 1.0,
+      "citation_auto_class": null,
+      "citation_judge_class": null,
+      "gate_fired": false,
+      "latency_total_ms": 2568.5049000003346,
+      "spans_unavailable": true
+    },
+    {
+      "case_id": "Q-DEV-001",
+      "arm": "A",
+      "mode": "retrieval",
+      "split": "dev",
+      "language": "en",
+      "status": "ok",
+      "result": null,
+      "points_covered": null,
+      "citation_auto_class": null,
+      "citation_judge_class": null,
+      "gate_fired": false,
+      "latency_total_ms": 99.0034000005835,
+      "spans_unavailable": true
+    },
+    {
+      "case_id": "Q-DEV-002",
+      "arm": "A",
+      "mode": "full",
+      "split": "dev",
+      "language": "vi",
+      "status": "ok",
+      "result": "correct",
+      "points_covered": 1.0,
+      "citation_auto_class": null,
+      "citation_judge_class": null,
+      "gate_fired": false,
+      "latency_total_ms": 1719.383900000139,
+      "spans_unavailable": true
+    },
+    {
+      "case_id": "Q-DEV-002",
+      "arm": "A",
+      "mode": "retrieval",
+      "split": "dev",
+      "language": "vi",
+      "status": "ok",
+      "result": null,
+      "points_covered": null,
+      "citation_auto_class": null,
+      "citation_judge_class": null,
+      "gate_fired": false,
+      "latency_total_ms": 2.7314999997543055,
+      "spans_unavailable": true
+    },
+    {
+      "case_id": "Q-DEV-005",
+      "arm": "A",
+      "mode": "full",
+      "split": "dev",
+      "language": "en",
+      "status": "ok",
+      "result": "correct_refusal",
+      "points_covered": null,
+      "citation_auto_class": null,
+      "citation_judge_class": null,
+      "gate_fired": true,
+      "latency_total_ms": 2.9284000002007815,
+      "spans_unavailable": false
+    },
+    {
+      "case_id": "Q-DEV-005",
+      "arm": "A",
+      "mode": "retrieval",
+      "split": "dev",
+      "language": "en",
+      "status": "ok",
+      "result": null,
+      "points_covered": null,
+      "citation_auto_class": null,
+      "citation_judge_class": null,
+      "gate_fired": true,
+      "latency_total_ms": 2.1128999997017672,
+      "spans_unavailable": false
+    }
+  ]
+}

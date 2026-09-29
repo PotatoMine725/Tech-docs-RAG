@@ -1,6 +1,6 @@
 # EVAL-001 owner re-check of changed ground truth
 
-**For the owner to fill.** EVAL-002 MUST NOT start until every `owner verdict:` line below is filled (`agents/prompts/02-EVAL-002-write-and-freeze.md`, entry condition).
+**Filled by the owner 2026-09-25** (verdicts below; applied in OWNER-001). EVAL-002 MUST NOT start until every `owner verdict:` line below is filled (`agents/prompts/02-EVAL-002-write-and-freeze.md`, entry condition).
 
 - **Baseline ("old")**: `blueprint.yaml` at `9e0ab15`. That is after the YAML parsing fix and before the independent-review fixes (`ce04909`) and owner decisions D1–D3 (`831d5a0`), so it is the version you reviewed.
 - **"New"**: `blueprint.yaml` at `629b931` (current). Produced by a script that compares the parsed YAML of both versions. Every case also got the new `slot: S1/S2` field from owner decision D1; it is not repeated below. The blocks below cover the cases whose answer points or core ground truth changed. A diff of the parsed YAML that ignores `slot` finds **27** changed blueprints; the other 18 are listed in "Other changes since your review" at the end (added by the REORIENT-001 fixes, after the REORIENT-001 verify found line 6 wrong).
@@ -18,7 +18,7 @@ Source: #03 "Unit testing best practices for .NET > Best practices > Avoid multi
 - **New P4 (optional):** "In most unit testing frameworks, after an Assert fails, all subsequent tests are considered failing, so working functionality can look broken."
 - **Supporting quotes:** P2 "Multiple Act tasks need to be individually asserted, and you can't guarantee that all Assert tasks execute." · P4 "In most unit testing frameworks, after an Assert task fails in a unit test, all subsequent tests are automatically considered as failing."
 
-owner verdict (009 and 010): 
+owner verdict (009 and 010): ok (owner, 2026-09-25)
 
 ## BP-EVAL-016 (VI) — assigning a list variable to another, then changing it
 Source: #26 "The C# type system > Value types and reference types". Review findings #8, #9, #20.
@@ -28,7 +28,7 @@ Source: #26 "The C# type system > Value types and reference types". Review findi
 - **Alternates added:** #07 "C# classes"; #07 "C# classes > Create objects"; #20 "A tour of the C# language > Familiar C# features". Each gives partial support for P1, so retrieving one of them counts as a source hit.
 - **Supporting quotes (unchanged):** P1 "**Reference types** hold a reference to an object on the managed heap. When you assign a reference type to a new variable, both variables point to the same object." · P2 "**Value types** hold their data directly. When you assign a value type to a new variable, the runtime copies the data."
 
-owner verdict: 
+owner verdict: change: remove alternate #20 "Familiar C# features" (states collections are reference types but not assignment semantics → false hit); keep both #07 alternates. (owner, 2026-09-25)
 
 ## BP-EVAL-022 (VI) — UseStatusCodePagesWithRedirects vs UseStatusCodePagesWithReExecute
 Source: #13 "Handle errors in ASP.NET Core > UseStatusCodePages > …WithRedirects" (slot S1) and "…WithReExecute" (slot S2). Review finding #11.
@@ -38,7 +38,7 @@ Source: #13 "Handle errors in ASP.NET Core > UseStatusCodePages > …WithRedirec
 - **New P5 (optional):** "Variants 1-4 add that the re-executed pipeline may change the status code; if it doesn't, the original code is sent."
 - **Supporting quotes:** P2 "Does not alter the status code before or after re-executing the pipeline." · P5 "The new pipeline execution may alter the response's status code, as the new pipeline has full control of the status code. If the new pipeline does not alter the status code, the original status code will be sent to the client."
 
-owner verdict: 
+owner verdict: ok — add a validator test that 022 has two slots (S1 Redirects, S2 ReExecute). (owner, 2026-09-25)
 
 ## BP-EVAL-023 (EN) — are logs/metrics emitted for exceptions an IExceptionHandler handles?
 Source: #13 "Handle errors in ASP.NET Core > IExceptionHandler" (any variant) or "… > SuppressDiagnosticsCallback". Review finding #1 (partly accepted).
@@ -48,7 +48,7 @@ Source: #13 "Handle errors in ASP.NET Core > IExceptionHandler" (any variant) or
 - **Answer points (unchanged):** P1 .NET 10 suppresses diagnostics for handled exceptions by default · P2 .NET 8 and 9 always emitted them · P3 changeable with SuppressDiagnosticsCallback.
 - **Added quotes:** "Starting in .NET 10, diagnostics are suppressed by default for handled exceptions." (P1) · "To revert to the .NET 8 and 9 behavior where diagnostics are always emitted for handled exceptions, set the callback to always return `false`:" (P2, P3).
 
-owner verdict: 
+owner verdict: ok (owner, 2026-09-25)
 
 ## BP-EVAL-024 (VI) — shadow copying in xUnit integration tests
 Source: #17 "Integration tests in ASP.NET Core > Disable shadow copying". Review finding #16.
@@ -57,7 +57,7 @@ Source: #17 "Integration tests in ASP.NET Core > Disable shadow copying". Review
 - **New P1 (required):** "Shadow copying runs the tests in a different directory than the output directory; tests that load files relative to Assembly.Location may then run into issues, and disabling shadow copying is the fix."
 - **Supporting quote:** "Shadow copying causes the tests to execute in a different directory than the output directory. If your tests rely on loading files relative to `Assembly.Location` and you encounter issues, you might have to disable shadow copying."
 
-owner verdict: 
+owner verdict: change: P1 → "Shadow copying runs the tests in a different directory than the output directory; tests that load files relative to Assembly.Location may run into issues, and you might have to disable shadow copying." (owner, 2026-09-25)
 
 ## BP-EVAL-025 (EN) — short-circuit robots.txt and favicon.ico
 Source: #23 "Routing in ASP.NET Core > Short-circuit middleware after routing". Review finding #15.
@@ -67,7 +67,7 @@ Source: #23 "Routing in ASP.NET Core > Short-circuit middleware after routing". 
 - **New P4 (optional):** "Caveat: it doesn't affect middleware placed before UseRouting, and endpoints with [Authorize] or [RequireCors] metadata fail with InvalidOperationException."
 - **Supporting quotes:** P2 "Use the [ShortCircuit](…) extension method to cause routing to invoke the endpoint logic immediately and then end the request." · P4 "The `ShortCircuit` and `MapShortCircuit` methods do not affect middleware placed before `UseRouting`. Trying to use these methods with endpoints that also have `[Authorize]` or `[RequireCors]` metadata will cause requests to fail with an `InvalidOperationException`."
 
-owner verdict: 
+owner verdict: ok (owner, 2026-09-25)
 
 ## BP-EVAL-031 (EN, cross-document) — default value of a string, from the kind of type string is
 Sources: slot S1 #04 "Built-in types and literals > `default` expressions"; slot S2 #26 "The C# type system > Value types and reference types" **or** #20 "A tour of the C# language > Familiar C# features" (new alternate). Review findings #2, #9; owner decision D1.
@@ -79,7 +79,7 @@ Sources: slot S1 #04 "Built-in types and literals > `default` expressions"; slot
 - **Supporting quotes (unchanged):** #04 (S1, P1 + P2) "The `default` expression produces the default value for a type: `0` for numeric types, `false` for `bool`, and `null` for reference types:" · #26 (S2, P1) "Classes, arrays, delegates, and strings are reference types."
 - **#20 alternate, note (quote):** "reference types like `string`, arrays, and other collections".
 
-owner verdict: 
+owner verdict: ok (owner, 2026-09-25)
 
 ## BP-EVAL-036 (VI, not in the documents) — verify with Moq that a method was called exactly once
 Expected: refusal (corpus-insufficient). Review finding #3.
@@ -92,7 +92,7 @@ Expected: refusal (corpus-insufficient). Review finding #3.
 - **Absence proof:** `Verify(`, `Times.Once` and `call count` have 0 hits in the 24 accepted documents (`evidence-map.yaml` ABS-004).
 - **Scoring note:** under the REORIENT-001 C1 decision, a refusal that mentions `Mock<T>`/`.Setup` as related content goes to the judge's refusal check.
 
-owner verdict: 
+owner verdict: ok (owner, 2026-09-25)
 
 ---
 
@@ -118,5 +118,17 @@ Found by the REORIENT-001 verify (`docs/reviews/code/REORIENT-001-verify.md`, FA
 | BP-DEV-005 (dev, refusal) | variations, citation criteria | adds the D2 related-content rule; "any citation must not be presented as supporting an answer" | D2 |
 | BP-DEV-006 (dev, refusal) | variations, `must_not_claim`, citation criteria | mentioning `MapGroup` route groups OK if versioning is said to be uncovered; presenting `MapGroup`/`/v1` as versioning = must-not-claim | #24, D2 |
 
-owner verdict (all rows above; `ok`, or `change: <case>: <what>`): 
+owner verdict (all rows above; `ok`, or `change: <case>: <what>`): ok — condition: EVAL-003b reports source/section hit both strict (expected sources only) and lenient (with alternates). (owner, 2026-09-25)
 
+---
+
+## Additional change: BP-EVAL-017 (EN) — split its evidence slot
+
+Not in the sheet above; raised by the owner after the EVAL-001 re-verify note ("the re-check sheet does not ask about splitting case 017's slot", `docs/plans/session-handoff-2026-09-25-autonomous.md` item 6).
+- **Before:** one slot S1 holding the #11 H1 intro, #11 "IMiddleware", the #11 "Additional resources" alternate and the #10 "Service lifetimes" alternate, so any one of them was a retrieval hit.
+
+owner verdict: change: split slots — S1 = H1 intro (+ the "Additional resources" alternates that hold variant intros), S2 = "IMiddleware" (+ #10 "Service lifetimes"); P2/P3 evidence is in the intro, P1 in IMiddleware. Update its citation criteria to one citation per slot. (owner, 2026-09-25)
+
+---
+
+Applied in OWNER-001 (`docs/reports/execution/OWNER-001.md`): 016, 024 and 017 changed in `blueprint.yaml`; 022 slot test added in `tests/unit/test_evaluation_blueprints.py`; the strict/lenient condition added to `docs/specs/evaluation-spec.md` § Retrieval hit rule and `agents/prompts/09b-EVAL-003b-metrics-and-judge.md`.

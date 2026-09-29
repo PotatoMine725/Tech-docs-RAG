@@ -1,6 +1,6 @@
 # EPIC-06-experiment
 
-Status: not started.
+Status: EXP-001 done 2026-09-28, pending `99-VERIFY` ([report](../../reports/epics/EPIC-06-experiment.md), [execution report](../../reports/execution/EXP-001.md)). BONUS-001 not started.
 
 Target: Tue 29 – Wed 30 Sep 2026 (Phase 3). Deadline for the whole project: 2026-10-01.
 

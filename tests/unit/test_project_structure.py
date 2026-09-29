@@ -4,7 +4,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 PKG = ROOT / "src" / "knowledge_assistant"
 EXCLUDED_IDS = {"14", "19", "24", "27"}
-FORBIDDEN_CORE = ("PySide6", "chromadb", "google")
+FORBIDDEN_CORE = ("PySide6", "chromadb", "google", "markitdown", "httpx")  # httpx: RAG-003, raw HTTP errors stay in infrastructure
 FORBIDDEN_APP = FORBIDDEN_CORE
 
 
@@ -34,12 +34,30 @@ def test_application_has_no_technology_or_presentation_dependencies():
     assert "presentation" not in _imports("application")
 
 
+def test_presentation_does_not_import_provider_libraries():
+    """RAG-003: google.genai / httpx exceptions are wrapped in infrastructure, so the GUI never needs (or sees) them."""
+    assert not _imports("presentation") & {"google", "httpx", "chromadb", "markitdown"}
+
+
 def test_core_and_application_do_not_import_outer_layers():
     for layer in ("core", "application"):
         for py in (PKG / layer).rglob("*.py"):
             text = py.read_text(encoding="utf-8")
             assert "knowledge_assistant.infrastructure" not in text, py
             assert "knowledge_assistant.presentation" not in text, py
+
+
+def test_markitdown_is_imported_only_by_its_adapter():
+    """ADR-0002: MarkItDown lives in one infrastructure/parsing module."""
+    importers = set()
+    for py in PKG.rglob("*.py"):
+        for node in ast.walk(ast.parse(py.read_text(encoding="utf-8"))):
+            names = [a.name for a in node.names] if isinstance(node, ast.Import) else []
+            if isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+                names = [node.module]
+            if any(name.split(".")[0] == "markitdown" for name in names):
+                importers.add(py.relative_to(PKG).as_posix())
+    assert importers == {"infrastructure/parsing/markitdown_parser.py"}
 
 
 def test_excluded_corpus_ids_are_exactly_14_19_24_27():
@@ -50,3 +68,16 @@ def test_excluded_corpus_ids_are_exactly_14_19_24_27():
 def test_excluded_ids_absent_from_sources():
     sources = {p.name.split("-")[0] for p in (ROOT / "corpus" / "sources").glob("*.md")}
     assert not sources & EXCLUDED_IDS
+
+
+def test_only_the_desktop_wiring_touches_composition_and_infrastructure():
+    """GUI-001: view-model, view, adapter and fake stay clean; `wiring.py` is the one seam to the composition root."""
+    importers = set()
+    for py in (PKG / "presentation").rglob("*.py"):
+        for node in ast.walk(ast.parse(py.read_text(encoding="utf-8"))):
+            names = [a.name for a in node.names] if isinstance(node, ast.Import) else []
+            if isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+                names = [node.module]
+            if any(n.startswith(("knowledge_assistant.composition", "knowledge_assistant.infrastructure")) for n in names):
+                importers.add(py.relative_to(PKG).as_posix())
+    assert importers == {"presentation/desktop/wiring.py"}

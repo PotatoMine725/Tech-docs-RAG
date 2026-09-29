@@ -4,7 +4,9 @@ Headings are ATX headings (`#` .. `######`) outside fenced code blocks. Sections
 H1-H3; H4+ stays inside its parent section. Line numbers are 0-based indexes into `lines`.
 """
 import re
+from bisect import bisect_right
 from collections.abc import Sequence
+from itertools import accumulate
 from dataclasses import dataclass
 
 _FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
@@ -60,6 +62,26 @@ def find_headings(lines: Sequence[str]) -> list[Heading]:
     return headings
 
 
+class HeadingLines:
+    """Heading lines of one normalized document, for the ADR-0003 D3a heading-only test.
+
+    Shared by the Arm A filter and the `heading_only_chunks` stat so both use one definition. Headings come from
+    `find_headings` over the whole document, so `#` lines inside a code fence are text, even in a piece cut from
+    the middle of a fence.
+    """
+
+    def __init__(self, text: str) -> None:
+        self._lines = text.split("\n")
+        self._starts = list(accumulate((len(line) + 1 for line in self._lines[:-1]), initial=0))
+        self._headings = frozenset(heading.line for heading in find_headings(self._lines))
+
+    def heading_only(self, start: int, end: int) -> bool:
+        """True when every non-blank line touching `text[start:end]` is a heading line."""
+        first = bisect_right(self._starts, start) - 1
+        last = bisect_right(self._starts, max(start, end - 1)) - 1
+        return all(index in self._headings or not self._lines[index].strip() for index in range(first, last + 1))
+
+
 def _closes(fence: str, line: str, marker: str) -> bool:
     same_kind = marker[0] == fence[0] and len(marker) >= len(fence)
     return same_kind and line.strip() == marker
@@ -110,3 +132,21 @@ def fence_mask(lines: Sequence[str]) -> list[bool]:
             continue
         mask.append(False)
     return mask
+
+
+def fenced_ranges(text: str) -> list[tuple[int, int]]:
+    """Character spans `[start, end)` of fenced code blocks, fence lines included (same rules as `fence_mask`)."""
+    lines = text.split("\n")
+    ranges: list[tuple[int, int]] = []
+    offset = 0
+    block_start: int | None = None
+    for line, fenced in zip(lines, fence_mask(lines)):
+        if fenced and block_start is None:
+            block_start = offset
+        elif not fenced and block_start is not None:
+            ranges.append((block_start, offset - 1))
+            block_start = None
+        offset += len(line) + 1
+    if block_start is not None:
+        ranges.append((block_start, len(text)))
+    return ranges

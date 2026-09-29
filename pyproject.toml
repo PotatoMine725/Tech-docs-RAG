@@ -13,6 +13,7 @@ dependencies = [
     "google-genai>=1.0,<2.0",
     "python-dotenv>=1.0,<2.0",
     "PyYAML>=6.0,<7.0",
+    "markitdown[pdf,docx]>=0.1.8,<0.2",
 ]
 
 [project.optional-dependencies]
@@ -23,7 +24,7 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["src"]
+pythonpath = ["src", "."]
 addopts = "-m 'not gemini'"
 markers = [
     "gemini: requires a real Gemini API key and network access; excluded by default",
