@@ -1,6 +1,7 @@
 # EPIC-07-final-qc
 
-Status: not started.
+Status: done, pending `99-VERIFY` (QC-001, 2026-09-29). See [execution report](../../reports/execution/QC-001.md) and
+[final report](../../reports/milestones/final.md).
 
 Target: Wed 30 Sep – Thu 1 Oct 2026 (Phase 4). 🔴 Deadline: 2026-10-01 (final submission).
 

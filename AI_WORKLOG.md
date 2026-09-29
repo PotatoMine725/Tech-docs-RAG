@@ -6,14 +6,16 @@ A record of how AI tools were used in this project, required by the submission (
 
 | Tool | Model / version | Used for |
 |---|---|---|
-| Claude Code (CLI) | Claude Sonnet 5 (commit `3d5a606`, co-author trailer) | SETUP-001: project skeleton, specs, corpus migration |
-| Claude Code (CLI) | Claude Opus 5.5 (`claude-opus-5-5`; commits `490068f` onward) | ADR drafting, master plan, corpus analysis, repo hygiene, evaluation design |
-| Claude Code (CLI) | Claude Sonnet 5 (`claude-sonnet-5`; RAG-003 commits, co-author trailer) | RAG-003: retry/fallback adapter, error classification, CLI, smoke checks |
-| Claude Code (CLI) | Claude Sonnet 5 (`claude-sonnet-5`; GUI-001 commit, co-author trailer) | GUI-001: adapter, wiring, tests, owner checklist |
-| Claude Code (CLI, background job) | Claude Sonnet 5 (`claude-sonnet-5`; EVAL-003c commit, co-author trailer) | EVAL-003c: report/spot-check tooling, EVAL-003b-verify housekeeping fixes |
+| Claude Code (CLI) — implementer sessions | Claude Sonnet 5 (commit `3d5a606`, co-author trailer) | SETUP-001: project skeleton, specs, corpus migration |
+| Claude Code (CLI) — planning/design sessions | Claude Opus 5.5 (`claude-opus-5-5`; commits `490068f` onward) | ADR drafting, master plan, corpus analysis, repo hygiene, EVAL-001 evaluation design (question blueprints, ground truth design) |
+| Claude Code (CLI) — implementer sessions | Claude Sonnet 5 (`claude-sonnet-5`; RAG-003 commits, co-author trailer) | RAG-003: retry/fallback adapter, error classification, CLI, smoke checks |
+| Claude Code (CLI) — implementer sessions | Claude Sonnet 5 (`claude-sonnet-5`; GUI-001 commit, co-author trailer) | GUI-001: adapter, wiring, tests, owner checklist |
+| Claude Code (CLI, background job) — implementer sessions | Claude Sonnet 5 (`claude-sonnet-5`; EVAL-003c commit, co-author trailer) | EVAL-003c: report/spot-check tooling, EVAL-003b-verify housekeeping fixes |
+| Claude Code (CLI) — independent verifier sessions | mixed (see each `docs/reviews/*/*-verify.md` for the session's own model line) | Fresh-context `agents/prompts/99-VERIFY.md` review after every task: EVAL-001, INGEST-001/002/003, OWNER-001, INGEST-004, RAG-001a, RAG-003, EVAL-003a/b/b-pre/c, EVAL-004a/b, EXP-001, QC-001 (this task) — every verdict, fix and re-verify in `docs/plans/task-ledger.md` |
+| Claude Code (CLI) — background QC-001 session | Claude Sonnet 5 (`claude-sonnet-5`) | QC-001: README, this worklog, final checks, demo script (this task) |
 | GitNexus (`npx gitnexus`) | local code index | Impact analysis before edits, change detection before commits |
-| Chunking consultation (`docs/plans/chunking-consultation-handoff.md`, cited as context by ADR-0003) | — | A handoff written by Claude Code so another agent could advise on chunking before ADR-0003 |
-| Google Gemini API | `gemini-embedding-001` (from RAG-001a, 2026-09-26); `gemini-3.5-flash-lite` (answers, from RAG-002, 2026-09-26); `gemini-3.5-flash` fallback (RAG-003 smoke check: 1 direct call; ADR-0004) | Embeddings, answers (2 dev answers in RAG-002, 3 in the RAG-003 smoke checks), LLM judge (2 dev judgements in EVAL-003b) (from EPIC-05) |
+| Chunking consultation (`docs/plans/chunking-consultation-handoff.md`, cited as context by ADR-0003) | not identified — the handoff was written by Claude Code for "another agent" to advise on chunking before ADR-0003, but no tool/model name for that other agent is recorded anywhere in the repo (checked at QC-001) | Chunking-approach input for ADR-0003, alongside the corpus-analysis reasoning that is recorded |
+| Google Gemini API | `gemini-embedding-001` (from RAG-001a, 2026-09-26); `gemini-3.5-flash-lite` (answers + judge, from RAG-002/EVAL-003b, 2026-09-26/27); `gemini-3.5-flash` fallback (RAG-003 smoke check: 1 direct call; ADR-0004) | Embeddings (chunks + questions), answers, and the LLM judge — see `docs/reports/epics/EPIC-05-evaluation.md` for the full evaluation-run request counts |
 
 ## Log
 
@@ -718,14 +720,128 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 - *Human decision:* the owner's addendum set scope (steps 0–4) and the expected post-merge test count (~866);
   commit and push to `eval-004b`, do not merge, stop for re-verify.
 
+### 2026-09-29 QC-001: README, AI_WORKLOG, final checks, traceability, demo script (branch `qc-001`, PR into `dev`)
+- *AI did:* rewrote `README.md` in full (every number linked to its source file); filled this file's three closing
+  sections; wrote `docs/reviews/milestones/brief-traceability.md` and `docs/reports/milestones/demo-video-script.md`;
+  ran the real final checks (offline pytest ×2, a fresh-clone install+test timed alone, the flaky HNSW-compaction
+  test 15×, a full-git-history secret scan, a script-based excluded-docs check, a corpus checksum re-derivation, and
+  a live smoke check on merged `dev`); see [report](docs/reports/execution/QC-001.md) for every command and result.
+- *AI got wrong:* (1) the entry condition (ledger rows 11/12) was not fully `verified` when this task started —
+  disclosed as a deviation and proceeded on the owner's explicit instruction, rather than silently starting anyway
+  or silently stopping. (2) A fresh clone following only "`pip install -r requirements.txt`" — the literal sequence
+  the addendum's own final-check step describes — cannot run `pytest` or launch the GUI: `pytest` is a
+  `pyproject.toml` dev-extra, and no editable install of `knowledge_assistant` exists anywhere (checked in both a
+  fresh clone and the shared main `.venv`). This was a real, previously undocumented gap, not a mistake in earlier
+  work — `scripts/*.py` entry points were unaffected (they self-insert `src/` onto `sys.path`).
+- *How found:* (1) reading `agents/prompts/_common.md` step 4 against `docs/plans/task-ledger.md` before starting;
+  (2) running the addendum's own fresh-clone instruction literally, in a real temp clone, rather than assuming
+  `requirements.txt` was sufficient.
+- *Fix:* (1) recorded as a deviation in the execution report; ledger rows 11/12 left untouched (not this task's
+  call to re-verify them). (2) `README.md` § How to run adds `pip install -e ".[dev]"` as an explicit install step;
+  verified in the same fresh clone that this closes both gaps with no code change.
+- *Human decision:* the owner's 2026-09-29 addendum set the full scope (README rewrite, worklog closing sections,
+  traceability, final checks incl. the flaky-test investigation and live smoke, demo script, and to ask before any
+  `dev`→`main` merge/push or tag).
+
 ## Summary: how AI helped
 
-To be filled at QC-001.
+Claude Code (CLI) did essentially all of the writing in this repository, from the first project skeleton (SETUP-001)
+through this final QC pass — code, tests, specs, ADRs, the evaluation dataset design, the metrics/judge/report
+pipeline, the GUI, and every report and worklog entry, including this one. Three distinct roles ran as separate
+sessions throughout, deliberately kept apart so one session's assumptions couldn't quietly carry into the next:
+**planning/design** (Opus 5.5: ADRs, the master plan, the EVAL-001 question design), **implementer** (mostly Sonnet 5:
+one task per session, each starting from a `verified` prerequisite in `docs/plans/task-ledger.md`), and **independent
+verifier** (`99-VERIFY.md`, a fresh session with no memory of the implementer's reasoning, for every task without
+exception). GitNexus supplied call-graph impact analysis before edits and change-detection scope before commits. The
+Gemini models inside the system itself (`gemini-embedding-001`, `gemini-3.5-flash-lite`, `gemini-3.5-flash`) are not
+"AI helping build the project" — they *are* the product under evaluation, including as the LLM judge that scores its
+own family's answers (a self-preference risk disclosed and spot-checked, not hidden — see
+[EPIC-05 § Judge reliability](docs/reports/epics/EPIC-05-evaluation.md#judge-spot-check-agreement-owner)).
+
+The pattern that held the whole project together: every implementer claim in a report was checked by an independent
+verifier before the next task could start, and every verifier finding either became a fix (with a mutation test
+proving the fix actually changes behaviour, not just wording) or an explicitly disclosed, owner-accepted limitation.
+Nothing here was reported "should work" without being run; `docs/plans/task-ledger.md` is the append-only record of
+every verdict.
 
 ## Incorrect AI outputs and improvements
 
-To be filled at QC-001, from the log above.
+Grouped by where the mistake was made and who caught it. Full detail (how found, exact fix, mutation proof where one
+exists) is in the dated log entries above; this section is the index.
+
+### Implementer claims caught by verifiers
+
+- **"Strict-like" evidence_hit** — EVAL-003b-pre's report claimed no case can be evidence-hit from an alternate
+  section's quote alone (behaving like the strict retrieval rule); false for 4 of 32 cases, since the same quote text
+  also occurs in other approved alternate sections. Found by 99-VERIFY; fixed by documenting evidence_hit as
+  content-level and adding a diagnostic. [`EVAL-003b-pre-verify.md` § C1](docs/reviews/evaluation/EVAL-003b-pre-verify.md).
+- **`[n]` parsed inside code (F1)** — RAG-002's citation-marker regex matched `[n]`-shaped text inside code blocks
+  (e.g. C# indexers), not only real citation markers. Found by 99-VERIFY; fixed in `ba5aa59` (markers recognised only
+  outside code, mutation-tested). [`RAG-002-verify.md` § F1](docs/reviews/code/RAG-002-verify.md).
+- **502 not retried** — RAG-003's retry classifier does not retry HTTP 502, departing from the owner's own retry
+  status list. Found by 99-VERIFY; recorded as an accepted, disclosed gap rather than silently left in the report.
+  [`RAG-003-verify.md` § F1](docs/reviews/code/RAG-003-verify.md).
+- **Unguarded hook** — EVAL-003a's `on_provider_error` observer hook was not exception-safe: a raising hook would end
+  the retry loop early. Found by 99-VERIFY; fixed with a guard, proven by a probe across 6 scripted failure sequences
+  and a dedicated mutation test. [`EVAL-003a-verify.md` § F1/5d](docs/reviews/evaluation/EVAL-003a-verify.md).
+- **Spot-check tool could not parse the real sheet** — `score_spot_check.py` aborted on the owner's real,
+  hand-graded EVAL-004a sheet (`cannot parse a case heading: '## S01 (answer check)'`); it had only ever been run
+  against its own generated fixtures. Found by 99-VERIFY; rewritten for the real blind per-point format and proven
+  read-only against the real sheet. [`EVAL-003c-verify.md`](docs/reviews/evaluation/EVAL-003c-verify.md).
+- **"Already based on `dev`"** — EXP-001 claimed its branch was already based on current `dev` without checking; it
+  had branched before PR #19 (EVAL-003c) merged, so its test count was against a stale base. Caught by the owner.
+  Fixed by a real merge commit (`fa522c2`) and re-running every generated number to confirm it was unchanged by the
+  merge. `AI_WORKLOG.md` EXP-001 entry (above).
+- **Wrong first-index time** — EVAL-004b's report cited the first ChromaDB index build as 2026-09-26 14:55:42 +0700
+  (commit `a998b68`); that is actually the later, zero-cost rebuild after `CHROMA_PATH` moved. The real first build
+  (Arm A, live) started 09:12:06 +0700. Found by 99-VERIFY; fixed in `ddeabb1`.
+  [`EVAL-004b-verify.md` § C](docs/reviews/evaluation/EVAL-004b-verify.md).
+- **"Equivalent" wording** — EPIC-06 §5 stated "Answer quality is equivalent at this n" (accuracy McNemar p = 1.0,
+  n = 31), which contradicts the report's own rule elsewhere that a non-significant result is not evidence of
+  equivalence. Found by 99-VERIFY (C12); reworded to state the confidence-interval range instead.
+  [`EXP-001-verify.md` § C12](docs/reviews/evaluation/EXP-001-verify.md).
+
+### Planning-phase (EVAL-001 design) errors caught by the owner or other agents
+
+- **Alternate-section quotes** — the EVAL-001 blueprint for BP-EVAL-018 listed a parent heading as an alternate
+  source that actually contains none of the required answer points, which would have falsely inflated a section-hit
+  score. Found by a separate, fresh-context Claude Code review agent during EVAL-001 (not the authoring session);
+  owner accepted the fix (the parent-section alternate removed, a real partial alternate added).
+  [`EVAL-001-blueprint-review.md` finding 13](docs/reviews/evaluation/EVAL-001-blueprint-review.md).
+- **"Span/source" scope wording** — a 2026-09-27 task addendum said the duplicate-citation rule should apply to
+  "span/source metrics"; read literally, this produced a source-level rule with a simulated bound of 6 cases against
+  the owner's predicted "at most 2". The owner said afterwards this was a wording mistake and the rule is
+  section-level only. `AI_WORKLOG.md` EVAL-003b entry (above). **Not resolved at QC-001:** the repository has no
+  record of who drafted that addendum's wording or whether a separate planning tool was involved — see the owner
+  question below.
+
+### System-side LLM errors (Gemini as the judge)
+
+- **S03: invented claim** — on Q-EVAL-012:A, the judge credited answer point P2 as satisfied although the answer
+  does not make that claim (the label is unaffected either way). Found by the owner's blind spot-check.
+  [EPIC-05 § Judge spot-check agreement](docs/reports/epics/EPIC-05-evaluation.md#judge-spot-check-agreement-owner).
+- **Marker 22 = source id** — on Q-EVAL-002:B, the judge's JSON named citation marker `22` in an answer with a
+  single citation, marker `1` — the likely cause (not verified) is the judge copying the cited chunk's source id
+  (`#22`) into the marker field. A `judge_error` (2 of 61 judge calls, both retries of this one case); the record
+  stays unlabelled rather than guessed. [EPIC-05, "Judge reliability"](docs/reports/epics/EPIC-05-evaluation.md).
 
 ## With 7 more days
 
-To be filled at QC-001.
+Draft only — **the owner has not yet confirmed or edited this list** (drafted from the Limitations sections of
+`README.md` and `docs/reports/epics/EPIC-05-evaluation.md`/`EPIC-06-experiment.md`, per QC-001):
+
+1. **Widen the evaluation set past n = 36.** At this size, one or two cases flipping moves a headline rate by
+   1.6–2.8 points, and the experiment's McNemar test can't reach significance with only a handful of discordant
+   pairs. A larger, still-frozen set would let both the evaluation and the experiment report tighter numbers.
+2. **Re-tune the retrieval gate threshold per arm** (currently one value, 0.686, tuned on Arm A's 6 dev questions
+   only) — or replace the single global threshold with a rule that doesn't penalize one chunking strategy for
+   scoring differently on the same evidence (the Q-EVAL-001 worked case in `EPIC-06-experiment.md`).
+3. **Add a second, independent judge model** (not from the same family as the answer model) to reduce self-preference
+   risk, and grow the owner spot-check past n = 10 for a narrower confidence interval on judge agreement.
+4. **Exercise the retry/fallback path against a real 429/503/502**, not only unit tests and mutations — no live
+   provider failure was ever observed in this project, so that code path is proven in principle, not in practice.
+5. **Fix the two disclosed MarkItDown/ingestion gaps** (converted-format post-clean-up skipped; binary `.txt` content
+   read as text) before any non-Markdown document enters the corpus for real.
+6. **User-uploaded documents** (see README "Future work" once the owner records the video) — ingestion for
+   arbitrary uploads, document management, page-level citations for non-Markdown formats, handling the lack of
+   ground truth for uploaded content, and prompt-injection risk from document contents.
