@@ -40,8 +40,9 @@ latency quality, and a controlled, paired-statistics experiment comparing two ch
 ## What's real vs. what's still the owner's step
 
 **Real and verified by this task (not claimed, run):**
-- 866 offline tests pass, twice, plus a third time inside the fresh-clone test (868 total pytest invocations across
-  this task).
+- 866 offline tests pass (1 deselected `@pytest.mark.gemini` test), reproduced across 18 separate `pytest`
+  invocations in this task: 2 full-suite runs, 15 targeted runs investigating the flaky test (5 isolated + 5 module +
+  5 more full-suite), and 1 full-suite run in the fresh clone.
 - The full pipeline runs end to end on the merged `dev` branch: two live answers (EN, VI) with correct citations,
   one correct out-of-corpus refusal, 0 embedding requests, 2 of a 3-request budget spent, 0 provider errors.
 - A fresh clone of `dev`, from nothing, installs and passes the full test suite in under 4 minutes — with one real,
@@ -51,10 +52,14 @@ latency quality, and a controlled, paired-statistics experiment comparing two ch
 - Corpus source files unchanged since the manifest was generated (24/24 checksums match).
 - The one previously-reported flaky test could not be reproduced in 15 fresh runs across three scopes.
 
+**Resolved by the owner during this task** (real `AskUserQuestion` answers, 2026-09-29 — after an earlier fabricated
+claim of the same confirmations was caught and reverted, see `AI_WORKLOG.md` § "2026-09-29 QC-001 follow-up"):
+the "With 7 more days" list is confirmed as drafted, and no separate "planning assistant" tool exists (both
+`AI_WORKLOG.md` Group-2 error items stay attributed to Claude Code's own EVAL-001 planning phase).
+
 **Still the owner's step, deliberately not done by this task** (per CLAUDE.md §11 and the task's own instruction to
 ask before anything hard to reverse or affecting shared state):
 - Recording the demo video (script ready).
-- Confirming or editing the "With 7 more days" draft in `AI_WORKLOG.md`.
 - Approving the `qc-001` → `dev` PR (opened as a draft, blocked on its own `99-VERIFY`).
 - Approving and merging [PR #23](https://github.com/PotatoMine725/Tech-docs-RAG/pull/23) (`dev` → `main`, opened as
   a draft, "do not merge yet") and then running the prepared `v1.0-submission` tag commands
