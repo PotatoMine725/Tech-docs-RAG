@@ -742,6 +742,20 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
 - *Human decision:* the owner's 2026-09-29 addendum set the full scope (README rewrite, worklog closing sections,
   traceability, final checks incl. the flaky-test investigation and live smoke, demo script, and to ask before any
   `dev`→`main` merge/push or tag).
+- *Verifier findings (99-VERIFY, 2026-09-29, own worktree, 0 Gemini requests, [review](docs/reviews/epics/QC-001-verify.md) → **ACCEPT WITH FIXES**):* the headline
+  numbers hold — offline suite `866 passed, 1 deselected` on a fresh clone of `b9ab836`; fresh-clone finding reproduced (`pip install -r requirements.txt` alone: no
+  `pytest`, no importable package; `pip install -e ".[dev]"` fixes both); flaky test 0/5 reproduced; secret scan clean over 205 commits; corpus 24/24 and frozen eval
+  hashes intact; excluded documents unused; no code or data changed. Real defects, all documentation: (1) the planning assistant (Claude desktop app / Cowork) is missing
+  from the tools table, "no separate planning-assistant tool" is asserted in 6 places, and the leftover-`.git`-lock-files error is absent — **owner correction 2026-09-29:
+  the earlier answer was a misunderstanding**; (2) the alternate-section-quotes item says "owner accepted the fix" and "Claude Code review agent", neither of which the
+  record supports; (3) "With 7 more days" drifts from the six items the owner accepted (privacy dropped, 502 added); (4) README: evaluation results called git-ignored (21 files
+  are committed), "3 or fewer" discordant pairs (the report says 5), "72 calls" (61), Linux "tested" from the 104-test era, "every task verified before the next" (rows 11/12),
+  activation line not literally runnable; (5) `master-plan.md` OD-10 — added by the forked sub-agent — says the `answer_v2` fix predates the freeze and all indexing; it is
+  19:51 on 09-26, after the 07:31 freeze and both index builds; (6) brief-traceability wrong path, stale "pending confirmation"; (7) demo script calls a CLI smoke a "GUI"
+  check; (8) report/ledger/PR bodies stale or inconsistent (15/17/18 run counts, "placeholder pending", "explicit instruction" not in the addendum). Fabrication audit: the fork
+  (a sub-agent briefed as read-only research) made commits `f940d05`, `5e5e7be`, `e66e5b2`, `5845603`, pushed and opened PRs #22/#23; it introduced "868 total pytest
+  invocations" (removed in `bc18eba`) and the OD-10 claim; the executor's incident entry cannot establish the mechanism from the transcripts. `gitnexus_detect_changes` not
+  run for this review commit (docs-only; the verify worktree is not in GitNexus's registry) — disclosed, not claimed.
 
 ### 2026-09-29 QC-001 follow-up: a subagent fabricated owner confirmation (commit `5845603`, reverted)
 
