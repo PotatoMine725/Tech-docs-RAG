@@ -213,22 +213,23 @@ Exit gate **G6**:
 
 ### EPIC-07 Final QC
 **When:** Wed 30 Sep – Thu 1 Oct · **Phase:** 4 · **Task:** QC-001 (`14`) · **Roles:** verifier, quality-controller
+**Status:** done 2026-09-29, pending `99-VERIFY` — [execution report](../reports/execution/QC-001.md), [final report](../reports/milestones/final.md).
 
 Deliverables:
-- Root `README.md` with the sections the submission requires: **problem, solution, architecture/workflow, AI usage, completed work, limitations**, plus the **dataset description**, install/run (app, tests, evaluation) and a results summary with links to reports. Install instructions consistent (`requirements.txt` currently lacks PySide6; `pyproject.toml` has it).
-- `AI_WORKLOG.md` completed: summary of how AI helped, incorrect AI outputs and how they were improved, "with 7 more days" (created in HOUSE-001; the log grows task by task).
-- Demo video script (≤ 5 minutes). The owner records the video.
-- Working product / demo link (how the app is shown to graders; OD-1).
-- Push to GitHub `origin` (github.com/PotatoMine725/Tech-docs-RAG). The push is the owner's call.
-- Brief traceability checklist (§9) with evidence links → `docs/reviews/milestones/`.
-- Final checks: full offline pytest, secret scan, excluded docs unused, source checksums unchanged, `gitnexus_detect_changes()` before the final commit.
-- Final report → `docs/reports/milestones/`.
+- Root `README.md` with the sections the submission requires: **problem, solution, architecture/workflow, AI usage, completed work, limitations**, plus the **dataset description**, install/run (app, tests, evaluation) and a results summary with links to reports. ✅ Install instructions: `requirements.txt` already carries PySide6 (confirmed still true 2026-09-29); the real remaining gap found in QC-001's fresh-clone test was `pytest` and the editable install, both missing from a plain `pip install -r requirements.txt` — fixed by documenting `pip install -e ".[dev]"` in the README.
+- `AI_WORKLOG.md` completed: summary of how AI helped, incorrect AI outputs and how they were improved, "with 7 more days" (created in HOUSE-001; the log grows task by task). ✅
+- Brief traceability checklist → [`docs/reviews/milestones/brief-traceability.md`](../reviews/milestones/brief-traceability.md). ✅
+- Demo video script (≤ 5 minutes) → [`docs/reports/milestones/demo-video-script.md`](../reports/milestones/demo-video-script.md). ✅ The owner records the video itself (not something an AI session can do).
+- Working product / demo link (how the app is shown to graders; OD-1): this is a desktop app, no hosted link — exact run commands in `README.md` § Working product. Demo video link to be added once recorded.
+- Push to GitHub `origin` (github.com/PotatoMine725/Tech-docs-RAG) and merge `dev` → `main`, tag `v1.0-submission`: **prepared, not executed** — draft PR + exact commands given to the owner; the owner must approve before either happens.
+- Final checks: full offline pytest (866 passed, 1 deselected, run twice), fresh-clone install test, the known flaky ChromaDB test run 15× (not reproduced), secret scan (clean, incl. git history), excluded docs unused (script-verified), corpus checksums unchanged (manifest `sha256_lf` verified against working tree), live smoke on merged `dev`, `gitnexus_detect_changes()` before the final commit — all in [`docs/reports/execution/QC-001.md`](../reports/execution/QC-001.md).
+- Final report → `docs/reports/milestones/final.md`. ✅
 
 Exit gate **G7**:
-- [ ] Every row of §9 is met, with an evidence link.
-- [ ] All checks above pass.
-- [ ] README has all required submission sections; `AI_WORKLOG.md` summary sections are filled.
-- [ ] Demo video (≤ 5 min) recorded; repo pushed to GitHub.
+- [x] Every row of §9 is met, with an evidence link. (`docs/reviews/milestones/brief-traceability.md`)
+- [x] All checks above pass.
+- [x] README has all required submission sections; `AI_WORKLOG.md` summary sections are filled.
+- [ ] Demo video (≤ 5 min) recorded; repo pushed to GitHub. (script ready; recording, push, merge-to-main and tag are the owner's steps)
 - [ ] Submitted by 1 Oct (channel/time: OD-1).
 
 ## 5. Gemini quota plan (free tier, ADR-0004)
@@ -284,7 +285,7 @@ This plan does **not** decide these. Each must be decided by the owner epic's la
 | OD-7 | Canonical ChromaDB path (`D:\ChromaDB` vs `data/chroma/`) and whether vector data is committed | ADR-0001, tech-stack | EPIC-03 | ✅ Decided 26 Sep (owner, RAG-001a): `data/chroma/`, git-ignored, not committed, rebuilt by script (ADR-0005 D16) |
 | OD-8 | Distance metric (held constant by D7, but not named) | ADR-0003 D7 | EPIC-03 | ✅ Decided 26 Sep (owner, RAG-001a): cosine, both arms (ADR-0005 D17) |
 | OD-9 | Rule for answering "insufficient information" | retrieval-spec | EPIC-03 | ✅ Decided 26 Sep (RAG-002, rule from the prompt, owner addendum): retrieval gate top-1 < 0.686 (dev set, Arm A, one value) + LLM `insufficient` flag |
-| OD-10 | Prompt template / grounding instructions | generation-spec | EPIC-03 | ✅ Decided 26 Sep (owner, RAG-002): `config/prompts/answer_v1.md`, owner's rule 2, JSON mode |
+| OD-10 | Prompt template / grounding instructions | generation-spec | EPIC-03 | ✅ Decided 26 Sep (owner, RAG-002): `config/prompts/answer_v1.md`, owner's rule 2, JSON mode. Superseded the same day by `answer_v2.md` (`ba5aa59`, the RAG-002-verify F1 fix for `[n]` citation markers inside code) — noted stale here until QC-001 (2026-09-29); every evaluation/experiment run in this project used `answer_v2`. `ba5aa59` is dated 2026-09-26 19:51 +0700, after the ground-truth freeze (`eval-freeze-v1`, 07:31) and both index builds; it changed the answer prompt only, never the ground truth, and was in place before any eval-split run (`git show -s --format=%ci ba5aa59 eval-freeze-v1^{}`). |
 | OD-11 | Max retry attempts before fallback | ADR-0004 D13 | EPIC-03 | ✅ Decided 26 Sep (owner, RAG-003 addendum; ADR-0004 amendment): 3 attempts in total (1 + 2 retries) with backoff, jitter and retry-after, each wait ≤ 120 s; then the fallback gets one attempt; a daily-quota 429 skips the retries; `ALLOW_FALLBACK` (the eval runner sets false); throttle 13 / 4 RPM |
 | OD-12 | How citation quality is checked (by hand, judge, or both) — **decided by the owner 2026-09-26: both (automatic span check + judge support check), reported separately** (`evaluation-spec.md`, EVAL-003b) | evaluation-spec | EPIC-05 B | 28 Sep |
 | OD-13 | Judge spot-check sample size | ADR-0004 D12 | EPIC-05 B | 29 Sep |
@@ -314,10 +315,10 @@ Facts to verify (not decisions):
 | ≥ 2 approaches: what changed, how evaluated, results, why different, what learned | EPIC-06 | Experiment report |
 | Failure analysis (grading emphasis) | EPIC-06 | Experiment report |
 | Bonus (reranking, hybrid, query rewriting, agentic RAG, automated evaluation, cost) | Stretch (§6); the LLM judge is automated evaluation | Reports, if done |
-| **Submission:** working product / demo link | EPIC-04 (app), EPIC-07 | Link in README (OD-1) |
-| **Submission:** GitHub repository | EPIC-07 (push to `origin`) | github.com/PotatoMine725/Tech-docs-RAG |
-| **Submission:** README with problem, solution, architecture/workflow, AI usage, completed work, limitations | EPIC-07 (dataset part: EPIC-01) | `README.md` |
-| **Submission:** demo video ≤ 5 minutes | EPIC-07 script; owner records | Video link in README |
+| **Submission:** working product / demo link | EPIC-04 (app), EPIC-07 | Desktop app, no hosted link; exact run commands in `README.md` § Working product (OD-1) |
+| **Submission:** GitHub repository | EPIC-07 (push to `origin`) | github.com/PotatoMine725/Tech-docs-RAG (push/merge to `main` pending owner approval) |
+| **Submission:** README with problem, solution, architecture/workflow, AI usage, completed work, limitations | EPIC-07 (dataset part: EPIC-01) | `README.md` ✅ (QC-001, 2026-09-29) |
+| **Submission:** demo video ≤ 5 minutes | EPIC-07 script; owner records | Script ready: `docs/reports/milestones/demo-video-script.md`; video link added once the owner records it |
 | **Submission:** `AI_WORKLOG.md` (tools, how AI helped, incorrect outputs + fixes, 7 more days) | HOUSE-001 creates; every task appends; EPIC-07 summarizes | `AI_WORKLOG.md` |
 | **Submission:** originality (can explain everything, no fake functionality) and quality (small and working) | Every task ("Explain it back"); EPIC-07 check | Task reports, QC review |
 
@@ -337,7 +338,7 @@ Gaps this plan covers:
 | Retrieval, project and quality specs mostly TBD | EPIC-03, EPIC-05, EPIC-07 |
 | Agent role files are TBD | When each epic starts (optional) |
 | MarkItDown not in `pyproject.toml` | EPIC-02 ✅ (INGEST-003) |
-| `requirements.txt` lacks PySide6 (pyproject has it) | EPIC-07 |
+| `requirements.txt` lacks PySide6 (pyproject has it) | Already fixed by the time of QC-001 (2026-09-29): `requirements.txt` carries `PySide6>=6.6,<7.0`. The real remaining gap (found by QC-001's fresh-clone test) was `pytest`/the editable install, not PySide6 — fixed by documenting `pip install -e ".[dev]"` in the README ✅ |
 | Working tree CRLF vs repo LF (line-ending noise in diffs) | HOUSE-001 ✅ (`.gitattributes`) |
 | Submission package missing from specs and plan; no `AI_WORKLOG.md` | HOUSE-001 ✅ |
 | Duplicate GitNexus block in `CLAUDE.md` | HOUSE-001 ✅ |
