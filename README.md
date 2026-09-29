@@ -7,7 +7,7 @@ project also **measures** how well it works — a 36-question evaluation set sco
 latency quality — and runs a **controlled experiment** comparing two chunking strategies with statistical tests, not
 just a claim.
 
-**Status:** feature-complete and evaluated; submission pending — the demo video is not yet recorded and the QC PR (#22) is not yet merged, so this work is not yet on `main`. Final QC checks: [`docs/reports/execution/QC-001.md`](docs/reports/execution/QC-001.md); final report: [`docs/reports/milestones/final.md`](docs/reports/milestones/final.md).
+**Status:** feature-complete and evaluated; submission pending — the demo video is not yet recorded and the QC PR (#22) is merged on `main`. Final QC checks: [`docs/reports/execution/QC-001.md`](docs/reports/execution/QC-001.md); final report: [`docs/reports/milestones/final.md`](docs/reports/milestones/final.md).
 
 ## Problem
 
