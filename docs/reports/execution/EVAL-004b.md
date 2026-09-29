@@ -107,14 +107,18 @@ SHA-256 at commit time (new/generated files; run-folder files under `data/evalua
 unchanged by this task — identical to the hashes recorded in `EVAL-004a.md`, see `2026-09-28.md`):
 
 ```
-430a3b5f36d4f1cf74a538f8e6cbd12cdb72120128e57d8142c105500e5c94ef  docs/reports/epics/EPIC-05-evaluation.md
+d75a3cc3a3504468d5c868734df0622d90640f7b63e2122f7d64bfd30ad9d8d4  docs/reports/epics/EPIC-05-evaluation.md
 867b84af47e06191224f106fbe04f6461881631771086d1b52acaecff0cfc549  data/evaluation/results/summary-20260928-eval-A-full-491f137-20260928-eval-B-full-491f137.json
 b116b10156875a3e452d3b90b45177fd061fc17ca814fcc237f0e6cc403b8776  data/evaluation/results/eval-table-20260928-eval-A-full-491f137.csv
 b7f00c34651d963a4d4abae45b38d611ff535fcfde9eae5ad3cea46f76888de1  data/evaluation/results/eval-table-20260928-eval-B-full-491f137.csv
 eaf422f3975ddd4b05aff4859360e0e2d690b51d535bee96eead2b1e8d87ce70  data/evaluation/results/eval-table-eval-004-appendix.md
 ```
 Note: `EPIC-05-evaluation.md`'s hash is only meaningful as of this commit — unlike the run-folder files, it is
-authored content that could change in a future edit (e.g. once EPIC-06 merges and the TODO line is filled in).
+authored content that could change in a future edit. It changed once already: the hash above is
+2026-09-29's, after the [EVAL-004b-verify](../../reviews/evaluation/EVAL-004b-verify.md) fix round (leakage-timeline
+citation corrected, EPIC-06 TODO line linked now that PR #20 merged, paired/unpaired note added) — the original
+2026-09-28 hash (`430a3b5f...94ef`) is superseded. The `summary-*`/CSV/appendix hashes above are unchanged by that
+fix round (re-ran `make_tables.py`, byte-identical).
 
 ## Unverified / open
 

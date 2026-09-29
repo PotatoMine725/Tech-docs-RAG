@@ -662,6 +662,45 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   or code change; commit and push to `exp-001`, do not merge. The owner's follow-up correction added the dev-merge
   step (0) with the conflict-resolution rule (keep every entry chronologically in the three log/plan files).
 
+### 2026-09-29 EVAL-004b fix round: leakage-timeline correction, EPIC-06 link, paired/unpaired note (branch `eval-004b`, PR #21)
+- *AI did:*
+  - Step 0 (owner addendum): fast-forwarded `eval-004b` to `origin/eval-004b` (`55f8b73`, the verify commit), then
+    merged `origin/dev` (PR #20 EXP-001, `81cb6da`) — merge commit `acae17f`. Two conflicts, both same-day entries
+    appended at the same anchor: `AI_WORKLOG.md` and `docs/plans/task-ledger.md` row 11/12; resolved by hand keeping
+    every entry from both sides, ordered by actual commit timestamp. `master-plan.md` auto-merged, no conflict.
+    866 passed, 1 deselected — matches the owner's expectation.
+  - Applied [EVAL-004b-verify](docs/reviews/evaluation/EVAL-004b-verify.md)'s fix prompt to
+    `docs/reports/epics/EPIC-05-evaluation.md`: corrected "Dataset" to cite the first index as Arm A's live build
+    (09:12:06 +0700, `validation/retrieval/indexing-log.jsonl`) instead of the `a998b68`/14:55:42 rebuild commit,
+    cited the `eval-freeze-v1` tag (`739676f`, 07:31:08) alongside the PR #8 merge (`1dd3b88d`, 07:33:41), replaced
+    the EPIC-06 TODO line with a real link now that PR #20 is merged, and added a paired-vs-unpaired note to
+    "Measurement limitations" per the owner's items 1–3.
+  - Re-ran `scripts/evaluation/make_tables.py --runs 20260928-eval-A-full-491f137 20260928-eval-B-full-491f137`
+    twice (before and after the final wording pass): `summary-*.json` and both per-arm CSVs stayed byte-identical
+    (SHA-256 matched the pre-fix committed hashes both times); only the report's prose changed.
+- *AI got wrong (caught before committing):*
+  - **Gap arithmetic.** The owner's addendum gave "≈ 1 h 39 min" as the gap; recomputing 09:12:06 minus each cited
+    freeze anchor gives 1 h 40 min 58 s (tag) and 1 h 38 min 25 s (PR merge) — neither is exactly 1 h 39 min. Reported
+    both precise figures instead of repeating the rounded one.
+  - **"Chunks... existed" conclusion.** The verifier's fix prompt said to keep "frozen before either arm's chunks or
+    embeddings existed" unchanged. Checked against the ledger (row 04a) and `git log`: Arm A's 733 chunks
+    (`data/processed/chunks/arm-a.jsonl`) were committed in INGEST-004 (`bdd43ba`, 2026-09-25 20:42:39 +0700) — the
+    day *before* the freeze tag. Chunks existed before the freeze; only the embeddings/index did not. Corrected the
+    sentence to "embeddings or index existed" and cited the chunk commit. The Goodhart-risk conclusion is unaffected
+    (chunks alone reveal nothing about retrieval/answer output).
+- *How found:* both caught in-session by recomputing from primary sources (`git log -1 --format=%ci` on the cited
+  commits) before writing the final sentence, not by trusting the owner's/verifier's stated figures — the report's
+  own subject matter (a Goodhart-risk timeline argument) is exactly the kind of claim that needs the exact numbers
+  right.
+- *Fix:* both corrected before the commit; no user correction was needed.
+- *Also updated:* the stale SHA-256 for `EPIC-05-evaluation.md` in `EVAL-004b.md`'s Files table (disclosed there as
+  commit-time-only); annotated (not rewritten, per the snapshots-are-point-in-time rule) the wrong "First index
+  built" row in `docs/snapshots/evaluation/2026-09-28.md`; appended the verifier's fix prompt and the owner's
+  addendum to `docs/prompt-log/claude-code/EVAL-004b.md`; `task-ledger.md` row 11 marked "fixes applied ... pending
+  re-verify" (not `verified` — that's the re-verifier's call).
+- *Human decision:* the owner's addendum set scope (steps 0–4) and the expected post-merge test count (~866);
+  commit and push to `eval-004b`, do not merge, stop for re-verify.
+
 ## Summary: how AI helped
 
 To be filled at QC-001.

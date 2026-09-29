@@ -34,12 +34,18 @@ embedding requests in this task.
 - `data/evaluation/questions/eval-v1.jsonl`: **36** cases, **18 EN / 18 VI** (even split), **32 answerable / 4
   unanswerable** (Q-EVAL-033–036, all `corpus-insufficient`), **7 parallel EN/VI groups** (14 cases forming 7 matched
   EN/VI pairs on the same underlying question — the "parallel" subset below).
-- Frozen **2026-09-26 07:33:41 +0700** (commit `1dd3b88d`, PR #8 `eval-002` → `dev`, tag `eval-freeze-v1`;
-  [snapshot](../../snapshots/evaluation/eval-v1.md)). At that commit `data/chroma/` held only `.gitkeep` — **no index
-  existed yet**. The first index was built **2026-09-26 14:55:42 +0700** (commit `a998b68`, PR #10 `rag-001b` → `dev`,
-  733/859 chunks for arm A/B), **7 h 22 min after** the ground truth froze. Ground truth was therefore written and
-  committed before either arm's chunks or embeddings existed, so it could not have been shaped by seeing retrieval or
-  answer output (Goodhart risk avoided by construction, not just by convention).
+- Frozen **2026-09-26 07:31:08 +0700** (tag `eval-freeze-v1`, commit `739676f` "EVAL-002: freeze eval-v1"; the PR #8
+  `eval-002` → `dev` merge commit `1dd3b88d` landed 2 min 33 s later, at 07:33:41 +0700;
+  [snapshot](../../snapshots/evaluation/eval-v1.md)). At `1dd3b88d`, `data/chroma/` held only `.gitkeep` — **no index
+  existed yet**. The first index was built **2026-09-26 09:12:06 +0700** — Arm A's live indexing run into
+  `D:\ChromaDB` (`validation/retrieval/indexing-log.jsonl`, first entry, `started_at: 2026-09-26T02:12:06+00:00` UTC;
+  [RAG-001b.md](../execution/RAG-001b.md) "Arm A, live"), **≈ 1 h 41 min after the tag** (**≈ 1 h 38 min after** the
+  PR #8 merge commit). (Commit `a998b68`/14:55:42 +0700, PR #10 `rag-001b` → `dev`, is a later event: a zero-API-cost
+  rebuild of the same 733/859 arm A/B chunks from the embedding cache into `data/chroma/`, not the first build — see
+  RAG-001b.md "Where the index actually is".) Both arms' chunk files already existed before the freeze (Arm A's 733
+  chunks landed in INGEST-004, commit `bdd43ba`, 2026-09-25 20:42:39 +0700 — the day before), but neither arm's
+  embeddings or index did, so ground truth could not have been shaped by seeing retrieval or answer output (Goodhart
+  risk avoided by construction, not just by convention).
 - This is the first and only run of the eval split (EVAL-004a "Eval firewall"): one run per arm, no re-runs, no
   threshold/prompt change after seeing results.
 
@@ -453,6 +459,11 @@ Generated files (never hand-typed — `scripts/evaluation/make_tables.py`'s `wri
   firewall") — there is no repeat-run variance estimate for any number in this report, so apparent per-case latency
   or answer differences between arms could partly reflect one-shot model non-determinism rather than a true
   chunking-scheme effect (EXP-001, EPIC-06, addresses this with paired statistics across the same 36 questions).
+  Any per-arm figure pulled directly from this report's committed `summary.json` (e.g. `breakdown/arm/A/answer/
+  accuracy` = 23/32 = 0.719) is an **unpaired**, single-run-per-arm figure, and will legitimately differ from
+  EPIC-06's **paired** McNemar table (Arm A accuracy 22/31 = 0.710): EPIC-06 drops cases with no same-question
+  partner in the other arm (`Q-EVAL-002:A` is correct but has no B partner). This is not an inconsistency between the
+  two reports — it's the paired vs. unpaired denominator.
 - **Self-grading bias.** The judge is the same model family as the answer model (`gemini-3.5-flash-lite` both sides),
   which risks the judge favouring its own answer style (`evaluation-spec.md` § Limitation). Mitigated, not removed,
   by the owner's blind spot-check above (n=10, 8/10 rule-based agreement) — a small sample of a systemic risk, not
@@ -475,5 +486,5 @@ Generated files (never hand-typed — `scripts/evaluation/make_tables.py`'s `wri
 
 Point-in-time run/commit/file-hash record: [`docs/snapshots/evaluation/2026-09-28.md`](../../snapshots/evaluation/2026-09-28.md).
 
-TODO (EVAL-004b, 2026-09-28): EPIC-06 (EXP-001, the paired-statistics arm-A-vs-arm-B experiment that reuses this
-same eval split) is on PR #20 (`exp-001` → `dev`), still open/not merged as of this report. Link it here once merged.
+EPIC-06 (EXP-001, the paired-statistics arm-A-vs-arm-B experiment that reuses this same eval split) is merged into
+`dev` (PR #20): [EPIC-06-experiment.md](EPIC-06-experiment.md).
