@@ -56,7 +56,9 @@ ask before anything hard to reverse or affecting shared state):
 - Recording the demo video (script ready).
 - Confirming or editing the "With 7 more days" draft in `AI_WORKLOG.md`.
 - Approving the `qc-001` → `dev` PR (opened as a draft, blocked on its own `99-VERIFY`).
-- Approving `dev` → `main` and the `v1.0-submission` tag (commands prepared, not run).
+- Approving and merging [PR #23](https://github.com/PotatoMine725/Tech-docs-RAG/pull/23) (`dev` → `main`, opened as
+  a draft, "do not merge yet") and then running the prepared `v1.0-submission` tag commands
+  (`docs/reports/execution/QC-001.md`).
 - Choosing the submission channel and time (OD-1).
 - Cleaning up the long list of stale git worktrees this project accumulated (listed in `QC-001.md`, not removed).
 
