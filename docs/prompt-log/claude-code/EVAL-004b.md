@@ -39,41 +39,19 @@ requests. No config/code/prompt change. Standard git block, PR into dev, do not 
 
 ## Fix round (2026-09-29, from EVAL-004b-verify)
 
-The verifier's fix prompt (verbatim from [EVAL-004b-verify.md](../../reviews/evaluation/EVAL-004b-verify.md) §
-"Fix prompt"):
+The verifier's fix prompt is already stored verbatim in
+[EVAL-004b-verify.md](../../reviews/evaluation/EVAL-004b-verify.md) § "Fix prompt" (items 1–2) — not re-quoted here
+to avoid a second, possibly-drifted copy.
+
+Owner additions on top of the fix prompt (verbatim, background-job task message):
 
 ```text
-1. File: docs/reports/epics/EPIC-05-evaluation.md, "Dataset" section (the sentence beginning "The first index
-   was built...").
-   Expected behaviour: replace "The first index was built 2026-09-26 14:55:42 +0700 (commit a998b68, PR
-   #10 rag-001b -> dev, 733/859 chunks for arm A/B), 7 h 22 min after the ground truth froze." with the
-   correct first-build time and source: Arm A's live index build started 2026-09-26 09:12:06 +0700
-   (validation/retrieval/indexing-log.jsonl, first entry, started_at: 2026-09-26T02:12:06+00:00 UTC;
-   docs/reports/execution/RAG-001b.md "Arm A, live", D:\ChromaDB), ~ 1 h 39 min after the ground truth froze
-   -- not the a998b68/14:55:42 PR-merge timestamp, which records when the later, zero-API-cost rebuild into
-   data/chroma/ was committed, not when the first index was actually built. Keep the "frozen before either arm's
-   chunks or embeddings existed" conclusion -- it still holds under the corrected numbers, just with a smaller gap.
-   Also correct (or add alongside) the freeze citation: the eval-freeze-v1 tag points to commit 739676f
-   ("EVAL-002: freeze eval-v1"), 07:31:08 +0700 -- 2 min 33 s before the 1dd3b88d PR-merge timestamp EPIC-05
-   currently cites; either cite 739676f or note both timestamps.
-
-2. File: docs/reports/epics/EPIC-05-evaluation.md, "Measurement limitations" (the "Single run per arm" bullet).
-   Expected behaviour (recommended, non-blocking): add one sentence noting that any per-arm figure pulled
-   directly from the committed summary.json (e.g. breakdown/arm/A/answer/accuracy = 23/32 = 0.719) is an
-   unpaired, single-run-per-arm figure, and will legitimately differ from EPIC-06's paired McNemar table
-   (Arm A accuracy 22/31 = 0.710) because EPIC-06 drops cases without a same-question partner in the other arm
-   (e.g. Q-EVAL-002:A is correct but has no B partner) -- so a reader comparing the two reports should not read the
-   difference as an inconsistency.
-```
-
-Owner additions on top of the fix prompt (verbatim):
-
-```text
+Owner additions to the EVAL-004b fix prompt:
 0. Merge origin/dev (it now contains PR #20, EXP-001) into eval-004b: merge commit, keep every AI_WORKLOG/ledger/master-plan
-   entry chronologically. Run the suite: expect ~866.
+   entry chronologically. Run the suite: expect ≈ 866.
 1. Leakage timeline in EPIC-05 "Dataset":
    - The first index = Arm A live build into D:\ChromaDB starting 2026-09-26 09:12:06 +0700 (indexing-log.jsonl, RAG-001b.md).
-   - The gap from the freeze is ~ 1 h 39 min.
+   - The gap from the freeze is ≈ 1 h 39 min.
    - Mention the later zero-cost rebuild into data/chroma (a998b68, 14:55) only as a separate, later event.
    - Keep the conclusion "frozen before any index" and cite both sources.
 2. Replace the EPIC-06 TODO line with a real link to docs/reports/epics/EPIC-06-experiment.md.
@@ -87,24 +65,31 @@ Execution notes:
 - Step 0: fast-forwarded `eval-004b` to `origin/eval-004b` (picking up the `VERIFY EVAL-004b` commit `55f8b73`
   first), then merged `origin/dev` (PR #20 EXP-001, `81cb6da`). Two conflicts (`AI_WORKLOG.md`,
   `docs/plans/task-ledger.md`), both from independent same-day entries appended at the same anchor point;
-  resolved by hand, keeping every entry from both sides (chronological order: EXP-001's original entry, 14:19-14:21;
-  EVAL-004b's entry, 19:56-19:57; EXP-001's post-verify follow-up entry, 19:37-20:03 — the follow-up is placed last
-  since its concluding action, the `origin/dev` merge into `exp-001`, is the latest event of the three). `master-plan.md`
-  auto-merged with no conflicts. 866 passed, 1 deselected, matching the owner's expectation.
-- Owner's "≈ 1 h 39 min" was a rounded estimate; recomputed precisely against both anchors (09:12:06 minus 07:31:08
-  tag = 1 h 40 min 58 s; minus 07:33:41 PR-merge = 1 h 38 min 25 s) and reported both, since the report already cites
-  both freeze timestamps.
-- The verifier's fix prompt said to keep "frozen before either arm's chunks or embeddings existed" unchanged.
-  Checked against the ledger (row 04a, INGEST-004) and `git log`: Arm A's 733 chunks (`data/processed/chunks/arm-a.jsonl`)
-  were committed 2026-09-25 20:42:39 +0700 (`bdd43ba`) — the day *before* the 2026-09-26 07:31:08 freeze tag. The
-  chunks therefore did exist before the freeze; only the embeddings/index did not. Corrected the sentence to
-  "embeddings or index" and named the chunk commit, since the file's own Goodhart-risk argument depends on this
-  being right (per this project's rule against unverified success/correctness claims). The Goodhart conclusion is
-  unaffected: chunks alone reveal nothing about retrieval or answer output.
+  resolved by hand, keeping every entry from both sides, ordered by when each entry's content was last touched:
+  EXP-001's original entry (created `734e8ca` 14:19, last text `c7b440d` 14:21), EXP-001's post-verify follow-up
+  entry (created `f7a72ff` 19:37, last text — the `origin/dev` merge into `exp-001` — `181c6b2` 20:03), then
+  EVAL-004b's entry (created `fbc7fce` 19:56, but its "Verifier findings" bullet was appended later by `55f8b73`
+  at 20:37 — the latest touch of the three, so it goes last). `master-plan.md` auto-merged with no conflicts.
+  866 passed, 1 deselected, matching the owner's expectation.
+- First edit pass copied the owner's "≈ 1 h 39 min" as given, and kept "frozen before either arm's chunks or
+  embeddings existed" exactly per the verifier's "keep" instruction. An advisor review flagged both as worth
+  double-checking before committing. Recomputed the gap from `git log`: 09:12:06 minus 07:31:08 (tag) = 1 h 40 min
+  58 s; minus 07:33:41 (PR #8 merge) = 1 h 38 min 25 s — neither matches "1 h 39 min" exactly, so both are reported
+  instead. For the chunks claim: `git log -1 --format=%ci` on `bdd43ba` (INGEST-004, Arm A's 733 chunks) gives
+  2026-09-25 20:42:39 +0700, the day *before* the 2026-09-26 07:31:08 freeze tag (`739676f`) — chunks existed before
+  the freeze, only the embeddings/index did not. Corrected the sentence to "embeddings or index" and named the
+  chunk commit; the Goodhart conclusion itself is unaffected (chunks alone reveal nothing about retrieval or answer
+  output). Both deviations from the owner's/verifier's exact wording are flagged for the owner in the execution
+  report and worklog rather than applied silently.
 - `make_tables.py` re-run twice (once before the chunks/gap correction, once after) against the same two run ids;
   `summary-*.json` and both per-arm CSVs stayed byte-identical to the pre-fix committed hashes both times (SHA-256
   confirmed). Only `EPIC-05-evaluation.md`'s prose changed.
 - Updated the stale SHA-256 for `EPIC-05-evaluation.md` in `EVAL-004b.md`'s Files table (the hash is disclosed there
-  as commit-time-only, per that report's own footnote) and annotated (not rewritten) the wrong "First index built"
-  row in the point-in-time snapshot `docs/snapshots/evaluation/2026-09-28.md`, per this project's rule that
-  snapshots are point-in-time records.
+  as commit-time-only, per that report's own footnote), added a one-line parenthetical next to `EVAL-004b.md`'s own
+  `a998b68` reference (a scope-check command list, not a claim, but worth flagging which commit that timestamp
+  belongs to), and annotated (not rewritten) the wrong "First index built" row in the point-in-time snapshot
+  `docs/snapshots/evaluation/2026-09-28.md`, per this project's rule that snapshots are point-in-time records.
+- `gitnexus_detect_changes` (CLAUDE.md MUST) was **not run**: this task is docs-only (`git diff --name-status acae17f`
+  shows 6 `docs/`/`AI_WORKLOG.md` files, zero `src/`/`config/`/`scripts/`/`tests/`), and the `eval-004b` worktree is
+  not in GitNexus's repo registry (only the main checkout and the `eval-003c` worktree are indexed), so there was no
+  matching index to run it against. Disclosed here as not evidenced, not claimed as passing.

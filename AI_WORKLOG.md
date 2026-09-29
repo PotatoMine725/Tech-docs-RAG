@@ -572,6 +572,44 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - an evaluation-side failures section;
   - the 5-point report with 2–3 next experiments.
 
+### 2026-09-28 EXP-001 follow-up: fixes from verify (branch `exp-001`, PR #20)
+- *AI did:* fixed the two docs-only findings of [EXP-001-verify](docs/reviews/evaluation/EXP-001-verify.md) and
+  produced the mutation evidence the verifier could not re-run.
+  - EPIC-06 §2: the `Q-EVAL-002:B` paragraph now says the case is out of every **judge-dependent** answer-level pair,
+    and explains that `citation_section_precision` is a deterministic span check that legitimately includes it —
+    added a note under the §3 results-overall table spelling out the n's (28/13/13 vs `citation_support_rate`'s
+    27/12/12; the English-only table is unaffected).
+  - EPIC-06 §5: "Answer quality is equivalent at this n" replaced with "No statistically reliable difference in
+    answer quality at n = 31 (... the data are consistent with anything from a ~10-point loss to a ~16-point gain, so
+    equivalence is not shown)", following the report's own §2 wording rule. Grepped the report, execution report and
+    this log for `equivalent`/`equal`/`same quality`: the only other hits are either the correctly hedged sentence
+    already in §2/the execution report, or per-case descriptions of two arms retrieving the literally same chunk
+    (020, 026, and worked example 1) — factual, not a statistical claim, so left as-is.
+  - Mutation evidence (M1–M4): re-applied on a disposable git worktree (`git worktree add <scratch> HEAD --detach`,
+    never the `exp-001` branch files), one exact-line mutation at a time, running
+    `pytest -q --color=no -rf tests/unit/application/test_eval_experiment.py` after each. All 4 killed: M1 →
+    `test_gate_false_refusal_is_refusal_with_chunking_kept_as_secondary`; M2 →
+    `test_rule_3_ranking_needs_a_cited_wrong_chunk_above_the_first_hit`; M3 →
+    `test_language_tag_needs_a_passing_english_twin`; M4 → `test_binary_row_reports_mcnemar_counts_and_cases`.
+    SHA-256 of `experiment.py` was identical before the run and after every revert
+    (`d52ba136f42d9427eabc395706f73a37b5c51e14b58b3f3239479b80596283c2`); the `exp-001` worktree's own copy hashed the
+    same and was never opened. Scratch worktree removed after. Results pasted into the execution report.
+  - Full offline suite: 793 passed, 1 deselected (unchanged — docs-only diff).
+- *AI got wrong:* claimed `exp-001` was "already based on current `dev`" without checking. It was not:
+  `exp-001` branched from `aa270a9` (PR #18) and never picked up PR #19 (`c863ea0`, EVAL-003c → `dev`), so the 793
+  count above was against the pre-#19 base. Caught by the owner.
+- *Fix (2026-09-28, same session):* `git fetch`, then `git merge origin/dev --no-edit` into `exp-001` — a real merge
+  commit (`fa522c2`), no rebase/force. `AI_WORKLOG.md`, `docs/plans/master-plan.md` and `docs/plans/task-ledger.md`
+  auto-merged with no conflict markers (git's `ort` strategy resolved all three line-wise; every entry from both
+  sides — this branch's EXP-001 rows and `dev`'s EVAL-003c rows — is present). No other file conflicted.
+  Re-ran `compare_arms.py` with the same run ids/report path: identical console output ("discordant cases: 23;
+  failures A 9, B 9"), and all 8 `data/experiments/exp-001/*` output files plus the report's AUTO-block content
+  hashed byte-identical to before the merge — PR #19 does not change any EXP-001 number. Full offline suite after
+  the merge: **866 passed, 1 deselected** (848 + 18, matching `dev`'s new baseline).
+- *Human decision:* the owner's fix prompt scoped exactly these two doc edits plus the mutation evidence, no number
+  or code change; commit and push to `exp-001`, do not merge. The owner's follow-up correction added the dev-merge
+  step (0) with the conflict-resolution rule (keep every entry chronologically in the three log/plan files).
+
 ### 2026-09-28 EVAL-004b: evaluation report — tables, judge reliability, appendix (branch `eval-004b`, PR into `dev`)
 - *AI did:*
   - Branched `eval-004b` from `dev` at `c863ea0` (the PR #19 / EVAL-003c merge) in its own worktree, then ran the
@@ -624,44 +662,6 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   EPIC-05 doesn't cross-reference it, which could read as a contradiction to someone comparing the two reports.
   Full review: [EVAL-004b-verify](docs/reviews/evaluation/EVAL-004b-verify.md).
 
-### 2026-09-28 EXP-001 follow-up: fixes from verify (branch `exp-001`, PR #20)
-- *AI did:* fixed the two docs-only findings of [EXP-001-verify](docs/reviews/evaluation/EXP-001-verify.md) and
-  produced the mutation evidence the verifier could not re-run.
-  - EPIC-06 §2: the `Q-EVAL-002:B` paragraph now says the case is out of every **judge-dependent** answer-level pair,
-    and explains that `citation_section_precision` is a deterministic span check that legitimately includes it —
-    added a note under the §3 results-overall table spelling out the n's (28/13/13 vs `citation_support_rate`'s
-    27/12/12; the English-only table is unaffected).
-  - EPIC-06 §5: "Answer quality is equivalent at this n" replaced with "No statistically reliable difference in
-    answer quality at n = 31 (... the data are consistent with anything from a ~10-point loss to a ~16-point gain, so
-    equivalence is not shown)", following the report's own §2 wording rule. Grepped the report, execution report and
-    this log for `equivalent`/`equal`/`same quality`: the only other hits are either the correctly hedged sentence
-    already in §2/the execution report, or per-case descriptions of two arms retrieving the literally same chunk
-    (020, 026, and worked example 1) — factual, not a statistical claim, so left as-is.
-  - Mutation evidence (M1–M4): re-applied on a disposable git worktree (`git worktree add <scratch> HEAD --detach`,
-    never the `exp-001` branch files), one exact-line mutation at a time, running
-    `pytest -q --color=no -rf tests/unit/application/test_eval_experiment.py` after each. All 4 killed: M1 →
-    `test_gate_false_refusal_is_refusal_with_chunking_kept_as_secondary`; M2 →
-    `test_rule_3_ranking_needs_a_cited_wrong_chunk_above_the_first_hit`; M3 →
-    `test_language_tag_needs_a_passing_english_twin`; M4 → `test_binary_row_reports_mcnemar_counts_and_cases`.
-    SHA-256 of `experiment.py` was identical before the run and after every revert
-    (`d52ba136f42d9427eabc395706f73a37b5c51e14b58b3f3239479b80596283c2`); the `exp-001` worktree's own copy hashed the
-    same and was never opened. Scratch worktree removed after. Results pasted into the execution report.
-  - Full offline suite: 793 passed, 1 deselected (unchanged — docs-only diff).
-- *AI got wrong:* claimed `exp-001` was "already based on current `dev`" without checking. It was not:
-  `exp-001` branched from `aa270a9` (PR #18) and never picked up PR #19 (`c863ea0`, EVAL-003c → `dev`), so the 793
-  count above was against the pre-#19 base. Caught by the owner.
-- *Fix (2026-09-28, same session):* `git fetch`, then `git merge origin/dev --no-edit` into `exp-001` — a real merge
-  commit (`fa522c2`), no rebase/force. `AI_WORKLOG.md`, `docs/plans/master-plan.md` and `docs/plans/task-ledger.md`
-  auto-merged with no conflict markers (git's `ort` strategy resolved all three line-wise; every entry from both
-  sides — this branch's EXP-001 rows and `dev`'s EVAL-003c rows — is present). No other file conflicted.
-  Re-ran `compare_arms.py` with the same run ids/report path: identical console output ("discordant cases: 23;
-  failures A 9, B 9"), and all 8 `data/experiments/exp-001/*` output files plus the report's AUTO-block content
-  hashed byte-identical to before the merge — PR #19 does not change any EXP-001 number. Full offline suite after
-  the merge: **866 passed, 1 deselected** (848 + 18, matching `dev`'s new baseline).
-- *Human decision:* the owner's fix prompt scoped exactly these two doc edits plus the mutation evidence, no number
-  or code change; commit and push to `exp-001`, do not merge. The owner's follow-up correction added the dev-merge
-  step (0) with the conflict-resolution rule (keep every entry chronologically in the three log/plan files).
-
 ### 2026-09-29 EVAL-004b fix round: leakage-timeline correction, EPIC-06 link, paired/unpaired note (branch `eval-004b`, PR #21)
 - *AI did:*
   - Step 0 (owner addendum): fast-forwarded `eval-004b` to `origin/eval-004b` (`55f8b73`, the verify commit), then
@@ -678,26 +678,37 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - Re-ran `scripts/evaluation/make_tables.py --runs 20260928-eval-A-full-491f137 20260928-eval-B-full-491f137`
     twice (before and after the final wording pass): `summary-*.json` and both per-arm CSVs stayed byte-identical
     (SHA-256 matched the pre-fix committed hashes both times); only the report's prose changed.
-- *AI got wrong (caught before committing):*
-  - **Gap arithmetic.** The owner's addendum gave "≈ 1 h 39 min" as the gap; recomputing 09:12:06 minus each cited
-    freeze anchor gives 1 h 40 min 58 s (tag) and 1 h 38 min 25 s (PR merge) — neither is exactly 1 h 39 min. Reported
-    both precise figures instead of repeating the rounded one.
-  - **"Chunks... existed" conclusion.** The verifier's fix prompt said to keep "frozen before either arm's chunks or
-    embeddings existed" unchanged. Checked against the ledger (row 04a) and `git log`: Arm A's 733 chunks
-    (`data/processed/chunks/arm-a.jsonl`) were committed in INGEST-004 (`bdd43ba`, 2026-09-25 20:42:39 +0700) — the
-    day *before* the freeze tag. Chunks existed before the freeze; only the embeddings/index did not. Corrected the
-    sentence to "embeddings or index existed" and cited the chunk commit. The Goodhart-risk conclusion is unaffected
-    (chunks alone reveal nothing about retrieval/answer output).
-- *How found:* both caught in-session by recomputing from primary sources (`git log -1 --format=%ci` on the cited
-  commits) before writing the final sentence, not by trusting the owner's/verifier's stated figures — the report's
-  own subject matter (a Goodhart-risk timeline argument) is exactly the kind of claim that needs the exact numbers
-  right.
-- *Fix:* both corrected before the commit; no user correction was needed.
+- *AI got wrong:*
+  - **Gap arithmetic.** The first edit pass copied the owner's "≈ 1 h 39 min" as given. An advisor review flagged it
+    as worth checking; recomputing 09:12:06 minus each cited freeze anchor gives 1 h 40 min 58 s (tag) and 1 h 38 min
+    25 s (PR merge) — neither is exactly 1 h 39 min. Corrected to report both precise figures instead of the rounded
+    one, and flagged the deviation for the owner (this is a Goodhart-risk timeline argument, exactly the kind of
+    claim that needs the exact numbers right).
+  - **"Chunks... existed" conclusion.** The first edit pass kept "frozen before either arm's chunks or embeddings
+    existed" exactly, per the verifier's explicit "keep" instruction. The same advisor review questioned it against
+    the ledger; `git log -1 --format=%ci` on `bdd43ba` (INGEST-004, Arm A's 733 chunks) gives 2026-09-25 20:42:39
+    +0700 — the day *before* the freeze tag. Chunks existed before the freeze; only the embeddings/index did not.
+    Corrected the sentence to "embeddings or index existed" and cited the chunk commit; flagged this deviation from
+    the verifier's "keep" instruction too. The Goodhart-risk conclusion itself is unaffected (chunks alone reveal
+    nothing about retrieval/answer output).
+  - **AI_WORKLOG entry order.** The first commit (`ddeabb1`) placed this task's own EVAL-004b entry (created
+    `fbc7fce` 19:56) before the EXP-001 follow-up entry (created `f7a72ff` 19:37) on the reasoning that the
+    follow-up's last commit (`181c6b2`, 20:03) came before the EVAL-004b entry was *written*. That reasoning missed
+    that the EVAL-004b entry's own "Verifier findings" bullet was appended later, by `55f8b73` at 20:37 — the latest
+    touch of the three — so by the same "last touched" rule the follow-up entry should come first. Reordered.
+- *How found:* all three by an advisor review after the first edit pass, not caught proactively; `git log` then
+  confirmed each one.
+- *Fix:* all three corrected in a follow-up commit before pushing.
 - *Also updated:* the stale SHA-256 for `EPIC-05-evaluation.md` in `EVAL-004b.md`'s Files table (disclosed there as
   commit-time-only); annotated (not rewritten, per the snapshots-are-point-in-time rule) the wrong "First index
-  built" row in `docs/snapshots/evaluation/2026-09-28.md`; appended the verifier's fix prompt and the owner's
-  addendum to `docs/prompt-log/claude-code/EVAL-004b.md`; `task-ledger.md` row 11 marked "fixes applied ... pending
-  re-verify" (not `verified` — that's the re-verifier's call).
+  built" row in `docs/snapshots/evaluation/2026-09-28.md`; appended the owner's addendum (verbatim) to
+  `docs/prompt-log/claude-code/EVAL-004b.md`, linking rather than re-quoting the verifier's fix prompt (already
+  verbatim in `EVAL-004b-verify.md`); `task-ledger.md` row 11 marked "fixes applied ... pending re-verify" (not
+  `verified` — that's the re-verifier's call).
+- **`gitnexus_detect_changes` not run:** CLAUDE.md makes it a MUST before committing. This task's diff since
+  `acae17f` is 6 `docs/`/`AI_WORKLOG.md` files, zero `src/`/`config/`/`scripts/`/`tests/`, and the `eval-004b`
+  worktree is not in GitNexus's repo registry (only the main checkout and `eval-003c` are indexed) — no matching
+  index existed to run it against. Disclosed as not evidenced, not claimed as passing.
 - *Human decision:* the owner's addendum set scope (steps 0–4) and the expected post-merge test count (~866);
   commit and push to `eval-004b`, do not merge, stop for re-verify.
 
