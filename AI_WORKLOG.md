@@ -811,9 +811,10 @@ exists) is in the dated log entries above; this section is the index.
 - **"Span/source" scope wording** — a 2026-09-27 task addendum said the duplicate-citation rule should apply to
   "span/source metrics"; read literally, this produced a source-level rule with a simulated bound of 6 cases against
   the owner's predicted "at most 2". The owner said afterwards this was a wording mistake and the rule is
-  section-level only. `AI_WORKLOG.md` EVAL-003b entry (above). **Not resolved at QC-001:** the repository has no
-  record of who drafted that addendum's wording or whether a separate planning tool was involved — see the owner
-  question below.
+  section-level only. `AI_WORKLOG.md` EVAL-003b entry (above). The repository has no record of who drafted that
+  addendum's wording or whether a separate planning tool was involved; **the owner confirmed at QC-001 (2026-09-29)
+  that no separate planning-assistant tool exists** — both this item and "alternate-section quotes" above are
+  Claude Code planning-phase (EVAL-001 design) errors, not the output of a distinct external tool.
 
 ### System-side LLM errors (Gemini as the judge)
 
@@ -827,8 +828,8 @@ exists) is in the dated log entries above; this section is the index.
 
 ## With 7 more days
 
-Draft only — **the owner has not yet confirmed or edited this list** (drafted from the Limitations sections of
-`README.md` and `docs/reports/epics/EPIC-05-evaluation.md`/`EPIC-06-experiment.md`, per QC-001):
+Drafted from the Limitations sections of `README.md` and `docs/reports/epics/EPIC-05-evaluation.md`/
+`EPIC-06-experiment.md`, per QC-001; **confirmed as written by the owner, 2026-09-29**:
 
 1. **Widen the evaluation set past n = 36.** At this size, one or two cases flipping moves a headline rate by
    1.6–2.8 points, and the experiment's McNemar test can't reach significance with only a handful of discordant
