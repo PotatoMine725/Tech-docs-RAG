@@ -610,6 +610,114 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   or code change; commit and push to `exp-001`, do not merge. The owner's follow-up correction added the dev-merge
   step (0) with the conflict-resolution rule (keep every entry chronologically in the three log/plan files).
 
+### 2026-09-28 EVAL-004b: evaluation report — tables, judge reliability, appendix (branch `eval-004b`, PR into `dev`)
+- *AI did:*
+  - Branched `eval-004b` from `dev` at `c863ea0` (the PR #19 / EVAL-003c merge) in its own worktree, then ran the
+    already-built EVAL-003c tools against the two committed EVAL-004a run folders with no code/config/prompt change:
+    `make_tables.py` → `docs/reports/epics/EPIC-05-evaluation.md` (tables), `summary-<runs>.json`, two per-arm CSVs;
+    `score_spot_check.py` against the owner's real (already-graded) `judge-spot-check.md`/`-judge.md` to fill the
+    `judge_agreement` section for real, not the placeholder.
+  - Wrote the report's prose (dataset, per-metric "how measured" + observation, judge reliability, appendix,
+    measurement limitations) around the generated tables, citing case ids and checking each claim against the raw
+    `records.jsonl`/`summary.json` before writing it down.
+  - Joined the two generated per-arm CSVs into one 72-row Markdown appendix (`eval-table-eval-004-appendix.md`) with
+    a small scratch script (not committed as code), for the assignment brief's 5-column requirement across both arms.
+  - Fixed `EVAL-004a.md`'s stale "9 of 10 agree" line; updated `task-ledger.md` row 11, `master-plan.md` gate G5B
+    (all 3 boxes) and Stage B status, added `docs/snapshots/evaluation/2026-09-28.md`.
+- *AI got wrong:*
+  - **Worktree base branch.** `EnterWorktree` defaulted to branching from `origin/main`, not `dev` — the task needed
+    `eval-004b` from `dev` *after* PR #19. Caught immediately (`git log -1` showed an old commit, not `c863ea0`)
+    before any file was touched; fixed with `git reset --hard origin/dev` (clean tree, nothing to lose) and a branch
+    rename.
+  - **Latency root cause, first draft.** The first version of the "Latency" observation guessed the answer-model
+    `generate` tail was "free-tier server-side queueing" and that the judge's `total` tail had "no equivalent" in
+    `generate` — both written before checking the raw per-record `retry_wait`/`throttle_wait` fields. Checking
+    `records.jsonl` directly (a small scratch script) showed `throttle_wait` is in fact large and non-zero on the
+    slow answer records (e.g. Q-EVAL-014:B: `generate` 42441.8 ms of which `throttle_wait` is 40867.8 ms) — the tail
+    is this project's own client-side per-minute request throttle folded into the `generate` timer, the same
+    mechanism as the judge's tail, just attributed to a different stage by each script's own instrumentation. The
+    paragraph was rewritten before it reached the committed report.
+- *How found:* both caught by the AI itself before committing — the worktree branch by checking `git log` right
+  after `EnterWorktree`, the latency claim by verifying against `records.jsonl` instead of trusting the aggregate
+  table numbers alone (per the "execute, don't argue" habit from prior tasks' feedback).
+- *Fix:* both corrected in-session, before any commit; no user correction was needed.
+- *Human decision:* none needed during the task — the owner's numbered invocation (prompt log) and the already-built
+  EVAL-003c tools fully determined scope and method.
+- *Verifier findings* (99-VERIFY, 2026-09-28, own worktree `verify-eval-004b`, zero Gemini requests): **ACCEPT WITH
+  FIXES**, 1 FAIL, 0 UNVERIFIED. Scope (docs + generated data only), full reproducibility (`make_tables.py` +
+  `score_spot_check.py` re-run byte-identical, SHA-256 matches the report's own table), appendix (5/72 rows
+  cross-checked against `eval-v1.jsonl`/`records.jsonl`/`summary.json`), judge reliability (S03 wording matches
+  EVAL-004a verbatim), cost (`thoughts_tokens` confirmed folded into output cost in `scoring.py:313`) and latency
+  (`throttle_wait` figures confirmed against raw `records.jsonl`) all check out. **FAIL:** EPIC-05's "Dataset" section
+  cites the first index build as 2026-09-26 14:55:42 +0700 (commit `a998b68`, the PR #10 merge) — that is the commit
+  time for the *later, zero-cost rebuild* into `data/chroma/`, not the first build. The real first index (Arm A) was
+  written live to `D:\ChromaDB` starting 2026-09-26 09:12:06 +0700 (`validation/retrieval/indexing-log.jsonl` first
+  entry; RAG-001b execution report "Arm A, live" 09:12:04-09:19:13 UTC+7). The freeze-before-index conclusion still
+  holds (07:31:08/07:33:41 freeze precedes 09:12:06 build), but the cited time and the "7 h 22 min" gap are wrong —
+  the real gap is ≈ 1 h 39 min. Also flagged (non-blocking): EPIC-05 cites the freeze as commit `1dd3b88d`/07:33:41
+  (the PR #8 merge), while the `eval-freeze-v1` tag itself points to `739676f`/07:31:08 ("EVAL-002: freeze eval-v1"),
+  2m33s earlier; and EPIC-05 never states that its own per-arm numbers (e.g. `summary.json`
+  `breakdown/arm/A/answer/accuracy` = 23/32 = 0.719) are unpaired single-run figures that will legitimately differ
+  from EPIC-06's paired McNemar table (22/31 = 0.710 for Arm A) — EPIC-06 already explains this on its own side, but
+  EPIC-05 doesn't cross-reference it, which could read as a contradiction to someone comparing the two reports.
+  Full review: [EVAL-004b-verify](docs/reviews/evaluation/EVAL-004b-verify.md).
+
+### 2026-09-29 EVAL-004b fix round: leakage-timeline correction, EPIC-06 link, paired/unpaired note (branch `eval-004b`, PR #21)
+- *AI did:*
+  - Step 0 (owner addendum): fast-forwarded `eval-004b` to `origin/eval-004b` (`55f8b73`, the verify commit), then
+    merged `origin/dev` (PR #20 EXP-001, `81cb6da`) — merge commit `acae17f`. Two conflicts, both same-day entries
+    appended at the same anchor: `AI_WORKLOG.md` and `docs/plans/task-ledger.md` row 11/12; resolved by hand keeping
+    every entry from both sides, ordered by actual commit timestamp (order corrected in `e9594a1`; see below).
+    `master-plan.md` auto-merged, no conflict.
+    866 passed, 1 deselected — matches the owner's expectation.
+  - Applied [EVAL-004b-verify](docs/reviews/evaluation/EVAL-004b-verify.md)'s fix prompt to
+    `docs/reports/epics/EPIC-05-evaluation.md`: corrected "Dataset" to cite the first index as Arm A's live build
+    (09:12:06 +0700, `validation/retrieval/indexing-log.jsonl`) instead of the `a998b68`/14:55:42 rebuild commit,
+    cited the `eval-freeze-v1` tag (`739676f`, 07:31:08) alongside the PR #8 merge (`1dd3b88d`, 07:33:41), replaced
+    the EPIC-06 TODO line with a real link now that PR #20 is merged, and added a paired-vs-unpaired note to
+    "Measurement limitations" per the owner's items 1–3.
+  - Re-ran `scripts/evaluation/make_tables.py --runs 20260928-eval-A-full-491f137 20260928-eval-B-full-491f137`
+    twice (before and after the final wording pass): `summary-*.json` and both per-arm CSVs stayed byte-identical
+    (SHA-256 matched the pre-fix committed hashes both times); only the report's prose changed.
+- *AI got wrong:*
+  - **Gap arithmetic.** The first edit pass copied the owner's "≈ 1 h 39 min" as given. An advisor review flagged it
+    as worth checking; recomputing 09:12:06 minus each cited freeze anchor gives 1 h 40 min 58 s (tag) and 1 h 38 min
+    25 s (PR merge) — neither is exactly 1 h 39 min. Corrected to report both precise figures instead of the rounded
+    one, and flagged the deviation for the owner (this is a Goodhart-risk timeline argument, exactly the kind of
+    claim that needs the exact numbers right).
+  - **"Chunks... existed" conclusion.** The first edit pass kept "frozen before either arm's chunks or embeddings
+    existed" exactly, per the verifier's explicit "keep" instruction. The same advisor review questioned it against
+    the ledger; `git log -1 --format=%ci` on `bdd43ba` (INGEST-004, Arm A's 733 chunks) gives 2026-09-25 20:42:39
+    +0700 — the day *before* the freeze tag. Chunks existed before the freeze; only the embeddings/index did not.
+    Corrected the sentence to "embeddings or index existed" and cited the chunk commit; flagged this deviation from
+    the verifier's "keep" instruction too. The Goodhart-risk conclusion itself is unaffected (chunks alone reveal
+    nothing about retrieval/answer output).
+  - **AI_WORKLOG entry order.** The merge conflict resolution (`acae17f`) placed this task's own EVAL-004b entry
+    (created `fbc7fce` 19:56) before the EXP-001 follow-up entry (created `f7a72ff` 19:37) on the reasoning that the
+    follow-up's last touch (`181c6b2`, 20:03) was the latest of the three, so it belonged last. That reasoning missed
+    that the EVAL-004b entry's own "Verifier findings" bullet was appended even later, by `55f8b73` at 20:37 — the
+    true latest touch — so by the same "last touched" rule the follow-up entry should come first, not last.
+    Reordered.
+- *How found:* the gap arithmetic and the chunks/embeddings wording were both caught by an advisor review before
+  `ddeabb1` was committed — neither was ever committed wrong; `git log` then confirmed both. The entry-order mistake
+  was caught by a second, later advisor review, after `ddeabb1` and `a3f45ca` had already been pushed to
+  `origin/eval-004b`.
+- *Fix:* the gap and chunks/embeddings wording were corrected in the working tree before `ddeabb1`. The entry order
+  was wrong in the pushed `acae17f`/`ddeabb1`/`a3f45ca`; corrected in a genuine follow-up commit (`e9594a1`), pushed
+  after.
+- *Also updated:* the stale SHA-256 for `EPIC-05-evaluation.md` in `EVAL-004b.md`'s Files table (disclosed there as
+  commit-time-only); annotated (not rewritten, per the snapshots-are-point-in-time rule) the wrong "First index
+  built" row in `docs/snapshots/evaluation/2026-09-28.md`; appended the owner's addendum (verbatim) to
+  `docs/prompt-log/claude-code/EVAL-004b.md`, linking rather than re-quoting the verifier's fix prompt (already
+  verbatim in `EVAL-004b-verify.md`); `task-ledger.md` row 11 marked "fixes applied ... pending re-verify" (not
+  `verified` — that's the re-verifier's call).
+- **`gitnexus_detect_changes` not run:** CLAUDE.md makes it a MUST before committing. This task's diff since
+  `acae17f` is 6 `docs/`/`AI_WORKLOG.md` files, zero `src/`/`config/`/`scripts/`/`tests/`, and the `eval-004b`
+  worktree is not in GitNexus's repo registry (only the main checkout and `eval-003c` are indexed) — no matching
+  index existed to run it against. Disclosed as not evidenced, not claimed as passing.
+- *Human decision:* the owner's addendum set scope (steps 0–4) and the expected post-merge test count (~866);
+  commit and push to `eval-004b`, do not merge, stop for re-verify.
+
 ## Summary: how AI helped
 
 To be filled at QC-001.
