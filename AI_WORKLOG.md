@@ -697,9 +697,13 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
     that the EVAL-004b entry's own "Verifier findings" bullet was appended even later, by `55f8b73` at 20:37 — the
     true latest touch — so by the same "last touched" rule the follow-up entry should come first, not last.
     Reordered.
-- *How found:* all three by an advisor review after the first edit pass, not caught proactively; `git log` then
-  confirmed each one.
-- *Fix:* all three corrected in a follow-up commit before pushing.
+- *How found:* the gap arithmetic and the chunks/embeddings wording were both caught by an advisor review before
+  `ddeabb1` was committed — neither was ever committed wrong; `git log` then confirmed both. The entry-order mistake
+  was caught by a second, later advisor review, after `ddeabb1` and `a3f45ca` had already been pushed to
+  `origin/eval-004b`.
+- *Fix:* the gap and chunks/embeddings wording were corrected in the working tree before `ddeabb1`. The entry order
+  was wrong in the pushed `acae17f`/`ddeabb1`/`a3f45ca`; corrected in a genuine follow-up commit (`e9594a1`), pushed
+  after.
 - *Also updated:* the stale SHA-256 for `EPIC-05-evaluation.md` in `EVAL-004b.md`'s Files table (disclosed there as
   commit-time-only); annotated (not rewritten, per the snapshots-are-point-in-time rule) the wrong "First index
   built" row in `docs/snapshots/evaluation/2026-09-28.md`; appended the owner's addendum (verbatim) to

@@ -148,12 +148,26 @@ fix round (re-ran `make_tables.py`, byte-identical).
   report was committed (see `AI_WORKLOG.md` for the full account).
 - The worktree base-branch issue (`EnterWorktree` defaulting to `origin/main`) was a setup step, not part of the
   task's 5 items; fixed before any file was touched (see "Entry condition, environment").
+- **2026-09-29 fix round** (from [EVAL-004b-verify](../../reviews/evaluation/EVAL-004b-verify.md)'s fix prompt):
+  two numbers deviate from what the owner/verifier stated, both flagged here for the owner to approve. (1) The
+  owner's addendum gave "≈ 1 h 39 min" for the freeze-to-first-index gap; the report now states the precise
+  figures instead — ≈ 1 h 41 min from the `eval-freeze-v1` tag (`739676f`, 07:31:08 +0700) and ≈ 1 h 38 min from
+  the PR #8 merge (`1dd3b88d`, 07:33:41 +0700) to the first index build (09:12:06 +0700). (2) The verifier's fix
+  prompt said to keep "frozen before either arm's chunks or embeddings existed" unchanged; this is corrected to
+  "embeddings or index" instead, because Arm A's 733 chunks were committed in INGEST-004 (`bdd43ba`, 2026-09-25
+  20:42:39 +0700) — the day before the freeze tag — so the chunks did exist at freeze time, only the
+  embeddings/index did not. See `AI_WORKLOG.md`'s 2026-09-29 entry for the full account.
 
 ## GitNexus
 
 No existing symbol was edited (no code change), so no impact analysis was needed. `git status`/`git diff --stat`
 confirm the change set matches "Files" above exactly: 4 modified docs, 8 new files (7 listed + 1 uncommitted scratch
 script, appendix A, removed before commit). No `src/`, `config/`, `scripts/` or `tests/` file changed.
+
+**2026-09-29 fix round:** `gitnexus_detect_changes` (CLAUDE.md MUST) was not run — the change set is docs-only
+(`git diff --name-status acae17f` shows `AI_WORKLOG.md` and 5 `docs/` files, zero `src/`/`config/`/`scripts/`/
+`tests/`), and the `eval-004b` worktree is not in GitNexus's indexed-repo registry (only the main checkout and the
+`eval-003c` worktree are), so there was no matching index to run it against.
 
 ## Explain it back
 
