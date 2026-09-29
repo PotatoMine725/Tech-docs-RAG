@@ -550,6 +550,28 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   - **Owner spot-check** (after the PR opened): the owner graded the 10 items blind, then cross-checked against the judge's key: agrees on 9 of 10. S03 (Q-EVAL-012:A): the owner grades P2 `no` where the judge gave `partial`; the label stays `partially_correct`. AI committed the owner's sheet as written and recorded the result in the report and ledger.
 - *Verifier findings* ([99-VERIFY](docs/reviews/evaluation/EVAL-004a-verify.md), 2026-09-28, own worktree, zero Gemini requests): **ACCEPT WITH FIXES**. Every run/quota/judge/duplicate-rule/scoring number independently reproduced (byte-identical `summary.json` and spot-check key after re-running the report's pasted scripts; independent read-only re-derivation of the duplicate rule confirming every dropped duplicate falls at overfetch ranks 6–13; the Q-EVAL-002/B marker-22 hypothesis confirmed by rebuilding the actual judge prompt offline and showing "22" appears only as the cited chunk's source id, never as a marker). One finding: the execution report's "Owner spot-check" section states only the owner's self-reported 9/10 "agree with the judge?" answers; recomputing `map_result` from the owner's own **blind** per-point grades gives **8/10** label agreement — S09 (`Q-EVAL-020:B`) and S10 (`Q-EVAL-017:B`) also disagree (owner rated a required point `yes` where the judge rated it `partial`, which flips the mapped label from `partially_correct` to `correct`), undocumented in the report or ledger. Full point-level agreement is 6/10; citation-support agreement is 25/25 markers but the sample has no case testing whether the judge would catch a bad citation. Fix is docs-only (the execution report and ledger row 11's open items); the owner's graded sheet is not touched.
 
+### 2026-09-28 EXP-001: Arm A vs Arm B experiment and failure analysis (branch `exp-001`, PR into `dev`)
+- *AI did:*
+  - Built `application/evaluation/experiment.py` (pure: paired comparison rows on `stats.py`, discordant cases, chunk-level facts, the §2 failure rules, ADR-0003 failure-mode signals) and `scripts/experiments/compare_arms.py`. The script reads the committed EVAL-004a runs, hash-checks the git-ignored chunk files, writes `data/experiments/exp-001/` and fills the report's tables.
+  - Read every discordant case (23) and every failure (18) at chunk level and wrote the [EPIC-06 report](docs/reports/epics/EPIC-06-experiment.md) around the brief's 5 points. 0 Gemini requests, no config change ([execution report](docs/reports/execution/EXP-001.md)).
+- *AI got wrong:*
+  - **Slot numbering.** The report draft said Q-EVAL-030 misses slot S2 (#03); #03 is slot S1 (S2 is #28).
+  - **Latency claim.** The draft said Arm A's retrieve mean came from "a few slow early queries", which was not checked. The data shows one 414.6 ms cold start on the first query.
+  - **Surviving mutation.** Mutation M2 (ranking rule `rank >= 3` → `>= 2`) survived the first test set: no test had a first hit at rank 2.
+  - **Execution-report slips.** The first execution-report draft counted "two" rank-4/5 cases (there are three) and quoted unpaired accuracy counts it had not computed.
+  - **Stray file.** A shell `echo … >=2` created a stray file named `=2`.
+- *Verifier findings* ([99-VERIFY](docs/reviews/evaluation/EXP-001-verify.md), 2026-09-28, own worktree, zero Gemini requests): **ACCEPT WITH FIXES**. Every acceptance item, both full test runs (793 on the branch, 775 on `dev`, matching 775+18), byte-identical reproducibility, and a large set of report numbers (accuracy/lenient_accuracy/false_refusal/evidence_hit@1/section_hit@5/tokens_prompt McNemar-Wilcoxon-bootstrap values, the 23-case discordant set, the 18 failure labels, the 447-duplicate and 45.05%/3.27% fence-cut claims, `failure_mode_signals` sums, several worked-example character counts) were independently recomputed from `summary.json`/`records.jsonl`/the chunk files directly — not copied from the report, and in two cases (fence-cut rule, discordant-set derivation) reimplemented from scratch rather than reusing the task's own code — and all matched exactly. Two docs-only findings, neither changes a number, table, or failure label: (1) EPIC-06 §2 says `Q-EVAL-002:B` is "out of every answer-level pair," but `citation_section_precision` (a deterministic span check, not judge-dependent) legitimately includes it, giving that row n=28 instead of 27 — the report shows this number but never explains the discrepancy the prose denies exists; (2) EPIC-06 §5 says "Answer quality is equivalent at this n," which contradicts the report's own §2 sentence on the same metric ("not 'the arms are equal'"). Mutation testing (M1–M4) was not re-executed: an attempt to reproduce M2 by editing `experiment.py` was blocked by the harness's permission classifier (editing task source is against the VERIFY protocol regardless); the edit was reverted immediately and M2 was instead confirmed by static inspection of the test assertion it would break.
+- *How found:* Slot numbering, latency claim and report slips: re-checking every report sentence against the per-chunk dump and the records before committing. Surviving mutation: the mutation run. Stray file: `git status`.
+- *Fix:* All four text errors corrected before the commit. Added a rank-2 boundary test (M2 is now killed). Deleted the stray file.
+- *Human decision:* The owner's addendum set the scope:
+  - EVAL-004a runs only and zero requests;
+  - reuse `stats.py`;
+  - paired n with Q-EVAL-002:B unlabelled;
+  - the four threat paragraphs;
+  - gate refusals classified as `refusal`;
+  - an evaluation-side failures section;
+  - the 5-point report with 2–3 next experiments.
+
 ### 2026-09-28 EVAL-004b: evaluation report — tables, judge reliability, appendix (branch `eval-004b`, PR into `dev`)
 - *AI did:*
   - Branched `eval-004b` from `dev` at `c863ea0` (the PR #19 / EVAL-003c merge) in its own worktree, then ran the
@@ -601,6 +623,44 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   from EPIC-06's paired McNemar table (22/31 = 0.710 for Arm A) — EPIC-06 already explains this on its own side, but
   EPIC-05 doesn't cross-reference it, which could read as a contradiction to someone comparing the two reports.
   Full review: [EVAL-004b-verify](docs/reviews/evaluation/EVAL-004b-verify.md).
+
+### 2026-09-28 EXP-001 follow-up: fixes from verify (branch `exp-001`, PR #20)
+- *AI did:* fixed the two docs-only findings of [EXP-001-verify](docs/reviews/evaluation/EXP-001-verify.md) and
+  produced the mutation evidence the verifier could not re-run.
+  - EPIC-06 §2: the `Q-EVAL-002:B` paragraph now says the case is out of every **judge-dependent** answer-level pair,
+    and explains that `citation_section_precision` is a deterministic span check that legitimately includes it —
+    added a note under the §3 results-overall table spelling out the n's (28/13/13 vs `citation_support_rate`'s
+    27/12/12; the English-only table is unaffected).
+  - EPIC-06 §5: "Answer quality is equivalent at this n" replaced with "No statistically reliable difference in
+    answer quality at n = 31 (... the data are consistent with anything from a ~10-point loss to a ~16-point gain, so
+    equivalence is not shown)", following the report's own §2 wording rule. Grepped the report, execution report and
+    this log for `equivalent`/`equal`/`same quality`: the only other hits are either the correctly hedged sentence
+    already in §2/the execution report, or per-case descriptions of two arms retrieving the literally same chunk
+    (020, 026, and worked example 1) — factual, not a statistical claim, so left as-is.
+  - Mutation evidence (M1–M4): re-applied on a disposable git worktree (`git worktree add <scratch> HEAD --detach`,
+    never the `exp-001` branch files), one exact-line mutation at a time, running
+    `pytest -q --color=no -rf tests/unit/application/test_eval_experiment.py` after each. All 4 killed: M1 →
+    `test_gate_false_refusal_is_refusal_with_chunking_kept_as_secondary`; M2 →
+    `test_rule_3_ranking_needs_a_cited_wrong_chunk_above_the_first_hit`; M3 →
+    `test_language_tag_needs_a_passing_english_twin`; M4 → `test_binary_row_reports_mcnemar_counts_and_cases`.
+    SHA-256 of `experiment.py` was identical before the run and after every revert
+    (`d52ba136f42d9427eabc395706f73a37b5c51e14b58b3f3239479b80596283c2`); the `exp-001` worktree's own copy hashed the
+    same and was never opened. Scratch worktree removed after. Results pasted into the execution report.
+  - Full offline suite: 793 passed, 1 deselected (unchanged — docs-only diff).
+- *AI got wrong:* claimed `exp-001` was "already based on current `dev`" without checking. It was not:
+  `exp-001` branched from `aa270a9` (PR #18) and never picked up PR #19 (`c863ea0`, EVAL-003c → `dev`), so the 793
+  count above was against the pre-#19 base. Caught by the owner.
+- *Fix (2026-09-28, same session):* `git fetch`, then `git merge origin/dev --no-edit` into `exp-001` — a real merge
+  commit (`fa522c2`), no rebase/force. `AI_WORKLOG.md`, `docs/plans/master-plan.md` and `docs/plans/task-ledger.md`
+  auto-merged with no conflict markers (git's `ort` strategy resolved all three line-wise; every entry from both
+  sides — this branch's EXP-001 rows and `dev`'s EVAL-003c rows — is present). No other file conflicted.
+  Re-ran `compare_arms.py` with the same run ids/report path: identical console output ("discordant cases: 23;
+  failures A 9, B 9"), and all 8 `data/experiments/exp-001/*` output files plus the report's AUTO-block content
+  hashed byte-identical to before the merge — PR #19 does not change any EXP-001 number. Full offline suite after
+  the merge: **866 passed, 1 deselected** (848 + 18, matching `dev`'s new baseline).
+- *Human decision:* the owner's fix prompt scoped exactly these two doc edits plus the mutation evidence, no number
+  or code change; commit and push to `exp-001`, do not merge. The owner's follow-up correction added the dev-merge
+  step (0) with the conflict-resolution rule (keep every entry chronologically in the three log/plan files).
 
 ## Summary: how AI helped
 
