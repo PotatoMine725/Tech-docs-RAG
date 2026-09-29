@@ -71,7 +71,8 @@ answerable/4 unanswerable, 7 parallel groups); per-case `citation.section_precis
 json` files (found Q-EVAL-005:A, Q-EVAL-015:A, Q-EVAL-010:B); per-record `latency_ms` breakdown for the four slowest
 answer calls (confirmed `throttle_wait`, not `retry_wait` or provider variance, explains the tail — see
 "Unverified/open"); `git log -1 --format=%ai` on `1dd3b88d`/`a998b68`/`491f137`/`c863ea0` for the dataset-freeze and
-first-index timestamps in the report's "Dataset" section; SHA-256 of every new/read file.
+first-index timestamps in the report's "Dataset" section (`a998b68` is the later zero-cost rebuild, not the first
+build — see EPIC-05 § Dataset and the 2026-09-29 fix round below); SHA-256 of every new/read file.
 
 ## Test summary
 

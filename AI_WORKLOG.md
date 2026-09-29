@@ -691,11 +691,12 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
     Corrected the sentence to "embeddings or index existed" and cited the chunk commit; flagged this deviation from
     the verifier's "keep" instruction too. The Goodhart-risk conclusion itself is unaffected (chunks alone reveal
     nothing about retrieval/answer output).
-  - **AI_WORKLOG entry order.** The first commit (`ddeabb1`) placed this task's own EVAL-004b entry (created
-    `fbc7fce` 19:56) before the EXP-001 follow-up entry (created `f7a72ff` 19:37) on the reasoning that the
-    follow-up's last commit (`181c6b2`, 20:03) came before the EVAL-004b entry was *written*. That reasoning missed
-    that the EVAL-004b entry's own "Verifier findings" bullet was appended later, by `55f8b73` at 20:37 — the latest
-    touch of the three — so by the same "last touched" rule the follow-up entry should come first. Reordered.
+  - **AI_WORKLOG entry order.** The merge conflict resolution (`acae17f`) placed this task's own EVAL-004b entry
+    (created `fbc7fce` 19:56) before the EXP-001 follow-up entry (created `f7a72ff` 19:37) on the reasoning that the
+    follow-up's last touch (`181c6b2`, 20:03) was the latest of the three, so it belonged last. That reasoning missed
+    that the EVAL-004b entry's own "Verifier findings" bullet was appended even later, by `55f8b73` at 20:37 — the
+    true latest touch — so by the same "last touched" rule the follow-up entry should come first, not last.
+    Reordered.
 - *How found:* all three by an advisor review after the first edit pass, not caught proactively; `git log` then
   confirmed each one.
 - *Fix:* all three corrected in a follow-up commit before pushing.
