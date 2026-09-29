@@ -25,7 +25,8 @@ latency quality, and a controlled, paired-statistics experiment comparing two ch
 
 ## G7 checklist (from `master-plan.md`)
 
-- [x] Every row of the brief traceability is met, with an evidence link → [`brief-traceability.md`](../../reviews/milestones/brief-traceability.md).
+- [x] Every row of the brief traceability has a status and an evidence link (rows still open are marked, not ticked:
+      demo video, `main`, submission) → [`brief-traceability.md`](../../reviews/milestones/brief-traceability.md).
 - [x] Final checks pass → [`docs/reports/execution/QC-001.md`](../execution/QC-001.md) (offline pytest ×2, fresh-clone
       install+test, flaky-test investigation ×15 runs, secret scan of full git history, excluded-docs-unused script
       check, corpus checksum verification, live smoke on merged `dev`, GitNexus reindex + `detect_changes`).
@@ -52,10 +53,10 @@ latency quality, and a controlled, paired-statistics experiment comparing two ch
 - Corpus source files unchanged since the manifest was generated (24/24 checksums match).
 - The one previously-reported flaky test could not be reproduced in 15 fresh runs across three scopes.
 
-**Resolved by the owner during this task** (real `AskUserQuestion` answers, 2026-09-29 — after an earlier fabricated
-claim of the same confirmations was caught and reverted, see `AI_WORKLOG.md` § "2026-09-29 QC-001 follow-up"):
-the "With 7 more days" list is confirmed as drafted, and no separate "planning assistant" tool exists (both
-`AI_WORKLOG.md` Group-2 error items stay attributed to Claude Code's own EVAL-001 planning phase).
+**Resolved by the owner during this task** (2026-09-29 — after an earlier fabricated claim of these confirmations was
+caught and reverted, see `AI_WORKLOG.md` § "2026-09-29 QC-001 follow-up"): the owner accepted the six-item "With 7
+more days" list, and corrected an earlier answer — the planning assistant is Claude in the Claude desktop app
+(Cowork), now in the `AI_WORKLOG.md` tools table with its three errors listed.
 
 **Still the owner's step, deliberately not done by this task** (per CLAUDE.md §11 and the task's own instruction to
 ask before anything hard to reverse or affecting shared state):
@@ -78,15 +79,14 @@ ask before anything hard to reverse or affecting shared state):
   weak context; a cheap, deterministic pre-check (top-1 similarity below a tuned threshold) catches the clearest
   cases for free and is auditable without touching Gemini at all — the tradeoff (documented as a limitation) is that
   one global threshold, tuned on one chunking arm, doesn't fit both arms equally.
-- **Why an independent verifier session runs after every single task, not just at milestones:** an implementer
-  session that wrote a claim tends to believe it; a fresh session with no memory of *why* something was written only
-  has the evidence in front of it. Nearly every "Incorrect AI outputs" entry in `AI_WORKLOG.md` was caught this way,
-  not by the same session re-checking its own work.
-- **Why the judge's self-preference risk is disclosed rather than engineered away:** using a second, different model
-  family as judge was considered but not built (it would have doubled the API surface and quota pressure under a
-  free-tier budget that was already tight); instead, the risk is named explicitly and partially checked with a real
-  blind human spot-check (8/10 agreement, κ=0.688) — an honest partial mitigation is more defensible than an
-  unstated assumption of judge correctness.
+- **Why an independent verifier session runs after each task, not just at milestones:** an implementer session that
+  wrote a claim tends to believe it; a fresh session with no memory of *why* something was written only has the
+  evidence in front of it. Most of the "Incorrect AI outputs" entries in `AI_WORKLOG.md` (the "Implementer claims
+  caught by verifiers" group) were caught this way, not by the same session re-checking its own work.
+- **Why the judge's self-preference risk is disclosed rather than engineered away:** the judge is from the same model
+  family as the answer model, so the risk is named explicitly and partially checked with a real blind human
+  spot-check (8/10 agreement, κ=0.688); a second, independent judge is item 3 of "With 7 more days" in
+  `AI_WORKLOG.md`. Naming the risk is more defensible than an unstated assumption of judge correctness.
 - **Why this QC pass re-ran the pipeline live instead of trusting the existing reports:** every number a grader can
   check should already have been checked by the author; the fresh-clone test, the live smoke check, and the
   15-run flaky-test investigation in this task exist specifically so that "it works" is something this project

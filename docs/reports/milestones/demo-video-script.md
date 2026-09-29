@@ -31,8 +31,10 @@ Launch: `python -m knowledge_assistant.presentation.desktop.app`.
    int hay long?"* Show the answer is generated in Vietnamese while the citation excerpts stay in English.
 3. **Out-of-corpus refusal (~30 s).** Ask: *"How do I issue refresh tokens and use them to renew JWT access tokens
    in ASP.NET Core?"* Show the "insufficient information" state — no citations, no hallucinated answer. Say: "This
-   was refused by the retrieval-score gate before the model was ever called — real output, live smoke check
-   `validation/generation/smoke-2026-09-29.md`."
+   was refused by the retrieval-score gate before the model was ever called."
+   (Source for the owner, not to be read aloud: the three questions were verified by the CLI smoke check
+   (`scripts/ask.py`, `validation/generation/smoke-2026-09-29.md`); the GUI itself was owner-checked on 2026-09-27
+   (`validation/generation/gui-check.md`).)
 
 ## 2:10–2:50 — Pipeline diagram (40 s)
 
@@ -70,11 +72,11 @@ But the chunks themselves are measurably different — fixed-size chunking cuts 
 
 **Show:** the Q-EVAL-001 worked case (EPIC-06 § 4, or the README's "Worked failure case" box).
 
-**Say:** "Here's a concrete failure this project would have missed without the paired analysis. Both chunking
+**Say:** "Here's a concrete case where the gate, not retrieval, decided the outcome. Both chunking
 strategies retrieve the exact same section, with the exact same evidence, for the same question. Header-aware
 chunking's version of that chunk scores 0.6779 against a 0.686 gate threshold — just below — so it's refused.
 Fixed-size chunking's version of the same chunk includes a bit more surrounding text and scores 0.6908 — just above
-— so it's answered correctly. The retrieval quality is equal; the gate threshold, tuned on the other chunker's dev
+— so it's answered correctly. The retrieval quality is equal; the gate threshold, tuned on Arm A's dev
 scores, is what decided this case."
 
 ## 4:30–4:50 — Limitations & next steps (20 s)
@@ -82,7 +84,7 @@ scores, is what decided this case."
 **Say:** "The evaluation set is 36 questions — small enough that one or two cases flipping moves the headline number
 by a couple of points. The gate threshold was tuned on only 6 dev questions and on one chunking arm. And the judge
 grading the answers is the same model family as the model giving them, mitigated but not removed by that manual
-spot-check. Full limitations and a 7-more-days plan are in the README and `AI_WORKLOG.md`."
+spot-check. Full limitations are in the README; the 7-more-days plan is in `AI_WORKLOG.md`."
 
 **Show:** README § Limitations (a quick scroll).
 
@@ -109,4 +111,4 @@ spot-check. Full limitations and a 7-more-days plan are in the README and `AI_WO
 - `README.md` (Problem, Dataset, Architecture, Evaluation summary, Experiment summary, Limitations)
 - `docs/reports/epics/EPIC-05-evaluation.md` (evaluation numbers, judge spot-check)
 - `docs/reports/epics/EPIC-06-experiment.md` (experiment numbers, Q-EVAL-001 worked case)
-- `validation/generation/smoke-2026-09-29.md` (the three live GUI questions, run and verified at QC-001)
+- `validation/generation/smoke-2026-09-29.md` (the three questions, run through the CLI at QC-001; the GUI was owner-checked separately, `validation/generation/gui-check.md`)

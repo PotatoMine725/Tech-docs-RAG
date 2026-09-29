@@ -7,7 +7,7 @@ project also **measures** how well it works — a 36-question evaluation set sco
 latency quality — and runs a **controlled experiment** comparing two chunking strategies with statistical tests, not
 just a claim.
 
-**Status:** feature-complete, evaluated, submission-ready. Final QC checks: [`docs/reports/execution/QC-001.md`](docs/reports/execution/QC-001.md); final report: [`docs/reports/milestones/final.md`](docs/reports/milestones/final.md).
+**Status:** feature-complete and evaluated; submission pending — the demo video is not yet recorded and the QC PR (#22) is not yet merged, so this work is not yet on `main`. Final QC checks: [`docs/reports/execution/QC-001.md`](docs/reports/execution/QC-001.md); final report: [`docs/reports/milestones/final.md`](docs/reports/milestones/final.md).
 
 ## Problem
 
@@ -99,15 +99,19 @@ flowchart LR
 
 ## How to run
 
-Requires Python ≥ 3.10 and a free [Gemini API key](https://aistudio.google.com/). Tested on Windows (Python 3.13.3)
-and Linux (Python 3.13.12 / 3.11.15).
+Requires Python ≥ 3.10 and a free [Gemini API key](https://aistudio.google.com/). Tested on Windows: the current
+866-test suite was verified on Python 3.13.3. Linux: the 104-test INGEST-003 suite ran on Python 3.13.12 and 3.11.15
+([report](docs/reports/execution/INGEST-003.md)); the current suite has not been run on Linux.
 
 ```bash
 # 1. Clone and create a virtual environment
 git clone https://github.com/PotatoMine725/Tech-docs-RAG.git
 cd Tech-docs-RAG
 python -m venv .venv
-.venv/Scripts/activate        # Windows: .venv\Scripts\activate ; Linux/Mac: source .venv/bin/activate
+# activate it — pick the line for your shell:
+#   PowerShell:  .venv\Scripts\Activate.ps1
+#   Git Bash:    source .venv/Scripts/activate
+#   Linux/Mac:   source .venv/bin/activate
 
 # 2. Install
 pip install -r requirements.txt
@@ -149,10 +153,12 @@ python scripts/experiments/compare_arms.py --run-a <run-id-A> --run-b <run-id-B>
 
 **0 quota when cached:** every embedding and every answer is cached to disk (`data/cache/embeddings.sqlite`,
 `data/evaluation/results/`), keyed by text and settings. Re-running step 5 or 8 against the same texts/cases makes
-**0** new API requests — confirmed in this project repeatedly (e.g. RAG-001b's re-runs, EVAL-003a's resume). The
-committed `data/chroma/` index and `data/evaluation/results/` runs are git-ignored (per-machine, rebuildable); a
-fresh clone starts with neither and must run step 5 (embedding quota) and, to reproduce the evaluation report, step 8
-against the frozen question set (`data/evaluation/questions/eval-v1.jsonl`, tag `eval-freeze-v1`).
+**0** new API requests — confirmed in this project repeatedly (e.g. RAG-001b's re-runs, EVAL-003a's resume). What is
+committed and what is not: `data/evaluation/results/` (21 files: the run files, tables and summaries behind the
+evaluation and experiment reports) **is tracked**; only the contents of `data/chroma/` and all of `data/cache/` are
+git-ignored (per-machine, rebuildable). A fresh clone therefore has the run files but no index and no cache: it must
+run step 5 (embedding quota) to use the assistant. Step 8 is only needed to produce *new* runs; the reports can be
+regenerated from the committed run files with `make_tables.py` and `compare_arms.py` (last two lines of step 8).
 
 **Real gap found and fixed during QC-001's fresh-clone test:** `pip install -r requirements.txt` alone leaves
 `knowledge_assistant` unimportable (no editable install) and does not install `pytest` (it is a `pyproject.toml`
@@ -181,7 +187,8 @@ built — tag `eval-freeze-v1`, [snapshot](docs/snapshots/evaluation/eval-v1.md)
 - **Citation quality:** every answered answerable record cited the right source (`source_precision` 1.000,
   `presence_rate` 1.000, n=58); `section_precision` 0.977 (3 records cite the right document, wrong section);
   judge-checked support `support_rate` 0.974 (n=57) ([§ Citation metrics](docs/reports/epics/EPIC-05-evaluation.md#citation-metrics)).
-- **Latency:** answer `generate` p50 1.5 s / p95 36.6 s / max 42.4 s across 72 calls — the tail is this project's own
+- **Latency:** answer `generate` p50 1.5 s / p95 36.6 s / max 42.4 s across 61 generate calls (72 scored records; the
+  other 11 made no generate call) — the tail is this project's own
   client-side per-minute request throttle queuing behind the free-tier rate cap, not provider slowness (verified
   against raw `throttle_wait` fields, not assumed) ([§ Latency](docs/reports/epics/EPIC-05-evaluation.md#latency)).
 - **Judge reliability (owner spot-check, n=10, seed 42, stratified):** **8/10** rule-based agreement (Cohen's
@@ -216,8 +223,8 @@ discordant pairs; 95% CI by paired bootstrap, 10,000 resamples).
 **Why they differ / what was learned:** header-aware chunking (A) keeps a section, its code and its explanation in
 one chunk (3% fence cuts); fixed-size chunking (B) cuts mid-block 14× as often (45%), which sometimes separates an
 explanation from its code or a required fact from its citing chunk — but this shows up in chunk-level and
-evidence-retrieval metrics, not reliably in final answer accuracy at n=31 (too few disagreements: with 3 or fewer
-discordant pairs, McNemar cannot reach p < 0.05 even if every one favoured the same arm — [see the report's
+evidence-retrieval metrics, not reliably in final answer accuracy at n=31 (too few disagreements: accuracy has 5
+discordant pairs, and even a 5–0 split would give McNemar p = 0.0625 — [see the report's
 explanation](docs/reports/epics/EPIC-06-experiment.md#2-how-each-arm-was-evaluated)).
 
 **Worked failure case — Q-EVAL-001** (gate refusal only on Arm A): both arms retrieve the exact same section
@@ -242,9 +249,9 @@ though it does count toward the brief's "automated evaluation" bonus category.
 
 ## AI usage
 
-Built with Claude Code (CLI) across every task, plus a separate planning-assistant session for early design
-consultation (chunking; see `docs/plans/chunking-consultation-handoff.md`) and GitNexus for impact analysis and
-change detection. Full tool table, per-task log of what AI did and got wrong (with how each mistake was found and
+Built with Claude Code (CLI) across every task; a planning assistant (Claude in the Claude desktop app, Cowork) broke
+the brief into tasks, wrote the task prompts, addenda and verify prompts, analysed reports and verifier verdicts, and
+advised the owner, who made every final call; GitNexus was used for impact analysis and change detection. Full tool table, per-task log of what AI did and got wrong (with how each mistake was found and
 fixed), and the "with 7 more days" plan: **[`AI_WORKLOG.md`](AI_WORKLOG.md)**.
 
 ## Completed work
@@ -264,11 +271,14 @@ All planned epics reached their exit gates (`docs/plans/master-plan.md` §4, `do
 - **EPIC-07 Final QC** (this document) — README, `AI_WORKLOG.md`, traceability, final checks, demo script (G7, see
   [final report](docs/reports/execution/QC-001.md)).
 
-Every task was independently verified in a fresh session (`agents/prompts/99-VERIFY.md`) before the next task
-started; verdicts and fix history are in [`docs/plans/task-ledger.md`](docs/plans/task-ledger.md).
+Each task was independently verified in a fresh session (`agents/prompts/99-VERIFY.md`), with two exceptions:
+QC-001 started while ledger rows 11 and 12 were not yet plain `verified`, and QC-001 itself is under re-verify.
+Verdicts and fix history are in [`docs/plans/task-ledger.md`](docs/plans/task-ledger.md).
 
 ## Limitations
 
+- **Not yet done:** the demo video is not recorded (script only), and the QC-001 work is not on `main` — PR #22
+  (`qc-001` → `dev`) and PR #23 (`dev` → `main`) are unmerged drafts awaiting re-verify and the owner's approval.
 - **n = 36** evaluation questions (32 answerable + 4 unanswerable). Each individual case is worth roughly 1.6–2.8
   percentage points of a headline rate — small movements can be one or two cases flipping, not a real capability
   change ([detail](docs/reports/epics/EPIC-05-evaluation.md#measurement-limitations)).

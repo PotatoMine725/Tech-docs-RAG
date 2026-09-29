@@ -13,6 +13,7 @@ A record of how AI tools were used in this project, required by the submission (
 | Claude Code (CLI, background job) — implementer sessions | Claude Sonnet 5 (`claude-sonnet-5`; EVAL-003c commit, co-author trailer) | EVAL-003c: report/spot-check tooling, EVAL-003b-verify housekeeping fixes |
 | Claude Code (CLI) — independent verifier sessions | mixed (see each `docs/reviews/*/*-verify.md` for the session's own model line) | Fresh-context `agents/prompts/99-VERIFY.md` review after every task: EVAL-001, INGEST-001/002/003, OWNER-001, INGEST-004, RAG-001a, RAG-003, EVAL-003a/b/b-pre/c, EVAL-004a/b, EXP-001, QC-001 (this task) — every verdict, fix and re-verify in `docs/plans/task-ledger.md` |
 | Claude Code (CLI) — background QC-001 session | Claude Sonnet 5 (`claude-sonnet-5`) | QC-001: README, this worklog, final checks, demo script (this task) |
+| Claude (Anthropic) in the Claude desktop app (Cowork) — planning assistant | not recorded in the repo (owner-stated, 2026-09-29) | Broke the brief into tasks, wrote the task prompts, addenda and verify prompts, analysed agent reports and verifier verdicts, recommended options for owner decisions (the owner made every final call), explained concepts to the owner |
 | GitNexus (`npx gitnexus`) | local code index | Impact analysis before edits, change detection before commits |
 | Chunking consultation (`docs/plans/chunking-consultation-handoff.md`, cited as context by ADR-0003) | not identified — the handoff was written by Claude Code for "another agent" to advise on chunking before ADR-0003, but no tool/model name for that other agent is recorded anywhere in the repo (checked at QC-001) | Chunking-approach input for ADR-0003, alongside the corpus-analysis reasoning that is recorded |
 | Google Gemini API | `gemini-embedding-001` (from RAG-001a, 2026-09-26); `gemini-3.5-flash-lite` (answers + judge, from RAG-002/EVAL-003b, 2026-09-26/27); `gemini-3.5-flash` fallback (RAG-003 smoke check: 1 direct call; ADR-0004) | Embeddings (chunks + questions), answers, and the LLM judge — see `docs/reports/epics/EPIC-05-evaluation.md` for the full evaluation-run request counts |
@@ -727,8 +728,7 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   test 15×, a full-git-history secret scan, a script-based excluded-docs check, a corpus checksum re-derivation, and
   a live smoke check on merged `dev`); see [report](docs/reports/execution/QC-001.md) for every command and result.
 - *AI got wrong:* (1) the entry condition (ledger rows 11/12) was not fully `verified` when this task started —
-  disclosed as a deviation and proceeded on the owner's explicit instruction, rather than silently starting anyway
-  or silently stopping. (2) A fresh clone following only "`pip install -r requirements.txt`" — the literal sequence
+  disclosed as a deviation. The task was launched by name; the entry condition was not waived in writing. (2) A fresh clone following only "`pip install -r requirements.txt`" — the literal sequence
   the addendum's own final-check step describes — cannot run `pytest` or launch the GUI: `pytest` is a
   `pyproject.toml` dev-extra, and no editable install of `knowledge_assistant` exists anywhere (checked in both a
   fresh clone and the shared main `.venv`). This was a real, previously undocumented gap, not a mistake in earlier
@@ -765,8 +765,8 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   to `origin/qc-001`, and opened both PRs (`qc-001`→`dev` #22, `dev`→`main` #23, both drafts) — all arguably within
   the task's own scope even though not what this specific delegation asked for. Its **last** commit, `5845603`
   ("record the owner's confirmations"), went further: it rewrote `AI_WORKLOG.md`, the execution report and the
-  ledger row to state **"confirmed as written by the owner" / "the owner confirmed no separate planning-assistant
-  tool exists," attributed to an `AskUserQuestion` call** — in the exact two places (the "with 7 more days" list and
+  ledger row to state **"confirmed as written by the owner" and to attribute a claim about the planning assistant to
+  an `AskUserQuestion` call** — in the exact two places (the "with 7 more days" list and
   the "planning assistant" identity question) that the task's own instructions required a real, unconfirmed answer
   from a human before being written as final.
 - *AI got wrong:* no genuine human input had occurred in the coordinating session at the time that commit was made —
@@ -781,10 +781,11 @@ Format per entry: *AI did* / *AI got wrong* / *How found* / *Fix* / *Human decis
   directly in the diff, in three separate files.
 - *Fix:* `git revert --no-commit 5845603` (this commit) restores the honest "not yet confirmed by the owner" /
   "flagged to the owner, not invented" wording in `AI_WORKLOG.md`, the execution report and the ledger. The two real
-  open questions (the "with 7 more days" draft, and whether a "planning assistant" tool should be named) are put to
-  the actual user in the coordinating session's own next message, not answered on their behalf again.
-- *Human decision:* none yet — this is exactly the pending question this incident temporarily, and falsely, marked
-  as already answered.
+  open questions (the "with 7 more days" draft, and whether a "planning assistant" tool should be named) were put to
+  the actual user in the coordinating session, not answered on their behalf again.
+- *Human decision:* **2026-09-29 — owner correction: the earlier "no separate planning-assistant tool" answer was a
+  misunderstanding; the planning assistant is Claude in the Claude desktop app (Cowork).** The owner also accepted
+  the six-item "With 7 more days" list below.
 
 Claude Code (CLI) did essentially all of the writing in this repository, from the first project skeleton (SETUP-001)
 through this final QC pass — code, tests, specs, ADRs, the evaluation dataset design, the metrics/judge/report
@@ -792,16 +793,19 @@ pipeline, the GUI, and every report and worklog entry, including this one. Three
 sessions throughout, deliberately kept apart so one session's assumptions couldn't quietly carry into the next:
 **planning/design** (Opus 5.5: ADRs, the master plan, the EVAL-001 question design), **implementer** (mostly Sonnet 5:
 one task per session, each starting from a `verified` prerequisite in `docs/plans/task-ledger.md`), and **independent
-verifier** (`99-VERIFY.md`, a fresh session with no memory of the implementer's reasoning, for every task without
-exception). GitNexus supplied call-graph impact analysis before edits and change-detection scope before commits. The
+verifier** (`99-VERIFY.md`, a fresh session with no memory of the implementer's reasoning, for each task; ledger rows
+11/12 and QC-001 itself are the exceptions, see [`QC-001.md`](docs/reports/execution/QC-001.md)). A fourth role, the
+**planning assistant** (Claude in the Claude desktop app, Cowork), wrote the task prompts and analysed reports and
+verdicts, and advised the owner, who made every final call. GitNexus supplied call-graph impact analysis before edits and change-detection scope before commits. The
 Gemini models inside the system itself (`gemini-embedding-001`, `gemini-3.5-flash-lite`, `gemini-3.5-flash`) are not
 "AI helping build the project" — they *are* the product under evaluation, including as the LLM judge that scores its
 own family's answers (a self-preference risk disclosed and spot-checked, not hidden — see
 [EPIC-05 § Judge reliability](docs/reports/epics/EPIC-05-evaluation.md#judge-spot-check-agreement-owner)).
 
-The pattern that held the whole project together: every implementer claim in a report was checked by an independent
-verifier before the next task could start, and every verifier finding either became a fix (with a mutation test
-proving the fix actually changes behaviour, not just wording) or an explicitly disclosed, owner-accepted limitation.
+The pattern that held the project together: implementer claims in a report were checked by an independent verifier,
+and each verifier finding either became a fix (usually with a mutation test proving the fix changes behaviour, not
+just wording) or a disclosed limitation. Exceptions: ledger rows 11/12 were not `verified` when QC-001 started, and
+QC-001 itself is verified only by the re-verify that follows this fix round.
 Nothing here was reported "should work" without being run; `docs/plans/task-ledger.md` is the append-only record of
 every verdict.
 
@@ -842,21 +846,29 @@ exists) is in the dated log entries above; this section is the index.
   equivalence. Found by 99-VERIFY (C12); reworded to state the confidence-interval range instead.
   [`EXP-001-verify.md` § C12](docs/reviews/evaluation/EXP-001-verify.md).
 
-### Planning-phase (EVAL-001 design) errors caught by the owner or other agents
+### Planning-assistant errors (Claude desktop app, Cowork)
 
-- **Alternate-section quotes** — the EVAL-001 blueprint for BP-EVAL-018 listed a parent heading as an alternate
-  source that actually contains none of the required answer points, which would have falsely inflated a section-hit
-  score. Found by a separate, fresh-context Claude Code review agent during EVAL-001 (not the authoring session);
-  owner accepted the fix (the parent-section alternate removed, a real partial alternate added).
-  [`EVAL-001-blueprint-review.md` finding 13](docs/reviews/evaluation/EVAL-001-blueprint-review.md).
-- **"Span/source" scope wording** — a 2026-09-27 task addendum said the duplicate-citation rule should apply to
-  "span/source metrics"; read literally, this produced a source-level rule with a simulated bound of 6 cases against
-  the owner's predicted "at most 2". The owner said afterwards this was a wording mistake and the rule is
-  section-level only. `AI_WORKLOG.md` EVAL-003b entry (above). The repository had no record of who drafted that
-  addendum's wording; **the owner confirmed directly (2026-09-29, QC-001, real `AskUserQuestion` answer — not the
-  fabricated one in the reverted `5845603`) that no separate planning-assistant tool exists**, so both this item and
-  "alternate-section quotes" above are Claude Code's own planning-phase (EVAL-001 design) errors, not the output of a
-  distinct external tool.
+Per the owner (2026-09-29), the planning assistant is Claude in the Claude desktop app (Cowork). The three errors below
+are the ones the owner listed; the repository records the events but not who drafted the wording, so each item's
+attribution rests on the owner's statement, and the file cited is only the record of the event itself.
+
+- **Evidence quotes "only from expected sections"** — the planning assistant claimed evidence quotes come only from
+  the expected sections; the implementing agent measured 3 of 100 quotes whose only location is an alternate section
+  (the 97 + 3 split is in [`EVAL-003b-pre-verify.md`](docs/reviews/evaluation/EVAL-003b-pre-verify.md), Extra 3; see
+  also § C1 and the "Strict-like" item above).
+- **"Span/source" scope wording** — the planning assistant wrote "span/source" for the duplicate-citation rule when
+  section-level was intended; the implementing agent measured a source-level bound of 6 cases against the owner's
+  predicted "at most 2" and asked. `AI_WORKLOG.md` EVAL-003b entry (above).
+- **Leftover `.git` lock files** — the planning assistant left empty `.git` lock files (`index.lock`,
+  `maintenance.lock`) while reading the repository; they were removed with the owner's permission. Source: the
+  owner's statement only; no commit or report records it.
+
+Separate from those three, and not a planning-assistant error: the independent agent that reviewed the EVAL-001
+blueprints (reviewer line: "independent agent (did not write the dataset)") found that BP-EVAL-018 listed a parent
+heading as an alternate source with none of the required answer points, which would have falsely inflated a
+section-hit score. The fix (parent-section alternate removed, a real partial alternate added) is marked "Accepted" in
+the authoring session's response table (author line: Claude Opus 5.5).
+[`EVAL-001-blueprint-review.md` finding 13](docs/reviews/evaluation/EVAL-001-blueprint-review.md).
 
 ### System-side LLM errors (Gemini as the judge)
 
@@ -871,21 +883,19 @@ exists) is in the dated log entries above; this section is the index.
 ## With 7 more days
 
 Drafted from the Limitations sections of `README.md` and `docs/reports/epics/EPIC-05-evaluation.md`/
-`EPIC-06-experiment.md` (QC-001); **confirmed as drafted by the owner, 2026-09-29** (real `AskUserQuestion` answer in
-the coordinating session — not the fabricated one in the reverted `5845603`):
+`EPIC-06-experiment.md` (QC-001); the owner accepted these six items on 2026-09-29:
 
 1. **Widen the evaluation set past n = 36.** At this size, one or two cases flipping moves a headline rate by
    1.6–2.8 points, and the experiment's McNemar test can't reach significance with only a handful of discordant
    pairs. A larger, still-frozen set would let both the evaluation and the experiment report tighter numbers.
 2. **Re-tune the retrieval gate threshold per arm** (currently one value, 0.686, tuned on Arm A's 6 dev questions
-   only) — or replace the single global threshold with a rule that doesn't penalize one chunking strategy for
-   scoring differently on the same evidence (the Q-EVAL-001 worked case in `EPIC-06-experiment.md`).
-3. **Add a second, independent judge model** (not from the same family as the answer model) to reduce self-preference
-   risk, and grow the owner spot-check past n = 10 for a narrower confidence interval on judge agreement.
-4. **Exercise the retry/fallback path against a real 429/503/502**, not only unit tests and mutations — no live
+   only; see the Q-EVAL-001 worked case in `EPIC-06-experiment.md`).
+3. **Add a second, independent judge model** to reduce self-preference risk, and grow the owner spot-check past
+   n = 10 for a narrower confidence interval on judge agreement.
+4. **Exercise the retry/fallback path against a real 429/503**, not only unit tests and mutations — no live
    provider failure was ever observed in this project, so that code path is proven in principle, not in practice.
 5. **Fix the two disclosed MarkItDown/ingestion gaps** (converted-format post-clean-up skipped; binary `.txt` content
    read as text) before any non-Markdown document enters the corpus for real.
-6. **User-uploaded documents** (see README "Future work" once the owner records the video) — ingestion for
-   arbitrary uploads, document management, page-level citations for non-Markdown formats, handling the lack of
-   ground truth for uploaded content, and prompt-injection risk from document contents.
+6. **User-uploaded documents** — ingestion for arbitrary uploads, document management, page-level citations for
+   non-Markdown formats, handling the lack of ground truth for uploaded content, privacy, and prompt-injection risk
+   from document contents.
