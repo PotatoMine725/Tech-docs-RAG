@@ -325,3 +325,56 @@ needs an owner decision, ask with `AskUserQuestion` in the foreground and record
     `.claude/worktrees/qc-001/.env` with that worktree; 15 (now 16 with `verify-qc-001`) stale worktrees remain for cleanup.
 
 After the fixes: re-run `99-VERIFY.md` for QC-001 (re-verify): link/path scripts, `git grep` checks above, the literal README steps in a fresh clone, `pytest` 866/1.
+
+---
+
+## Re-verify addendum (2026-09-29) — limited: the 11 fix items + owner additions A–D
+
+Scope: fix commit `432c4fc` on `qc-001` (PR #22), the only commit after `bfd568d`. Own worktree `.claude/worktrees/reverify-qc-001` (detached
+at `432c4fc`), **zero Gemini requests**, `.env` never opened, `OPENBLAS_NUM_THREADS=1`. `git diff --name-only bfd568d..HEAD` = 8 `.md` files, nothing
+else (docs-only). The owner's additions A–D are the "Owner additions to the QC-001 fix prompt" block in the fix-round session's first message
+(A planning assistant, B owner attributions + exactly six 7-more-days items, C OD-10, D one commit then stop). The owner's second message of
+this re-verify (7-more-days list kept as is; owner-run fresh-clone result) is recorded below and is not counted as A–D.
+
+### Verdict: **ACCEPT**
+
+| # | Item | Result | Evidence |
+|---|---|---|---|
+| 1 | Planning assistant; "no separate planning-assistant" removed; tools row | **PASS** | `git grep -i "no separate planning" -- . ':!docs/reviews'` gives 2 hits, `AI_WORKLOG.md:749` and `:786`, both *quotations inside the owner-correction entry*. Fix item 1(c) prescribed that wording, so the review's own "→ 0" check contradicts itself; the claim is no longer asserted anywhere. Tools row at `AI_WORKLOG.md:16` ("Claude … in the Claude desktop app (Cowork) — planning assistant", "owner-stated, 2026-09-29"); "Cowork" is present in README, AI_WORKLOG, report, `final.md`, ledger. The three errors are listed under "Planning-assistant errors"; the lock-file item is sourced to the owner's statement only, as required |
+| 2 | Finding-13 attribution | **PASS** | "owner accepted" and "Claude Code review agent" are gone; the text now says the reviewer line is "independent agent" and that "Accepted" is the authoring session's response column (`EVAL-001-blueprint-review.md`), and the item is no longer a planning-assistant entry |
+| 3 | 7-more-days = the six accepted items | **PASS** | `AI_WORKLOG.md:883-905` against the accepted text (section 4, F-08): privacy present, 502 removed, "or replace…" and "not from the same family" removed, the "once the owner records the video" clause removed. The owner's second message confirms the list is kept as is |
+| 4 | README corrections (a–g) | **PASS** | (a) `git ls-files data/evaluation/results` = 21, text says tracked, self-contradiction gone; (b) 5 discordant pairs, 5–0 gives p = 0.0625 (`EPIC-06:107-111`); (c) "61 generate calls (72 scored records)": recomputed from the two eval `records.jsonl`, 72 records, `llm_called` true 61 / false 11, and `EPIC-05:204` `main generate \| 61`; (d) Linux wording; (e) three activation lines; (f) `Status:` softened plus a "Not yet done" bullet; (g) "two exceptions" wording. Claim "reports can be regenerated from the committed run files": `make_tables.py` and `compare_arms.py` import nothing Gemini/embedding; I ran both on the committed runs and `git status` stayed clean (byte-identical output) |
+| 5 | OD-10 | **PASS** | `master-plan.md:288`: `ba5aa59` = 2026-09-26 19:51:16 +0700, `eval-freeze-v1` 07:31:08 (my `git show -s`); the false "predates" clause is gone. "In place before any eval-split run": the first eval-split run is 2026-09-28 |
+| 6 | brief-traceability | **PASS** | `infrastructure/embeddings/` (exists); groundedness "0.965 overall (55/57); per-arm 0.926 / 1.000"; both over-claims removed; 7-more-days row "confirmed by the owner 2026-09-29"; demo-video ❌ and "not on `main`" rows added |
+| 7 | Report / ledger / `final.md` consistency | **PASS** | no stale `placeholder pending`, `17×`, `explicit instruction` outside quoted history (`AI_WORKLOG.md:755` describes the finding); `final.md:28` no longer ticks "every row met"; "Most of the … entries" replaces "nearly every"; 18 invocations = 15 flaky runs + 2 + 1, one definition |
+| 8 | Demo script | **PASS** | smoke ≠ GUI corrected (`:36-37`, `:114`); plan location `AI_WORKLOG.md`; "Arm A's dev scores"; "would have missed" gone; sections 20+20+90+40+50+50+20 = 290 s = 4:50 |
+| 9 | PR bodies | **PASS** | `gh pr view` (read only): #22 says "launched by name, entry condition not waived in writing", no "explicit instruction"; #23 (draft, open) ticks the two answered owner items and keeps the rest open. PR #23 was read, not touched |
+| 10 | `.env.example` | **PASS** | option 2 taken: `QC-001.md:252-254` states defaults live in `config.py`; file unchanged |
+| 11 | Owner-side reminders | n/a | not fixes; unchanged |
+| A–D | Owner additions | **PASS** | A ✓ (row, three errors, all 6 places), B ✓, C ✓ (`git show -s` dates cited in the edit), D ✓ (one commit, `432c4fc`) |
+
+**Owner-attribution sweep.** Every added line of `bfd568d..HEAD` containing "owner" is backed by (a) the real `AskUserQuestion` answer of 02:15:22Z (six 7-more-days
+items accepted), (b) the owner's 2026-09-29 statements (planning-assistant correction, the three errors, the tools-row wording, and the lock-file details, all in the
+fix-round session's first message, owner addition A), or (c) an existing repo record (rows 7–11 of section 1). No unsourced "owner accepted/decided/confirmed" line remains.
+
+**Numbers.** 5 discordant pairs ✓; 61 generate calls ✓ (the re-verify instruction said "61 judge calls"; the README's 61 is *generate* calls, the judge count is a separate
+number and the README does not use 61 for it); committed-results statement ✓ (21 tracked; `data/chroma/` contents and `data/cache/` ignored).
+
+**Links.** README: 34 relative links, 0 bad. Other edited files: 124 links, 1 bad, `AI_WORKLOG.md:236` `RAG-001a-verify.md#…utc7` (F-18, already on `dev`, not a fix-round regression).
+
+**Activation command.** Tested with a fresh `python -m venv` (no installs). PowerShell `.venv\Scripts\Activate.ps1`: `python` and `VIRTUAL_ENV` point to the venv ✓.
+Git Bash `source .venv/Scripts/activate`: `python` resolves to the venv and `VIRTUAL_ENV` is set ✓ (this tool's Git Bash also prints `uname: command not found`, an
+environment quirk of the tool shell, not the README). The Linux/Mac line `source .venv/bin/activate` **could not be tested here** (Windows only): unverified.
+
+**Owner-run evidence (owner's second message, 2026-09-29), recorded in `QC-001.md` and the traceability quality row as owner-reported, not AI-run:** README PowerShell
+steps in a fresh clone of `qc-001` on Windows; install and activation worked verbatim, under 1 minute (warm pip cache), offline tests all passed, no errors. No test
+count or other timings were given, so none is written. This closes the fresh-clone "partial" item (A9/E).
+
+**Residual, non-blocking.** (1) The Linux activation line is untested. (2) F-18, a pre-existing broken anchor on `dev`. (3) PR #22's body says "Blocked on its own
+`99-VERIFY` — do not merge until verified": true until this addendum, stale after the merge. (4) `.env.example` completeness (F-16) is resolved by documentation only.
+(5) Install time of the AI's own fix-round re-run is not recorded (stated in the report).
+
+**Not re-run in this pass** (docs-only diff, covered by the first review): secret scan, corpus checksums, eval hashes, excluded-document scan, flaky-test runs.
+The suite is run on `dev` after the merge.
+
+Ledger row 14 becomes `verified` in the same commit. PR #22 is merged into `dev` with a merge commit; **PR #23 untouched, no tag** (the owner's step).

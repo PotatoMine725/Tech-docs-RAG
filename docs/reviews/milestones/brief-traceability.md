@@ -85,7 +85,7 @@ written, or listed as a limitation instead of a false "met".
 | Demo video ≤ 5 minutes | ❌ not done — script done; recording is the owner's step | [`docs/reports/milestones/demo-video-script.md`](../../reports/milestones/demo-video-script.md) |
 | `AI_WORKLOG.md`: tools, how AI helped, incorrect outputs + fixes, 7 more days | ✅ | [`AI_WORKLOG.md`](../../../AI_WORKLOG.md) — filled at QC-001; "7 more days" confirmed by the owner 2026-09-29 |
 | Originality (can explain everything, no fake functionality) | ✅ | Every task's execution report has an "Explain it back" section (see `docs/reports/execution/*.md`); this QC pass ran the whole pipeline live rather than trusting prior claims |
-| Quality (small and working beats large and not understood) | ✅ | 866 offline tests, fresh-clone install verified end to end (QC-001); known gaps are listed in [`README.md`](../../../README.md) § Limitations |
+| Quality (small and working beats large and not understood) | ✅ | 866 offline tests, fresh-clone install verified end to end (QC-001; owner-run on Windows/PowerShell in a fresh clone of `qc-001`, 2026-09-29: install and activation worked verbatim, under 1 minute with a warm pip cache, offline tests all passed, no errors — [report](../../reports/execution/QC-001.md)); known gaps are listed in [`README.md`](../../../README.md) § Limitations |
 
 ## Notes on this file's own honesty
 
