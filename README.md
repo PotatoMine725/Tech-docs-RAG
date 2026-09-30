@@ -7,7 +7,7 @@ project also **measures** how well it works — a 36-question evaluation set sco
 latency quality — and runs a **controlled experiment** comparing two chunking strategies with statistical tests, not
 just a claim.
 
-**Status:** feature-complete and evaluated; submission pending — the demo video is not yet recorded and the QC PR (#22) is merged on `main`. Final QC checks: [`docs/reports/execution/QC-001.md`](docs/reports/execution/QC-001.md); final report: [`docs/reports/milestones/final.md`](docs/reports/milestones/final.md).
+**Status:** feature-complete and evaluated; the QC work (PR #22 → `dev`, PR #23 `dev` → `main`) is merged on `main`, and the demo video is recorded ([watch](https://drive.google.com/file/d/13ErbcoNjaPEP2Iwn0ny1NXbF0bItY5Qn/view?usp=sharing)). Final QC checks: [`docs/reports/execution/QC-001.md`](docs/reports/execution/QC-001.md); final report: [`docs/reports/milestones/final.md`](docs/reports/milestones/final.md).
 
 ## Problem
 
@@ -272,13 +272,13 @@ All planned epics reached their exit gates (`docs/plans/master-plan.md` §4, `do
   [final report](docs/reports/execution/QC-001.md)).
 
 Each task was independently verified in a fresh session (`agents/prompts/99-VERIFY.md`), with two exceptions:
-QC-001 started while ledger rows 11 and 12 were not yet plain `verified`, and QC-001 itself is under re-verify.
+QC-001 started while ledger rows 11 and 12 were not yet plain `verified`, and QC-001 itself passed re-verify (ACCEPT).
 Verdicts and fix history are in [`docs/plans/task-ledger.md`](docs/plans/task-ledger.md).
 
 ## Limitations
 
-- **Not yet done:** the demo video is not recorded (script only), and the QC-001 work is not on `main` — PR #22
-  (`qc-001` → `dev`) and PR #23 (`dev` → `main`) are unmerged drafts awaiting re-verify and the owner's approval.
+- **Submission status:** the QC-001 work is on `main` — PR #22 (`qc-001` → `dev`) and PR #23 (`dev` → `main`) are
+  merged — and the demo video is recorded (link under "Working product").
 - **n = 36** evaluation questions (32 answerable + 4 unanswerable). Each individual case is worth roughly 1.6–2.8
   percentage points of a headline rate — small movements can be one or two cases flipping, not a real capability
   change ([detail](docs/reports/epics/EPIC-05-evaluation.md#measurement-limitations)).
@@ -332,7 +332,7 @@ This is a **desktop application**, not a hosted web service — there is no publ
 - **Running it yourself:** see "How to run" above (`python scripts/ask.py ...` for the CLI, `python -m
   knowledge_assistant.presentation.desktop.app` for the GUI).
 - **Demo video** (≤ 5 min): script at [`docs/reports/milestones/demo-video-script.md`](docs/reports/milestones/demo-video-script.md);
-  video link: _added here once the owner records it_.
+  recorded video: [Google Drive](https://drive.google.com/file/d/13ErbcoNjaPEP2Iwn0ny1NXbF0bItY5Qn/view?usp=sharing).
 - **GitHub repository:** [github.com/PotatoMine725/Tech-docs-RAG](https://github.com/PotatoMine725/Tech-docs-RAG).
 
 ## Repo map
