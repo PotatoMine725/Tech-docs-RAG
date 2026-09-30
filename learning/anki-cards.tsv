@@ -1,0 +1,258 @@
+#separator:tab
+#html:true
+#tags column:3
+#columns:Front	Back	Tags
+<code>import</code> / module / package	Cách Python nạp code từ file/thư mục khác; package là thư mục có <code>__init__.py</code><br><small>01 §1.1</small>	glossary group_A
+type hint	Chú thích kiểu (<code>str</code>, <code>list[int]</code>, <code>X \| None</code>) — <b>không</b> bị ép lúc chạy<br><small>01 §1.2</small>	glossary group_A
+<code>@dataclass(frozen=True)</code>	Class dữ liệu bất biến, gần <code>record</code> của C#<br><small>01 §1.3</small>	glossary group_A
+f-string	Chuỗi nội suy <code>f"{x}"</code>; <code>!r</code> in bản <code>repr</code><br><small>01 §1.4</small>	glossary group_A
+list / dict / tuple / set	Bốn kiểu tập hợp; <code>dict</code> giữ thứ tự chèn<br><small>01 §1.5</small>	glossary group_A
+comprehension	Biểu thức tạo list/dict/set gọn: <code>[x for x in xs if ...]</code><br><small>01 §1.6</small>	glossary group_A
+<code>try/except</code>, <code>raise ... from</code>	Xử lý lỗi; <code>from</code> giữ nguyên lỗi gốc (như <code>InnerException</code>)<br><small>01 §1.7</small>	glossary group_A
+<code>pathlib.Path</code>	Đường dẫn dạng object; <code>/</code> để ghép<br><small>01 §1.8</small>	glossary group_A
+class, <code>__init__</code>, <code>self</code>, <code>_private</code>	Định nghĩa class; <code>_</code> là quy ước "nội bộ"<br><small>01 §2.1</small>	glossary group_A
+<code>Protocol</code>	Interface kiểu structural: khớp theo hình dạng, không cần kế thừa<br><small>01 §2.2</small>	glossary group_A
+dependency as function	Truyền hàm (<code>clock</code>, <code>sleep</code>, <code>jitter</code>) làm phụ thuộc để test xác định<br><small>01 §2.3</small>	glossary group_A
+keyword-only argument, <code>*args</code>, <code>**kwargs</code>	Tham số bắt buộc gọi theo tên; gom tham số thừa<br><small>01 §2.4</small>	glossary group_A
+context manager (<code>with</code>)	Đối tượng có <code>__enter__/__exit__</code>; tương đương <code>using</code><br><small>01 §2.5</small>	glossary group_A
+<code>Enum</code> trộn <code>str</code>	Hằng có tên, so sánh được với chuỗi<br><small>01 §2.6</small>	glossary group_A
+<code>lambda</code>, <code>dict.fromkeys</code>	Hàm nhỏ; <code>dict.fromkeys</code> khử trùng lặp <b>giữ thứ tự</b><br><small>01 §2.8</small>	glossary group_A
+regex, lookahead/lookbehind	Biểu thức chính quy; kiểm điều kiện xung quanh mà không tiêu thụ ký tự<br><small>01 §3.1</small>	glossary group_A
+<code>struct</code>, <code>bytes</code>	Đóng gói/giải nén dữ liệu nhị phân (vector float32)<br><small>01 §3.2</small>	glossary group_A
+<code>Fraction</code>, <code>math.comb</code>	Số hữu tỉ chính xác; tổ hợp — tránh sai số float<br><small>01 §3.3</small>	glossary group_A
+<code>__post_init__</code>	Kiểm tra bất biến ngay sau khi dựng dataclass<br><small>01 §3.4</small>	glossary group_A
+<code>getattr(obj, name, default)</code>	Đọc thuộc tính với giá trị mặc định (dùng cho object của SDK)<br><small>01 §3.5</small>	glossary group_A
+<code>from __future__ import annotations</code>	Hoãn đánh giá chú thích kiểu (tham chiếu tới class chưa định nghĩa)<br><small>01 §3.6</small>	glossary group_A
+reading recipe / decoder table	Quy trình 6 bước + bảng ký hiệu để <b>đọc</b> code Python lạ<br><small>01b §1.1</small>	glossary group_A
+virtual environment (<code>.venv</code>)	Bản sao Python + thư viện riêng cho từng dự án<br><small>02 §1.1</small>	glossary group_A
+<code>requirements.txt</code>	Danh sách phụ thuộc "phẳng" với ràng buộc phiên bản<br><small>02 §1.2</small>	glossary group_A
+<code>pyproject.toml</code>	Metadata dự án + phụ thuộc + cấu hình công cụ (như <code>.csproj</code>)<br><small>02 §1.3</small>	glossary group_A
+extras, editable install (<code>-e</code>)	Nhóm phụ thuộc tuỳ chọn; cài liên kết tới thư mục nguồn<br><small>02 §2.1</small>	glossary group_A
+src layout, <code>sys.path</code>, <code>PYTHONPATH</code>	Cách Python tìm module; mã nằm trong <code>src/</code><br><small>02 §2.2</small>	glossary group_A
+<code>python -m</code>	Chạy module theo tên (bắt buộc với import tương đối)<br><small>02 §2.3</small>	glossary group_A
+environment variable, <code>.env</code>, <code>python-dotenv</code>	Cấu hình/bí mật ngoài code; <code>load_dotenv</code> mặc định <b>không ghi đè</b> biến đã có<br><small>02 §2.4</small>	glossary group_A
+<code>PROJECT_ROOT</code>	Neo đường dẫn vào gốc repo, không phụ thuộc thư mục làm việc<br><small>02 §2.5</small>	glossary group_A
+pytest config, marker <code>gemini</code>	<code>addopts = "-m 'not gemini'"</code> loại test cần API thật<br><small>02 §3.1</small>	glossary group_A
+<code>OPENBLAS_NUM_THREADS</code>	Giới hạn luồng của thư viện đại số tuyến tính trên máy ít RAM<br><small>02 §3.2</small>	glossary group_A
+layered/clean architecture, dependency rule	presentation → application → core ← infrastructure; core không import thư viện ngoài<br><small>03 §1.1</small>	glossary group_B
+ADR (Architecture Decision Record)	Bản ghi một quyết định kiến trúc và lý do<br><small>03 §1.3</small>	glossary group_B
+port / adapter	Port = <code>Protocol</code> trong core; adapter = cài đặt trong infrastructure<br><small>03 §2.1</small>	glossary group_B
+Decorator pattern (<code>CachingEmbedder</code>)	Bọc một <code>Embedder</code> để thêm cache mà không đổi interface<br><small>03 §2.2</small>	glossary group_B
+composition root	Nơi duy nhất "lắp" các mảnh với nhau (<code>composition.py</code>)<br><small>03 §2.3</small>	glossary group_B
+error boundary	Lỗi của nhà cung cấp không rời infrastructure; core chỉ thấy lỗi của mình<br><small>03 §2.4</small>	glossary group_B
+architecture test	Test dùng <code>ast</code> kiểm luật import giữa các tầng<br><small>03 §2.5</small>	glossary group_B
+domain model	Đối tượng nghiệp vụ độc lập định dạng (<code>Document</code>, <code>Citation</code>…)<br><small>03 §2.6</small>	glossary group_B
+MVVM	View ↔ ViewModel ↔ Port; GUI không chứa logic nghiệp vụ<br><small>03 §3.1</small>	glossary group_B
+<code>QThreadPool</code> / <code>QRunnable</code> / <code>Signal</code>	Chạy việc nặng ngoài luồng GUI, trả kết quả về luồng GUI<br><small>03 §3.2</small>	glossary group_B
+thread affinity, <code>Lock</code>, lazy service	SQLite gắn với luồng tạo ra; tạo service lười dưới <code>Lock</code><br><small>03 §3.3</small>	glossary group_B
+lazy import, <code>--fake</code>	Import khi cần; chế độ demo offline không cần key<br><small>03 §3.5</small>	glossary group_B
+RAG (Retrieval-Augmented Generation)	Tìm đoạn liên quan trong kho rồi cho LLM trả lời dựa trên chúng<br><small>05 §1.1</small>	glossary group_C
+offline vs online phase	Xây index (một lần) vs trả lời (mỗi câu hỏi)<br><small>05 §1.2</small>	glossary group_C
+corpus	Bộ tài liệu cố định (24 tài liệu chấp nhận)<br><small>05 §1.3</small>	glossary group_C
+grounded answer, "insufficient"	Trả lời dựa trên ngữ cảnh; nếu không đủ phải nói rõ<br><small>05 §1.5</small>	glossary group_C
+<code>AnswerResult</code>	Hợp đồng đầu ra của use case (câu trả lời, citation, độ trễ…)<br><small>05 §2.5</small>	glossary group_C
+language detection (vi/en)	Đoán ngôn ngữ câu hỏi từ ký tự tiếng Việt đặc trưng<br><small>05 §2.4</small>	glossary group_C
+cross-lingual retrieval	Câu hỏi tiếng Việt, tài liệu tiếng Anh<br><small>05 §3.2</small>	glossary group_C
+embedding	Vector số biểu diễn "nghĩa" của một đoạn văn<br><small>06 §1.1</small>	glossary group_C
+dimension (768), <code>model_id</code>	Số chiều vector; khoá định danh model+kích thước<br><small>06 §1.2</small>	glossary group_C
+normalization, dot product, cosine	Chuẩn hoá vector; tích vô hướng = cosine khi chuẩn; <code>score = 1 − distance</code><br><small>06 §1.3</small>	glossary group_C
+vector database (ChromaDB)	Kho lưu vector + tìm kiếm gần đúng; chạy nhúng trong tiến trình<br><small>06 §1.4</small>	glossary group_C
+batching, <code>plan_calls</code>	Chia text thành các lô (≤ 45 text, nửa ngân sách token/phút)<br><small>06 §2.2</small>	glossary group_C
+token estimate (<code>chars/4</code>)	Ước lượng token để lập kế hoạch quota<br><small>06 §2.3</small>	glossary group_C
+embedding cache	Bảng SQLite khoá bằng hash; chỉ gửi phần chưa có<br><small>06 §2.5</small>	glossary group_C
+<code>ChromaVectorStore</code>	Adapter Chroma: upsert, tìm, kiểm cấu hình khi mở<br><small>06 §2.6</small>	glossary group_C
+HNSW, approximate nearest neighbour	Cấu trúc đồ thị cho tìm gần đúng — nhanh nhưng không xác định tuyệt đối<br><small>06 §3.1</small>	glossary group_C
+quota plan	Tính tổng request theo ngày (709 + 859 trên hai ngày)<br><small>06 §3.2</small>	glossary group_C
+chunk / chunking	Đoạn văn bản được cắt để nhúng và truy xuất<br><small>07 §1.1</small>	glossary group_C
+fixed-size chunker (Arm B)	Cửa sổ cố định 1600 ký tự, overlap 200<br><small>07 §1.2</small>	glossary group_C
+header-aware chunker (Arm A)	Cắt theo H2/H3, giữ code/bảng nguyên khối<br><small>07 §2.1</small>	glossary group_C
+overlap, atomic block	Phần chồng lấn giữa chunk; khối code/bảng không bị cắt<br><small>07 §2.2</small>	glossary group_C
+<code>display_text</code> / <code>embed_text</code>	Văn bản hiển thị vs văn bản đem đi nhúng (có heading path, bỏ link)<br><small>07 §1.3</small>	glossary group_C
+<code>chunk_id</code>, determinism	<code>source:config:index:04d</code> — xác định nên index chạy lại là no-op<br><small>07 §2.6</small>	glossary group_C
+top-k, over-fetch, dedup (<code>passage_hash</code>)	Lấy dư (5+10) rồi khử trùng theo đoạn, giữ 5<br><small>07 §3.1</small>	glossary group_C
+refusal gate, threshold 0.686	Top-1 &lt; ngưỡng → không gọi LLM; ngưỡng = 0.7360 − 0.05<br><small>07 §3.3</small>	glossary group_C
+tie-break by <code>chunk_id</code>	Phá hoà xác định khi hai chunk cùng điểm<br><small>07 §3.5</small>	glossary group_C
+index idempotency	Chỉ nhúng chunk chưa có trong store<br><small>05 §2.3</small>	glossary group_C
+prompt template, version	Prompt là file có phiên bản (<code>answer_v2</code>), không nằm trong code<br><small>08 §1.1</small>	glossary group_D
+structured output / JSON mode, schema	Ép model trả JSON đúng khoá; schema là JSON Schema<br><small>08 §1.3</small>	glossary group_D
+"insufficient" refusal rule	Model đặt <code>insufficient=true</code>; câu trả lời hiển thị là thông báo cố định<br><small>08 §1.4</small>	glossary group_D
+<code>parse_answer_json</code>	Kiểm kiểu chặt đầu ra của model; sai → <code>GenerationError</code><br><small>08 §1.5</small>	glossary group_D
+one-pass placeholder rendering	Một lượt <code>re.sub</code>; <code>{}</code> trong dữ liệu không bị coi là placeholder<br><small>08 §2.1</small>	glossary group_D
+passage numbering <code>[n]</code>	Đánh số passage 1..k; là khoá liên kết prompt ↔ citation<br><small>08 §2.2</small>	glossary group_D
+citation marker, <code>resolve_citations</code>	Đọc <code>[n]</code> ngoài code; số ngoài 1..k bị bỏ và ghi lại<br><small>08 §2.4</small>	glossary group_D
+excerpt	300 ký tự đầu của passage, cắt ở ranh giới từ, không thêm "…"<br><small>08 §2.5</small>	glossary group_D
+uncited sentences	Chỉ số chẩn đoán: câu ≥ 5 từ không có marker<br><small>08 §2.6</small>	glossary group_D
+prompt injection	Văn bản trong dữ liệu chứa lệnh nhắm vào model — repo chưa phòng thủ (corpus cố định)<br><small>08 §3.3</small>	glossary group_D
+temperature 0	Giảm phương sai đầu ra; không đảm bảo giống hệt<br><small>08 §3.2</small>	glossary group_D
+rate limit (RPM/TPM/RPD)	Giới hạn request/phút, token/phút, request/ngày theo project &amp; model<br><small>09 §1.1</small>	glossary group_D
+model pinning	Tên model chỉ trong cấu hình, không <code>-latest</code><br><small>09 §1.2</small>	glossary group_D
+token, thinking token	Đơn vị tính phí/giới hạn; token "suy nghĩ" tính như output<br><small>09 §1.3</small>	glossary group_D
+failure kinds (<code>quota</code>/<code>unavailable</code>/<code>other</code>)	Ba loại lỗi API dùng chung cho retry, log, GUI<br><small>09 §1.4</small>	glossary group_D
+sliding-window throttle	Giữ lịch sử 60s; chờ nếu không còn chỗ<br><small>09 §2.1</small>	glossary group_D
+retry, exponential backoff, jitter, <code>Retry-After</code>	Thử lại với chờ tăng dần + ngẫu nhiên; tôn trọng gợi ý của server; trần 120s<br><small>09 §2.2</small>	glossary group_D
+<code>classify_failure</code>	Hàm duy nhất biết lỗi nào của SDK là lỗi nhà cung cấp<br><small>09 §2.3</small>	glossary group_D
+fallback model	Model dự phòng, đúng một lần, ngân sách output riêng<br><small>09 §2.4</small>	glossary group_D
+<code>finish_reason</code> check	<code>MAX_TOKENS</code>/rỗng → <code>GenerationError</code>, không retry, không fallback<br><small>09 §2.6</small>	glossary group_D
+key redaction	Che API key ở mọi đường ghi ra<br><small>09 §3.1</small>	glossary group_D
+daily quota reset (timezone)	Reset nửa đêm giờ Pacific = 14:00 UTC+7 (PDT) / 15:00 UTC+7 (PST); chủ dự án xác nhận, phần tài liệu Google là <code>[GENERAL]</code><br><small>09 §3.2</small>	glossary group_D
+cost estimate with <code>null</code> prices	Ước tính chi phí, không bao giờ đoán giá thiếu<br><small>09 §3.4</small>	glossary group_D
+ground truth	Đáp án chuẩn + nguồn kỳ vọng, viết <b>trước</b> khi có index<br><small>10 §1.2</small>	glossary group_E
+dev set vs eval set	Bộ chỉnh (6 case) vs bộ báo cáo (36 case) — không được chỉnh trên eval<br><small>10 §1.3</small>	glossary group_E
+result labels (OD-5)	<code>correct</code>, <code>partially_correct</code>, <code>incorrect</code>, <code>false_refusal</code>, <code>correct_refusal</code>, <code>hallucination</code><br><small>10 §1.4</small>	glossary group_E
+hit@k, MRR	Có trúng trong top-k không; trung bình <code>1/hạng</code><br><small>10 §1.5</small>	glossary group_E
+section hit, span overlap	Trúng theo offset ký tự nửa mở, không so tên heading<br><small>10 §2.1</small>	glossary group_E
+evidence slot	Nhóm nguồn tương đương; case trúng khi mọi slot có một nguồn<br><small>10 §2.2</small>	glossary group_E
+lenient vs strict	Có/không tính nguồn thay thế; headline lenient, luôn báo kèm strict<br><small>10 §2.3</small>	glossary group_E
+duplicate rule	Section-level tính bản trùng bị loại; source-level thì không<br><small>10 §2.4</small>	glossary group_E
+evidence hit	Mọi required point có quote nguyên văn trong chunk top-k<br><small>10 §2.5</small>	glossary group_E
+<code>map_result</code>	Bảng ánh xạ xác định từ dữ liệu judge sang nhãn<br><small>10 §2.6</small>	glossary group_E
+points-covered	<code>(yes + 0.5·partial)/số point required</code><br><small>10 §2.7</small>	glossary group_E
+denominators (answerable / unanswerable / answered)	Ba mẫu số không được lẫn; record lỗi bị loại và liệt kê<br><small>10 §2.8</small>	glossary group_E
+freeze (tag + hash + amendment)	Đóng băng bộ câu hỏi; sửa im lặng bị phát hiện<br><small>10 §3.1</small>	glossary group_E
+threats to validity	Các mối đe doạ tính hợp lệ (ngưỡng chỉnh trên A, judge = model, n nhỏ…)<br><small>10 §3.2</small>	glossary group_E
+bias controls, parallel EN/VI group	Kiểm soát thiên lệch; nhóm song song tách hiệu ứng ngôn ngữ<br><small>10 §3.3</small>	glossary group_E
+LLM-as-judge	Dùng LLM chấm đầu ra theo rubric; không phải chân lý<br><small>11 §1.1</small>	glossary group_E
+answer check / refusal check	Hai kiểu chấm: coverage từng point vs "trình bày nội dung liên quan như đáp án"<br><small>11 §1.2</small>	glossary group_E
+strict verdict parse, <code>judge_error</code>	Sai một chút là <code>judge_error</code>, không đoán<br><small>11 §2.2</small>	glossary group_E
+judgement cache &amp; validity	Khoá <code>(case, arm, sha256(answer), version)</code>; hash prompt/model khác → từ chối<br><small>11 §2.3</small>	glossary group_E
+self-preference bias	Judge có xu hướng ưu ái văn bản giống của chính nó<br><small>11 §3.1</small>	glossary group_E
+spot-check, Cohen's κ	Người kiểm mù mẫu nhỏ; κ = đồng thuận đã trừ phần ngẫu nhiên (0.688)<br><small>11 §3.2</small>	glossary group_E
+paired design	Cùng câu hỏi trên cả hai arm; so mỗi câu với chính nó<br><small>12 §1.2</small>	glossary group_E
+p-value, confidence interval (CI)	Xác suất dữ liệu cực đoan nếu không có khác biệt; khoảng giá trị Δ chấp nhận được<br><small>12 §1.3</small>	glossary group_E
+nearest-rank percentile	Phân vị ở hạng <code>ceil(p/100·n)</code>, không nội suy<br><small>12 §1.4</small>	glossary group_E
+McNemar exact	Kiểm định ghép cặp cho kết quả 0/1 dựa trên các cặp bất đồng<br><small>12 §2.1</small>	glossary group_E
+Wilcoxon signed-rank exact	Kiểm định ghép cặp cho giá trị liên tục (độ trễ, token)<br><small>12 §2.3</small>	glossary group_E
+paired bootstrap	Lấy mẫu có hoàn lại <b>chỉ số cặp</b>, 10 000 lần, seed 42 → CI<br><small>12 §2.4</small>	glossary group_E
+wording rule	<code>p ≥ 0.05</code> → "no statistically reliable difference at n = X", không nêu người thắng<br><small>12 §2.5</small>	glossary group_E
+statistical power	Cần ≥ 6 cặp bất đồng một phía để p &lt; 0.05; n nhỏ → khó đạt ý nghĩa<br><small>12 §2.2</small>	glossary group_E
+multiple comparisons	Chạy nhiều phép thử → dương tính giả; repo không hiệu chỉnh<br><small>12 §3.1</small>	glossary group_E
+confounder	Yếu tố gây nhiễu không phải chunker (thứ tự chạy, cache)<br><small>12 §3.3</small>	glossary group_E
+controlled experiment, held-constant	Chỉ đổi chunker; mọi thứ khác giữ hằng và được máy kiểm<br><small>13 §1.1</small>	glossary group_E
+failure analysis (stages)	Phân loại lỗi theo tầng bằng cây quy tắc có thứ tự<br><small>13 §2.4</small>	glossary group_E
+discordant case	Case hai arm cho kết quả khác nhau — đọc ở mức chunk<br><small>13 §2.3</small>	glossary group_E
+measurement-side error	Lỗi do cách đo (judge, ngưỡng), không phải lỗi hệ thống<br><small>13 §3.1</small>	glossary group_E
+honest conclusion	Nói đúng mức dữ liệu cho phép, nêu cả điều <b>không</b> kết luận<br><small>13 §3.2</small>	glossary group_E
+JSONL (JSON Lines)	Mỗi dòng một JSON; thêm bản ghi = nối dòng<br><small>04 §1.1</small>	glossary group_F
+SHA-256 / content hash	Danh tính nội dung; cùng nội dung → cùng hash<br><small>04 §1.2</small>	glossary group_F
+idempotent / deterministic / append-only	Chạy nhiều lần như một; cùng vào cùng ra; chỉ thêm<br><small>04 §1.3</small>	glossary group_F
+<code>fsync</code>, torn write	Ghi xuống đĩa thật; dòng cụt do crash được nhận diện và cắt<br><small>04 §2.1</small>	glossary group_F
+"last line wins" (<code>latest_records</code>)	Trạng thái hiện tại = bản ghi cuối theo khoá<br><small>04 §2.2</small>	glossary group_F
+atomic replace (<code>os.replace</code>)	Ghi tmp rồi đổi tên — người đọc thấy bản cũ hoặc mới<br><small>04 §2.3</small>	glossary group_F
+cache key, float32 BLOB	Khoá = hash(model\|task\|text); vector lưu 4 byte/số<br><small>04 §2.4</small>	glossary group_F
+commit per provider call	Một transaction mỗi lời gọi trả tiền — không mất kết quả đã trả<br><small>04 §2.5</small>	glossary group_F
+resume + manifest check	Từ chối tiếp tục khi thiết lập đổi (<code>RunConfigMismatch</code>)<br><small>04 §3.1</small>	glossary group_F
+UTF-8 + LF	Ép LF (<code>.gitattributes</code>) để hash/diff ổn định<br><small>04 §3.3</small>	glossary group_F
+pytest, fixture, <code>tmp_path</code>	Test bằng <code>assert</code> trần; fixture tiêm bằng tên tham số<br><small>14 §1.1</small>	glossary group_F
+fake vs stub vs mock	Fake = cài đặt đơn giản thật; mock kiểm tương tác<br><small>14 §1.3</small>	glossary group_F
+<code>FakeClock</code>, <code>FakeEmbedder</code>, <code>api_error</code>	Bộ fake có kịch bản của repo<br><small>14 §2.1</small>	glossary group_F
+<code>parametrize</code>	Một hàm test, nhiều bộ dữ liệu<br><small>14 §2.4</small>	glossary group_F
+flaky test	Test đôi khi fail; repo ghi nhận (15/15 pass) thay vì che<br><small>14 §3.1</small>	glossary group_F
+mutation testing	Cố tình phá code để chứng minh test bắt được lỗi; đột biến "sống sót"<br><small>14 §3.2</small>	glossary group_F
+executor / verifier	Hai vai: người làm và người kiểm độc lập (<code>99-VERIFY</code>)<br><small>15 §1.1</small>	glossary group_F
+task ledger, status <code>verified</code>	Sổ trạng thái tác vụ; <code>verified with fixes</code> chưa đủ để đi tiếp<br><small>15 §1.3</small>	glossary group_F
+"Explain it back"	3–5 ý chủ dự án phải bảo vệ được khi phỏng vấn<br><small>15 §1.2</small>	glossary group_F
+<code>dev</code> / <code>main</code> / tag	<code>dev</code> tích hợp; <code>main</code> ổn định, chỉ merge khi chủ dự án nói; tag đóng băng/nộp<br><small>15 §2.3</small>	glossary group_F
+git worktree	Thư mục làm việc thứ hai cho cùng repo, dùng cho phiên song song<br><small>15 §2.4</small>	glossary group_F
+workflow incidents	Các sự cố quy trình thật (subagent bịa xác nhận…)<br><small>15 §3.1</small>	glossary group_F
+secret scan	Quét lịch sử git tìm khoá; redaction; <code>.env</code> git-ignored<br><small>15 §3.3</small>	glossary group_F
+GitNexus impact analysis	Phân tích tác động trước khi sửa symbol<br><small>15 §3.2</small>	glossary group_F
+BM25, RRF (hybrid search)	Tìm theo từ khoá + hợp nhất thứ hạng; <b>chưa</b> xây trong repo<br><small>16 §2.1</small>	glossary group_F
+reranking	Cross-encoder xếp hạng lại ứng viên; thêm khi có bằng chứng cần<br><small>16 §2.2</small>	glossary group_F
+parent–child / semantic chunking	Kỹ thuật chunking nâng cao; nhắm vào lỗi "một chunk có đủ đáp án không"<br><small>16 §2.3</small>	glossary group_F
+query rewriting, HyDE	Viết lại/sinh truy vấn giả trước khi tìm<br><small>16 §2.4</small>	glossary group_F
+MMR, metadata filter	Đa dạng hoá kết quả; lọc theo metadata<br><small>16 §2.5</small>	glossary group_F
+Python type hints có được ép lúc chạy không?	Không. Trong repo, nơi cần bảo đảm kiểu (output của LLM), code tự kiểm tra bằng <code>isinstance</code> ([REPO src/knowledge_assistant/application/generation/answer_question.py:36-56]).	interview file_01
+Structural typing là gì, dùng ở đâu?	Class thoả <code>Protocol</code> nếu có đúng method; repo dùng để core định nghĩa cổng (<code>LLM</code>, <code>Embedder</code>, <code>VectorStore</code>) mà adapter không cần kế thừa ([REPO src/knowledge_assistant/core/interfaces/llm.py:36-37]).	interview file_01
+Vì sao inject clock/sleep?	Để test code phụ thuộc thời gian chạy tức thì và xác định ([REPO src/knowledge_assistant/infrastructure/embeddings/throttle.py:24-31]).	interview file_01
+Khi nào bắt <code>except Exception</code>?	Chỉ ở ranh giới, có lý do và log; ví dụ hook quan sát không được làm đổi hành vi retry ([REPO src/knowledge_assistant/infrastructure/llm/gemini/gemini_llm.py:196-200]).	interview file_01
+Dataclass frozen giải quyết gì?	Dữ liệu chảy giữa layer bất biến, có equality theo giá trị, ≈ <code>record</code> C#.	interview file_01
+Bạn đọc code Python lạ như thế nào?	Docstring → import → hằng số/kiểu → hàm công khai → chạy bằng đầu một ví dụ nhỏ; dùng test làm ví dụ sống.	interview file_01b
+Decorator là gì?	Hàm nhận hàm và trả hàm; repo dùng decorator chuẩn như <code>@dataclass</code>, <code>@property</code>, <code>@contextmanager</code>, <code>@pytest.fixture</code> (mục T9).	interview file_01b
+Khác biệt <code>is None</code> và <code>== None</code>?	<code>is</code> so sánh danh tính, là cách chuẩn với <code>None</code> ([REPO src/knowledge_assistant/presentation/desktop/viewmodels/ask_viewmodel.py:105]).	interview file_01b
+Vì sao test dùng fake thay vì gọi API thật?	Xác định, miễn phí, không cần mạng/key; repo có <code>FakeEmbedder</code>, <code>FakeClock</code>, <code>FakeLLM</code>... ([REPO tests/fakes.py:12-62]).	interview file_01b
+Virtual environment dùng để làm gì?	Cô lập phụ thuộc theo dự án để tái lập và tránh xung đột phiên bản ([REPO README.md:107-114]).	interview file_02
+Bạn đảm bảo test không gọi API thật thế nào?	Marker <code>gemini</code> + <code>addopts = "-m 'not gemini'"</code> + fake cho mọi adapter; adapter Gemini không có key thì ném lỗi cấu hình và không gọi mạng ([REPO pyproject.toml:25-31]).	interview file_02
+Bạn quản lý cấu hình và bí mật ra sao?	Biến môi trường (<code>os.getenv</code>), <code>.env</code> git-ignored, <code>.env.example</code> chỉ placeholder; key chỉ đọc từ môi trường và không bao giờ in ([REPO src/knowledge_assistant/config.py:33-35]).	interview file_02
+Tại sao dùng src layout?	Tránh import nhầm bản chưa cài từ thư mục hiện tại; buộc đi qua cơ chế cài/<code>sys.path</code> có chủ đích ([REPO pyproject.toml:22-23]).	interview file_02
+Một lỗi môi trường bạn từng gặp?	<code>pip install -r requirements.txt</code> không đủ (thiếu editable install) — bắt được ở test clone sạch của QC-001; và worktree dùng chung <code>.venv</code> chạy nhầm code checkout chính ([REPO README.md:116-120]).	interview file_02
+Đường dẫn tương đối theo cwd có vấn đề gì?	Chạy từ thư mục khác ghi/đọc sai chỗ; repo neo đường dẫn vào <code>PROJECT_ROOT</code> ([REPO src/knowledge_assistant/config.py:7-15]).	interview file_02
+Clean architecture ở dự án này khác project reference của .NET ở điểm nào?	Không có compiler ép; luật được canh bằng test <code>ast</code> ([REPO tests/unit/test_project_structure.py:11-19]).	interview file_03
+Kể một lần thiết kế port bị rò rỉ chi tiết công nghệ?	<code>plan_calls</code> (batching của Gemini) nằm trong <code>Embedder</code> core; ADR-0005 Amendment 2 chuyển sang <code>PlannedEmbedder</code> ([REPO docs/architecture/decisions/0005-embedding-and-vector-store-settings.md:123]).	interview file_03
+Làm thế nào test được code gọi LLM mà không tốn quota?	<code>LLM</code> là <code>Protocol</code>; test truyền <code>FakeLLM</code>/<code>ScriptedLLM</code> ([REPO tests/fakes.py:187]).	interview file_03
+MVVM ở đây khác WPF thế nào?	Không có data binding: view-model phát <code>_notify()</code> tới listener; view vẽ lại. Đổi lại, view-model test được không cần Qt.	interview file_03
+Vì sao dùng <code>Lock</code> trong <code>CoreAskQuestion._service</code>?	Service theo arm dựng lười trên worker thread; lock chặn dựng hai lần ([REPO src/knowledge_assistant/presentation/desktop/viewmodels/core_ask_question.py:60-64]).	interview file_03
+Bạn thiết kế pipeline dài có thể dừng và chạy tiếp thế nào?	Ghi từng dòng bền vững, khoá bằng hash/<code>chunk_id</code>, chỉ xử lý phần còn thiếu, manifest cấu hình và từ chối resume khi thiết lập đổi ([REPO src/knowledge_assistant/application/evaluation/run_evaluation.py:1-13]).	interview file_04
+Làm sao ghi file an toàn khi mất điện?	Append từng dòng + <code>fsync</code> (chịu được dòng cụt); file nhỏ ghi nguyên tử bằng tmp + <code>os.replace</code> ([REPO src/knowledge_assistant/infrastructure/persistence/jsonl_record_store.py:32-40]).	interview file_04
+Cache khoá theo gì?	Hash của (model, task, text) để tránh dùng nhầm vector; lưu float32 BLOB; commit theo từng lời gọi để không mất tiền đã trả ([REPO src/knowledge_assistant/infrastructure/persistence/embedding_cache.py:1-6]).	interview file_04
+Idempotency là gì và làm sao đạt được?	Chạy nhiều lần = chạy một lần; đạt bằng khoá danh tính xác định (<code>chunk_id</code>) và kiểm "đã có chưa" trước khi làm ([REPO src/knowledge_assistant/application/ingestion/index_corpus.py:71-77]).	interview file_04
+Kể một lỗi thật về xuống dòng.	Test Windows fail vì <code>write_text</code> không có <code>newline="\n"</code>; và hash phải tính lại theo LF; dự án ép LF bằng <code>.gitattributes</code> ([REPO docs/reports/execution/INGEST-003.md:66], [REPO .gitattributes:1-3]).	interview file_04
+Nguồn không xác định trong hệ thống của bạn là gì?	HNSW (test flaky), đầu ra LLM dù temperature 0, độ trễ; được cô lập ở biên và ghi nhận ([REPO docs/specs/generation-spec.md:30-32]).	interview file_04
+Giải thích RAG bằng ví dụ từ dự án của bạn.	Câu hỏi được embed, tìm top-5 đoạn trong Chroma, đưa vào prompt cùng luật "chỉ dùng CONTEXT"; LLM trả JSON có <code>answer</code>, <code>cited_passages</code>, <code>insufficient</code> ([REPO config/prompts/answer_v2.md:1-13]).	interview file_05
+Làm thế nào bạn giảm hallucination?	Prompt ép dùng context; gate ngăn LLM chạy khi retrieval yếu; citation kiểm được; đánh giá có nhãn <code>hallucination</code> và judge kiểm chứng ([REPO src/knowledge_assistant/application/evaluation/metrics/mapping.py:3-12]).	interview file_05
+Tại sao có hai lớp từ chối?	Gate rẻ (không tốn LLM) nhưng thô; lớp LLM tinh nhưng tốn request ([REPO src/knowledge_assistant/application/generation/answer_question.py:1-9]).	interview file_05
+Làm sao index resume được?	<code>pending()</code> chỉ lấy chunk chưa có trong store; cache SQLite giữ vector đã trả tiền ([REPO src/knowledge_assistant/application/ingestion/index_corpus.py:71-77]).	interview file_05
+Giới hạn của pipeline này?	Không rerank/hybrid; ngưỡng tune trên n nhỏ; nhận diện ngôn ngữ bằng heuristic ([REPO README.md:245]).	interview file_05
+Cosine similarity là gì, vì sao dùng thay khoảng cách Euclid?	Đo góc, không đo độ dài; trên vector đơn vị xếp hạng như nhau, nhưng cosine vẫn đúng khi vector không chuẩn hoá ([REPO docs/architecture/decisions/0005-embedding-and-vector-store-settings.md:69]).	interview file_06
+Bạn xử lý giới hạn quota của API embedding thế nào?	Đo (V-1), throttle cửa sổ trượt tính theo số text, batch ≤45 và nửa ngân sách token, cache SQLite commit từng cuộc gọi, chia hai ngày quota ([REPO docs/architecture/decisions/0005-embedding-and-vector-store-settings.md:41-46,85-99]).	interview file_06
+Vector DB nhúng khác server thế nào?	Nhúng: chạy trong tiến trình, dữ liệu là thư mục; không có server để vận hành; đánh đổi là chia sẻ đa tiến trình/luồng hạn chế ([REPO src/knowledge_assistant/infrastructure/vector_store/chromadb/chroma_store.py:78]).	interview file_06
+Kể một lỗi kiến trúc bạn phát hiện ở tầng embedding.	Cache và embedder chia batch khác nhau → mất vector đã trả tiền khi lỗi (RAG-001a F1/F2), sửa bằng <code>plan_calls</code> ([REPO docs/architecture/decisions/0005-embedding-and-vector-store-settings.md:109-118]).	interview file_06
+Bạn xử lý flaky test thế nào?	Chạy lại 15 lần, công khai không tái hiện, không xoá test ([REPO README.md:305-310]).	interview file_06
+Bạn chọn kích thước chunk như thế nào?	Dựa trên phân phối đo được của corpus (không dựa kết quả retrieval), ghi trong ADR-0003 D3; mọi thay đổi phải qua ADR mới/amendment có bằng chứng ([REPO docs/architecture/decisions/0003-chunking-parameters-and-experiment.md:82]).	interview file_07
+Header-aware chunking hơn gì fixed-size?	Không cắt code/bảng (3.27% vs 45.05% chunk cắt qua code), giữ ngữ cảnh heading; đổi lại phức tạp hơn và chunk không đều ([REPO docs/reports/execution/INGEST-004.md:44-52]).	interview file_07
+Xử lý tài liệu trùng lặp thế nào?	Bỏ trùng <code>content_hash</code> lúc chunk (447 ở Arm A), và khử trùng theo <code>passage_hash</code> lúc retrieval với over-fetch ([REPO docs/specs/retrieval-spec.md:14-21]).	interview file_07
+Làm sao quyết định ngưỡng từ chối?	Công thức trên dev, có bảng số; thừa nhận n nhỏ và chỉ tune trên Arm A ([REPO docs/specs/retrieval-spec.md:38-56]).	interview file_07
+Một quyết định thiết kế có thể làm lệch thước đo — ví dụ?	Chunk chỉ chứa heading tạo hit giả cho Arm A; D3a loại bỏ, quyết định trước khi có kết quả ([REPO docs/architecture/decisions/0003-chunking-parameters-and-experiment.md:27-33]).	interview file_07
+Bạn ép LLM trả về dữ liệu có cấu trúc thế nào và tin nó tới đâu?	JSON mode + schema, <b>rồi kiểm lại kiểu ở phía mình</b>: JSON mode không đảm bảo ngữ nghĩa (<code>answer</code> rỗng, số passage ngoài phạm vi). Đầu ra hỏng ném <code>GenerationError</code> chứ không im lặng chấp nhận ([REPO src/knowledge_assistant/application/generation/answer_question.py:36-56]).	interview file_08
+Bạn quản lý phiên bản prompt ra sao?	Prompt là file bất biến theo phiên bản, tên file là version, ghi vào từng kết quả; sửa = file mới, giữ bản cũ làm bằng chứng ([REPO docs/specs/generation-spec.md:20-24]).	interview file_08
+Làm sao ngăn model bịa citation?	Đánh số passage; model chỉ được trích số 1..k; số ngoài phạm vi bị bỏ và ghi lại; excerpt là tiền tố nguyên văn nên kiểm được ([REPO src/knowledge_assistant/application/citation/citations.py:136-150]).	interview file_08
+Kể một lỗi tương tác giữa prompt và parser.	<code>args[0]</code> bị coi là citation; sửa cả hai phía: parser bỏ qua code, prompt v2 yêu cầu bọc backtick; kiểm bằng mutation (7 và 3 test fail khi tắt) ([REPO AI_WORKLOG.md:344-352]).	interview file_08
+Bạn phân biệt 'không có câu trả lời' và 'hệ thống lỗi' thế nào?	Ba đường riêng: cổng truy xuất, <code>insufficient</code> của model (cả hai là kết quả hợp lệ), và <code>GenerationError</code>/<code>LLMError</code> (lỗi). Không bao giờ đổi lỗi thành insufficient ([REPO docs/specs/generation-spec.md:36-38]).	interview file_08
+Prompt injection ảnh hưởng gì tới hệ thống này?	Corpus cố định nên hiện chưa phải rủi ro thực tế; repo nêu rõ đó là rủi ro của bản có upload và không có bộ lọc injection. Trả lời trung thực quan trọng hơn khoe phòng thủ không có ([REPO README.md:323-325]).	interview file_08
+Bạn thiết kế retry cho API có rate limit thế nào?	Phân loại lỗi, retry backoff luỹ thừa + jitter + <code>Retry-After</code>, trần thời gian, giới hạn số lần, fallback một lần, throttle chủ động phía client ([REPO src/knowledge_assistant/infrastructure/llm/gemini/gemini_llm.py:6-20]).	interview file_09
+Tại sao không retry mọi lỗi?	400/401/403/404 không tự hết; gửi lại đốt quota. Chỉ retry lỗi có thể tạm thời ([REPO src/knowledge_assistant/infrastructure/gemini_retry.py:16]).	interview file_09
+Làm sao đảm bảo kết quả đánh giá không trộn model?	<code>ALLOW_FALLBACK=false</code> + kiểm tra "model purity" (fallback/model khác = bug, ghi log và dừng) ([REPO src/knowledge_assistant/application/evaluation/run_evaluation.py:9-10]).	interview file_09
+Bạn ngăn rò rỉ API key thế nào?	Chỉ đọc từ env, <code>redact_key</code> che theo giá trị và theo mẫu, mọi dòng ghi file đi qua <code>redact</code> ([REPO src/knowledge_assistant/infrastructure/gemini_retry.py:52-57]).	interview file_09
+Kể một sai lầm về retry đã được bắt.	Hook quan sát không được bảo vệ làm vòng retry kết thúc sớm (EVAL-003a F1); 502 không nằm trong tập retry (RAG-003 F1) ([REPO AI_WORKLOG.md:826-831]).	interview file_09
+Ước tính chi phí thế nào khi thiếu số liệu?	Trả <code>None</code> kèm lý do; giá <code>null</code> không bao giờ được đoán ([REPO config/pricing.json:1-28]).	interview file_09
+Bạn thiết kế bộ đánh giá cho hệ thống RAG thế nào?	Ground truth viết trước index; tách dev/eval; đóng băng bằng hash + tag; metric tách tầng (retrieval, câu trả lời, citation, latency); có nhóm song song cho ngôn ngữ; near-miss cho từ chối ([REPO docs/specs/evaluation-dataset-design.md:9-13]).	interview file_10
+Làm sao tránh tự lừa mình khi đánh giá?	Freeze + hash + amendment log; báo cả lenient và strict; báo <code>n</code> cho mọi tỉ lệ; liệt kê threats to validity; không chỉnh trên eval ([REPO docs/specs/evaluation-spec.md:87-98]).	interview file_10
+Recall@k và MRR khác nhau ra sao?	hit@k: có tìm được trong k không; MRR: tìm được sớm cỡ nào (<code>1/hạng</code>). Repo báo hit@1/3/5 + MRR ([REPO src/knowledge_assistant/application/evaluation/metrics/retrieval.py:27]).	interview file_10
+Vì sao không cho LLM chọn nhãn cuối?	Nhãn phải xác định và kiểm thử được; judge chỉ cấp dữ liệu, bảng <code>map_result</code> quyết định ([REPO src/knowledge_assistant/application/evaluation/metrics/mapping.py:1-4]).	interview file_10
+Một metric có mẫu số sai thì sao?	Đã xảy ra: câu văn spec sai về mẫu số, sửa ở verify; báo cáo luôn ghi <code>22/31</code> vs <code>23/32</code> và lý do ([REPO docs/reports/epics/EPIC-06-experiment.md:80-81]).	interview file_10
+Bạn báo cáo kết quả không có ý nghĩa thống kê thế nào?	"Không có khác biệt đáng tin ở n = X", kèm CI và số cặp bất đồng, không tuyên bố arm nào hơn ([REPO docs/reports/epics/EPIC-06-experiment.md:82-83]).	interview file_10
+Bạn dùng LLM-as-judge thế nào cho đáng tin?	Rubric ràng buộc nguồn; judge chỉ cấp dữ liệu, nhãn do code; parse nghiêm ngặt; cache khoá hash; spot-check mù bằng người + κ ([REPO src/knowledge_assistant/application/evaluation/judge.py:1-30]).	interview file_11
+Judge và model trả lời là một — có vấn đề gì?	Self-preference; repo ghi nhận giới hạn và bù bằng spot-check, không tuyên bố loại bỏ được ([REPO docs/specs/evaluation-spec.md:69]).	interview file_11
+Judge trả JSON sai thì làm gì?	<code>judge_error</code>, giữ raw text, thử lại một lần, rồi liệt kê record như chưa gắn nhãn; <b>không</b> đoán ([REPO src/knowledge_assistant/application/evaluation/judge.py:195-228]).	interview file_11
+Cohen's κ dùng để làm gì?	Đo đồng thuận đã hiệu chỉnh cho ngẫu nhiên; ở đây 0.688 với 8/10 ([REPO docs/reports/epics/EPIC-05-evaluation.md:375-383]).	interview file_11
+Bạn đổi prompt judge giữa chừng thì sao?	Hash khác → <code>JudgeCacheMismatch</code>; phải tăng version hoặc dùng thư mục mới ([REPO src/knowledge_assistant/application/evaluation/judge.py:308-320]).	interview file_11
+Kể một lỗi thật của judge.	<code>Q-EVAL-002:B</code>: judge chép source id <code>22</code> vào trường marker; parse chặt bắt được; record chưa gắn nhãn, được liệt kê ([REPO docs/reports/epics/EPIC-06-experiment.md:103-105]).	interview file_11
+McNemar test dùng khi nào?	So hai tỉ lệ nhị phân trên cùng một tập mẫu (ghép cặp); chỉ dùng các cặp bất đồng; bản exact dùng nhị thức, tốt cho n nhỏ ([REPO src/knowledge_assistant/application/evaluation/stats.py:34-46]).	interview file_12
+Bootstrap là gì, khác t-test thế nào?	Giả lập phân phối của thống kê bằng lấy mẫu có hoàn lại, không cần giả định phân phối; ở đây lấy mẫu <b>chỉ số cặp</b>, 10 000 lần, seed 42 ([REPO src/knowledge_assistant/application/evaluation/stats.py:63-81]).	interview file_12
+Bạn báo cáo kết quả không có ý nghĩa thế nào?	"No statistically reliable difference at n = X" kèm CI; không tuyên bố arm thắng ([REPO src/knowledge_assistant/application/evaluation/experiment.py:152-158]).	interview file_12
+Vì sao tự cài Wilcoxon?	scipy không có trong môi trường; bản tự cài chính xác cả khi có hòa; bù lại có thể lệch nhẹ scipy ở ca hòa và điều đó được ghi ([REPO src/knowledge_assistant/application/evaluation/stats.py:117-120]).	interview file_12
+Percentile p95 tính thế nào?	Nearest-rank <code>ceil(p/100 × n)</code> với số hữu tỉ chính xác, không nội suy ([REPO src/knowledge_assistant/application/evaluation/metrics/latency.py:19-27]).	interview file_12
+Điều gì thống kê không cứu được trong thí nghiệm này?	Confounding do thứ tự chạy/cache, một lần chạy mỗi arm, ngưỡng chỉnh trên Arm A ([REPO docs/reports/epics/EPIC-06-experiment.md:85-122]).	interview file_12
+Kể về một thí nghiệm bạn thiết kế.	Chỉ đổi chunker, mọi thứ khác giữ hằng và máy kiểm; bộ câu hỏi đóng băng; kiểm định ghép cặp; đọc từng ca ở mức chunk; kết luận đúng mức ([REPO docs/reports/epics/EPIC-06-experiment.md:17-21]).	interview file_13
+Kết quả không có ý nghĩa thống kê thì bạn làm gì?	Nói rõ "không đủ bằng chứng", trình bày CI, và đào xuống cơ chế (chunk-level) để rút bài học thay vì bịa kết luận ([REPO docs/reports/epics/EPIC-06-experiment.md:556-571]).	interview file_13
+Làm sao biết lỗi do hệ thống hay do cách đo?	Đọc từng ca bất đồng, đọc <code>reason</code> của judge, đối chiếu spot-check của người ([REPO docs/reports/epics/EPIC-06-experiment.md:534-554]).	interview file_13
+Vì sao giữ Arm A khi accuracy B nhỉnh hơn?	Vì khác biệt accuracy không đáng tin; A rẻ hơn 494 token, giữ code nguyên, citation thẳng hàng section; lựa chọn dựa vào chi phí và cơ chế đo được ([REPO docs/reports/epics/EPIC-06-experiment.md:575-580]).	interview file_13
+Cache ảnh hưởng thí nghiệm ra sao?	Tiết kiệm quota nhưng gây confounding độ trễ (<code>embed_query</code> B 0.1 ms vs A 352 ms), nên độ trễ không được kiểm định ([REPO docs/reports/epics/EPIC-06-experiment.md:113-118]).	interview file_13
+Bạn đề xuất gì tiếp theo?	Ngưỡng theo từng arm, hybrid retrieval + đa dạng hoá biến thể, viết lại truy vấn VI→EN, mỗi cái kèm metric thành công định trước ([REPO docs/reports/epics/EPIC-06-experiment.md:586-603]).	interview file_13
+Bạn kiểm thử code gọi API bên ngoài thế nào?	Đặt sau interface, dùng fake có kịch bản thất bại, tiêm đồng hồ/sleep; mặc định offline, test live tách bằng marker ([REPO pyproject.toml:25-31]).	interview file_14
+Coverage 100% có đủ không?	Không; chỉ nói dòng nào được chạy. Mutation testing kiểm test có <b>bắt lỗi</b>; repo dùng như cổng nghiệm thu ([REPO AI_WORKLOG.md:351-352]).	interview file_14
+Bạn xử lý test flaky ra sao?	Thu bằng chứng có hệ thống (15/15), không che giấu, ghi nhận nguyên nhân nghi ngờ nhưng chưa xác nhận ([REPO README.md:305-309]).	interview file_14
+Làm sao test độ trễ/retry mà không chờ thật?	Đồng hồ giả trong đó <code>sleep</code> cộng thời gian ([REPO tests/fakes.py:50-62]).	interview file_14
+Bạn giữ kiến trúc phân tầng thế nào?	Một test dùng <code>ast</code> quét import và fail nếu vi phạm ([REPO CLAUDE.md:7]).	interview file_14
+Một sai lầm bạn từng gặp khi thử đột biến?	Khôi phục bằng <code>git checkout</code> trên file chưa được theo dõi khiến đột biến ở lại; bắt được nhờ <code>grep</code> lại trước khi commit ([REPO AI_WORKLOG.md:129-131]).	interview file_14
+Bạn dùng AI khi phát triển thế nào mà vẫn kiểm soát chất lượng?	Tách executor/verifier, verifier tái tạo mọi số và đọc test để tìm test không thể fail, nhật ký trung thực có mục "AI làm sai gì", và quyết định mở luôn hỏi chủ dự án ([REPO agents/prompts/99-VERIFY.md:12-19]).	interview file_15
+AI làm sai điều gì trong dự án của bạn?	Bịa xác nhận của chủ dự án (subagent), khẳng định nhánh dựa trên <code>dev</code> mà không kiểm, số đếm cũ, thông điệp commit sai về mức rủi ro — mỗi cái có cách bắt và sửa ([REPO AI_WORKLOG.md:601-604], [REPO AI_WORKLOG.md:760-768]).	interview file_15
+Bạn quản lý nhánh và phát hành ra sao?	Nhánh tác vụ từ <code>dev</code>, merge về <code>dev</code>; <code>main</code> chỉ khi chủ dự án nói; tag <code>eval-freeze-v1</code> và <code>v1.0-submission</code> ([REPO CLAUDE.md:15]).	interview file_15
+Làm việc song song nhiều phiên thế nào?	Git worktree riêng cho từng phiên; lưu ý dữ liệu bị ignore và editable install ([REPO src/knowledge_assistant/config.py:18-30]).	interview file_15
+Bạn bảo vệ bí mật thế nào?	Chỉ đọc từ môi trường, che khi ghi, không in, quét lịch sử git (198 commit, 0 lần) ([REPO docs/plans/task-ledger.md:38-38]).	interview file_15
+Bạn quyết định điều gì và AI quyết định điều gì?	AI thực thi và đề xuất; các điểm quyết định (ngưỡng, phương pháp chấm, luật hit) do chủ dự án, ghi ngày vào spec/ADR ([REPO docs/specs/evaluation-spec.md:3-3]).	interview file_15
+Bạn sẽ cải thiện hệ RAG này thế nào?	Theo bằng chứng: mở rộng eval, ngưỡng theo arm, judge thứ hai, chạy đường lỗi thật; sau đó hybrid + đa dạng hoá biến thể cho ca gần trùng ([REPO docs/reports/epics/EPIC-06-experiment.md:586-603]).	interview file_16
+Khi nào dùng hybrid search?	Khi có nhiều định danh/từ khoá chính xác (tên API) mà embedding làm mờ; kết hợp BM25 và dense bằng RRF; phải đo lại ([REPO agents/prompts/13-BONUS-001-hybrid-and-query-rewrite.md:7-7]).	interview file_16
+Reranking có đáng không?	Tuỳ bằng chứng: nếu chunk đúng ở top-5 nhưng xếp thấp và gây lỗi thì có; ở EXP-001 tầng <code>ranking</code> không kích hoạt nên chưa có lý do rõ ([REPO docs/reports/epics/EPIC-06-experiment.md:466-466]).	interview file_16
+Rủi ro khi cho người dùng upload tài liệu?	Prompt injection, riêng tư, thiếu ground truth, citation theo trang; README liệt kê ([REPO README.md:312-327]).	interview file_16
+Bạn đo tác động của một thay đổi như thế nào?	Bộ eval đóng băng, một biến đổi, kiểm định ghép cặp + CI, đọc ca bất đồng (file 10–13).	interview file_16
+Bạn dự phòng gì cho lỗi API thật chưa gặp?	Repo có retry/fallback nhưng chưa từng thấy 429/503 thật; việc tiếp theo là kiểm chứng đường đó ([REPO AI_WORKLOG.md:883-902]).	interview file_16
