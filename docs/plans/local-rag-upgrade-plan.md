@@ -227,6 +227,31 @@ Not planned:
   model competes for the same cores. Revisit only if the benchmark script shows otherwise.
 - **Any step that calls the model twice per question** (query rewriting, keyword translation) as a default.
 
+### 6.5 Indexing speed (owner question, 2026-11-21)
+
+Measured (EmbeddingGemma 1 fp32, ONNX Runtime CPU, 200 arm-A chunks, pinned to i7-12700H E-cores as a stand-in for
+the target; relative numbers only):
+
+| Setting | Chunks/s | Peak RAM MB |
+|---|---|---|
+| 4 cores, batch 1 / 4 / 8 / 16 / 32 | 2.4 / 2.5 / 2.3 / 2.3 / 2.2 | 636 / 661 / 933 / 930 / 1522 |
+| 8 cores, batch 8 | 4.5 | 937 |
+
+Batch size does not change speed, but batches above 4 cost RAM: use **batch 4**. Speed scales with cores, so
+encoding is compute-bound and the only levers are doing less work or using other hardware. In order of expected
+payoff (*estimates* until measured):
+
+| # | Change | Note |
+|---|---|---|
+| 1 | Never embed a chunk twice: the existing embedding cache (key = model id + task + text) plus file-hash chunk ids (§7.2) | Re-uploads, renames and re-indexing after a crash cost nothing. Already half in place. |
+| 2 | Background indexing per file, with progress and cancel (§7.2); each file becomes searchable as soon as it is done, not when the whole batch is | The wait is felt less; total time unchanged. |
+| 3 | Use all physical cores while indexing, fewer while the user is chatting | 8 vs 4 cores ≈ 1.9× here. |
+| 4 | Intel iGPU through ONNX Runtime's OpenVINO or DirectML execution provider | Target has an Intel UHD iGPU. Needs a separate package (owner approval to download) and its own benchmark, quality included. |
+| 5 | A smaller embedder (e.g. `multilingual-e5-small`, about 118M parameters) | Must pass the same retrieval benchmark first; EmbeddingGemma 1 is the bar. |
+| 6 | Shorter chunks | Little to gain: chunks are already about 235 tokens (median). |
+
+Not worth it on this CPU: int8 and int4 builds (measured slower than fp32, `docs/reports/2026-11-21-embedding-benchmark.md`).
+
 ## 7. Phase 2 and 3 — retrieval and ingestion
 
 ### 7.1 Phase 2 — hybrid search and reranking (month 3)
@@ -265,6 +290,24 @@ close:
 | Indexing a textbook on CPU takes minutes | Background job with progress and cancel; the document is searchable only when complete. |
 
 Collections: one per subject or course, each with its own vector collection and keyword index.
+
+#### 7.2.1 Projects and how many files a project can hold (owner, 2026-11-21)
+
+The number of files does not grow the LLM's context: the model only receives the retrieved passages, a fixed budget
+whatever the collection size. What grows with the file count is indexing time, index size (about 3 KB per chunk at
+768 dimensions; 100,000 chunks ≈ 300 MB) and the number of near-miss passages competing for the top-k slots, which is
+the real quality risk. So the limit is set by retrieval precision and indexing time, not by the context window.
+
+| Item | Plan |
+|---|---|
+| Projects, NotebookLM-style | A project is the "collection" above: a named group of files the user creates and uploads into. Retrieval only ever searches the open project. In one shared Chroma collection this is a `project_id` metadata filter; separate collections per project are equally fine. Decide in Phase 3. |
+| Source toggles | In the open project, each file has an on/off switch; retrieval filters on the enabled `source_id`s (vector and keyword index alike). |
+| Fixed passage budget | The LLM receives passages up to a token budget (first value: about 3,000 tokens with a 4,096–8,192 context), not a fixed k. Tokens counted with the LLM's tokenizer. |
+| Per-source cap | At most N passages from one file in the final context (first value: 2), so one long file cannot fill the budget. Measured on the benchmark like any retriever change (§4.2). |
+| Soft size limit | Warn by expected indexing time, not file count: first value 3,000 chunks per project (*estimate*: about 20 minutes on the target at the 2026-11-21 rate). No hard limit. |
+| Scale check | Measure section hit@k as the collection grows with distractor documents (same questions, more near-misses). Distractor source: **DECISION REQUIRED** (the four excluded documents may not be used, CLAUDE.md rule 4). |
+
+Memory layers (conversation history, document summaries) are out of scope for now (owner, 2026-11-21).
 
 No ground truth exists for uploaded documents. For them the project reports conversion and retrieval sanity checks
 only, never an accuracy figure.
