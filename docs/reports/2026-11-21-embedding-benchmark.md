@@ -115,7 +115,8 @@ numbers as indicative and the ordering as the result; confirm on the real machin
 ## Outcome
 
 - Best candidate from this run: **EmbeddingGemma 1**. Quality within noise of Gemini on both languages; fp32 is the
-  fastest build, int4 roughly halves memory for a one-case loss at @1, but neither meets the 0.2 GB budget.
+  fastest build, int4 roughly halves memory for a one-case loss at @1. Neither meets the plan's original 0.2 GB
+  line, but under the owner's clarified target (above) gemma1 fp32 is the default and int4 the low-RAM option.
 - EmbeddingGemma 2 (text only) is slower and uses more memory, and on this set it never retrieves better than
   EmbeddingGemma 1 at @1 (not significant at n = 32). Not recommended here, despite its better published MTEB scores.
 - int8 builds are not worth it on this CPU (slower, no memory saving under load).
