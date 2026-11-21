@@ -166,7 +166,12 @@ def worker(args: argparse.Namespace) -> int:
     outputs = [o.name for o in session.get_outputs()]
     record["onnx_inputs"] = {n: [str(i.type), [str(d) for d in i.shape]] for n, i in inputs.items()}
     record["onnx_outputs"] = outputs
-    unknown = set(inputs) - {"input_ids", "attention_mask"}
+    # EmbeddingGemma 2's text graph also takes the media encoders' outputs (image/video/audio_features, shape
+    # [num_tokens, 512]); a text-only input feeds them empty (0 tokens), as transformers.js does for text.
+    media = {n: np.zeros((0, int(i.shape[1])), dtype=np.float32) for n, i in inputs.items()
+             if n.endswith("_features") and i.type == "tensor(float)" and len(i.shape) == 2}
+    record["empty_media_inputs"] = sorted(media)
+    unknown = set(inputs) - {"input_ids", "attention_mask"} - set(media)
     if unknown or "input_ids" not in inputs:
         raise SystemExit(f"unexpected ONNX inputs {sorted(inputs)}: only input_ids/attention_mask are fed")
     if "sentence_embedding" not in outputs:
@@ -182,7 +187,7 @@ def worker(args: argparse.Namespace) -> int:
         for row, x in enumerate(ids):
             input_ids[row, : len(x)] = x
             mask[row, : len(x)] = 1
-        feed = {"input_ids": input_ids}
+        feed = {"input_ids": input_ids, **media}
         if "attention_mask" in inputs:
             feed["attention_mask"] = mask
         (vectors,) = session.run(["sentence_embedding"], feed)
@@ -440,7 +445,7 @@ def orchestrate(args: argparse.Namespace) -> int:
     for model in args.models:
         for variant in args.variants:
             for profile in args.profiles:
-                cmd = [sys.executable, str(Path(__file__).resolve()), "--worker", "--model", model,
+                cmd = [args.worker_python or sys.executable, str(Path(__file__).resolve()), "--worker", "--model", model,
                        "--variant", variant, "--profile", profile, "--model-dir", str(Path(args.models_dir) / model),
                        "--out-dir", str(out_dir), "--batch-size", str(args.batch_size),
                        "--max-tokens", str(args.max_tokens), "--latency-repeats", str(args.latency_repeats)]
@@ -508,6 +513,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--lowend-threads", type=int, default=4)
     parser.add_argument("--lowend-docs", type=int, default=200, help="chunks encoded in the low-end speed run")
     parser.add_argument("--keep-vectors", action="store_true")
+    parser.add_argument("--worker-python", help="interpreter for the model runs (needs onnxruntime, tokenizers, "
+                        "numpy), e.g. a separate venv with a newer onnxruntime; scoring stays in this interpreter")
     parser.add_argument("--check-recorded", action="store_true", help="only run the harness self-check")
     # worker-only
     parser.add_argument("--worker", action="store_true", help=argparse.SUPPRESS)
