@@ -31,16 +31,21 @@ standalone** RAG desktop app that:
 | GUI | The PySide6 GUI stays and stays independent of the Planner. |
 | LLM runtime | Bundled `llama-server` (llama.cpp): OpenAI-style API, grammar-constrained JSON. Ollama remains usable through the same adapter. |
 | Default LLM | 1.5–2B parameters, Q4 quantisation (Qwen3 1.7B or a newer model of the same size). "Quality" option: 4B Q4. |
-| Default embedder | `multilingual-e5-small`, ONNX int8. `bge-m3` optional on stronger machines. Final choice by evaluation. |
+| Default embedder | `multilingual-e5-small`, ONNX int8. `bge-m3` optional on stronger machines. Final choice by evaluation. Benchmark 2026-11-21: EmbeddingGemma 1 (fp32, int4 for low RAM) within noise of Gemini; EmbeddingGemma 2 behind (`docs/reports/2026-11-21-embedding-benchmark.md`). |
 | Keyword search for Vietnamese | Syllable + bigram tokens, plus a diacritic-stripped copy of the index. No heavy NLP library. |
 | Ingestion | Convert every input file to Markdown with MarkItDown, then use the existing Markdown chunkers. |
 | Product shape | Standalone PySide6 app: application layer in-process, starts and stops `llama-server` itself. Study features have screens in this app. |
 | Planner integration | Optional mode of the same install, off by default and enabled in settings: FastAPI on localhost, versioned under `/v1`, C# client generated from OpenAPI (NSwag). Loose coupling through a discovery file (§8.1). |
 | Gemini | Fallback only during the transition (see §4.3 for what "removed" means). |
 
-RAM budget on the 8 GB target (*estimate*): Windows about 3 GB, and the Planner about 0.5 GB when both apps run,
-leaving the assistant under 2.5 GB in total: LLM 1.2–1.5 GB, embedder 0.2 GB, index under 0.5 GB, **plus the
-reranker, which the first draft did not count** (§7.1).
+RAM budget (owner, 2026-11-21): "8 GB" is the app's whole share of RAM, so that it can run alongside other
+applications on a 16 GB machine; it is not a machine with 8 GB in total. Embedder: **≤ 1 GB peak working set**,
+indexing included (EmbeddingGemma 1 fp32 measured about 0.55 GB loaded and 1 GB at the indexing peak,
+`docs/reports/2026-11-21-embedding-benchmark.md`). The LLM, index and reranker figures still need the same
+re-estimate (§7.1).
+
+Superseded first estimate (8 GB machine): Windows about 3 GB, and the Planner about 0.5 GB when both apps run,
+leaving the assistant under 2.5 GB in total: LLM 1.2–1.5 GB, embedder 0.2 GB, index under 0.5 GB, plus the reranker.
 
 ## 3. What the current code makes easy and hard
 
