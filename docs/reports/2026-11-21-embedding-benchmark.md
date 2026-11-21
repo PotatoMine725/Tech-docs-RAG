@@ -44,9 +44,17 @@ chunk that hits any slot, so it saturates for Gemini.
 Against Gemini, case by case: gemma1 (every variant) loses 2 cases at @1 (Q-EVAL-008, -028; int4 also -016) and at
 @5 wins 1 (-022) and loses 2 (-029, -032). gemma2 loses 6 cases at @1 and at @5 wins 2, loses 4.
 
-Reading: with n = 16 per language, one or two cases is noise. gemma1 is within that margin of Gemini. gemma2 is
-4 cases behind gemma1 at @1, almost all on Vietnamese questions (8/16 against 11/16); that gap is larger than noise
-but rests on one 32-question set, so it is evidence, not proof.
+Paired gemma1 against gemma2 (exact two-sided sign test on discordant cases):
+
+| Pair | @1: only first hits / only second hits | p | @5 | p |
+|---|---|---|---|---|
+| gemma1 fp32 vs gemma2 fp32 | 4 / 0 | 0.125 | 3 / 2 | 1.0 |
+| gemma1 int4 vs gemma2 int4 | 4 / 1 | 0.375 | 3 / 2 | 1.0 |
+| gemma1 fp32 vs gemma1 int4 | 1 / 0 | 1.0 | 0 / 0 | 1.0 |
+
+Reading: with n = 16 per language, one or two cases is noise. gemma1 is within that margin of Gemini. gemma2 trails
+gemma1 at @1 in a consistent direction (fp32: gemma2 never wins a case gemma1 loses), mostly on Vietnamese questions
+(8/16 against 11/16), but the difference is **not statistically significant at n = 32**, and at @5 the two are level.
 
 ## Precision fidelity (cosine to the same model's fp32)
 
@@ -84,8 +92,20 @@ Peak RAM = the process's peak working set (includes Python, NumPy and the tokeni
 Observations, as measured:
 - int8 (dynamic quantization) is slower than fp32 and, for gemma1, peaks higher in RAM during batch indexing, even
   though it is the smallest right after loading (149 MB working set against 552 MB for fp32). Not investigated.
-- gemma1 int4 is the only build near the plan's embedder budget: about 0.5 GB peak, against about 1 GB for gemma1
-  fp32 and 1.3-1.9 GB for every gemma2 build.
+- Memory against the plan's embedder budget of **0.2 GB** (plan § memory budget): no build meets it. Three figures,
+  full profile:
+
+  | Model | After load, working set MB (closest to the app's steady query state) | Peak working set MB (batch-8 indexing) | Peak private MB |
+  |---|---|---|---|
+  | gemma1 fp32 | 552 | 977 | 1776 |
+  | gemma1 int4 | 238 | 553 | 1184 |
+  | gemma1 int8 | 149 | 1648 | 1967 |
+  | gemma2 fp32 | 664 | 1736 | 3417 |
+  | gemma2 int4 | 209 | 1289 | 2965 |
+
+  gemma1 int4 is the closest (238 MB loaded, about 0.55 GB while indexing). Every gemma2 build commits about 3 GB of
+  private memory during indexing, which is a real cost on an 8 GB machine that must also hold the LLM. The budget
+  needs revisiting with the owner, or indexing needs a smaller batch (not measured).
 - Low-end indexing of all 733 chunks would take about 5-6 min (gemma1 fp32) to 9 min (gemma1 int4) at these rates.
 
 Limits of the low-end emulation: E-cores only approximate a 4-core gen-10 CPU. The instruction set (INT8 speed depends
@@ -95,9 +115,9 @@ numbers as indicative and the ordering as the result; confirm on the real machin
 ## Outcome
 
 - Best candidate from this run: **EmbeddingGemma 1**. Quality within noise of Gemini on both languages; fp32 is the
-  fastest build, int4 halves memory for a one-case loss at @1.
-- EmbeddingGemma 2 (text only) is slower, uses more memory, and retrieves worse on this corpus, mainly for Vietnamese
-  questions. Not recommended here, despite its better published MTEB scores.
+  fastest build, int4 roughly halves memory for a one-case loss at @1, but neither meets the 0.2 GB budget.
+- EmbeddingGemma 2 (text only) is slower and uses more memory, and on this set it never retrieves better than
+  EmbeddingGemma 1 at @1 (not significant at n = 32). Not recommended here, despite its better published MTEB scores.
 - int8 builds are not worth it on this CPU (slower, no memory saving under load).
 - Not decided here (owner): fp32 vs int4 for gemma1 on the 8 GB target; whether to also run the plan's original
   candidate (`multilingual-e5-small`) under the same harness; production retriever settings (dedup, score gate) for
