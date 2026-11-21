@@ -116,7 +116,10 @@ numbers as indicative and the ordering as the result; confirm on the real machin
 
 - Best candidate from this run: **EmbeddingGemma 1**. Quality within noise of Gemini on both languages; fp32 is the
   fastest build, int4 roughly halves memory for a one-case loss at @1. Neither meets the plan's original 0.2 GB
-  line, but under the owner's clarified target (above) gemma1 fp32 is the default and int4 the low-RAM option.
+  line. The owner said (2026-11-21) that 0.2 GB is too strict: the 8 GB target is the app's share of RAM on a
+  16 GB machine running other applications. Under that reading gemma1 fp32 (0.55 GB loaded, about 1 GB at the
+  indexing peak) fits and is the default; int4 (0.24 / 0.55 GB) is the low-RAM option. The new embedder figure for
+  the plan is the owner's call.
 - EmbeddingGemma 2 (text only) is slower and uses more memory, and on this set it never retrieves better than
   EmbeddingGemma 1 at @1 (not significant at n = 32). Not recommended here, despite its better published MTEB scores.
 - int8 builds are not worth it on this CPU (slower, no memory saving under load).
