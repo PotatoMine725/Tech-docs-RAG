@@ -65,7 +65,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
-from knowledge_assistant.composition import ARMS, build_answer_service, open_embedder  # noqa: E402
+from knowledge_assistant.composition import ARMS, build_answer_service, create_llm, open_embedder  # noqa: E402
 from knowledge_assistant.config import get_logs_dir  # noqa: E402
 from knowledge_assistant.core.exceptions import (  # noqa: E402
     ConfigurationError,
@@ -78,13 +78,12 @@ from knowledge_assistant.core.exceptions import (  # noqa: E402
 )
 from knowledge_assistant.core.models import AnswerResult  # noqa: E402
 from knowledge_assistant.infrastructure.gemini_retry import redact_key  # noqa: E402
-from knowledge_assistant.infrastructure.llm.gemini import GeminiLLM  # noqa: E402
 
 
 @contextlib.contextmanager
 def open_service(arm: str, gate_off: bool):
-    """(AnswerQuestion, GeminiLLM) for one arm; the query embedder is closed on exit."""
-    llm = GeminiLLM()
+    """(AnswerQuestion, LLM) for one arm, providers from configuration; the query embedder is closed on exit."""
+    llm = create_llm()
     with open_embedder() as embedder:
         yield build_answer_service(arm, llm, embedder, gate_off=gate_off), llm
 

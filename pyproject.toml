@@ -18,6 +18,8 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest"]
+# Local embedding (EMBEDDING_PROVIDER=embeddinggemma): EmbeddingGemma v1 ONNX on the CPU.
+local = ["onnxruntime>=1.20", "tokenizers>=0.20", "numpy>=1.26"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

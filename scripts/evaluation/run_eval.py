@@ -58,8 +58,8 @@ from knowledge_assistant.application.generation.answer_question import AnswerQue
 from knowledge_assistant.application.retrieval.retrieve import Retriever  # noqa: E402
 from knowledge_assistant.composition import build_answer_service, open_embedder, open_vector_store  # noqa: E402
 from knowledge_assistant.config import (  # noqa: E402
+    get_active_embedding_model_id,
     get_answer_settings,
-    get_embedding_settings,
     get_retrieval_settings,
 )
 from knowledge_assistant.core.exceptions import (  # noqa: E402
@@ -97,7 +97,7 @@ class Services:
 
 @contextlib.contextmanager
 def open_services(arm: str, mode: str, settings, on_provider_error):
-    """The query embedder (Gemini behind the on-disk cache), the arm's existing collection and, in full mode, the LLM
+    """The query embedder (the configured provider behind the on-disk cache), the arm's existing collection and, in full mode, the LLM
     with its throttles, built ONCE here. `settings` is the answer settings the run was configured with."""
     retrieval = get_retrieval_settings()
     with open_embedder() as embedder:
@@ -214,12 +214,14 @@ def _run(args, emit, services, git_state, root: Path, today) -> int:
 
     # 2. the settings this run uses (full mode: the fallback model is forced off) and its identity
     settings = replace(get_answer_settings(), allow_fallback=False)
-    retrieval, embedding = get_retrieval_settings(), get_embedding_settings()
+    retrieval = get_retrieval_settings()
+    embedding_model, _, dim = get_active_embedding_model_id().rpartition("@")
+    embedding_dim = int(dim)
     prompt_file = settings.prompts_dir / f"{settings.prompt_version}.md"
     config = RunConfig(
         arm=args.arm, mode=args.mode, split=args.split, answer_model=settings.model,
         fallback_model=settings.fallback_model, allow_fallback=settings.allow_fallback,
-        embedding_model=embedding.model, embedding_dim=embedding.dim, throttle_rpm=settings.limits.throttle_rpm,
+        embedding_model=embedding_model, embedding_dim=embedding_dim, throttle_rpm=settings.limits.throttle_rpm,
         threshold=retrieval.insufficient_score_threshold, prompt_version=settings.prompt_version,
         prompt_sha256=hashlib.sha256(prompt_file.read_bytes()).hexdigest(), top_k=retrieval.top_k,
         overfetch=retrieval.overfetch, freeze_tag=FREEZE_TAG, freeze_tag_commit=tag_commit, question_files=hashes,
