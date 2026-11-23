@@ -47,19 +47,34 @@ class EmbeddingGemmaEmbedder:
     def stats(self) -> dict[str, float]:
         return {"batches": self.batches, "texts": self.texts, "api_requests": 0}
 
-    def plan_calls(self, texts: list[str]) -> list[list[str]]:
-        """Groups of `batch_size` texts; `embed(group)` runs one ONNX batch, so the cache commits after each."""
+    def _index_groups(self, texts: list[str]) -> list[list[int]]:
+        """Indices sorted by token count (stable), cut into groups of `batch_size`. Similar lengths share a batch, so
+        little padding is computed (the benchmark's encode_all sorts the same way). Token count, not character
+        count: on arm A, character sorting gave 6.85 texts/s and token sorting 8.08, back to back
+        (docs/reports/2026-11-23-local-reindex.md). The prefix is the same for every text, so it is left out."""
+        if not texts:
+            return []
+        _, tokenizer = self._load()
+        lengths = [len(e.ids) for e in tokenizer.encode_batch(texts)]
+        order = sorted(range(len(texts)), key=lengths.__getitem__)
         size = self._settings.batch_size
-        return [texts[i : i + size] for i in range(0, len(texts), size)]
+        return [order[i : i + size] for i in range(0, len(order), size)]
+
+    def plan_calls(self, texts: list[str]) -> list[list[str]]:
+        """Token-length-sorted groups of at most `batch_size` texts; together they hold every text once, NOT in input
+        order. `embed(group)` runs one ONNX batch (a group plans to itself), so the cache commits after each."""
+        return [[texts[i] for i in group] for group in self._index_groups(texts)]
 
     def embed(self, texts: list[str], task: EmbeddingTask) -> list[list[float]]:
+        """Vectors in input order, whatever order the batches ran in."""
         if not texts:
             return []
         np = _numpy()
         session, tokenizer = self._load()
         prefix = PREFIXES[task]
-        vectors: list[list[float]] = []
-        for batch in self.plan_calls(texts):
+        vectors: list[list[float]] = [[] for _ in texts]
+        for group in self._index_groups(texts):
+            batch = [texts[i] for i in group]
             encoded = tokenizer.encode_batch([prefix + text for text in batch])
             ids = [e.ids[: self._settings.max_tokens] for e in encoded]
             width = max(len(x) for x in ids)
@@ -75,7 +90,11 @@ class EmbeddingGemmaEmbedder:
                 (out,) = session.run([OUTPUT], feed)
             except Exception as error:  # ONNX Runtime raises its own exception types
                 raise EmbeddingError(f"local embedding failed: {error}") from error
-            vectors.extend(self._finish(np.asarray(out, dtype=np.float32)))
+            finished = self._finish(np.asarray(out, dtype=np.float32))
+            if len(finished) != len(group):
+                raise EmbeddingError(f"local model returned {len(finished)} vectors for {len(group)} texts")
+            for i, vector in zip(group, finished):
+                vectors[i] = vector
             self.batches += 1
             self.texts += len(batch)
         return vectors

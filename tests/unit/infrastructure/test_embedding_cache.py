@@ -112,14 +112,54 @@ def test_wrong_vector_count_from_inner_raises(db_path):
             cache.embed(["a", "b"], DOC)
 
 
-def test_an_inner_plan_that_drops_or_reorders_texts_is_rejected(db_path):
-    class BadPlan(FakeEmbedder):
+def test_an_inner_plan_that_drops_or_repeats_a_text_is_rejected(db_path):
+    class Drops(FakeEmbedder):
         def plan_calls(self, texts):
-            return [list(reversed(texts))]
+            return [texts[:-1]]
 
-    with CachingEmbedder(BadPlan(), db_path) as cache:
-        with pytest.raises(EmbeddingError, match="in order"):
-            cache.embed(["a", "b"], DOC)
+    class Repeats(FakeEmbedder):
+        def plan_calls(self, texts):
+            return [texts, texts[:1]]
+
+    for bad in (Drops(), Repeats()):
+        with CachingEmbedder(bad, db_path) as cache:
+            with pytest.raises(EmbeddingError, match="covered|exactly once"):
+                cache.embed(["a", "b"], DOC)
+
+
+def test_an_inner_plan_may_reorder_texts_and_the_result_keeps_input_order(db_path):
+    """The local embedder length-sorts: groups come out of input order, each still one committed call."""
+
+    class Reversed(FakeEmbedder):
+        def plan_calls(self, texts):
+            backwards = list(reversed(texts))
+            return [backwards[i : i + self.batch_size] for i in range(0, len(backwards), self.batch_size)]
+
+    inner = Reversed(batch_size=2)
+    with CachingEmbedder(inner, db_path) as cache:
+        result = cache.embed(["a", "b", "c"], DOC)
+    assert inner.calls == [(["c", "b"], DOC), (["a"], DOC)]
+    assert result == [pytest.approx(inner.vector(t), abs=1e-6) for t in ["a", "b", "c"]]
+
+
+def test_a_reordered_plan_keeps_every_finished_group_after_a_crash(db_path):
+    class ReversedFailsOnSecond(FakeEmbedder):
+        def plan_calls(self, texts):
+            backwards = list(reversed(texts))
+            return [backwards[i : i + self.batch_size] for i in range(0, len(backwards), self.batch_size)]
+
+        def embed(self, texts, task):
+            if len(self.calls) == 1:
+                raise EmbeddingError("stop")
+            return super().embed(texts, task)
+
+    with CachingEmbedder(ReversedFailsOnSecond(batch_size=2), db_path) as cache:
+        with pytest.raises(EmbeddingError):
+            cache.embed(["1", "2", "3", "4"], DOC)
+    resumed = FakeEmbedder(batch_size=10)
+    with CachingEmbedder(resumed, db_path) as cache:
+        cache.embed(["1", "2", "3", "4"], DOC)
+    assert resumed.calls == [(["1", "2"], DOC)]
 
 
 def _protocol_members(protocol: type) -> dict[str, object]:

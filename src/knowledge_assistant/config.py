@@ -300,9 +300,17 @@ class RetrievalSettings:
     insufficient_score_threshold: float
 
 
+# OD-9 gate threshold per embedding provider: scores of different embedders are not comparable. Each value comes from
+# the same rule (dev set, Arm A, lowest answerable top-1 - 0.05; retrieval-spec.md). gemini: RAG-002, 2026-09-26.
+# embeddinggemma: tuned for fp32 @768 (2026-11-23, ADR-0006); other variants / dims are not tuned (TBD).
+GATE_THRESHOLDS = {"gemini": 0.686, "embeddinggemma": 0.5417}
+
+
 def get_retrieval_settings() -> RetrievalSettings:
+    """`INSUFFICIENT_SCORE_THRESHOLD`, when set, overrides the provider's default."""
+    override = (os.getenv("INSUFFICIENT_SCORE_THRESHOLD") or "").strip()
     return RetrievalSettings(
         top_k=int(os.getenv("TOP_K", "5")),
         overfetch=int(os.getenv("RETRIEVAL_OVERFETCH", "10")),
-        insufficient_score_threshold=float(os.getenv("INSUFFICIENT_SCORE_THRESHOLD", "0.686")),
+        insufficient_score_threshold=float(override) if override else GATE_THRESHOLDS[get_embedding_provider()],
     )

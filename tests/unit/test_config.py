@@ -9,6 +9,8 @@ from pathlib import Path
 import pytest
 
 from knowledge_assistant.config import (
+    EMBEDDING_PROVIDERS,
+    GATE_THRESHOLDS,
     PROJECT_ROOT,
     ModelLimits,
     get_answer_settings,
@@ -16,6 +18,7 @@ from knowledge_assistant.config import (
     get_chunks_dir,
     get_embedding_settings,
     get_logs_dir,
+    get_retrieval_settings,
 )
 from knowledge_assistant.core.exceptions import ConfigurationError
 
@@ -204,3 +207,23 @@ def test_model_names_appear_in_no_source_file_except_config():
         if path.name != "config.py" and re.search(r"gemini-(?:\d|embedding|flash|pro)", path.read_text(encoding="utf-8"))
     ]
     assert offenders == []
+
+
+@pytest.mark.parametrize("provider, expected", [("gemini", 0.686), ("embeddinggemma", 0.5417)])
+def test_gate_threshold_defaults_to_the_embedding_providers_tuned_value(monkeypatch, provider, expected):
+    monkeypatch.delenv("INSUFFICIENT_SCORE_THRESHOLD", raising=False)
+    monkeypatch.setenv("EMBEDDING_PROVIDER", provider)
+    assert get_retrieval_settings().insufficient_score_threshold == expected
+
+
+def test_gate_threshold_env_overrides_every_provider_default(monkeypatch):
+    monkeypatch.setenv("INSUFFICIENT_SCORE_THRESHOLD", "0.6")
+    for provider in ("gemini", "embeddinggemma"):
+        monkeypatch.setenv("EMBEDDING_PROVIDER", provider)
+        assert get_retrieval_settings().insufficient_score_threshold == 0.6
+    monkeypatch.setenv("INSUFFICIENT_SCORE_THRESHOLD", "")
+    assert get_retrieval_settings().insufficient_score_threshold == 0.5417
+
+
+def test_every_embedding_provider_has_a_gate_threshold():
+    assert set(GATE_THRESHOLDS) == set(EMBEDDING_PROVIDERS)
