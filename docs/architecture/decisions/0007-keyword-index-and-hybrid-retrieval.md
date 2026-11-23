@@ -75,6 +75,9 @@ ingestion, plan §7.2) and must not add a dependency.
 - The default (dense) behaviour and every recorded run are unchanged; switching mode needs no re-embedding.
 - `scripts/evaluation/compare_retrieval_runs.py` shows the mode, the cases that ended in an error (a sparse run whose
   question shares no word with the index) and a per-language table.
+- The desktop app calls one retriever from any thread-pool worker. The FTS5 connection is therefore opened with
+  `check_same_thread=False`, and every statement holds one lock (tested from several threads). Hybrid/sparse in the
+  GUI has not been tried by hand.
 - Memory/latency on the 8 GB target: not measured in this step (TBD with the reranker, plan §2 RAM budget).
 - Sparse rankings do not depend on the embedder. The gemini and the embeddinggemma sparse runs differ only in the
   gate column.

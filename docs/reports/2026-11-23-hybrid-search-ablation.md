@@ -1,6 +1,10 @@
 # Hybrid search ablation: dense / sparse / hybrid × Gemini / EmbeddingGemma (plan step 4a)
 
-Date: 2026-11-23. Commit of every run: `44f25e6` (branch `hybrid-search`, clean tree). Decision record: ADR-0007.
+Date: 2026-11-23. Commit of every run: `44f25e6` (branch `hybrid-search`). 21 runs recorded a clean tree. Three
+runs recorded `git_dirty: true` because docs were being edited while they ran: `dev-B-…-local-hybrid` and
+`eval-A-…-local-hybrid` (`.env.example`) and `eval-B-…-local-hybrid` (`.env.example`, `docs/specs/retrieval-spec.md`).
+No code file was dirty and neither file is read at runtime (`.env.example` is never loaded), so the results stand.
+Decision record: ADR-0007.
 Retrieval only: 24 runs, **0 LLM requests, 0 embedding API requests** (every query embedding was cached; all 24 runs
 finished with every case ok, no errors). No question file was written or changed.
 
@@ -84,21 +88,27 @@ The dev split has no span ground truth, so it cannot show section or evidence di
 ## Reading
 - **Local embedder:** hybrid lifts evidence_hit@5 on both arms (A 0.719 → 0.812, B 0.719 → 0.812; +4/−1 and +5/−2
   cases) and source top-1 on B (29 → 31). section_hit@5 moves by one case (A −1, B +1). In Vietnamese questions,
-  evidence_hit@5 goes 0.625 → 0.750 (A) and 0.625 → 0.688 (B). BM25 on the original Vietnamese question matches the
-  English technical terms the question contains (every sparse eval and dev question matched at least one chunk).
+  evidence_hit@5 goes 0.625 → 0.750 (A) and 0.625 → 0.688 (B). BM25 on the original Vietnamese question matches through
+  the English words the question contains. Checked on the sparse runs: for all 16 VI answerable eval questions on
+  both arms, the words the question shares with its sparse top-1 chunk are ASCII only (no Vietnamese word). Examples:
+  Q-EVAL-022 matches `usestatuscodepageswithredirects`, `status`, `code`, `url`, `client`; Q-EVAL-008 matches
+  `404`, `api`, `id`, `int`. Every sparse eval and dev question matched at least one chunk (0 errors).
 - **Gemini:** hybrid does not help on this set. evidence_hit@5 drops (A 0.938 → 0.875, B 0.844 → 0.781; −3/+1 and
-  −4/+2 cases, mostly VI), and section_hit@5 is flat or +1. Sparse alone is below Gemini dense on every metric.
+  −4/+2 cases, mostly VI), and section_hit@5 is flat or +1. Sparse alone is below Gemini dense on every eval metric
+  except expected source in top-5 (32/32 for both).
 - **Sparse alone** matches local dense on evidence_hit@5 or beats it (A 0.812 vs 0.719, B 0.750 vs 0.719) but is
   worse on top-1 and MRR.
 - **Gate:** unchanged by design (dense top-1). The local gate still refuses 5/32 answerable eval questions on each arm,
-  4 or 5 of them Vietnamese. Hybrid improves what is retrieved for those questions but cannot stop the refusal. That
+  4 or 5 of them Vietnamese. Whatever hybrid retrieves, the gate decision is the same as in dense mode. Changing it
   needs the reranker's absolute score (plan §7.1, ADR-0007 D6, TBD) or a different local threshold rule (owner's call,
   retrieval-spec.md).
 
 ## Caveats (honest limits of this benchmark)
-- **Ceiling.** Gemini dense is already at 0.938 section_hit@5 (both arms) and 0.938 evidence_hit@5 (arm A) on 32
-  answerable questions. That leaves at most two cases of headroom per metric, so this set cannot show a hybrid gain
-  for Gemini, and a loss of one to three cases is within what 32 questions can resolve. As plan §7.1 says, the
+- **Ceiling.** Gemini dense is already at 0.938 (30/32) section_hit@5 on both arms and 0.938 evidence_hit@5 on arm A,
+  with source top-1 at 32/32. On those metrics only two cases of headroom are left, so they cannot show a hybrid gain
+  for Gemini. The ceiling does **not** explain everything: Gemini arm B evidence_hit@5 is 0.844 (27/32, five cases of
+  headroom), and hybrid still went down there (−4/+2, mostly VI). No significance test was run; differences of one
+  to three cases are indications only. As plan §7.1 says, the
   benchmark needs exact-identifier questions (class names, method names, error codes, where keyword search should
   help) and Vietnamese-corpus questions before hybrid can be judged.
 - **Vietnamese tokenization is not validated.** The corpus is English only. The VI numbers above measure Vietnamese

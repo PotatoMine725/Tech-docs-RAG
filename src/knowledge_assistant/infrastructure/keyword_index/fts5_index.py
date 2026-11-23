@@ -12,10 +12,14 @@ Queries: the raw question is never passed to MATCH (FTS5 query syntax would reje
 NOT as operators). Its word tokens are quoted one by one and joined with OR, so a question matches a chunk that holds
 any of its words and BM25 ranks them (an implicit AND would match almost nothing for a Vietnamese question over the
 English corpus). `bm25()` is lower = better; `score` is its negation, so higher = better like the dense score.
+
+Threads: the desktop app builds a retriever once and calls it from any thread-pool worker, so the connection is opened
+with `check_same_thread=False` and every use of it holds one lock (one statement at a time; searches take milliseconds).
 """
 import json
 import re
 import sqlite3
+import threading
 from dataclasses import asdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -79,10 +83,12 @@ class Fts5KeywordIndex:
         self.tokenizer = tokenizer
         self.path = Path(directory) / index_file_name(chunker_config)
         self._connection: sqlite3.Connection | None = None
+        self._lock = threading.Lock()
         if self.path.exists() or create:
             self.path.parent.mkdir(parents=True, exist_ok=True)
-            self._connection = sqlite3.connect(self.path)
-            self._prepare()
+            self._connection = sqlite3.connect(self.path, check_same_thread=False)
+            with self._lock:
+                self._prepare()
 
     def _prepare(self) -> None:
         connection = self._connection
@@ -109,9 +115,10 @@ class Fts5KeywordIndex:
         return self._connection is not None
 
     def close(self) -> None:
-        if self._connection is not None:
-            self._connection.close()
-            self._connection = None
+        with self._lock:
+            if self._connection is not None:
+                self._connection.close()
+                self._connection = None
 
     def _writable(self) -> sqlite3.Connection:
         if self._connection is None:
@@ -123,7 +130,7 @@ class Fts5KeywordIndex:
         for chunk in chunks:
             if chunk.chunker_config != self.chunker_config:
                 raise KeywordIndexError(f"chunk {chunk.chunk_id} is {chunk.chunker_config}, index is {self.chunker_config}")
-        with connection:
+        with self._lock, connection:
             connection.executemany("DELETE FROM chunks WHERE chunk_id = ?", [(chunk.chunk_id,) for chunk in chunks])
             connection.executemany(
                 "INSERT INTO chunks (text, chunk_id, source_id, chunk_json) VALUES (?, ?, ?, ?)",
@@ -132,18 +139,19 @@ class Fts5KeywordIndex:
 
     def delete_source(self, source_id: str) -> int:
         connection = self._writable()
-        with connection:
+        with self._lock, connection:
             return connection.execute("DELETE FROM chunks WHERE source_id = ?", (source_id,)).rowcount
 
     def search(self, query: str, top_k: int) -> list[RetrievedChunk]:
         expression = match_expression(query)
         if self._connection is None or expression is None or top_k <= 0:
             return []
-        rows = self._connection.execute(
-            "SELECT chunk_json, bm25(chunks) AS rank_value FROM chunks WHERE chunks MATCH ? "
-            "ORDER BY rank_value, chunk_id LIMIT ?",
-            (expression, top_k),
-        ).fetchall()
+        with self._lock:
+            rows = self._connection.execute(
+                "SELECT chunk_json, bm25(chunks) AS rank_value FROM chunks WHERE chunks MATCH ? "
+                "ORDER BY rank_value, chunk_id LIMIT ?",
+                (expression, top_k),
+            ).fetchall()
         return [
             RetrievedChunk(chunk=_chunk_from_json(chunk_json), rank=rank, score=-float(value))
             for rank, (chunk_json, value) in enumerate(rows, start=1)
@@ -152,9 +160,11 @@ class Fts5KeywordIndex:
     def count(self) -> int:
         if self._connection is None:
             return 0
-        return self._connection.execute("SELECT count(*) FROM chunks").fetchone()[0]
+        with self._lock:
+            return self._connection.execute("SELECT count(*) FROM chunks").fetchone()[0]
 
     def get_ids(self) -> set[str]:
         if self._connection is None:
             return set()
-        return {row[0] for row in self._connection.execute("SELECT chunk_id FROM chunks")}
+        with self._lock:
+            return {row[0] for row in self._connection.execute("SELECT chunk_id FROM chunks")}

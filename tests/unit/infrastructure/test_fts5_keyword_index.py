@@ -124,3 +124,14 @@ def test_reopened_index_keeps_its_rows(tmp_path):
     _index(tmp_path, [make_chunk("01", 0, "kestrel")]).close()
     reopened = Fts5KeywordIndex(tmp_path, "header-1600", create=False)
     assert reopened.exists and reopened.count() == 1
+
+
+def test_an_index_opened_on_one_thread_serves_searches_from_other_threads(tmp_path):
+    """The desktop app builds the retriever once and asks from any thread-pool worker (wiring.py)."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    index = _index(tmp_path, [make_chunk("01", 0, "kestrel"), make_chunk("02", 0, "kestrel server")])
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        results = list(pool.map(lambda _: [hit.chunk.source_id for hit in index.search("kestrel", 5)], range(16)))
+    assert all(sorted(result) == ["01", "02"] for result in results)
+    assert index.count() == 2
