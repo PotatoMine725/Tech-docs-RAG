@@ -104,6 +104,7 @@ class AnswerResult:
     llm: LLMResponse | None  # None when the retrieval gate fired
     prompt_version: str
     duplicates_dropped: int = 0  # over-fetched hits dropped as same-content duplicates (RAG-002 addendum 1)
+    gate_score: float | None = None  # the retrieval-gate input: dense top-1 cosine (ADR-0007 D6); None = retrieved[0].score
 
 
 @dataclass(frozen=True)

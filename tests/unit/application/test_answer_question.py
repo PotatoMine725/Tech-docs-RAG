@@ -168,3 +168,29 @@ def test_an_llm_error_reaches_the_caller_and_is_never_turned_into_insufficient(e
     with pytest.raises(type(error)) as raised:
         _service(FailingLLM()).ask("Question?")
     assert raised.value is error
+
+
+class _FusedRetriever:
+    """A hybrid-like retriever: RRF-sized chunk scores (~0.03), dense gate score given separately (ADR-0007 D6)."""
+
+    def __init__(self, gate_score):
+        self._inner = _service(FakeLLM()).__dict__["_retriever"]
+        self._gate = gate_score
+
+    def retrieve(self, question):
+        from dataclasses import replace
+
+        result = self._inner.retrieve(question)
+        fused = tuple(replace(hit, score=0.03) for hit in result.chunks)
+        return replace(result, chunks=fused, gate_score=self._gate)
+
+
+@pytest.mark.parametrize("gate_score, gated", [(0.8, False), (0.4, True)])
+def test_gate_reads_the_dense_gate_score_not_the_fused_chunk_score(gate_score, gated):
+    llm = FakeLLM(_reply(answer="Body [1]."))
+    service = _service(llm, threshold=0.5)
+    service._retriever = _FusedRetriever(gate_score)
+    result = service.ask("What is this?")
+    assert (llm.requests == []) is gated
+    assert result.gate_score == gate_score
+    assert result.retrieved[0].score == 0.03

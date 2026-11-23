@@ -89,3 +89,17 @@ def test_a_chunk_file_mixing_arms_or_repeating_ids_is_refused(tmp_path):
     store = ChromaVectorStore(tmp_path / "chroma", CONFIG, MODEL)
     with pytest.raises(ValueError, match="duplicate"):
         IndexCorpus(FakeEmbedder(), store).run(write_chunks(tmp_path / "a.jsonl", [make_chunk(0), make_chunk(0)]))
+
+
+def test_index_keywords_adds_only_missing_chunks_and_reports_counts(tmp_path):
+    from knowledge_assistant.application.ingestion.index_corpus import index_keywords
+    from knowledge_assistant.infrastructure.keyword_index.fts5_index import Fts5KeywordIndex
+
+    chunks = [make_chunk(i) for i in range(4)]
+    index = Fts5KeywordIndex(tmp_path, "header-1600")
+    first = index_keywords(chunks[:2], index)
+    assert (first.already_present, first.newly_indexed, first.index_count) == (0, 2, 2)
+    second = index_keywords(chunks, index)  # resume: the first two are skipped
+    assert (second.already_present, second.newly_indexed, second.index_count) == (2, 2, 4)
+    with pytest.raises(ValueError, match="duplicate"):
+        index_keywords([chunks[0], chunks[0]], index)

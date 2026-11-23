@@ -45,7 +45,7 @@ is one element of the list). A test keeps this list equal to what result_to_dict
                                              throttle_wait, total; generate/retry_wait/throttle_wait absent when
                                              the gate refused
   retrieval                     object
-  retrieval.top1_score          float        similarity of the best passage
+  retrieval.top1_score          float        the gate input: dense top-1 similarity (every RETRIEVAL_MODE)
   retrieval.threshold           float | null  null with --gate-off
   retrieval.gate_off            bool
   retrieval.duplicates_dropped  int
@@ -127,7 +127,7 @@ def result_to_dict(result: AnswerResult, arm: str, threshold: float) -> dict:
         },
         "latency_ms": {stage: round(ms, 1) for stage, ms in result.latency_ms.items()},
         "retrieval": {
-            "top1_score": round(result.retrieved[0].score, 4),
+            "top1_score": round(_gate_score(result), 4),
             "threshold": _threshold(threshold),
             "gate_off": _threshold(threshold) is None,
             "duplicates_dropped": result.duplicates_dropped,
@@ -136,6 +136,11 @@ def result_to_dict(result: AnswerResult, arm: str, threshold: float) -> dict:
         "dropped_markers": list(result.dropped_markers),
         "uncited_sentences": result.uncited_sentences,
     }
+
+
+def _gate_score(result: AnswerResult) -> float:
+    """What the gate compared with the threshold: the dense top-1 score (ADR-0007 D6)."""
+    return result.retrieved[0].score if result.gate_score is None else result.gate_score
 
 
 def render_text(result: AnswerResult, arm: str, threshold: float) -> str:
@@ -169,7 +174,7 @@ def render_text(result: AnswerResult, arm: str, threshold: float) -> str:
         lines.append("Tokens: none")
     shown = _threshold(threshold)
     lines.append(
-        f"Retrieval: top-1 score {result.retrieved[0].score:.4f}, threshold "
+        f"Retrieval: top-1 score {_gate_score(result):.4f} (dense), threshold "
         f"{'off' if shown is None else f'{shown:.4f}'}, duplicates dropped {result.duplicates_dropped}"
     )
     return "\n".join(lines) + "\n"

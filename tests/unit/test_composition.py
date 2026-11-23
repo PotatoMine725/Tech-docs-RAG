@@ -43,3 +43,41 @@ def test_a_missing_collection_is_a_vector_store_error_naming_the_build_command(t
     monkeypatch.setenv("CHUNKS_DIR", str(tmp_path / "chunks"))  # no chunk file there either
     with pytest.raises(VectorStoreError, match="build_chunks|build_index"):
         open_vector_store("A")
+
+
+def _chunk_dir(tmp_path, monkeypatch):
+    from knowledge_assistant.application.ingestion.build_chunks import chunk_to_record
+
+    chunks = [make_chunk(f"{i:02d}", i, f"Passage body {i} kestrel.", ("Doc", f"Part {i}")) for i in range(1, 7)]
+    (tmp_path / "chunks").mkdir()
+    (tmp_path / "chunks" / "arm-a.jsonl").write_text(
+        "".join(json.dumps(chunk_to_record(c)) + "\n" for c in chunks), encoding="utf-8")
+    monkeypatch.setenv("CHUNKS_DIR", str(tmp_path / "chunks"))
+    monkeypatch.setenv("KEYWORD_INDEX_DIR", str(tmp_path / "keyword"))
+    return chunks
+
+
+def test_dense_mode_needs_no_keyword_index(tmp_path, monkeypatch):
+    from knowledge_assistant.composition import create_retriever
+
+    _chunk_dir(tmp_path, monkeypatch)
+    monkeypatch.delenv("RETRIEVAL_MODE", raising=False)
+    retriever = create_retriever("A", FakeEmbedder(), _store(0.9))
+    assert retriever.mode == "dense"
+    assert not (tmp_path / "keyword").exists()
+
+
+def test_hybrid_mode_opens_the_arms_keyword_index_or_names_the_build_command(tmp_path, monkeypatch):
+    from knowledge_assistant.application.ingestion.index_corpus import index_keywords
+    from knowledge_assistant.composition import create_retriever
+    from knowledge_assistant.core.exceptions import KeywordIndexError
+    from knowledge_assistant.infrastructure.keyword_index.fts5_index import Fts5KeywordIndex
+
+    chunks = _chunk_dir(tmp_path, monkeypatch)
+    monkeypatch.setenv("RETRIEVAL_MODE", "hybrid")
+    with pytest.raises(KeywordIndexError, match="build_index"):
+        create_retriever("A", FakeEmbedder(), _store(0.9))
+    index_keywords(chunks, Fts5KeywordIndex(tmp_path / "keyword", "header-1600"))
+    retriever = create_retriever("A", FakeEmbedder(), _store(0.9))
+    assert (retriever.mode, retriever.rrf_k) == ("hybrid", 60)
+    assert len(retriever.retrieve("kestrel?").chunks) == 5

@@ -11,6 +11,7 @@ from pathlib import Path
 
 from knowledge_assistant.application.ingestion.build_chunks import load_chunks
 from knowledge_assistant.core.interfaces.embedding import Embedder, EmbeddingTask
+from knowledge_assistant.core.interfaces.keyword_index import KeywordIndex
 from knowledge_assistant.core.interfaces.vector_store import VectorStore
 from knowledge_assistant.core.models import DocumentChunk
 
@@ -35,6 +36,32 @@ class IndexReport:
 
     def to_dict(self) -> dict:
         return asdict(self)
+
+
+@dataclass(frozen=True)
+class KeywordIndexReport:
+    """The keyword-index part of one build (ADR-0007): same chunks, same resume rule as the vector store."""
+
+    already_present: int  # chunk_ids already in the keyword index (skipped: resume)
+    newly_indexed: int
+    index_count: int  # index.count() after the run
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+def index_keywords(chunks: list[DocumentChunk], index: KeywordIndex, batch: int = 500) -> KeywordIndexReport:
+    """Adds the chunks the keyword index does not have yet, in file order. No quota and no model: it runs before the
+    embedding step, so a run stopped by the embedding quota still leaves a complete keyword index."""
+    ids = [chunk.chunk_id for chunk in chunks]
+    if len(set(ids)) != len(ids):
+        raise ValueError("chunk file has duplicate chunk_ids")
+    present = index.get_ids()
+    todo = [chunk for chunk in chunks if chunk.chunk_id not in present]
+    for i in range(0, len(todo), batch):
+        index.upsert(todo[i : i + batch])
+    return KeywordIndexReport(already_present=len(chunks) - len(todo), newly_indexed=len(todo),
+                              index_count=index.count())
 
 
 def chunker_config_of(chunks: list[DocumentChunk]) -> str:

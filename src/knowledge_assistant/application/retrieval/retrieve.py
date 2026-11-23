@@ -1,12 +1,23 @@
-"""Query → ranked chunks (RAG-002). Embeds the question as a QUERY (the composition root passes a cached embedder),
-searches one arm's store, and drops same-content duplicates.
+"""Query → ranked chunks (RAG-002; modes ADR-0007). Embeds the question as a QUERY (the composition root passes a cached
+embedder), searches one arm's indexes, and drops same-content duplicates.
+
+Modes (RETRIEVAL_MODE, default `dense`):
+- `dense`: the vector store only; exactly the behaviour before ADR-0007.
+- `sparse`: the keyword index only (BM25 on the original question, no translation).
+- `hybrid`: Reciprocal Rank Fusion of the dense and the keyword list, each `top_k + overfetch` long:
+  score(chunk) = sum over the lists that hold it of 1 / (rrf_k + rank), rrf_k = 60.
+
+Gate score (ADR-0007 D6): every mode embeds the question and runs the dense search, and `gate_score` is the dense
+top-1 cosine of the active embedder. RRF and BM25 scores are rank-based or unbounded and cannot say "nothing
+relevant", so the OD-9 gate keeps reading the dense score until the reranker step gives an absolute one (TBD). In dense
+mode `gate_score` equals `chunks[0].score`, as before.
 
 Dedup (RAG-002 addendum 1 + owner decision 2026-09-26, both arms alike): fetch `top_k + overfetch` hits, order them
 by (score desc, chunk_id), keep the first hit of each `passage_hash` (the link-stripped text the LLM sees), cut to
 `top_k` and number the ranks 1..k again. The kept hit lists the chunk IDs it replaced in `duplicate_chunk_ids`.
 `content_hash` is not used: chunks whose text differs only in a link URL (e.g. doc 17's repeated sections) have
 different content hashes but the same passage and the same vector. `duplicates_dropped` counts the over-fetched
-hits dropped this way.
+hits dropped this way. In hybrid mode dedup runs on the fused list.
 """
 import time
 from collections.abc import Callable
@@ -15,8 +26,13 @@ from dataclasses import dataclass
 from knowledge_assistant.application.common.passage import passage_hash
 from knowledge_assistant.core.exceptions import RetrievalError
 from knowledge_assistant.core.interfaces.embedding import Embedder, EmbeddingTask
+from knowledge_assistant.core.interfaces.keyword_index import KeywordIndex
 from knowledge_assistant.core.interfaces.vector_store import VectorStore
 from knowledge_assistant.core.models import RetrievedChunk
+
+DENSE, SPARSE, HYBRID = "dense", "sparse", "hybrid"
+RETRIEVAL_MODES = (DENSE, SPARSE, HYBRID)
+RRF_K = 60  # ADR-0007 D5 (Cormack et al. 2009)
 
 
 @dataclass(frozen=True)
@@ -24,6 +40,11 @@ class RetrievalResult:
     chunks: tuple[RetrievedChunk, ...]  # rank 1 first, ranks 1..k
     duplicates_dropped: int
     latency_ms: dict[str, float]  # embed_query, retrieve
+    gate_score: float | None = None  # dense top-1 cosine (the OD-9 gate input); None = chunks[0].score
+
+    def __post_init__(self) -> None:
+        if self.gate_score is None and self.chunks:
+            object.__setattr__(self, "gate_score", self.chunks[0].score)
 
 
 def dedupe_by_passage(hits: list[RetrievedChunk], top_k: int) -> tuple[list[RetrievedChunk], int]:
@@ -45,6 +66,21 @@ def dedupe_by_passage(hits: list[RetrievedChunk], top_k: int) -> tuple[list[Retr
     ], dropped
 
 
+def reciprocal_rank_fusion(lists: list[list[RetrievedChunk]], k: int = RRF_K) -> list[RetrievedChunk]:
+    """One list of every chunk in `lists`, scored sum(1 / (k + rank)) over the lists that hold it (rank = position in
+    that list, 1-based), ordered by (score desc, chunk_id) and ranked 1..n."""
+    scores: dict[str, float] = {}
+    chunks = {}
+    for hits in lists:
+        for position, hit in enumerate(hits, start=1):
+            chunk_id = hit.chunk.chunk_id
+            scores[chunk_id] = scores.get(chunk_id, 0.0) + 1.0 / (k + position)
+            chunks.setdefault(chunk_id, hit.chunk)
+    ordered = sorted(scores, key=lambda chunk_id: (-scores[chunk_id], chunk_id))
+    return [RetrievedChunk(chunk=chunks[chunk_id], rank=rank, score=scores[chunk_id])
+            for rank, chunk_id in enumerate(ordered, start=1)]
+
+
 class Retriever:
     def __init__(
         self,
@@ -53,13 +89,26 @@ class Retriever:
         top_k: int = 5,
         overfetch: int = 10,
         clock: Callable[[], float] = time.perf_counter,
+        *,
+        keyword_index: KeywordIndex | None = None,
+        mode: str = DENSE,
+        rrf_k: int = RRF_K,
     ) -> None:
         if top_k < 1 or overfetch < 0:
             raise ValueError(f"top_k must be >= 1 and overfetch >= 0, got {top_k}, {overfetch}")
+        if mode not in RETRIEVAL_MODES:
+            raise ValueError(f"mode must be one of {RETRIEVAL_MODES}, got {mode!r}")
+        if mode != DENSE and keyword_index is None:
+            raise ValueError(f"retrieval mode {mode} needs a keyword index")
+        if rrf_k < 1:
+            raise ValueError(f"rrf_k must be >= 1, got {rrf_k}")
         self._embedder = embedder
         self._store = store
+        self._keywords = keyword_index
         self.top_k = top_k
         self.overfetch = overfetch
+        self.mode = mode
+        self.rrf_k = rrf_k
         self._clock = clock
 
     def retrieve(self, question: str) -> RetrievalResult:
@@ -68,13 +117,26 @@ class Retriever:
         embedded = self._clock()
         if len(vectors) != 1:
             raise RetrievalError(f"expected 1 query embedding, got {len(vectors)}")
-        hits = self._store.search(vectors[0], self.top_k + self.overfetch)
-        searched = self._clock()
-        if not hits:
+        fetch = self.top_k + self.overfetch
+        dense = self._store.search(vectors[0], fetch)
+        if not dense:
             raise RetrievalError("the vector store returned no chunks (is the collection indexed?)")
+        gate_score = max(hit.score for hit in dense)
+        if self.mode == DENSE:
+            hits = dense
+        else:
+            sparse = self._keywords.search(question, fetch)
+            if self.mode == SPARSE:
+                if not sparse:
+                    raise RetrievalError("the keyword index matched no chunk (no question word occurs in the index)")
+                hits = sparse
+            else:
+                hits = reciprocal_rank_fusion([dense, sparse], self.rrf_k)
+        searched = self._clock()
         chunks, dropped = dedupe_by_passage(hits, self.top_k)
         return RetrievalResult(
             chunks=tuple(chunks),
             duplicates_dropped=dropped,
             latency_ms={"embed_query": (embedded - start) * 1000.0, "retrieve": (searched - embedded) * 1000.0},
+            gate_score=gate_score,
         )

@@ -26,7 +26,7 @@ from knowledge_assistant.application.evaluation.records import (
     record_key,
 )
 from knowledge_assistant.application.generation.answer_question import AnswerQuestion
-from knowledge_assistant.application.retrieval.retrieve import Retriever
+from knowledge_assistant.application.retrieval.retrieve import RETRIEVAL_MODES, RRF_K, Retriever
 from knowledge_assistant.core.exceptions import (
     EmbeddingError,
     EvaluationError,
@@ -44,6 +44,9 @@ RETRIEVAL, FULL = "retrieval", "full"
 MODES = (RETRIEVAL, FULL)
 SPLITS = ("eval", "dev")
 SCHEMA_VERSION = 1
+# RunConfig keys added after runs were recorded, with the value those runs used: a manifest without the key compares as
+# this value, so a dense run recorded before ADR-0007 still resumes with the default settings.
+LEGACY_DEFAULTS = {"retrieval_mode": "dense", "rrf_k": RRF_K}
 
 QUOTA, MAX_LLM_CALLS, ABORTED = "quota", "max_llm_calls", "aborted"  # RunSummary.stopped
 CASE_ERRORS = (LLMError, GenerationError, EmbeddingError, RetrievalError)  # a case fails; anything else is a bug
@@ -70,6 +73,8 @@ class RunConfig:
     freeze_tag: str
     freeze_tag_commit: str
     question_files: dict[str, str]  # file name -> SHA-256 (both files, whichever split runs)
+    retrieval_mode: str = "dense"  # ADR-0007; runs recorded before it have no key and were dense (LEGACY_DEFAULTS)
+    rrf_k: int = RRF_K  # used by hybrid mode only
 
     def __post_init__(self) -> None:
         if self.arm not in ARMS:
@@ -85,6 +90,8 @@ class RunConfig:
             raise ValueError(f"threshold must be a finite number (a disabled gate is never evaluated), got {self.threshold}")
         if self.top_k < 1 or self.overfetch < 0 or self.throttle_rpm < 1:
             raise ValueError("top_k and throttle_rpm must be at least 1 and overfetch at least 0")
+        if self.retrieval_mode not in RETRIEVAL_MODES:
+            raise ValueError(f"retrieval_mode must be one of {RETRIEVAL_MODES}, got {self.retrieval_mode!r}")
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -202,6 +209,10 @@ class RunEvaluation:
         if answerer is not None and answerer.threshold != config.threshold:
             raise ValueError(f"the answerer's gate threshold {answerer.threshold} differs from the configured "
                              f"threshold {config.threshold}")
+        retriever_mode = getattr(retriever, "mode", "dense")  # test fakes have no mode: they stand for dense
+        if retriever_mode != config.retrieval_mode:
+            raise ValueError(f"the retriever runs in {retriever_mode} mode, the run is configured for "
+                             f"{config.retrieval_mode}")
         if max_llm_calls < 0:
             raise ValueError(f"max_llm_calls must be >= 0, got {max_llm_calls}")
         self._run_id = run_id
@@ -234,7 +245,7 @@ class RunEvaluation:
                 if case["question"] in missing:
                     continue
                 try:
-                    top1 = self._retriever.retrieve(case["question"]).chunks[0].score
+                    top1 = self._retriever.retrieve(case["question"]).gate_score
                 except (EmbeddingError, RetrievalError):
                     continue
                 if top1 < self._config.threshold:
@@ -350,10 +361,11 @@ class RunEvaluation:
             result = self._retriever.retrieve(question)
             latency = dict.fromkeys(LATENCY_STAGES)
             latency.update(result.latency_ms, total=(self._clock() - start) * 1000.0)
-            return {**self._retrieval_fields(result.chunks, result.duplicates_dropped), "latency_ms": latency}, 0
+            return {**self._retrieval_fields(result.chunks, result.duplicates_dropped, result.gate_score),
+                    "latency_ms": latency}, 0
 
         answer = self._answerer.ask(question)
-        fields = self._retrieval_fields(answer.retrieved, answer.duplicates_dropped)
+        fields = self._retrieval_fields(answer.retrieved, answer.duplicates_dropped, answer.gate_score)
         llm = answer.llm
         if fields["gate_fired"] != (llm is None):
             raise EvaluationError(
@@ -391,8 +403,10 @@ class RunEvaluation:
         )
         return fields, (llm.retry_count + 1 if llm else 0)
 
-    def _retrieval_fields(self, chunks, duplicates_dropped: int) -> dict:
-        top1 = chunks[0].score
+    def _retrieval_fields(self, chunks, duplicates_dropped: int, gate_score: float | None = None) -> dict:
+        """`top1_score` is the gate input: the dense top-1 cosine in every retrieval mode (ADR-0007 D6), equal to
+        `chunks[0].score` in dense mode. The fused or BM25 scores stay in `retrieved[i].score`."""
+        top1 = chunks[0].score if gate_score is None else gate_score
         return {
             "retrieved": [chunk_entry(hit) for hit in chunks],
             "top1_score": top1,
@@ -434,7 +448,7 @@ class RunEvaluation:
         """A recorded run continues only with the settings it started with (git state and times are not settings)."""
         if manifest is None:
             return
-        config, recorded = self._config.to_dict(), manifest["config"]
+        config, recorded = self._config.to_dict(), {**LEGACY_DEFAULTS, **manifest["config"]}
         differing = sorted(key for key in config.keys() | recorded.keys() if config.get(key) != recorded.get(key))
         if manifest.get("run_id") != self._run_id or differing:
             raise RunConfigMismatch(
