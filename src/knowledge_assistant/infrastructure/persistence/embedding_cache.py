@@ -45,7 +45,7 @@ class PlannedEmbedder(Embedder, Protocol):
     """An Embedder that also says how it splits texts into provider calls (a batching detail, so not core)."""
 
     def plan_calls(self, texts: list[str]) -> list[list[str]]:
-        """How `embed` splits `texts` into provider calls, in order.
+        """How `embed` splits `texts` into provider calls: every text exactly once, groups in any order.
 
         `embed(group)` on one returned group makes exactly one provider call, so a caller that
         stores results per group (the embedding cache) keeps every paid call's vectors.
@@ -104,18 +104,23 @@ class CachingEmbedder:
         for key, text in zip(keys, texts):
             if key not in found and key not in missing:
                 missing[key] = text
-        # The inner embedder owns the split rule (count and token caps); the cache never re-slices,
-        # so a group here is exactly one paid call and is committed before the next one is sent.
-        pending = list(missing.items())
-        start = 0
-        for group in self._inner.plan_calls([text for _, text in pending]):
-            batch = pending[start : start + len(group)]
-            start += len(group)
-            if [text for _, text in batch] != list(group):
-                raise EmbeddingError("inner plan_calls must return every text once, in order")
+        # The inner embedder owns the split rule (count and token caps, and the order: the local embedder
+        # length-sorts); the cache never re-slices, so a group here is exactly one paid call and is committed
+        # before the next one is sent. Groups may come in any order but must hold every missing text exactly
+        # once; the result is rebuilt by key below, so it is in input order either way.
+        key_of = {text: key for key, text in missing.items()}  # unique: the key is a hash of (model, task, text)
+        sent: set[str] = set()
+        for group in self._inner.plan_calls(list(missing.values())):
+            batch = []
+            for text in group:
+                key = key_of.get(text)
+                if key is None or key in sent:
+                    raise EmbeddingError("inner plan_calls must return every text exactly once")
+                sent.add(key)
+                batch.append((key, text))
             found.update(self._embed_and_store(batch, task))
-        if start != len(pending):
-            raise EmbeddingError(f"inner plan_calls covered {start} of {len(pending)} texts")
+        if len(sent) != len(missing):
+            raise EmbeddingError(f"inner plan_calls covered {len(sent)} of {len(missing)} texts")
 
         return [found[key] for key in keys]
 

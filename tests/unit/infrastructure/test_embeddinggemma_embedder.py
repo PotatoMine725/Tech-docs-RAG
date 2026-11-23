@@ -70,7 +70,8 @@ def test_task_prompts_match_the_benchmark(tmp_path):
     embedder, _, tokenizer = make(tmp_path)
     embedder.embed(["doc"], EmbeddingTask.DOCUMENT)
     embedder.embed(["q"], EmbeddingTask.QUERY)
-    assert tokenizer.seen == ["title: none | text: doc", "task: search result | query: q"]
+    prompted = [t for t in tokenizer.seen if " | " in t]  # the plan also tokenizes the bare texts to sort them
+    assert prompted == ["title: none | text: doc", "task: search result | query: q"]
 
 
 def test_batches_are_zero_padded_with_a_matching_mask(tmp_path):
@@ -130,3 +131,54 @@ def test_missing_model_file_is_a_configuration_error(tmp_path):
 def test_construction_loads_nothing(tmp_path):
     settings = replace(get_local_embedding_settings(), model_dir=Path(tmp_path) / "absent")
     EmbeddingGemmaEmbedder(settings)  # no error: the model loads on the first embed
+
+
+def test_plan_calls_groups_texts_of_similar_length_and_covers_every_text_once(tmp_path):
+    embedder, _, _ = make(tmp_path, batch_size=2)
+    texts = ["cccccc", "a", "eeeeeeeeee", "bbb", "dddddddd"]
+    groups = embedder.plan_calls(texts)
+    assert groups == [["a", "bbb"], ["cccccc", "dddddddd"], ["eeeeeeeeee"]]
+    assert all(embedder.plan_calls(group) == [group] for group in groups)  # a group plans to itself: one batch
+
+
+def test_embed_returns_input_order_and_sorted_batches_pad_less(tmp_path):
+    texts = ["x" * 40, "y", "z" * 38, "w" * 2]
+    sorted_embedder, sorted_session, _ = make(tmp_path, batch_size=2)
+    vectors = sorted_embedder.embed(texts, EmbeddingTask.DOCUMENT)
+    expected = [sorted_embedder.embed([t], EmbeddingTask.DOCUMENT)[0] for t in texts]
+    assert vectors == expected
+
+    def padded_cells(session):
+        return sum(f["attention_mask"].size for f in session.feeds[:2])
+
+    def real_cells(session):
+        return sum(int(f["attention_mask"].sum()) for f in session.feeds[:2])
+
+    assert real_cells(sorted_session) == sum(len("title: none | text: " + t) for t in texts)
+    in_input_order = 2 * (20 + 40) + 2 * (20 + 38)  # the old contiguous batches: [x40, y], [z38, w2]
+    assert padded_cells(sorted_session) < in_input_order
+
+
+def test_the_cache_stores_sorted_groups_and_returns_input_order(tmp_path):
+    embedder, session, _ = make(tmp_path, batch_size=2)
+    texts = ["long text here", "a", "medium", "bb"]
+    with CachingEmbedder(embedder, tmp_path / "c.sqlite") as cache:
+        result = cache.embed(texts, EmbeddingTask.DOCUMENT)
+    direct = [embedder.embed([t], EmbeddingTask.DOCUMENT)[0] for t in texts]
+    assert result == [pytest.approx(v, abs=1e-6) for v in direct]
+    assert len(session.feeds) == 2 + len(texts)
+
+
+def test_plan_sorts_by_token_count_not_characters(tmp_path):
+    class WordTokenizer(FakeTokenizer):
+        def encode_batch(self, texts):
+            return [SimpleNamespace(ids=[1] * len(t.split())) for t in texts]
+
+    settings = replace(get_local_embedding_settings(), cache_path=tmp_path / "c.sqlite", batch_size=1)
+    embedder = EmbeddingGemmaEmbedder(settings, session=FakeSession(), tokenizer=WordTokenizer())
+    assert embedder.plan_calls(["a b c", "longwordwithoutspaces"]) == [["longwordwithoutspaces"], ["a b c"]]
+
+
+def test_planning_nothing_loads_no_model(tmp_path):
+    settings = replace(get_local_embedding_settings(), model_dir=Path(tmp_path) / "absent")
+    assert EmbeddingGemmaEmbedder(settings).plan_calls([]) == []  # all cache hits: the model is never opened
