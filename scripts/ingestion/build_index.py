@@ -4,8 +4,10 @@
 
 Reads data/processed/chunks/arm-<a|b>.jsonl. Chunks already in the arm's collection are skipped and
 texts already in the embedding cache cost no quota, so a stopped run is resumed by running it again.
---dry-run makes no API call and writes nothing to Chroma: it prints what a run would send and a
+--dry-run makes no API call and writes nothing to Chroma: it prints what a run would send and, for Gemini, a
 simulated duration under the per-minute throttle.
+The embedder is the configured provider (EMBEDDING_PROVIDER: gemini | embeddinggemma); each provider/model gets its
+own collection, so switching providers never mixes vectors.
 A real run appends its IndexReport to validation/retrieval/indexing-log.jsonl.
 """
 import argparse
@@ -22,7 +24,9 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from knowledge_assistant.application.ingestion.build_chunks import load_chunks  # noqa: E402
 from knowledge_assistant.application.ingestion.index_corpus import IndexCorpus, chunker_config_of  # noqa: E402
+from knowledge_assistant.composition import create_embedder, embedding_cache_path  # noqa: E402
 from knowledge_assistant.config import (  # noqa: E402
+    get_active_embedding_model_id,
     get_chroma_path,
     get_chunks_dir,
     get_embedding_settings,
@@ -70,35 +74,36 @@ def simulate_minutes(plan: list[list[str]], requests_per_minute: int, tokens_per
 
 
 def dry_run(arm: str, chunks_path: Path) -> int:
-    settings = get_embedding_settings()
     chunks = load_chunks(chunks_path)
     config = chunker_config_of(chunks)
-    store = ChromaVectorStore(get_chroma_path(), config, settings.model_id, create=False)
+    store = ChromaVectorStore(get_chroma_path(), config, get_active_embedding_model_id(), create=False)
     present = store.get_ids()
     pending = [chunk for chunk in chunks if chunk.chunk_id not in present]
-    gemini = GeminiEmbedder(settings)  # no client is created: planning makes no call
-    with CachingEmbedder(gemini, settings.cache_path) as cache:
+    embedder = create_embedder()  # no client and no model is loaded: planning makes no call
+    with CachingEmbedder(embedder, embedding_cache_path()) as cache:
         to_send = cache.missing([chunk.embed_text for chunk in pending], EmbeddingTask.DOCUMENT)
-    plan = gemini.plan_calls(to_send)
+    plan = embedder.plan_calls(to_send)
     tokens = sum(estimate_tokens(text) for text in to_send)
-    minutes = simulate_minutes(plan, settings.requests_per_minute, settings.tokens_per_minute)
     print(f"DRY RUN arm {arm} ({config}), collection {store.name} ({'exists' if store.exists else 'not created yet'})")
+    print(f"embedder: {embedder.model_id}")
     print(f"chunks in file: {len(chunks)}; already in store: {len(chunks) - len(pending)}; to index: {len(pending)}")
-    print(f"unique texts to send (not in cache): {len(to_send)}; est. tokens (chars/4): {tokens}")
-    print(f"provider calls: {len(plan)}; largest call: {max((len(g) for g in plan), default=0)} texts")
-    print(f"quota requests (1 per text): {len(to_send)} of {DAILY_REQUEST_LIMIT}/day")
-    print(f"simulated: last call starts at {minutes:.1f} min (throttle {settings.requests_per_minute} req/min, "
-          f"{settings.tokens_per_minute} tok/min; call latency not included)")
+    print(f"unique texts to embed (not in cache): {len(to_send)}; est. tokens (chars/4): {tokens}")
+    print(f"embedding calls: {len(plan)}; largest call: {max((len(g) for g in plan), default=0)} texts")
+    if isinstance(embedder, GeminiEmbedder):
+        settings = get_embedding_settings()
+        minutes = simulate_minutes(plan, settings.requests_per_minute, settings.tokens_per_minute)
+        print(f"quota requests (1 per text): {len(to_send)} of {DAILY_REQUEST_LIMIT}/day")
+        print(f"simulated: last call starts at {minutes:.1f} min (throttle {settings.requests_per_minute} req/min, "
+              f"{settings.tokens_per_minute} tok/min; call latency not included)")
     return 0
 
 
 def run(arm: str, chunks_path: Path) -> int:
-    settings = get_embedding_settings()
     log_path = setup_logging(arm)
     chunks = load_chunks(chunks_path)
-    store = ChromaVectorStore(get_chroma_path(), chunker_config_of(chunks), settings.model_id)
-    gemini = GeminiEmbedder(settings)
-    with CachingEmbedder(gemini, settings.cache_path) as cache:
+    store = ChromaVectorStore(get_chroma_path(), chunker_config_of(chunks), get_active_embedding_model_id())
+    embedder = create_embedder()
+    with CachingEmbedder(embedder, embedding_cache_path()) as cache:
         try:
             report = IndexCorpus(cache, store, usage=cache.stats).run(chunks_path)
         except QuotaExhaustedError as error:
@@ -109,10 +114,12 @@ def run(arm: str, chunks_path: Path) -> int:
         "arm": arm,
         "collection": store.name,
         **report.to_dict(),
-        "http_calls": gemini.http_calls,
-        "retries": gemini.retries,
-        "throttle_wait_s": round(gemini.stats()["throttle_wait_s"], 1),
+        # provider counters (Gemini: http_calls, retries, throttle_wait_s; local: batches, texts); the report
+        # already holds api_requests and estimated_tokens
+        **{k: v for k, v in embedder.stats().items() if k not in ("api_requests", "estimated_tokens")},
     }
+    if "throttle_wait_s" in entry:
+        entry["throttle_wait_s"] = round(entry["throttle_wait_s"], 1)
     INDEXING_LOG.parent.mkdir(parents=True, exist_ok=True)
     with INDEXING_LOG.open("a", encoding="utf-8", newline="\n") as handle:
         handle.write(json.dumps(entry, ensure_ascii=False) + "\n")

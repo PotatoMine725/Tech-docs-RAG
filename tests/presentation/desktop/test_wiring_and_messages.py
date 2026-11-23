@@ -34,7 +34,7 @@ def test_real_port_shares_one_llm_forces_fallback_and_builds_lazily(monkeypatch)
             self.settings = settings
             made.append(self)
 
-    monkeypatch.setattr(wiring, "GeminiLLM", SpyLLM)
+    monkeypatch.setattr(wiring, "create_llm", SpyLLM)
     monkeypatch.setattr(wiring, "build_answer_service", lambda arm, llm, embedder: built.append((arm, llm)) or object())
     port = wiring.build_real_port()
     assert len(made) == 1 and made[0].settings.allow_fallback is True and built == []

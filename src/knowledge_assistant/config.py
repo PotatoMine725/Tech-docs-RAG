@@ -68,6 +68,90 @@ def get_embedding_settings() -> EmbeddingSettings:
     )
 
 
+EMBEDDING_PROVIDERS = ("gemini", "embeddinggemma")
+LOCAL_EMBEDDING_VARIANTS = ("fp32", "fp16", "int8", "int4")
+LOCAL_EMBEDDING_DIMS = (768, 512, 256, 128)  # Matryoshka sizes EmbeddingGemma was trained for
+
+
+def _choice(name: str, default: str, allowed: tuple[str, ...]) -> str:
+    value = (os.getenv(name) or default).strip().lower()
+    if value not in allowed:
+        raise ConfigurationError(f"{name}={value!r} is not one of {', '.join(allowed)}")
+    return value
+
+
+def get_embedding_provider() -> str:
+    """Which embedder answers queries and builds the index: `gemini` (cloud, default) or `embeddinggemma` (local)."""
+    return _choice("EMBEDDING_PROVIDER", "gemini", EMBEDDING_PROVIDERS)
+
+
+@dataclass(frozen=True)
+class LocalEmbeddingSettings:
+    """Local EmbeddingGemma v1 (300M) on ONNX Runtime, CPU only (embedding benchmark 2026-11-21, owner decision:
+    v1, FP32 default, INT4 as the low-RAM option, embedder budget <= 1 GB).
+
+    `model_dir` holds `tokenizer.json` and `onnx/<variant file>.onnx` (the onnx-community export layout). Nothing is
+    downloaded by the app. `threads` 0 lets ONNX Runtime pick (all physical cores).
+    """
+
+    model_dir: Path | None
+    variant: str
+    dim: int
+    batch_size: int
+    threads: int
+    max_tokens: int
+    cache_path: Path
+
+    @property
+    def model_id(self) -> str:
+        """Cache / collection key. Each variant gets its own key: INT4 vectors are close to, not equal to, FP32."""
+        return f"embeddinggemma-300m-{self.variant}@{self.dim}"
+
+
+def get_local_embedding_settings() -> LocalEmbeddingSettings:
+    model_dir = os.getenv("LOCAL_EMBEDDING_MODEL_DIR")
+    dim = int(os.getenv("LOCAL_EMBEDDING_DIM", "768"))
+    if dim not in LOCAL_EMBEDDING_DIMS:
+        raise ConfigurationError(f"LOCAL_EMBEDDING_DIM={dim} must be one of {LOCAL_EMBEDDING_DIMS}")
+    batch_size = int(os.getenv("LOCAL_EMBEDDING_BATCH_SIZE", "8"))
+    threads = int(os.getenv("LOCAL_EMBEDDING_THREADS", "0"))
+    max_tokens = int(os.getenv("LOCAL_EMBEDDING_MAX_TOKENS", "2048"))
+    if batch_size < 1 or threads < 0 or max_tokens < 1:
+        raise ConfigurationError("LOCAL_EMBEDDING_BATCH_SIZE and _MAX_TOKENS must be >= 1, _THREADS >= 0")
+    return LocalEmbeddingSettings(
+        model_dir=resolve_project_path(model_dir) if model_dir else None,
+        variant=_choice("LOCAL_EMBEDDING_VARIANT", "fp32", LOCAL_EMBEDDING_VARIANTS),
+        dim=dim,
+        batch_size=batch_size,
+        threads=threads,
+        max_tokens=max_tokens,
+        cache_path=resolve_project_path(os.getenv("EMBEDDING_CACHE_PATH", "data/cache/embeddings.sqlite")),
+    )
+
+
+def get_active_embedding_model_id() -> str:
+    """The model id of the configured embedding provider: names the cache entries and the Chroma collection."""
+    if get_embedding_provider() == "embeddinggemma":
+        return get_local_embedding_settings().model_id
+    return get_embedding_settings().model_id
+
+
+LLM_PROVIDERS = ("gemini", "llamacpp")
+
+
+def get_llm_provider() -> str:
+    """Which LLM writes the answers: `gemini` (default). `llamacpp` is reserved for the local GGUF provider."""
+    return _choice("LLM_PROVIDER", "gemini", LLM_PROVIDERS)
+
+
+RERANK_PROVIDERS = ("none",)
+
+
+def get_rerank_provider() -> str:
+    """Reranking after retrieval: only `none` (keep the retriever's order) until hybrid search adds a real one."""
+    return _choice("RERANK_PROVIDER", "none", RERANK_PROVIDERS)
+
+
 @dataclass(frozen=True)
 class ModelLimits:
     """Free-tier limits of one model (AI Studio, read by the owner 2026-09-26) and the client-side throttle.

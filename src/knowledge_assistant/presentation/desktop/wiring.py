@@ -6,20 +6,21 @@ point's seam: view-model, view, adapter and fake stay free of infrastructure imp
 `build_real_port()`. `tests/unit/test_project_structure.py` pins that nothing else in presentation imports
 `composition` or `infrastructure`.
 
-Shared state: ONE `GeminiLLM` for both arms, so the per-minute throttles are shared; one `AnswerQuestion` per arm,
+Providers come from configuration (EMBEDDING_PROVIDER, LLM_PROVIDER) via the composition root; this module names
+no concrete provider. Shared state: ONE LLM for both arms, so the per-minute throttles are shared; one `AnswerQuestion` per arm,
 built on first use (the window opens even when an index is missing; the error shows on the first question).
 `ALLOW_FALLBACK` is forced to true here (the app answers with the fallback model when the answer model fails;
 the evaluation runner does the opposite in its own process).
 """
 from __future__ import annotations
 
+import threading
 from dataclasses import replace
 
 from knowledge_assistant.application.generation.answer_question import AnswerQuestion
-from knowledge_assistant.composition import build_answer_service, open_embedder
-from knowledge_assistant.config import get_answer_settings, get_embedding_settings
+from knowledge_assistant.composition import build_answer_service, create_embedder, create_llm, open_embedder
+from knowledge_assistant.config import get_answer_settings
 from knowledge_assistant.core.interfaces.embedding import EmbeddingTask
-from knowledge_assistant.infrastructure.llm.gemini import GeminiLLM
 
 from .viewmodels.core_ask_question import CoreAskQuestion
 
@@ -29,20 +30,26 @@ class PerCallEmbedder:
 
     The embedding cache is a SQLite connection, which may only be used by the thread that created it, while the
     thread pool runs each question on whichever worker is free. Opening per call is safe on any thread and costs
-    one file open (a cached query text still spends no request).
+    one file open (a cached query text still spends no request). The provider itself is created once and shared, so
+    a local model loads once per app run; a lock keeps one query embedding at a time (the local model already uses
+    every core, and the Gemini throttle is not thread-safe).
     """
+
+    def __init__(self) -> None:
+        self._inner = create_embedder()
+        self._lock = threading.Lock()
 
     @property
     def model_id(self) -> str:
-        return get_embedding_settings().model_id
+        return self._inner.model_id
 
     def embed(self, texts: list[str], task: EmbeddingTask) -> list[list[float]]:
-        with open_embedder() as embedder:
+        with self._lock, open_embedder(inner=self._inner) as embedder:
             return embedder.embed(texts, task)
 
 
 def build_real_port() -> CoreAskQuestion:
-    llm = GeminiLLM(replace(get_answer_settings(), allow_fallback=True))
+    llm = create_llm(replace(get_answer_settings(), allow_fallback=True))
     embedder = PerCallEmbedder()
 
     def service_for_arm(arm: str) -> AnswerQuestion:
