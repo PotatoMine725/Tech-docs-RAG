@@ -104,8 +104,21 @@ class LocalEmbeddingSettings:
 
     @property
     def model_id(self) -> str:
-        """Cache / collection key. Each variant gets its own key: INT4 vectors are close to, not equal to, FP32."""
-        return f"embeddinggemma-300m-{self.variant}@{self.dim}"
+        """Cache / collection key: export revision, variant, token limit and size. Any of them changes the vectors
+        (INT4 is close to, not equal to, FP32), so each combination gets its own cache entries and collection."""
+        return f"embeddinggemma-300m{self._revision_tag()}-{self.variant}-t{self.max_tokens}@{self.dim}"
+
+    def _revision_tag(self) -> str:
+        """`-<8 hex>` from the export's REVISION file (``<repo>@<commit>``, written when the model was downloaded);
+        empty when there is none."""
+        if self.model_dir is None:
+            return ""
+        try:
+            revision = (self.model_dir / "REVISION").read_text(encoding="utf-8").strip()
+        except OSError:
+            return ""
+        commit = revision.rpartition("@")[2]
+        return f"-{commit[:8]}" if commit else ""
 
 
 def get_local_embedding_settings() -> LocalEmbeddingSettings:

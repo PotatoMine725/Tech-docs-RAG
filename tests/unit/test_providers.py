@@ -34,7 +34,7 @@ def test_local_embedder_is_selected_independently_of_the_llm(monkeypatch):
     embedder = create_embedder()
     assert isinstance(embedder, EmbeddingGemmaEmbedder)
     assert isinstance(create_llm(), GeminiLLM)
-    assert get_active_embedding_model_id() == embedder.model_id == "embeddinggemma-300m-int4@768"
+    assert get_active_embedding_model_id() == embedder.model_id == "embeddinggemma-300m-int4-t2048@768"
     assert embedding_cache_path() == get_local_embedding_settings().cache_path
 
 

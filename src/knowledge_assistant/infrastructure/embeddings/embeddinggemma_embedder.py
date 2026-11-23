@@ -125,10 +125,14 @@ class EmbeddingGemmaEmbedder:
         options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
         options.intra_op_num_threads = self._settings.threads
         options.inter_op_num_threads = 1
-        session = ort.InferenceSession(str(onnx_path), options, providers=["CPUExecutionProvider"])
+        try:
+            session = ort.InferenceSession(str(onnx_path), options, providers=["CPUExecutionProvider"])
+            tokenizer = Tokenizer.from_file(str(tokenizer_path))
+        except Exception as error:  # corrupt or incompatible files raise the libraries' own exception types
+            raise ConfigurationError(f"cannot load the local embedding model from {model_dir}: {error}") from error
         if OUTPUT not in [o.name for o in session.get_outputs()]:
             raise ConfigurationError(f"{onnx_path.name} has no {OUTPUT} output; use the onnx-community export")
-        return session, Tokenizer.from_file(str(tokenizer_path))
+        return session, tokenizer
 
 
 def _numpy() -> Any:

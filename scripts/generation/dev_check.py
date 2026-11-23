@@ -30,17 +30,17 @@ from knowledge_assistant.application.common.passage import passage_hash  # noqa:
 from knowledge_assistant.application.ingestion.build_chunks import load_chunks  # noqa: E402
 from knowledge_assistant.application.ingestion.index_corpus import chunker_config_of  # noqa: E402
 from knowledge_assistant.application.retrieval.retrieve import Retriever  # noqa: E402
+from knowledge_assistant.composition import open_embedder  # noqa: E402
 from knowledge_assistant.config import (  # noqa: E402
     get_answer_settings,
     get_chroma_path,
     get_chunks_dir,
-    get_embedding_settings,
+    get_active_embedding_model_id,
     get_logs_dir,
     get_retrieval_settings,
 )
 from knowledge_assistant.core.exceptions import EmbeddingError, GenerationError, LLMError  # noqa: E402
 from knowledge_assistant.core.interfaces.embedding import EmbeddingTask  # noqa: E402
-from knowledge_assistant.infrastructure.embeddings.gemini_embedder import GeminiEmbedder  # noqa: E402
 from knowledge_assistant.infrastructure.gemini_retry import redact_key  # noqa: E402
 from knowledge_assistant.infrastructure.llm.gemini import GeminiLLM  # noqa: E402
 from knowledge_assistant.infrastructure.persistence.embedding_cache import CachingEmbedder  # noqa: E402
@@ -73,13 +73,12 @@ def save_error(kind: str, body: str) -> Path:
 
 
 def open_cache() -> CachingEmbedder:
-    settings = replace(get_embedding_settings(), max_attempts=1)  # no retry loop on a 429 (addendum 5)
-    return CachingEmbedder(GeminiEmbedder(settings), settings.cache_path)
+    return open_embedder(max_attempts=1)  # configured provider; Gemini: no retry loop on a 429 (addendum 5)
 
 
 def open_store(arm: str) -> ChromaVectorStore:
     config = chunker_config_of(load_chunks(get_chunks_dir() / f"arm-{arm.lower()}.jsonl"))
-    store = ChromaVectorStore(get_chroma_path(), config, get_embedding_settings().model_id, create=False)
+    store = ChromaVectorStore(get_chroma_path(), config, get_active_embedding_model_id(), create=False)
     if not store.exists:
         raise SystemExit(f"collection {store.name} does not exist; run scripts/ingestion/build_index.py --arm {arm}")
     return store

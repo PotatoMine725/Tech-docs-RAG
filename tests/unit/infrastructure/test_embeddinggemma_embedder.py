@@ -46,9 +46,24 @@ def make(tmp_path, **overrides):
     return EmbeddingGemmaEmbedder(settings, session=session, tokenizer=tokenizer), session, tokenizer
 
 
-def test_model_id_names_variant_and_dim(tmp_path):
-    assert make(tmp_path)[0].model_id == "embeddinggemma-300m-fp32@768"
-    assert make(tmp_path, variant="int4", dim=256)[0].model_id == "embeddinggemma-300m-int4@256"
+def test_model_id_names_variant_token_limit_and_dim(tmp_path):
+    assert make(tmp_path, model_dir=None)[0].model_id == "embeddinggemma-300m-fp32-t2048@768"
+    assert make(tmp_path, model_dir=None, variant="int4", dim=256, max_tokens=512)[0].model_id == \
+        "embeddinggemma-300m-int4-t512@256"
+
+
+def test_model_id_includes_the_export_revision(tmp_path):
+    (tmp_path / "REVISION").write_text("onnx-community/embeddinggemma-300m-ONNX@5090578d9565bb06\n", encoding="utf-8")
+    assert make(tmp_path, model_dir=tmp_path)[0].model_id == "embeddinggemma-300m-5090578d-fp32-t2048@768"
+
+
+def test_a_corrupt_model_file_is_a_configuration_error(tmp_path):
+    (tmp_path / "onnx").mkdir()
+    (tmp_path / "onnx" / "model.onnx").write_bytes(b"not a model")
+    (tmp_path / "tokenizer.json").write_text("{}", encoding="utf-8")
+    settings = replace(get_local_embedding_settings(), model_dir=tmp_path)
+    with pytest.raises(ConfigurationError, match="cannot load"):
+        EmbeddingGemmaEmbedder(settings).embed(["x"], EmbeddingTask.QUERY)
 
 
 def test_task_prompts_match_the_benchmark(tmp_path):
@@ -58,12 +73,21 @@ def test_task_prompts_match_the_benchmark(tmp_path):
     assert tokenizer.seen == ["title: none | text: doc", "task: search result | query: q"]
 
 
-def test_batches_are_padded_with_a_mask_and_truncated(tmp_path):
+def test_batches_are_zero_padded_with_a_matching_mask(tmp_path):
+    embedder, session, _ = make(tmp_path, batch_size=2)
+    embedder.embed(["a", "abcd"], EmbeddingTask.QUERY)
+    feed = session.feeds[0]
+    short, long = (len("task: search result | query: " + t) for t in ("a", "abcd"))
+    assert feed["input_ids"].dtype == np.int64 and feed["input_ids"].shape == (2, long)
+    assert feed["attention_mask"][0].tolist() == [1] * short + [0] * (long - short)
+    assert feed["attention_mask"][1].tolist() == [1] * long
+    assert feed["input_ids"][0, short:].tolist() == [0] * (long - short) and all(feed["input_ids"][0, :short] > 0)
+
+
+def test_long_texts_are_truncated_to_max_tokens(tmp_path):
     embedder, session, _ = make(tmp_path, max_tokens=25, batch_size=2)
     embedder.embed(["a", "a much longer text than the limit allows"], EmbeddingTask.QUERY)
-    feed = session.feeds[0]
-    assert feed["input_ids"].dtype == np.int64 and feed["input_ids"].shape[1] == 25
-    assert feed["attention_mask"].sum(axis=1).tolist() == [len("task: search result | query: a"[:25]), 25]
+    assert session.feeds[0]["input_ids"].shape[1] == 25
 
 
 def test_vectors_are_unit_length_and_truncated_to_dim(tmp_path):

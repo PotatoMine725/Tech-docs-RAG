@@ -20,7 +20,8 @@ Refines: ADR-0004 D10 (embedding model), ADR-0005 (cache key, collection key). P
   the benchmark, Matryoshka dims 768/512/256/128, lazy model load. `onnxruntime`, `tokenizers`, `numpy` are an
   optional extra (`pip install -e .[local]`); the Gemini-only setup does not need them. The app never downloads a
   model: `LOCAL_EMBEDDING_MODEL_DIR` points to an existing onnx-community export.
-- **Keys**: model id `embeddinggemma-300m-<variant>@<dim>` names both cache entries and the Chroma collection, so
+- **Keys**: model id `embeddinggemma-300m[-<revision>]-<variant>-t<max_tokens>@<dim>` (revision: first 8 hex of the
+  export's `REVISION` file) names both cache entries and the Chroma collection, so
   vectors of different providers, variants or sizes never mix; switching provider needs a rebuilt index.
 
 ## Consequences
