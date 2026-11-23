@@ -8,9 +8,10 @@ Every number comes from the run folders under data/evaluation/results/ through t
   slot), span metrics where `expected-spans-v1.json` covers the split (eval only), top-1 score range of answerable
   and unanswerable cases, and how often the gate fired on each;
 - a per-case top-1 table (one column per run).
-Full-mode runs are read for their retrieval fields only.
+Full-mode runs are read for their retrieval fields only. Duplicates resolve through the arms' full chunk files.
 """
 import argparse
+import json
 import statistics
 import sys
 from pathlib import Path
@@ -20,14 +21,26 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from knowledge_assistant.application.evaluation import scoring  # noqa: E402
+from knowledge_assistant.application.evaluation.metrics.retrieval import chunk_index  # noqa: E402
+from knowledge_assistant.config import get_chunks_dir  # noqa: E402
 from scripts.evaluation.eval_report_data import (  # noqa: E402
-    build_chunk_indexes,
     load_runs,
     load_spans_by_case,
     score_runs,
 )
 
-SPAN_KEYS = ("evidence_hit@1", "evidence_hit@5", "mrr@5")
+SPAN_KEYS = ("source_hit@1", "section_hit@1", "evidence_hit@1", "source_hit@5", "section_hit@5", "evidence_hit@5", "mrr")
+
+
+def full_chunk_indexes(runs: list[dict]) -> dict[str, dict]:
+    """{arm: chunk_index} from the arm's whole chunk file, so every `duplicate_chunk_ids` entry resolves (the
+    retrieved-chunks-only index of `eval_report_data.build_chunk_indexes` cannot resolve a duplicate no run retrieved)."""
+    indexes = {}
+    for arm in {run["manifest"]["config"]["arm"] for run in runs}:
+        path = get_chunks_dir() / f"arm-{arm.lower()}.jsonl"
+        with path.open(encoding="utf-8") as lines:
+            indexes[arm] = chunk_index([json.loads(line) for line in lines if line.strip()])
+    return indexes
 
 
 def source_hit(record: dict, k: int) -> bool:
@@ -51,9 +64,9 @@ def main(argv: list[str] | None = None) -> int:
 
     runs = load_runs(args.runs)
     spans = load_spans_by_case()
-    rows = score_runs(runs, spans, build_chunk_indexes(runs))
+    rows = score_runs(runs, spans, full_chunk_indexes(runs))
 
-    print("| run | embedding model | threshold | cases | answerable | source hit@1 | source hit@5 | "
+    print("| run | embedding model | threshold | cases | answerable | expected source in top-1 | expected source in top-5 | "
           + " | ".join(SPAN_KEYS) + " | answerable top-1 | unanswerable top-1 | gate fired: answerable | "
           "gate fired: unanswerable |")
     print("|" + "---|" * (11 + len(SPAN_KEYS)))
@@ -67,7 +80,7 @@ def main(argv: list[str] | None = None) -> int:
         span_cells = []
         for key in SPAN_KEYS:
             value = summary.get(key)
-            span_cells.append(f"{value['mean']:.3f} (n={value['n']})" if value and value.get("n") else "–")
+            span_cells.append(f"{value['value']:.3f}" if value and value.get("value") is not None else "–")
         print(f"| {run['run_id']} | {config['embedding_model']}@{config['embedding_dim']} | {config['threshold']} "
               f"| {len(ok)} | {len(answerable)} "
               f"| {_rate(sum(source_hit(r, 1) for r in answerable), len(answerable))} "

@@ -35,6 +35,11 @@ Two layers:
   `insufficient_reason = "retrieval_gate"`. score == threshold passes the gate (strict <).
 - (b) **LLM layer:** the model answers `"insufficient": true` → `insufficient_reason = "llm"` (generation-spec.md).
 
+**Threshold per embedding provider** (scores of different embedders are not comparable; `config.GATE_THRESHOLDS`,
+`INSUFFICIENT_SCORE_THRESHOLD` overrides). Each is used for both arms.
+
+### Gemini (`gemini-embedding-001@768`): 0.686
+
 **Threshold = 0.686**, used for both arms. Tuned on the dev set only (`dev-v1.jsonl`, never the eval set), Arm A.
 Rule: threshold = (lowest top-1 score among answerable dev cases) − 0.05, so the gate never refuses an answerable dev
 question; the LLM layer handles the rest.
@@ -54,3 +59,28 @@ question; the LLM layer handles the rest.
 - **Caveat: n is small** (6 cases, 2 answerable per language). The margin between the lowest answerable (0.7360) and
   the highest unanswerable (0.6741) score is 0.06; eval questions may fall on either side. The evaluation reports how
   often the gate fires, per arm, so a wrong gate is visible.
+
+### EmbeddingGemma (`embeddinggemma-300m-5090578d-fp32-t2048@768`): 0.5417 (tuned 2026-11-23, ADR-0006)
+
+Same rule: dev set only (`dev-v1.jsonl`), Arm A, threshold = lowest answerable top-1 − 0.05. Source: run
+`20261123-dev-A-retrieval-local-4937f03` (Arm B: `20261123-dev-B-retrieval-local-4937f03`, information only). Tuned for
+FP32 at 768 dims; other variants (INT4, ...) or dims are **not tuned (TBD)**.
+
+| case | language | answerable | Arm A top-1 | (Arm B top-1, information only) |
+|---|---|---|---:|---:|
+| Q-DEV-001 | en | yes | 0.6558 | 0.6965 |
+| Q-DEV-002 | vi | yes | 0.6363 | 0.6459 |
+| Q-DEV-003 | en | yes | 0.7009 | 0.6820 |
+| Q-DEV-004 | vi | yes | 0.5917 | 0.5823 |
+| Q-DEV-005 | en | no | 0.5869 | 0.5903 |
+| Q-DEV-006 | vi | no | 0.5378 | 0.5524 |
+
+- 0.5917 − 0.05 = 0.5417. No answerable dev case is refused; Q-DEV-006 is refused; **Q-DEV-005 (0.5869) passes the
+  gate** and is left to the LLM layer. On Arm B neither unanswerable case is refused (0.5903, 0.5524 ≥ 0.5417).
+- Answerable and unanswerable dev scores do **not** overlap on Arm A, but the gap is 0.0048 (0.5917 vs 0.5869)
+  against 0.06 for Gemini: the local embedder separates them much less. **Owner note:** the rule is applied as written;
+  whether the local gate should use a different rule is the owner's call (not tuned on the eval set).
+- Local scores are lower overall (answerable 0.59–0.70 vs Gemini 0.74–0.79), so the Gemini value 0.686 would refuse 3
+  of 4 answerable dev cases on Arm A.
+- Eval split, for information (not used for tuning): the gate refuses 5/32 answerable cases on each arm (Gemini 3/32
+  Arm A, 2/32 Arm B) and 2/4 unanswerable ones (Gemini 3/4). See `docs/reports/2026-11-23-local-reindex.md`.
