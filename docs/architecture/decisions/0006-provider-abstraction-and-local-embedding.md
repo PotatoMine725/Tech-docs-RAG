@@ -29,7 +29,7 @@ Refines: ADR-0004 D10 (embedding model), ADR-0005 (cache key, collection key). P
   overrides): gemini 0.686, embeddinggemma 0.5417. The local value was tuned in the reindex step (2026-11-23) with
   the retrieval-spec rule (dev, Arm A, lowest answerable top-1 - 0.05), for FP32 @768 only; other variants / dims are
   TBD. The answerable / unanswerable gap on dev is 0.0048 (Gemini 0.06): see retrieval-spec.md.
-- The local embedder plans token-length-sorted batches (less padding; arm A 5.18 -> 8.08 texts/s on the owner's
+- The local embedder plans token-length-sorted batches (less padding; arm A 4.86 -> 7.82 texts/s back to back on the owner's
   machine, docs/reports/2026-11-23-local-reindex.md). The embedding cache therefore accepts plan groups in any order
   (each text in exactly one group, one call per group, committed before the next; results in input order).
 - The desktop app creates the embedding provider once (the local model loads once per run) and serializes query

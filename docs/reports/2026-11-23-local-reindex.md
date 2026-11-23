@@ -14,20 +14,27 @@ The app batched texts in input order, so each batch was padded to its longest te
 temporary cache on the owner's machine, through `CachingEmbedder`. Each starts after a 2-text warm-up and measures
 embedding only (no Chroma writes).
 
+**Controlled before/after** (the real commits, no patching, back to back): `e04ec8b` (dev, unsorted) 150.9 s =
+**4.86 texts/s**; `2db94b0` (this branch, token-sorted) 93.8 s = **7.82 texts/s** (+61%).
+
+Earlier exploratory runs (same script; rows 2, 4, 5 patched the plan in a scratch script; row 1 ran ~8 minutes before
+rows 3–5):
+
 | run (time order) | batching | seconds | texts/s |
 |---|---|---:|---:|
 | 1 | input order (code before this change) | 141.6 | 5.18 |
-| 2 | sorted by character length (first attempt) | 112.5 | 6.52 |
+| 2 | sorted by character length | 112.5 | 6.52 |
 | 3 | benchmark script itself, `gemma1 fp32 full` (reference) | 91.1 | 8.05 |
-| 4 | sorted by token count (committed) | 90.8 | 8.08 |
+| 4 | sorted by token count | 90.8 | 8.08 |
 | 5 | sorted by character length, repeated | 106.9 | 6.85 |
 
-- Runs 3–5 ran back to back. Token-count sorting matches the benchmark (8.08 vs 8.05 texts/s), and character-length
+- Rows 3–5 ran back to back: token-count sorting matches the benchmark (8.08 vs 8.05 texts/s), character-length
   sorting does not (6.85), so the committed plan sorts by token count.
-- Unsorted → token-sorted: 5.18 → 8.08 texts/s (+56%). Runs 1 and 4 were about 8 minutes apart and the machine was
-  not idle (a browser was running), so the gain is an estimate, not a controlled measurement.
-- The benchmark recorded 9.66 texts/s on 2026-11-21 under the same ORT 1.20.1. Today it gave 8.05, so the machine is
-  slower today. The ~10.7 figure in the task came from ORT 1.32 in the benchmark venv, not the project venv.
+- The machine was not idle (a browser was running); expect a few percent of run-to-run noise (rows 2 vs 5).
+- Sorting does not change the vectors: 16 arm-A texts embedded with the sorted code differ from their cached
+  (unsorted-build) vectors by at most 6.7e-8 (float noise).
+- The benchmark recorded 9.66 texts/s on 2026-11-21 under the same ORT 1.20.1; today it gave 8.05, so the machine is
+  slower today. The ~10.7 figure came from ORT 1.32 in the benchmark venv, not the project venv.
 - 89 embed calls for 733 texts: identical chunk texts are embedded once (cache dedup).
 
 Contract (`CachingEmbedder`): each planned group is still one embed call, committed before the next, and results come
@@ -79,6 +86,13 @@ retrieval mode) and local `20261123-{dev,eval}-{A,B}-retrieval-local-4937f03`.
 | gate refuses answerable | 3/32 | 2/32 | 5/32 | 5/32 |
 | gate refuses unanswerable | 3/4 | 3/4 | 2/4 | 2/4 |
 
+Definitions (`application/evaluation/metrics/retrieval.py`, lenient rule): `source_hit@k` / `section_hit@k` = 1 only
+if **every slot** of the case (multi-document cases have several) has an expected or alternate source / section span
+in the top k; `evidence_hit@k` = every required answer point has a supporting quote whole in a top-k chunk; `mrr` =
+1 / rank of the first retrieved chunk overlapping **any** slot's expected section span (0 if none). The "top-1 chunk
+from a non-expected source" note below checks **any one** expected or alternate `source_id`, so it can be clean while
+`source_hit@1` < 1 (a multi-slot case cannot have all its sources at rank 1).
+
 - The local embedder is behind Gemini on every metric of both arms, except evidence_hit@1 on Arm B
   (0.438 vs 0.406). The biggest drop is evidence_hit@5 (0.938 → 0.719 on Arm A).
 - Answerable cases the gate refuses: Arm A Q-EVAL-011 (en), 016, 018, 020, 028 (vi); Arm B Q-EVAL-010, 016, 018, 020,
@@ -101,8 +115,9 @@ retrieval mode) and local `20261123-{dev,eval}-{A,B}-retrieval-local-4937f03`.
 | Local A | 4/4 | 4/4 | 0/4 | 1/2 |
 | Local B | 4/4 | 4/4 | 0/4 | 0/2 |
 
-The recorded Gemini dev retrieval run holds 3 of the 6 dev cases (Q-DEV-001, 002, 005); a Gemini dev Arm B run was not
-recorded. Span metrics are not available for dev (`expected-spans-v1.json` covers the eval split only). "Expected
+The recorded Gemini dev retrieval run has records for 3 of the 6 dev cases only (Q-DEV-001, 002, 005; the other three
+are absent, not errors); a Gemini dev Arm B run was not recorded. The Gemini top-1 values of all six dev cases are in
+retrieval-spec.md (RAG-002 tuning). Span metrics are not available for dev (`expected-spans-v1.json` covers the eval split only). "Expected
 source" = a `source_id` in the case's `expected_sources` or `acceptable_alternate_sources`.
 
 ## Not done / open
