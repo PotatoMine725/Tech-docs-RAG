@@ -1,4 +1,4 @@
-"""MarkItDown adapter (ADR-0002): converts PDF, HTML, DOCX and plain-text files to Markdown.
+"""MarkItDown adapter (ADR-0002): converts PDF, HTML, DOCX, PPTX and plain-text files to Markdown.
 
 The only module that imports `markitdown` (guarded by `tests/unit/test_project_structure.py`). The import and
 the converters are created on the first `parse`, so building the default registry stays cheap for the Markdown
@@ -20,6 +20,7 @@ _CONVERTERS = {
     ".html": "HtmlConverter",
     ".htm": "HtmlConverter",
     ".docx": "DocxConverter",
+    ".pptx": "PptxConverter",
     ".txt": "PlainTextConverter",
 }
 MARKITDOWN_EXTENSIONS = tuple(_CONVERTERS)

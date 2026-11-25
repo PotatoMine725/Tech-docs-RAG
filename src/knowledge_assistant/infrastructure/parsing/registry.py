@@ -18,7 +18,7 @@ class ParserRegistry:
 
 
 def default_registry() -> ParserRegistry:
-    """Markdown is read directly; PDF, HTML, DOCX and txt go through one shared MarkItDown adapter (ADR-0002)."""
+    """Markdown is read directly; PDF, HTML, DOCX, PPTX and txt go through one shared MarkItDown adapter (ADR-0002)."""
     from knowledge_assistant.infrastructure.parsing.markdown_parser import MarkdownParser
     from knowledge_assistant.infrastructure.parsing.markitdown_parser import MARKITDOWN_EXTENSIONS, MarkItDownParser
 
