@@ -484,3 +484,52 @@ def test_the_estimate_skips_cases_that_are_already_ok_and_has_no_llm_requests_in
     assert (estimate.selected, estimate.already_ok, estimate.to_run) == (4, 2, 2)
     retrieval = Run(mode="retrieval").evaluation.estimate(make_cases(4), lambda texts: list(texts))
     assert (retrieval.llm_requests_min, retrieval.llm_requests_max) == (0, 0) and retrieval.uncached_embeddings == 4
+
+
+# --- retrieval mode (ADR-0007) ----------------------------------------------------------------------------------------
+
+def test_a_dense_run_recorded_before_retrieval_mode_existed_still_resumes():
+    run = Run()
+    run.run(make_cases(2))
+    for key in ("retrieval_mode", "rrf_k"):  # a manifest written before ADR-0007 has neither key
+        del run.store.manifest["config"][key]
+    resumed = Run(store=run.store)
+    summary = resumed.run(make_cases(3))
+    assert (summary.skipped, summary.ok) == (2, 1)
+
+
+def test_a_hybrid_resume_of_a_dense_run_is_refused():
+    run = Run()
+    run.run(make_cases(2))
+    hybrid = ScriptedRetriever()
+    hybrid.mode = "hybrid"
+    other = Run(store=run.store, retriever=hybrid, config=make_config(retrieval_mode="hybrid"))
+    with pytest.raises(RunConfigMismatch, match="retrieval_mode"):
+        other.run(make_cases(3))
+
+
+def test_retriever_mode_must_match_the_run_config():
+    with pytest.raises(ValueError, match="sparse"):
+        Run(config=make_config(retrieval_mode="sparse"))
+    with pytest.raises(ValueError, match="retrieval_mode"):
+        make_config(retrieval_mode="bm25")
+
+
+def test_records_keep_the_dense_gate_score_as_top1_when_chunk_scores_are_fused():
+    from knowledge_assistant.application.retrieval.retrieve import RetrievalResult
+
+    class FusedRetriever(ScriptedRetriever):
+        mode = "hybrid"
+
+        def retrieve(self, question):
+            result = super().retrieve(question)
+            fused = tuple(type(hit)(chunk=hit.chunk, rank=hit.rank, score=0.03) for hit in result.chunks)
+            return RetrievalResult(fused, result.duplicates_dropped, result.latency_ms, gate_score=0.9)
+
+    for mode in ("retrieval", "full"):
+        run = Run(retriever=FusedRetriever(), mode=mode, config=make_config(mode=mode, retrieval_mode="hybrid"))
+        run.run(make_cases(1))
+        record = next(iter(final(run.store).values()))
+        assert record["status"] == "ok", record.get("error")
+        assert record["top1_score"] == 0.9 and record["gate_fired"] is False
+        assert record["retrieved"][0]["score"] == 0.03

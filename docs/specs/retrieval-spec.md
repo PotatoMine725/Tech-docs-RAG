@@ -33,6 +33,9 @@ Status: decided for RAG-002 (2026-09-26). Code: `application/retrieval/retrieve.
 Two layers:
 - (a) **Retrieval gate:** if the top-1 score (after dedup) < `INSUFFICIENT_SCORE_THRESHOLD`, the LLM is not called;
   `insufficient_reason = "retrieval_gate"`. score == threshold passes the gate (strict <).
+  **Per retrieval mode (ADR-0007 D6):** the gate score is always the **dense** top-1 cosine of the active embedder,
+  also in `sparse` and `hybrid` mode (RRF and BM25 scores cannot say "nothing relevant"). In dense mode this is the
+  rank-1 score, as before. Hybrid/sparse gate: **TBD** until the reranker step gives an absolute relevance score.
 - (b) **LLM layer:** the model answers `"insufficient": true` → `insufficient_reason = "llm"` (generation-spec.md).
 
 **Threshold per embedding provider** (scores of different embedders are not comparable; `config.GATE_THRESHOLDS`,

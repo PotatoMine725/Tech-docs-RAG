@@ -1,11 +1,15 @@
-"""Embed one arm's chunks and index them in Chroma (RAG-001b, ADR-0005).
+"""Embed one arm's chunks and index them in Chroma, and index their text in the keyword index (RAG-001b, ADR-0005,
+ADR-0007).
 
     python scripts/ingestion/build_index.py --arm A|B [--dry-run]
 
 Reads data/processed/chunks/arm-<a|b>.jsonl. Chunks already in the arm's collection are skipped and
 texts already in the embedding cache cost no quota, so a stopped run is resumed by running it again.
---dry-run makes no API call and writes nothing to Chroma: it prints what a run would send and, for Gemini, a
-simulated duration under the per-minute throttle.
+The keyword index (SQLite FTS5, data/keyword/kw_<chunker config>.sqlite) is built first from the same chunks with
+the same resume rule (chunk_ids already present are skipped); it costs no quota and needs no model, so a run stopped
+by the embedding quota still leaves it complete.
+--dry-run makes no API call and writes nothing to Chroma or to the keyword index: it prints what a run would send and,
+for Gemini, a simulated duration under the per-minute throttle.
 The embedder is the configured provider (EMBEDDING_PROVIDER: gemini | embeddinggemma); each provider/model gets its
 own collection, so switching providers never mixes vectors.
 A real run appends its IndexReport to validation/retrieval/indexing-log.jsonl.
@@ -23,19 +27,25 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from knowledge_assistant.application.ingestion.build_chunks import load_chunks  # noqa: E402
-from knowledge_assistant.application.ingestion.index_corpus import IndexCorpus, chunker_config_of  # noqa: E402
+from knowledge_assistant.application.ingestion.index_corpus import (  # noqa: E402
+    IndexCorpus,
+    chunker_config_of,
+    index_keywords,
+)
 from knowledge_assistant.composition import create_embedder, embedding_cache_path  # noqa: E402
 from knowledge_assistant.config import (  # noqa: E402
     get_active_embedding_model_id,
     get_chroma_path,
     get_chunks_dir,
     get_embedding_settings,
+    get_keyword_index_dir,
     get_logs_dir,
 )
 from knowledge_assistant.core.exceptions import QuotaExhaustedError  # noqa: E402
 from knowledge_assistant.core.interfaces.embedding import EmbeddingTask  # noqa: E402
 from knowledge_assistant.infrastructure.embeddings.gemini_embedder import GeminiEmbedder  # noqa: E402
 from knowledge_assistant.infrastructure.embeddings.throttle import SlidingWindowThrottle, estimate_tokens  # noqa: E402
+from knowledge_assistant.infrastructure.keyword_index.fts5_index import Fts5KeywordIndex  # noqa: E402
 from knowledge_assistant.infrastructure.persistence.embedding_cache import CachingEmbedder  # noqa: E402
 from knowledge_assistant.infrastructure.vector_store.chromadb.chroma_store import ChromaVectorStore  # noqa: E402
 
@@ -79,13 +89,22 @@ def dry_run(arm: str, chunks_path: Path) -> int:
     store = ChromaVectorStore(get_chroma_path(), config, get_active_embedding_model_id(), create=False)
     present = store.get_ids()
     pending = [chunk for chunk in chunks if chunk.chunk_id not in present]
-    embedder = create_embedder()  # no client and no model is loaded: planning makes no call
+    # Gemini: no client is created and no API call is made. The local embedder DOES load its model (ONNX session and
+    # tokenizer) when any text is left to embed: planning tokenizes the texts to sort them by length (ADR-0006). It
+    # embeds nothing.
+    embedder = create_embedder()
     with CachingEmbedder(embedder, embedding_cache_path()) as cache:
         to_send = cache.missing([chunk.embed_text for chunk in pending], EmbeddingTask.DOCUMENT)
     plan = embedder.plan_calls(to_send)
     tokens = sum(estimate_tokens(text) for text in to_send)
     print(f"DRY RUN arm {arm} ({config}), collection {store.name} ({'exists' if store.exists else 'not created yet'})")
     print(f"embedder: {embedder.model_id}")
+    keywords = Fts5KeywordIndex(get_keyword_index_dir(), config, create=False)
+    keyword_present = keywords.get_ids()
+    print(f"keyword index {keywords.path.name} ({'exists' if keywords.exists else 'not created yet'}): "
+          f"{sum(chunk.chunk_id in keyword_present for chunk in chunks)} of {len(chunks)} chunks present, "
+          f"{sum(chunk.chunk_id not in keyword_present for chunk in chunks)} to add")
+    keywords.close()
     print(f"chunks in file: {len(chunks)}; already in store: {len(chunks) - len(pending)}; to index: {len(pending)}")
     print(f"unique texts to embed (not in cache): {len(to_send)}; est. tokens (chars/4): {tokens}")
     print(f"embedding calls: {len(plan)}; largest call: {max((len(g) for g in plan), default=0)} texts")
@@ -101,6 +120,12 @@ def dry_run(arm: str, chunks_path: Path) -> int:
 def run(arm: str, chunks_path: Path) -> int:
     log_path = setup_logging(arm)
     chunks = load_chunks(chunks_path)
+    keywords = Fts5KeywordIndex(get_keyword_index_dir(), chunker_config_of(chunks))
+    try:
+        keyword_report = index_keywords(chunks, keywords)
+    finally:
+        keywords.close()
+    print(f"keyword index {keywords.path.name}: {keyword_report.to_dict()}")
     store = ChromaVectorStore(get_chroma_path(), chunker_config_of(chunks), get_active_embedding_model_id())
     embedder = create_embedder()
     with CachingEmbedder(embedder, embedding_cache_path()) as cache:
@@ -114,6 +139,7 @@ def run(arm: str, chunks_path: Path) -> int:
         "arm": arm,
         "collection": store.name,
         **report.to_dict(),
+        "keyword_index": {"file": keywords.path.name, **keyword_report.to_dict()},
         # provider counters (Gemini: http_calls, retries, throttle_wait_s; local: batches, texts); the report
         # already holds api_requests and estimated_tokens
         **{k: v for k, v in embedder.stats().items() if k not in ("api_requests", "estimated_tokens")},
@@ -129,7 +155,9 @@ def run(arm: str, chunks_path: Path) -> int:
           f"{'MATCH' if store.count() == lines else 'MISMATCH'}")
     print(f"appended to {INDEXING_LOG.relative_to(PROJECT_ROOT).as_posix()}; log {log_path.name}; "
           f"finished {datetime.now(timezone.utc).isoformat(timespec='seconds')}")
-    return 0 if store.count() == lines else 1
+    keyword_ok = keyword_report.index_count == lines
+    print(f"keyword index count = {keyword_report.index_count}; {'MATCH' if keyword_ok else 'MISMATCH'}")
+    return 0 if store.count() == lines and keyword_ok else 1
 
 
 def main() -> int:

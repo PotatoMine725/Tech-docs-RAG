@@ -1,7 +1,8 @@
 """Ask a question → grounded answer with citations, or an explicit "insufficient information" (RAG-002).
 
 Two insufficient layers (OD-9, retrieval-spec.md):
-  (a) retrieval gate: top-1 score < threshold → the LLM is not called, `insufficient_reason="retrieval_gate"`;
+  (a) retrieval gate: gate score (dense top-1, ADR-0007 D6) < threshold → the LLM is not called,
+      `insufficient_reason="retrieval_gate"`;
   (b) LLM layer: the model answers `"insufficient": true` → `insufficient_reason="llm"`.
 An insufficient answer shows the localized message, keeps `missing_information`, and may keep related citations
 (owner decision D2, 2026-09-24). Unusable LLM output raises GenerationError, and a provider failure raises an LLMError
@@ -85,9 +86,10 @@ class AnswerQuestion:
             "retrieved": retrieved,
             "prompt_version": self._prompts.version,
             "duplicates_dropped": retrieval.duplicates_dropped,
+            "gate_score": retrieval.gate_score,
         }
 
-        if retrieved[0].score < self.threshold:
+        if retrieval.gate_score < self.threshold:
             latency["total"] = (self._clock() - start) * 1000.0
             return AnswerResult(
                 answer=self._messages[language], insufficient=True, insufficient_reason=RETRIEVAL_GATE,

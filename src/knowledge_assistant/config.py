@@ -297,20 +297,37 @@ class RetrievalSettings:
 
     top_k: int
     overfetch: int  # extra hits fetched so same-content duplicates can be dropped (RAG-002 addendum 1)
-    insufficient_score_threshold: float
+    insufficient_score_threshold: float  # compared with the dense top-1 score in every mode (ADR-0007 D6)
+    mode: str = "dense"  # dense | sparse | hybrid (ADR-0007)
+    rrf_k: int = 60  # Reciprocal Rank Fusion constant, hybrid mode only (ADR-0007 D5)
 
 
 # OD-9 gate threshold per embedding provider: scores of different embedders are not comparable. Each value comes from
 # the same rule (dev set, Arm A, lowest answerable top-1 - 0.05; retrieval-spec.md). gemini: RAG-002, 2026-09-26.
-# embeddinggemma: tuned for fp32 @768 (2026-11-23, ADR-0006); other variants / dims are not tuned (TBD).
+# embeddinggemma: tuned for fp32 @768 ONLY (2026-11-23, ADR-0006). It is still applied to any other variant
+# (int4 ...) or dimension (512/256/128), whose scores differ: there it is an untested cutoff (TBD), so set
+# INSUFFICIENT_SCORE_THRESHOLD after tuning that configuration with the same rule.
 GATE_THRESHOLDS = {"gemini": 0.686, "embeddinggemma": 0.5417}
+
+RETRIEVAL_MODES = ("dense", "sparse", "hybrid")  # same values as application.retrieval.retrieve.RETRIEVAL_MODES
 
 
 def get_retrieval_settings() -> RetrievalSettings:
-    """`INSUFFICIENT_SCORE_THRESHOLD`, when set, overrides the provider's default."""
+    """`INSUFFICIENT_SCORE_THRESHOLD`, when set, overrides the provider's default (the embeddinggemma default is tuned
+    for fp32 @768 only, see GATE_THRESHOLDS). `RETRIEVAL_MODE` defaults to dense, the behaviour of every recorded run."""
     override = (os.getenv("INSUFFICIENT_SCORE_THRESHOLD") or "").strip()
+    rrf_k = int(os.getenv("RRF_K", "60"))
+    if rrf_k < 1:
+        raise ConfigurationError(f"RRF_K={rrf_k} must be at least 1")
     return RetrievalSettings(
         top_k=int(os.getenv("TOP_K", "5")),
         overfetch=int(os.getenv("RETRIEVAL_OVERFETCH", "10")),
         insufficient_score_threshold=float(override) if override else GATE_THRESHOLDS[get_embedding_provider()],
+        mode=_choice("RETRIEVAL_MODE", "dense", RETRIEVAL_MODES),
+        rrf_k=rrf_k,
     )
+
+
+def get_keyword_index_dir() -> Path:
+    """The FTS5 keyword index files, one per arm (ADR-0007); git-ignored, rebuilt by build_index.py."""
+    return resolve_project_path(os.getenv("KEYWORD_INDEX_DIR", "data/keyword"))

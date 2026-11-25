@@ -81,3 +81,8 @@ def test_only_the_desktop_wiring_touches_composition_and_infrastructure():
             if any(n.startswith(("knowledge_assistant.composition", "knowledge_assistant.infrastructure")) for n in names):
                 importers.add(py.relative_to(PKG).as_posix())
     assert importers == {"presentation/desktop/wiring.py"}
+
+
+def test_sqlite_stays_in_infrastructure():
+    """ADR-0005 D18 / ADR-0007: SQLite (embedding cache, FTS5 keyword index) is a storage technology."""
+    assert "sqlite3" not in _imports("core") | _imports("application")

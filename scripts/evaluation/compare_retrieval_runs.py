@@ -7,7 +7,11 @@ Every number comes from the run folders under data/evaluation/results/ through t
 - one summary row per run: cases, answerable, expected-source hit@1 / @5 (the case's expected `source_id`s, any
   slot), span metrics where `expected-spans-v1.json` covers the split (eval only), top-1 score range of answerable
   and unanswerable cases, and how often the gate fired on each;
-- a per-case top-1 table (one column per run).
+- one row per run and question language (en, vi): the same hit rates over that language's answerable cases, with n;
+- a per-case top-1 table (one column per run), unless --no-cases.
+`retrieval` is the run's RETRIEVAL_MODE (ADR-0007; runs recorded before it have none and were dense). `top1_score` is the
+gate input, the dense top-1 cosine, in every mode, so its ranges and the gate columns do not depend on the mode; an
+`errors` column counts cases without an ok record (e.g. a sparse run whose question matched no keyword).
 Full-mode runs are read for their retrieval fields only. Duplicates resolve through the arms' full chunk files.
 """
 import argparse
@@ -57,37 +61,71 @@ def _rate(hits: int, n: int) -> str:
     return f"{hits}/{n} ({hits / n:.3f})" if n else "–"
 
 
+def retrieval_mode(run: dict) -> str:
+    return run["manifest"]["config"].get("retrieval_mode", "dense")
+
+
+def _span_cells(rows: list[dict]) -> list[str]:
+    summary = scoring.summarize_retrieval(rows) if rows else {}
+    cells = []
+    for key in SPAN_KEYS:
+        value = summary.get(key)
+        cells.append(f"{value['value']:.3f}" if value and value.get("value") is not None else "–")
+    return cells
+
+
+def print_language_table(runs: list[dict], rows: list[dict]) -> None:
+    """One row per run x language: hit rates over that language's answerable ok cases (span metrics where covered)."""
+    print("| run | retrieval | language | answerable n | expected source in top-1 | expected source in top-5 | "
+          + " | ".join(SPAN_KEYS) + " | gate fired: answerable |")
+    print("|" + "---|" * (7 + len(SPAN_KEYS)))
+    for run in runs:
+        ok = [r for r in run["records"] if r["status"] == "ok"]
+        for language in sorted({r["language"] for r in ok}):
+            answerable = [r for r in ok if r["answerable"] and r["language"] == language]
+            lang_rows = [row for row in rows if row["run_id"] == run["run_id"] and row["status"] == "ok"
+                         and row["language"] == language and row["answerable"]]
+            print(f"| {run['run_id']} | {retrieval_mode(run)} | {language} | {len(answerable)} "
+                  f"| {_rate(sum(source_hit(r, 1) for r in answerable), len(answerable))} "
+                  f"| {_rate(sum(source_hit(r, 5) for r in answerable), len(answerable))} | "
+                  + " | ".join(_span_cells(lang_rows))
+                  + f" | {_rate(sum(bool(r['gate_fired']) for r in answerable), len(answerable))} |")
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--runs", nargs="+", required=True)
+    parser.add_argument("--no-cases", action="store_true", help="skip the per-case top-1 table")
     args = parser.parse_args(argv)
 
     runs = load_runs(args.runs)
     spans = load_spans_by_case()
     rows = score_runs(runs, spans, full_chunk_indexes(runs))
 
-    print("| run | embedding model | threshold | cases | answerable | expected source in top-1 | expected source in top-5 | "
-          + " | ".join(SPAN_KEYS) + " | answerable top-1 | unanswerable top-1 | gate fired: answerable | "
-          "gate fired: unanswerable |")
-    print("|" + "---|" * (11 + len(SPAN_KEYS)))
+    print("| run | retrieval | embedding model | threshold | cases | errors | answerable | expected source in top-1 | "
+          "expected source in top-5 | " + " | ".join(SPAN_KEYS) + " | answerable top-1 | unanswerable top-1 | "
+          "gate fired: answerable | gate fired: unanswerable |")
+    print("|" + "---|" * (13 + len(SPAN_KEYS)))
     for run in runs:
         config = run["manifest"]["config"]
         ok = [r for r in run["records"] if r["status"] == "ok"]
         answerable = [r for r in ok if r["answerable"]]
         unanswerable = [r for r in ok if not r["answerable"]]
-        summary = scoring.summarize_retrieval([row for row in rows if row["run_id"] == run["run_id"]
-                                               and row["status"] == "ok"])
-        span_cells = []
-        for key in SPAN_KEYS:
-            value = summary.get(key)
-            span_cells.append(f"{value['value']:.3f}" if value and value.get("value") is not None else "–")
-        print(f"| {run['run_id']} | {config['embedding_model']}@{config['embedding_dim']} | {config['threshold']} "
-              f"| {len(ok)} | {len(answerable)} "
+        latest = {r["case_id"]: r for r in run["records"]}  # records are append-only; the last line of a case wins
+        errors = sum(1 for r in latest.values() if r["status"] != "ok")
+        span_cells = _span_cells([row for row in rows if row["run_id"] == run["run_id"] and row["status"] == "ok"])
+        print(f"| {run['run_id']} | {retrieval_mode(run)} | {config['embedding_model']}@{config['embedding_dim']} "
+              f"| {config['threshold']} | {len(ok)} | {errors} | {len(answerable)} "
               f"| {_rate(sum(source_hit(r, 1) for r in answerable), len(answerable))} "
               f"| {_rate(sum(source_hit(r, 5) for r in answerable), len(answerable))} | " + " | ".join(span_cells)
               + f" | {_range([r['top1_score'] for r in answerable])} | {_range([r['top1_score'] for r in unanswerable])}"
               f" | {_rate(sum(bool(r['gate_fired']) for r in answerable), len(answerable))}"
               f" | {_rate(sum(bool(r['gate_fired']) for r in unanswerable), len(unanswerable))} |")
+
+    print()
+    print_language_table(runs, rows)
+    if args.no_cases:
+        return 0
 
     print()
     cases = sorted({r["case_id"] for run in runs for r in run["records"]})

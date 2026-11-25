@@ -26,6 +26,11 @@ class VectorStoreError(KnowledgeAssistantError):
     """The vector store cannot serve the request, e.g. its collection was built with other settings."""
 
 
+class KeywordIndexError(VectorStoreError):
+    """The keyword index cannot serve the request (missing, or built with other settings). A `VectorStoreError`, so
+    every caller that reports a missing or mismatched index handles both the same way."""
+
+
 class RetrievalError(KnowledgeAssistantError):
     """Retrieval returned nothing usable, e.g. the collection is empty or the query embedding is missing."""
 

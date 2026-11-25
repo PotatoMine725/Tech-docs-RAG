@@ -227,3 +227,35 @@ def test_gate_threshold_env_overrides_every_provider_default(monkeypatch):
 
 def test_every_embedding_provider_has_a_gate_threshold():
     assert set(GATE_THRESHOLDS) == set(EMBEDDING_PROVIDERS)
+
+
+def test_retrieval_mode_defaults_to_dense_with_rrf_k_60(monkeypatch):
+    monkeypatch.delenv("RETRIEVAL_MODE", raising=False)
+    monkeypatch.delenv("RRF_K", raising=False)
+    settings = get_retrieval_settings()
+    assert (settings.mode, settings.rrf_k) == ("dense", 60)
+
+
+def test_retrieval_mode_is_validated_and_matches_the_retriever_modes(monkeypatch):
+    from knowledge_assistant.application.retrieval.retrieve import RETRIEVAL_MODES as RETRIEVER_MODES
+    from knowledge_assistant.config import RETRIEVAL_MODES
+
+    assert RETRIEVAL_MODES == RETRIEVER_MODES
+    monkeypatch.setenv("RETRIEVAL_MODE", " Hybrid ")
+    assert get_retrieval_settings().mode == "hybrid"
+    monkeypatch.setenv("RETRIEVAL_MODE", "bm25")
+    with pytest.raises(ConfigurationError, match="RETRIEVAL_MODE"):
+        get_retrieval_settings()
+    monkeypatch.setenv("RETRIEVAL_MODE", "dense")
+    monkeypatch.setenv("RRF_K", "0")
+    with pytest.raises(ConfigurationError, match="RRF_K"):
+        get_retrieval_settings()
+
+
+def test_keyword_index_dir_resolves_from_the_repo_root(monkeypatch):
+    from knowledge_assistant.config import get_keyword_index_dir
+
+    monkeypatch.delenv("KEYWORD_INDEX_DIR", raising=False)
+    assert get_keyword_index_dir() == PROJECT_ROOT / "data" / "keyword"
+    monkeypatch.setenv("KEYWORD_INDEX_DIR", "elsewhere/kw")
+    assert get_keyword_index_dir() == PROJECT_ROOT / "elsewhere" / "kw"

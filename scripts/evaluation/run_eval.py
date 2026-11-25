@@ -56,7 +56,12 @@ from knowledge_assistant.application.evaluation.run_evaluation import (  # noqa:
 )
 from knowledge_assistant.application.generation.answer_question import AnswerQuestion  # noqa: E402
 from knowledge_assistant.application.retrieval.retrieve import Retriever  # noqa: E402
-from knowledge_assistant.composition import build_answer_service, open_embedder, open_vector_store  # noqa: E402
+from knowledge_assistant.composition import (  # noqa: E402
+    build_answer_service,
+    create_retriever,
+    open_embedder,
+    open_vector_store,
+)
 from knowledge_assistant.config import (  # noqa: E402
     get_active_embedding_model_id,
     get_answer_settings,
@@ -99,10 +104,9 @@ class Services:
 def open_services(arm: str, mode: str, settings, on_provider_error):
     """The query embedder (the configured provider behind the on-disk cache), the arm's existing collection and, in full mode, the LLM
     with its throttles, built ONCE here. `settings` is the answer settings the run was configured with."""
-    retrieval = get_retrieval_settings()
     with open_embedder() as embedder:
         store = open_vector_store(arm)
-        retriever = Retriever(embedder, store, retrieval.top_k, retrieval.overfetch)
+        retriever = create_retriever(arm, embedder, store)  # RETRIEVAL_MODE; dense never opens the keyword index
         answerer = llm = throttles = None
         if mode == FULL:
             throttles = build_throttles(settings)
@@ -225,6 +229,7 @@ def _run(args, emit, services, git_state, root: Path, today) -> int:
         threshold=retrieval.insufficient_score_threshold, prompt_version=settings.prompt_version,
         prompt_sha256=hashlib.sha256(prompt_file.read_bytes()).hexdigest(), top_k=retrieval.top_k,
         overfetch=retrieval.overfetch, freeze_tag=FREEZE_TAG, freeze_tag_commit=tag_commit, question_files=hashes,
+        retrieval_mode=retrieval.mode, rrf_k=retrieval.rrf_k,
     )
     run_id = args.run_id or default_run_id(today(), args.split, args.arm, args.mode, environment.git_commit)
     directory = root / RESULTS_DIR / run_id
@@ -234,7 +239,8 @@ def _run(args, emit, services, git_state, root: Path, today) -> int:
 
     # 3. estimate, then run
     emit(f"run {run_id}: arm {args.arm}, mode {args.mode}, split {args.split} -> {RESULTS_DIR.as_posix()}/{run_id}/")
-    emit(f"settings: answer model {config.answer_model} (fallback off), threshold {config.threshold}, top-k "
+    emit(f"settings: answer model {config.answer_model} (fallback off), retrieval {config.retrieval_mode}, embedding "
+         f"{config.embedding_model}@{config.embedding_dim}, threshold {config.threshold} (dense top-1), top-k "
          f"{config.top_k}+{config.overfetch}, prompt {config.prompt_version}, freeze tag {FREEZE_TAG} ({tag_commit[:7]})")
     with services(args.arm, args.mode, settings, FirstProviderErrors(store, run_id)) as opened:
         evaluation = RunEvaluation(run_id, config, store, opened.retriever, opened.answerer,
