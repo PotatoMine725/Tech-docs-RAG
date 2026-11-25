@@ -61,6 +61,14 @@ def _marker_matches(text: str, pattern: re.Pattern[str]) -> list[re.Match[str]]:
     return [m for m in pattern.finditer(text) if _is_marker(m.start(1) - 1, m.group(1), code)]
 
 
+def marker_spans(text: str) -> list[tuple[int, int, int]]:
+    """(start, end, number) of every citation marker `[n]` in the text, skipping code blocks and inline code.
+
+    The same rule the citation checks use, for callers that show markers (the desktop window's citation chips).
+    """
+    return [(m.start(), m.end(), int(m.group(1))) for m in _marker_matches(text, _MARKER)]
+
+
 def _mask_non_markers(text: str) -> str:
     """The text with the "[" of every non-marker `[n]` replaced, so `_MARKER` finds only real markers. Same length."""
     code = _code_spans(text)

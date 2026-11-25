@@ -10,11 +10,12 @@ The single-answer properties of the first version (`state`, `result`, `error_*`,
 """
 from __future__ import annotations
 
-import re
 from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import Enum
 from typing import Callable
+
+from knowledge_assistant.application.citation.citations import marker_spans
 
 from .contracts import AnswerResult, AskQuestionError, AskQuestionPort, Citation
 
@@ -22,7 +23,7 @@ Executor = Callable[[Callable[[], object], Callable[[object], None], Callable[[E
 
 ARMS = ("A", "B")
 
-_MARKER = re.compile(r"\[(\d+)\]")  # the marker form the citation code recognises (application/citation)
+_SAFE_URL_SCHEMES = ("https://", "http://")
 
 _ERROR_TEXT = {
     "quota": "The Gemini quota is used up for now. Wait a few minutes and ask again.",
@@ -145,8 +146,11 @@ class AskViewModel:
         self._viewer = None
         self._notify()
         question, arm = turn.question, turn.arm
-        self._executor(lambda: self._port.ask(question, arm),
-                       lambda result: self._on_ok(turn, result), lambda exc: self._on_err(turn, exc))
+        try:
+            self._executor(lambda: self._port.ask(question, arm),
+                           lambda result: self._on_ok(turn, result), lambda exc: self._on_err(turn, exc))
+        except Exception as exc:  # noqa: BLE001 - the job never started: the turn must not stay busy
+            self._on_err(turn, exc)
 
     # ---- source viewer --------------------------------------------------
     def open_citation(self, turn_index: int, marker: int) -> bool:
@@ -189,6 +193,12 @@ class AskViewModel:
             return None
         t, i = self._viewer
         return self.turns[t].citations[i]
+
+    @property
+    def selected_link(self) -> str:
+        """The open citation's source URL when it is a web address; empty otherwise, so nothing else is clickable."""
+        url = self.selected.source_url.strip() if self.selected else ""
+        return url if url.lower().startswith(_SAFE_URL_SCHEMES) else ""
 
     @property
     def viewer_position(self) -> str:
@@ -282,20 +292,20 @@ class AskViewModel:
 
     @staticmethod
     def segments(turn: Turn) -> list[Segment]:
-        """The answer split at its markers. Only markers that name one of the turn's citations become chips."""
+        """The answer split at its markers. Only markers that name one of the turn's citations become chips;
+        bracketed numbers inside code blocks or inline code stay text (the citation checks' own rule)."""
         if turn.state is not ViewState.ANSWER or not turn.result:
             return []
         known = {c.marker for c in turn.citations}
         out: list[Segment] = []
         text, pos = turn.result.answer, 0
-        for m in _MARKER.finditer(text):
-            marker = int(m.group(1))
+        for start, end, marker in marker_spans(text):
             if marker not in known:
                 continue
-            if m.start() > pos:
-                out.append(Segment(text[pos:m.start()]))
-            out.append(Segment(m.group(0), marker))
-            pos = m.end()
+            if start > pos:
+                out.append(Segment(text[pos:start]))
+            out.append(Segment(text[start:end], marker))
+            pos = end
         if pos < len(text):
             out.append(Segment(text[pos:]))
         return out

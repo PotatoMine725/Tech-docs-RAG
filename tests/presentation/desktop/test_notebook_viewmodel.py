@@ -173,17 +173,44 @@ def test_copy_text_for_lists_the_sources_under_a_real_answer_only():
     assert vm.copy_text_for(1) == "" and vm.copy_text_for(7) == ""
 
 
-def test_source_titles_are_the_document_names_citations_carry():
-    titles = load_source_titles("corpus/manifest.json")  # corpus 1, whatever CORPUS_MANIFEST says
-    names = {json.loads(line)["document_name"]
-             for line in (ROOT / "data/processed/chunks/arm-a.jsonl").read_text(encoding="utf-8").splitlines()
-             if line.strip()}
-    assert len(titles) == 24 and set(titles) == names
+def test_source_titles_are_the_indexed_document_names_and_match_the_manifest():
+    titles = load_source_titles(str(ROOT / "data/processed/chunks"))  # corpus 1, whatever CHUNKS_DIR says
+    manifest = json.loads((ROOT / "corpus/manifest.json").read_text(encoding="utf-8"))["documents"]
+    assert len(titles) == 24 and set(titles) == {d["title"] for d in manifest}
     assert list(titles) == sorted(titles, key=str.casefold)
 
 
-def test_missing_manifest_gives_no_sources(tmp_path):
-    assert load_source_titles(str(tmp_path / "nope.json")) == ()
+def test_missing_chunk_files_give_no_sources(tmp_path):
+    assert load_source_titles(str(tmp_path)) == ()
+
+
+def test_a_scheduling_failure_ends_the_turn_in_error_and_frees_the_window():
+    def broken(fn, on_ok, on_err):
+        raise RuntimeError("pool is shut down")
+
+    vm = AskViewModel(FakeAskQuestion(sleep=lambda s: None), broken)
+    vm.submit("What is DI?")
+    assert vm.state is ViewState.ERROR and not vm.busy and "pool is shut down" in vm.error_message
+    assert vm.retry(0) is True and vm.turns[-1].question == "What is DI?" and not vm.busy  # retry keeps the question
+
+
+def test_markers_inside_code_stay_text():
+    answer = "Use `list[1]` here [1].\n```\nvalues[2] = 0\n```\nThen [2]."
+    vm = AskViewModel(Port(AnswerResult("q", "en", answer, False, citations=(cite(1), cite(2)))), sync)
+    vm.submit("q")
+    chips = [s.marker for s in vm.segments(vm.turns[0]) if s.marker is not None]
+    assert chips == [1, 2] and "".join(s.text for s in vm.segments(vm.turns[0])) == answer
+
+
+def test_only_web_source_urls_are_links():
+    for url, link in (("https://learn.microsoft.com/x", "https://learn.microsoft.com/x"),
+                      ("HTTP://example.invalid/a", "HTTP://example.invalid/a"),
+                      ("file:///C:/Windows/system32/calc.exe", ""), ("javascript:alert(1)", ""), ("", "")):
+        c = Citation(1, "Doc", "A > B", "Text.", url)
+        vm = AskViewModel(Port(AnswerResult("q", "en", "A [1].", False, citations=(c,))), sync)
+        vm.submit("q")
+        vm.open_citation(0, 1)
+        assert vm.selected_link == link
 
 
 def test_theme_has_the_same_tokens_in_both_schemes_and_a_stylesheet_for_each():

@@ -57,8 +57,14 @@ class Composer(QPlainTextEdit):
             return
         super().keyPressEvent(event)
 
+    def changeEvent(self, event) -> None:  # noqa: N802 - Qt override
+        super().changeEvent(event)
+        if event.type() == event.Type.FontChange:  # the window's font arrives after construction: refit
+            self._fit()
+
     def _fit(self) -> None:
         line = self.fontMetrics().lineSpacing()
+        # QPlainTextEdit's document layout measures its height in lines, not pixels
         lines = max(1, min(self.MAX_LINES, int(self.document().size().height())))
         self.setFixedHeight(lines * line + 12)
 
@@ -204,7 +210,7 @@ class MainWindow(QMainWindow):
         self.viewer_related = QLabel("Related, not an answer.", objectName="viewerRelated")
         self.detail = QTextBrowser(objectName="excerpt")
         self.detail.setFont(_font(theme.SERIF, 11))
-        self.detail.setOpenExternalLinks(True)
+        self.detail.setOpenLinks(False)  # escaped excerpt text only: nothing in it is a link
         self.viewer_source = QLabel(objectName="viewerSource", wordWrap=True, openExternalLinks=True)
         self.viewer_source.setTextFormat(Qt.TextFormat.RichText)
         lay = QVBoxLayout(self.viewer)
@@ -438,8 +444,12 @@ class MainWindow(QMainWindow):
         self.detail.setHtml(
             f"<body style=\"font-family:{serif}; color:{c['ink']};\"><p style=\"line-height:160%;\">"
             f"<span style=\"background-color:{c['accent-soft']};\">{self._text(sel.excerpt)}</span></p></body>")
-        url = html.escape(sel.source_url)
-        self.viewer_source.setText(f"Source: <a href=\"{url}\" style=\"color:{c['link']};\">{url}</a>")
+        link = vm.selected_link
+        if link:
+            url = html.escape(link, quote=True)
+            self.viewer_source.setText(f"Source: <a href=\"{url}\" style=\"color:{c['link']};\">{url}</a>")
+        else:  # not a web address: shown, never clickable
+            self.viewer_source.setText(f"Source: {html.escape(sel.source_url)}" if sel.source_url else "")
 
     def sizeHint(self) -> QSize:  # noqa: N802 - Qt override
         return QSize(*theme.WINDOW_SIZE)

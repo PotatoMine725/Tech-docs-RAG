@@ -140,6 +140,33 @@ def test_source_click_opens_the_cited_section_and_filter_hides_rows(app):
     assert rows["Dependency Injection Guide"].isHidden() and not rows["ASP.NET Core Middleware"].isHidden()
 
 
+def test_composer_is_one_line_tall_until_the_text_grows(app):
+    _, win = make()
+    one = win.composer.height()
+    win.composer.setPlainText("a short question")
+    assert win.composer.height() == one
+    win.composer.setPlainText("line\nline\nline")
+    three = win.composer.height()
+    win.composer.setPlainText("\n".join(["line"] * 20))
+    assert one < three < win.composer.height() == one + 5 * win.composer.fontMetrics().lineSpacing()
+
+
+def test_a_source_url_that_is_not_a_web_address_is_not_a_link(app):
+    from knowledge_assistant.presentation.desktop.viewmodels.contracts import AnswerResult, Citation
+
+    class Port:
+        def ask(self, question, arm):
+            c = Citation(1, "Doc", "A > B", "Text.", "file:///C:/Windows/system32/calc.exe")
+            return AnswerResult(question, "en", "A [1].", False, citations=(c,))
+
+    vm = AskViewModel(Port(), QtExecutor())
+    win = MainWindow(vm)
+    vm.submit("q")
+    pump(app, lambda: vm.state is ViewState.ANSWER)
+    vm.open_citation(0, 1)
+    assert "<a " not in win.viewer_source.text() and "calc.exe" in win.viewer_source.text()
+
+
 def test_arm_is_chosen_in_the_settings_menu(app):
     vm, win = make()
     win.arm_actions[1].trigger()
