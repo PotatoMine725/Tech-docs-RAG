@@ -1,5 +1,6 @@
 # Category F (unanswerable, near corpus-2 topics) + v2 dev split (tuning only, never reported). DRAFT.
 - id: Q2-EVAL-031
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: F_unanswerable
   corpus: corpus2
@@ -17,6 +18,7 @@
   difficulty: medium
 
 - id: Q2-EVAL-032
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: F_unanswerable
   corpus: corpus2
@@ -33,6 +35,7 @@
   difficulty: easy
 
 - id: Q2-EVAL-033
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: F_unanswerable
   corpus: corpus2
@@ -50,6 +53,7 @@
   difficulty: medium
 
 - id: Q2-EVAL-034
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: F_unanswerable
   corpus: corpus2
@@ -66,6 +70,7 @@
   difficulty: medium
 
 - id: Q2-EVAL-035
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: F_unanswerable
   corpus: corpus2
@@ -82,6 +87,7 @@
   difficulty: medium
 
 - id: Q2-EVAL-036
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: F_unanswerable
   corpus: corpus2
@@ -99,6 +105,7 @@
 
 # ------------------------------------------------------------------ dev (disjoint sections from eval)
 - id: Q2-DEV-001
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: dev
   category: A_vi_on_vi
   corpus: corpus2
@@ -121,6 +128,7 @@
   difficulty: easy
 
 - id: Q2-DEV-002
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: dev
   category: A_vi_on_vi
   corpus: corpus2
@@ -140,6 +148,7 @@
   difficulty: medium
 
 - id: Q2-DEV-003
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: dev
   category: D_vi_on_mixed
   corpus: corpus2
@@ -160,6 +169,7 @@
   failure_mode: exact_identifier
 
 - id: Q2-DEV-004
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: dev
   category: D_vi_on_mixed
   corpus: corpus2
@@ -179,6 +189,7 @@
   difficulty: easy
 
 - id: Q2-DEV-006
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: dev
   category: F_unanswerable
   corpus: corpus2
@@ -195,6 +206,7 @@
   difficulty: easy
 
 - id: Q2-DEV-005
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: dev
   category: B_en_on_en
   corpus: corpus2

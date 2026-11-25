@@ -1,6 +1,7 @@
 # Category D (Vietnamese questions on mixed VI-EN corpus-2 documents). DRAFT, owner review pending.
 # C2-08 is stored in decomposed Unicode (NFD); its quotes are written with \u escapes so they match the text exactly.
 - id: Q2-EVAL-021
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: D_vi_on_mixed
   corpus: corpus2
@@ -22,6 +23,7 @@
   concepts: [Socket, UnknownHostException]
 
 - id: Q2-EVAL-022
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: D_vi_on_mixed
   corpus: corpus2
@@ -44,6 +46,7 @@
   concepts: [getPort, getLocalPort]
 
 - id: Q2-EVAL-023
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: D_vi_on_mixed
   corpus: corpus2
@@ -65,6 +68,7 @@
   concepts: [XmlDocument, SelectNodes, SelectSingleNode, XmlNodeList]
 
 - id: Q2-EVAL-024
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: D_vi_on_mixed
   corpus: corpus2
@@ -85,6 +89,7 @@
   concepts: [XPath, node types]
 
 - id: Q2-EVAL-025
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: D_vi_on_mixed
   corpus: corpus2
@@ -104,6 +109,7 @@
   concepts: [PreparedStatement, SQL Injection]
 
 - id: Q2-EVAL-026
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: D_vi_on_mixed
   corpus: corpus2
@@ -126,6 +132,7 @@
   concepts: [JWT, payload, signature]
 
 - id: Q2-EVAL-027
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: D_vi_on_mixed
   corpus: corpus2
@@ -152,6 +159,7 @@
   concepts: [Hold Period, hoa hồng affiliate]
 
 - id: Q2-EVAL-028
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: D_vi_on_mixed
   corpus: corpus2
@@ -174,6 +182,7 @@
   concepts: [Pro Tier, pricing]
 
 - id: Q2-EVAL-029
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: D_vi_on_mixed
   corpus: corpus2
@@ -193,6 +202,7 @@
   concepts: [ferritin, thiếu máu thiếu sắt]
 
 - id: Q2-EVAL-030
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: D_vi_on_mixed
   corpus: corpus2

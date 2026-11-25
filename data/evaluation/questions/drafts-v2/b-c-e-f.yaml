@@ -3,6 +3,7 @@
 
 # ---------------------------------------------------------------- B_en_on_en
 - id: Q2-EVAL-037
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: B_en_on_en
   corpus: corpus2
@@ -24,6 +25,7 @@
   concepts: [private healthcare, COVID-19, public-private model]
 
 - id: Q2-EVAL-038
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: B_en_on_en
   corpus: corpus2
@@ -44,6 +46,7 @@
   concepts: [functional requirements specification, acceptance testing]
 
 - id: Q2-EVAL-039
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: B_en_on_en
   corpus: corpus2
@@ -65,6 +68,7 @@
   concepts: [use case, class status, cancel class]
 
 - id: Q2-EVAL-040
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: B_en_on_en
   corpus: corpus2
@@ -86,6 +90,7 @@
   concepts: [business rule, committed working duration, training duration]
 
 - id: Q2-EVAL-041
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: B_en_on_en
   corpus: corpus2
@@ -109,6 +114,7 @@
   concepts: [cultural adjustment, W-curve model]
 
 - id: Q2-EVAL-042
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: B_en_on_en
   corpus: corpus2
@@ -132,6 +138,7 @@
   concepts: [global issues, definition]
 
 - id: Q2-EVAL-043
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: B_en_on_en
   corpus: corpus2
@@ -153,6 +160,7 @@
   concepts: [debt relief, HIPC Initiative, Jubilee movement]
 
 - id: Q2-EVAL-044
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: B_en_on_en
   corpus: corpus2
@@ -175,6 +183,7 @@
   concepts: [international migration, remittances]
 
 - id: Q2-EVAL-045
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: B_en_on_en
   corpus: corpus2
@@ -197,6 +206,7 @@
   concepts: [Unity, 2D vs 3D mode, orthographic camera]
 
 - id: Q2-EVAL-046
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: B_en_on_en
   corpus: corpus2
@@ -218,6 +228,7 @@
   concepts: [Unity, MonoBehaviour, Awake, Start]
 
 - id: Q2-EVAL-047
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: B_en_on_en
   corpus: corpus2
@@ -238,6 +249,7 @@
   concepts: [Unity, coroutine, WaitForSeconds, frame duration]
 
 - id: Q2-EVAL-048
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: B_en_on_en
   corpus: corpus2
@@ -259,6 +271,7 @@
   concepts: [notetaking, abbreviation techniques]
 
 - id: Q2-EVAL-049
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: B_en_on_en
   corpus: corpus2
@@ -282,6 +295,7 @@
   concepts: [notetaking, tips]
 
 - id: Q2-EVAL-050
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: B_en_on_en
   corpus: corpus2
@@ -302,6 +316,7 @@
 
 # ---------------------------------------------------------------- C_vi_on_en
 - id: Q2-EVAL-051
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: C_vi_on_en
   corpus: corpus2
@@ -322,6 +337,7 @@
   concepts: [healthy diet, sugar tax, government policy]
 
 - id: Q2-EVAL-052
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: C_vi_on_en
   corpus: corpus2
@@ -343,6 +359,7 @@
   concepts: [validation rules, common business rules]
 
 - id: Q2-EVAL-053
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: C_vi_on_en
   corpus: corpus2
@@ -366,6 +383,7 @@
   concepts: [business rule, allowance calculation, GPA level]
 
 - id: Q2-EVAL-054
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: C_vi_on_en
   corpus: corpus2
@@ -389,6 +407,7 @@
   concepts: [cultural adjustment, depression stage, W-curve model]
 
 - id: Q2-EVAL-055
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: C_vi_on_en
   corpus: corpus2
@@ -410,6 +429,7 @@
   concepts: [remittances, international migration]
 
 - id: Q2-EVAL-056
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: C_vi_on_en
   corpus: corpus2
@@ -429,6 +449,7 @@
   concepts: [global issues, World Bank mandate]
 
 - id: Q2-EVAL-057
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: C_vi_on_en
   corpus: corpus2
@@ -449,6 +470,7 @@
   concepts: [Unity, Invoke, InvokeRepeating, CancelInvoke]
 
 - id: Q2-EVAL-058
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: C_vi_on_en
   corpus: corpus2
@@ -471,6 +493,7 @@
 
 # ---------------------------------------------------------------- E_identifier_c1
 - id: Q2-EVAL-059
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: E_identifier_c1
   corpus: corpus1
@@ -493,6 +516,7 @@
   concepts: [status code pages, SkipStatusCodePages, IStatusCodePagesFeature]
 
 - id: Q2-EVAL-060
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: E_identifier_c1
   corpus: corpus1
@@ -515,6 +539,7 @@
   concepts: [routing, RequireHost, host matching]
 
 - id: Q2-EVAL-061
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: E_identifier_c1
   corpus: corpus1
@@ -539,6 +564,7 @@
   concepts: [dependency injection, keyed services, FromKeyedServices]
 
 - id: Q2-EVAL-062
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: E_identifier_c1
   corpus: corpus1
@@ -560,6 +586,7 @@
   concepts: [async, Task.WhenAny]
 
 - id: Q2-EVAL-063
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: E_identifier_c1
   corpus: corpus1
@@ -580,6 +607,7 @@
   concepts: [integer literals, literal suffix, uint, ulong]
 
 - id: Q2-EVAL-064
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: E_identifier_c1
   corpus: corpus1
@@ -602,6 +630,7 @@
   concepts: [integration tests, ConfigureTestServices, WithWebHostBuilder, WebApplicationFactory]
 
 - id: Q2-EVAL-065
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: E_identifier_c1
   corpus: corpus1
@@ -624,6 +653,7 @@
   concepts: [async, ValueTask, heap allocation, performance]
 
 - id: Q2-EVAL-066
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: E_identifier_c1
   corpus: corpus1
@@ -646,6 +676,7 @@
   concepts: [web API, error result, ProblemDetails]
 
 - id: Q2-EVAL-067
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: E_identifier_c1
   corpus: corpus1
@@ -668,6 +699,7 @@
   concepts: [dynamic type, compile-time checking, run-time exceptions]
 
 - id: Q2-EVAL-068
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: E_identifier_c1
   corpus: corpus1
@@ -692,6 +724,7 @@
 
 # ---------------------------------------------------------------- F_unanswerable
 - id: Q2-EVAL-069
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: F_unanswerable
   corpus: corpus1
@@ -710,6 +743,7 @@
   concepts: [output caching, ASP.NET Core middleware]
 
 - id: Q2-EVAL-070
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: F_unanswerable
   corpus: corpus1
@@ -728,6 +762,7 @@
   concepts: [hosted services, background jobs]
 
 - id: Q2-EVAL-071
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: F_unanswerable
   corpus: corpus1
@@ -746,6 +781,7 @@
   concepts: [EF Core, migrations, data seeding]
 
 - id: Q2-EVAL-072
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: F_unanswerable
   corpus: corpus1

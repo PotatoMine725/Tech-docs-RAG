@@ -1,5 +1,6 @@
 # Category A (VI questions on VI corpus-2 documents) + corpus-2 unanswerables + v2 dev. DRAFT, owner review pending.
 - id: Q2-EVAL-001
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: A_vi_on_vi
   corpus: corpus2
@@ -20,6 +21,7 @@
   concepts: [HBsAg, chronic hepatitis B]
 
 - id: Q2-EVAL-002
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: A_vi_on_vi
   corpus: corpus2
@@ -40,6 +42,7 @@
   concepts: [NPT, treaty duration]
 
 - id: Q2-EVAL-003
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: A_vi_on_vi
   corpus: corpus2
@@ -59,6 +62,7 @@
   concepts: [NPT, withdrawal]
 
 - id: Q2-EVAL-004
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: A_vi_on_vi
   corpus: corpus2
@@ -78,6 +82,7 @@
   concepts: [Đảng Cộng sản Đông Dương, Trần Phú, Hội nghị Trung ương 10-1930]
 
 - id: Q2-EVAL-005
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: A_vi_on_vi
   corpus: corpus2
@@ -99,6 +104,7 @@
   concepts: [Luận cương chính trị 10-1930]
 
 - id: Q2-EVAL-006
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: A_vi_on_vi
   corpus: corpus2
@@ -119,6 +125,7 @@
   concepts: [Mặt trận Việt Minh, Hội nghị Trung ương 8]
 
 - id: Q2-EVAL-007
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: A_vi_on_vi
   corpus: corpus2
@@ -137,6 +144,7 @@
   concepts: [UCMC, chẹn thụ thể AG, suy tim]
 
 - id: Q2-EVAL-008
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: A_vi_on_vi
   corpus: corpus2
@@ -157,6 +165,7 @@
   concepts: [eplerenone, kháng aldosterone]
 
 - id: Q2-EVAL-009
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: A_vi_on_vi
   corpus: corpus2
@@ -177,6 +186,7 @@
   concepts: [ran nổ, đông đặc phổi]
 
 - id: Q2-EVAL-010
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: A_vi_on_vi
   corpus: corpus2
@@ -196,6 +206,7 @@
   concepts: [đông đặc phổi, nhu mô phổi]
 
 - id: Q2-EVAL-011
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: A_vi_on_vi
   corpus: corpus2
@@ -216,6 +227,7 @@
   concepts: [thông liên thất, điều trị ngoại khoa]
 
 - id: Q2-EVAL-012
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: A_vi_on_vi
   corpus: corpus2
@@ -236,6 +248,7 @@
   concepts: [siêu âm tim, thông liên thất]
 
 - id: Q2-EVAL-013
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: A_vi_on_vi
   corpus: corpus2
@@ -254,6 +267,7 @@
   concepts: [piston, tiết diện nguy hiểm]
 
 - id: Q2-EVAL-014
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: A_vi_on_vi
   corpus: corpus2
@@ -275,6 +289,7 @@
   concepts: [chốt piston, ứng suất uốn]
 
 - id: Q2-EVAL-015
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: A_vi_on_vi
   corpus: corpus2
@@ -293,6 +308,7 @@
   concepts: [chỉ số nén đa biến, quá trình nén]
 
 - id: Q2-EVAL-016
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: A_vi_on_vi
   corpus: corpus2
@@ -316,6 +332,7 @@
   concepts: [tính toán nhiệt, đồ thị công]
 
 - id: Q2-EVAL-017
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: A_vi_on_vi
   corpus: corpus2
@@ -336,6 +353,7 @@
   concepts: [Anti HBs, Anti HBc, chủng ngừa HBV]
 
 - id: Q2-EVAL-018
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: A_vi_on_vi
   corpus: corpus2
@@ -356,6 +374,7 @@
   concepts: [thời hạn nộp bài, hội nghị khoa học]
 
 - id: Q2-EVAL-019
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: A_vi_on_vi
   corpus: corpus2
@@ -377,6 +396,7 @@
   concepts: [hội nghị khoa học, hình thức tổ chức]
 
 - id: Q2-EVAL-020
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
   split: eval
   category: A_vi_on_vi
   corpus: corpus2
