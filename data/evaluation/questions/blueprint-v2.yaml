@@ -6,7 +6,7 @@
 # Every slot becomes one DRAFT question in step 3; per-slot objectives, sources and heading paths are filled then.
 version: 2
 created: 2026-11-25
-status: proposed  # allocation; owner OK required before step 3
+status: approved  # allocation approved by the owner 2026-11-25; questions are DRAFT until reviewed
 categories:
   A_vi_on_vi:      {question_language: vi, corpus: corpus2, docs_language: vi}
   B_en_on_en:      {question_language: en, corpus: corpus2, docs_language: en}
@@ -54,4 +54,4 @@ allocation:  # category -> source -> {count, typing split}
     corpus2_topics: {count: 6, note: "e.g. dengue (only in the excluded scanned C2-23), topics adjacent to C2-07/C2-10/C2-11/C2-19"}
     corpus1_topics: {count: 4, note: "adjacent to corpus 1 IT docs, absent from every accepted source"}
 totals: {A: 20, B: 14, C: 8, D: 10, E: 10, F: 10, v2_eval: 72, v1_eval: 36, all_eval: 108}
-dev_split: TBD  # DECISION REQUIRED: optional 6 v2 dev questions for gate-threshold tuning on VI / mixed text
+dev_split: {count: 6, A_vi_on_vi: 2, D_vi_on_mixed: 2, B_en_on_en: 1, F_unanswerable: 1}  # owner 2026-11-25; tuning only, never reported
