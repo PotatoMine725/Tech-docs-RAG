@@ -81,6 +81,10 @@ def chunk_indexes() -> dict:
 def collect(run_ids: list[str]) -> list[dict]:
     """One row per (run, case): identity, case metadata, hit (evidence_hit@5 or None), section/source hits, gate."""
     cases, spans, indexes = load_cases(), load_spans(), chunk_indexes()
+    configs = [tuple(parse_id(run_id).values()) for run_id in run_ids]
+    repeated = sorted({c for c in configs if configs.count(c) > 1})
+    if repeated:  # two runs of one configuration would silently double its n
+        raise SystemExit(f"more than one run per configuration (narrow --runs-glob): {repeated}")
     rows = []
     for run_id in run_ids:
         meta = parse_id(run_id)

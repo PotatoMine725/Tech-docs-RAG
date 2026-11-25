@@ -75,4 +75,5 @@ Refines: ADR-0002 (formats), ADR-0003 D5/D6 (heading-path citations). Plan Phase
    documents.
 3. **NFC:** all text is normalized to Unicode NFC at ingestion (indexed text and questions), after conversion, so the
    converted text and its `converted_sha256` stay as pinned. Evidence matching compares both sides in NFC.
-   Correction to the note above: **C2-25** is NFD as well (found at indexing), besides C2-07 and C2-08.
+   Correction to the note above: **C2-25** is not NFC either (found at indexing; composing reorders its combining
+   marks without changing its length), besides C2-07 and C2-08.

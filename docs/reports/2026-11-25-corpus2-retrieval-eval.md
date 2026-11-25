@@ -1,8 +1,9 @@
 # Corpus 2 ingestion and retrieval-only evaluation (benchmark v1 + v2)
 
 Date: 2026-11-25. Status: **partial**. Local EmbeddingGemma: all runs. Gemini: v1 only. The Gemini corpus-2 index
-stopped at the daily embedding quota (851 of 1,045 arm-A texts cached, 0 in the store). **Gemini v2 numbers: TBD**
-after the quota reset (about 1,111 more requests: rest of arm A, arm B 840, 78 queries).
+stopped at the daily embedding quota: the embedder counted 1,100 requests (retries included) for 851 vectors kept
+in the cache, 0 in the store (the STOPPED path writes no indexing-log line; this is its record). **Gemini v2
+numbers: TBD** after the quota reset (about 1,112 more texts: arm A 194, arm B 840, 78 queries).
 Every number below comes from `scripts/evaluation/report_corpus2.py --runs-glob '20261125-*-retrieval-*'`
 (42 runs, commit c5a7117, no run git_dirty). No LLM call was made.
 
@@ -87,11 +88,15 @@ score (retrieval-spec.md: hybrid gate TBD until a reranker). Dev n is 9-11: smal
 
 ## Recommendation (provisional until Gemini v2)
 - **Best so far:** on corpus 1, Gemini dense arm A (0.938). On corpus 2 the local embedder's best is hybrid arm A
-  (0.923). Hybrid never hurt the local embedder and fixes its C (vi-on-en) gap. Its gain over dense is not
-  significant (p=0.125). Which embedder × mode is best on corpus 2: **TBD (Gemini v2)**.
+  (0.923). Hybrid A ≥ dense A in every category; its gain on corpus 2 (48 vs 44) is not significant (p=0.125). On
+  arm B hybrid is one case below dense on corpus 2 (45 vs 46, p=1.000) and on C (6/8 vs 7/8). Which embedder ×
+  mode is best on corpus 2: **TBD (Gemini v2)**.
 - **Where local lags:** v1 dense (23 vs 30, p=0.016); no-diacritics questions (dense A 4/9); gate calibration on
   corpus 2 (above). Sparse alone fails cross-language C (1/8), as expected without translation.
-- **Next step:** a **reranker** before a fine-tune. Source/section hits are higher than evidence hits (v1 local
-  dense A: section 29/32, evidence 23/32), so the right section is often found but the evidence chunk is not in the
-  top 5. A reranker could also give the absolute score the hybrid gate lacks. A fine-tune is not justified on 62
-  answerable questions. Both are untested here: **TBD**.
+- **Next step:** a **reranker** before a fine-tune. Section hits exceed evidence hits (v1 local dense A: section
+  29/32, evidence 23/32). Checked offline against the arm's whole chunk file (same NFC + whitespace rule): in every
+  section-hit / evidence-miss case the required quotes are contained whole in some chunk of the arm, i.e. the misses
+  are ranking, not chunking: v1 local dense A 6/6, v1 local dense B 5/5, corpus-2 local dense A 4/4, hybrid A 3/3,
+  dense B 3/3 (Gemini dense A v1: no such case). A reranker over a deeper candidate list targets exactly these and
+  could also give the absolute score the hybrid gate lacks. A fine-tune is not justified on 62 answerable questions.
+  Reranker gain itself is untested: **TBD**.
