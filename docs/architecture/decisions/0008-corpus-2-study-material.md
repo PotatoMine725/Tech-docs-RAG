@@ -44,3 +44,8 @@ Refines: ADR-0002 (formats), ADR-0003 D5/D6 (heading-path citations). Plan Phase
   manifest's sha256 values pin the inputs.
 - Words split across table cells in slide PDFs (C2-03, C2-05, C2-06, C2-32) and parts of C2-13 and C2-25 make keyword
   matching weaker on those documents. This is a property of the extraction, recorded here, not fixed.
+- C2-08 (1549 combining marks) and C2-07 (26) are stored in decomposed Unicode (NFD); questions are typed in NFC,
+  so exact keyword matching on those documents misses unless text is NFC-normalized. Quotes copy the stored form.
+  Normalizing at ingestion is **DECISION REQUIRED** (indexing step); it would change chunk text, not this manifest.
+- Image inspection (sampled, 2026-11-25) found 47 image-only facts in 17 of 18 documents with images; C2-26 keeps
+  almost all formulas as WMF images and C2-27 has nearly all explanations in screenshots.

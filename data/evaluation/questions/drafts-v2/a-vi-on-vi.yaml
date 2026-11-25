@@ -1,0 +1,396 @@
+# Category A (VI questions on VI corpus-2 documents) + corpus-2 unanswerables + v2 dev. DRAFT, owner review pending.
+- id: Q2-EVAL-001
+  split: eval
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  typing: no_diacritics
+  question: "Xet nghiem HBsAg duong tinh keo dai bao lau thi duoc coi la nhiem HBV man tinh?"
+  answerable: true
+  expected_answer: "Khi HBsAg xuất hiện kéo dài trên 6 tháng thì được coi là nhiễm HBV mạn."
+  answer_points:
+    - {id: P1, text: "Nhiễm HBV mạn khi HBsAg xuất hiện kéo dài trên 6 tháng.", required: true}
+    - {id: P2, text: "Ở bệnh nhân phục hồi sau nhiễm cấp, HBsAg biến mất sau 4-6 tháng.", required: false}
+  expected_sources: [{source_id: C2-29, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-29, heading_path: "", supports: [P1, P2], quote: "Đối với bệnh nhân phục hồi sau giai đoạn nhiễm cấp, HBsAg sẽ biến mất sau 4-6 tháng. Nhiễm HBV mạn khi HBsAg xuất hiện kéo dài trên 6 tháng."}
+  must_not_claim: ["A threshold other than 6 months for chronic HBV infection."]
+  cognitive_level: recall
+  difficulty: easy
+  concepts: [HBsAg, chronic hepatitis B]
+
+- id: Q2-EVAL-002
+  split: eval
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  question: "Hiệp ước NPT bắt đầu có hiệu lực từ ngày nào, và lúc đầu hiệp ước có thời hạn bao lâu?"
+  answerable: true
+  expected_answer: "NPT có hiệu lực ngày 5/3/1970; ban đầu có thời hạn 25 năm, sau đó được gia hạn vô thời hạn vào năm 1995."
+  answer_points:
+    - {id: P1, text: "NPT có hiệu lực ngày 5/3/1970.", required: true}
+    - {id: P2, text: "Thời hạn ban đầu 25 năm, được gia hạn vô thời hạn năm 1995.", required: true}
+  expected_sources: [{source_id: C2-10, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-10, heading_path: "", supports: [P1], quote: "qua ngày 12/6/1968, mở ký ngày 1/7/1968 và có hiệu lực ngày 5/3/1970."}
+    - {source_id: C2-10, heading_path: "", supports: [P2], quote: "Ban đầu, hiệp ước có thời hạn 25 năm, sau đó được gia hạn vô thời hạn vào năm 1995."}
+  must_not_claim: ["NPT came into force in 1968 (that is the adoption / signing year)."]
+  cognitive_level: recall
+  difficulty: easy
+  concepts: [NPT, treaty duration]
+
+- id: Q2-EVAL-003
+  split: eval
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  typing: no_diacritics
+  question: "Neu mot quoc gia muon rut khoi hiep uoc NPT thi phai bao truoc bao lau va bao cho ai?"
+  answerable: true
+  expected_answer: "Phải báo trước 3 tháng cho Liên Hợp Quốc."
+  answer_points:
+    - {id: P1, text: "Phải báo trước 3 tháng cho Liên Hợp Quốc.", required: true}
+  expected_sources: [{source_id: C2-10, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-10, heading_path: "", supports: [P1], quote: "nếu muốn rút khỏi hiệp ước, phải báo trước 3 tháng cho Liên Hợp Quốc."}
+  must_not_claim: ["A notice period other than 3 months, or notice given only to the IAEA."]
+  cognitive_level: recall
+  difficulty: medium
+  concepts: [NPT, withdrawal]
+
+- id: Q2-EVAL-004
+  split: eval
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  question: "Hội nghị Ban Chấp hành Trung ương lần thứ nhất tháng 10-1930 đã đổi tên Đảng thành gì và bầu ai làm Tổng Bí thư?"
+  answerable: true
+  expected_answer: "Hội nghị đổi tên Đảng Cộng sản Việt Nam thành Đảng Cộng sản Đông Dương và bầu đồng chí Trần Phú làm Tổng Bí thư."
+  answer_points:
+    - {id: P1, text: "Đổi tên thành Đảng Cộng sản Đông Dương.", required: true}
+    - {id: P2, text: "Trần Phú được bầu làm Tổng Bí thư.", required: true}
+  expected_sources: [{source_id: C2-07, heading_path: "*1.1.* Hoàn cảnh quốc tế cuối thế kỷ XIX, đầu thế kỷ XX", slot: S1}]
+  evidence:
+    - {source_id: C2-07, heading_path: "*1.1.* Hoàn cảnh quốc tế cuối thế kỷ XIX, đầu thế kỷ XX", supports: [P1, P2], quote: "quyết định đổi tên Đảng Cộng sản Việt Nam thành Đảng Cộng sản Đông Dương. Đồng chí Trần Phú được bầu làm Tổng Bí thư của Đảng."}
+  must_not_claim: ["Nguyễn Ái Quốc was elected General Secretary at this conference."]
+  cognitive_level: recall
+  difficulty: easy
+  concepts: [Đảng Cộng sản Đông Dương, Trần Phú, Hội nghị Trung ương 10-1930]
+
+- id: Q2-EVAL-005
+  split: eval
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  question: "Luận cương chính trị tháng 10-1930 bị đánh giá là có những hạn chế gì so với yêu cầu giải phóng dân tộc?"
+  answerable: true
+  expected_answer: "Luận cương không nêu rõ mâu thuẫn chủ yếu của xã hội Việt Nam thuộc địa, không nhấn mạnh nhiệm vụ giải phóng dân tộc mà nặng về đấu tranh giai cấp và cách mạng ruộng đất, và không đề ra được chiến lược liên minh dân tộc và giai cấp rộng rãi."
+  answer_points:
+    - {id: P1, text: "Không nêu rõ mâu thuẫn chủ yếu của xã hội Việt Nam thuộc địa.", required: true}
+    - {id: P2, text: "Không nhấn mạnh nhiệm vụ giải phóng dân tộc, nặng về đấu tranh giai cấp và cách mạng ruộng đất.", required: true}
+    - {id: P3, text: "Không đề ra chiến lược liên minh dân tộc và giai cấp rộng rãi.", required: false}
+  expected_sources: [{source_id: C2-07, heading_path: "*1.1.* Hoàn cảnh quốc tế cuối thế kỷ XIX, đầu thế kỷ XX", slot: S1}]
+  evidence:
+    - {source_id: C2-07, heading_path: "*1.1.* Hoàn cảnh quốc tế cuối thế kỷ XIX, đầu thế kỷ XX", supports: [P1, P2], quote: "Luận cương đã không nêu rõ mâu thuẫn chủ yếu của xã hội Việt Nam thuộc địa, không nhấn mạnh nhiệm vụ giải phóng dân tộc, mà nặng về đấu tranh giai cấp và cách mạng ruộng đất"}
+    - {source_id: C2-07, heading_path: "*1.1.* Hoàn cảnh quốc tế cuối thế kỷ XIX, đầu thế kỷ XX", supports: [P3], quote: "không đề ra được một chiến lược liên minh dân tộc và giai cấp rộng rãi trong cuộc đấu tranh chống đế quốc xâm lược và tay sai."}
+  must_not_claim: ["Limitations of the February 1930 platform (Cương lĩnh) presented as those of the October Luận cương."]
+  cognitive_level: analyze
+  difficulty: medium
+  concepts: [Luận cương chính trị 10-1930]
+
+- id: Q2-EVAL-006
+  split: eval
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  typing: no_diacritics
+  question: "Mat tran Viet Minh duoc thanh lap khi nao va khau hieu chinh luc do la gi?"
+  answerable: true
+  expected_answer: "Mặt trận Việt Minh được thành lập tháng 5.1941 (Hội nghị Trung ương 8); khẩu hiệu chính: Đoàn kết toàn dân, chống Nhật, chống Pháp, tranh lại độc lập; hoãn cách mạng ruộng đất."
+  answer_points:
+    - {id: P1, text: "Thành lập tháng 5.1941.", required: true}
+    - {id: P2, text: "Khẩu hiệu: Đoàn kết toàn dân, chống Nhật, chống Pháp, tranh lại độc lập; hoãn cách mạng ruộng đất.", required: true}
+  expected_sources: [{source_id: C2-07, heading_path: "*1.1.* Hoàn cảnh quốc tế cuối thế kỷ XIX, đầu thế kỷ XX", slot: S1}]
+  evidence:
+    - {source_id: C2-07, heading_path: "*1.1.* Hoàn cảnh quốc tế cuối thế kỷ XIX, đầu thế kỷ XX", supports: [P1, P2], quote: "Quyết định thành lập *Mặt trận Việt Minh (*5.1941), khẩu hiệu chính là: Đoàn kết toàn dân, chống Nhật, chống Pháp, tranh lại độc lập; hoãn cách mạng ruộng đất"}
+  must_not_claim: ["The Việt Minh front was founded in 1945."]
+  cognitive_level: recall
+  difficulty: medium
+  concepts: [Mặt trận Việt Minh, Hội nghị Trung ương 8]
+
+- id: Q2-EVAL-007
+  split: eval
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  question: "Bệnh nhân suy tim không dung nạp thuốc ức chế men chuyển vì bị ho hoặc phù mạch thì có thể chuyển sang nhóm thuốc nào?"
+  answerable: true
+  expected_answer: "Có thể dùng thuốc chẹn thụ thể angiotensin (AG) II."
+  answer_points:
+    - {id: P1, text: "Dùng thuốc chẹn thụ thể AG (angiotensin II).", required: true}
+  expected_sources: [{source_id: C2-11, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-11, heading_path: "", supports: [P1], quote: "Những bệnh nhân không dung nạp thuốc UCMC vì bị phù mạch hay ho có thể dùng chẹn thụ thể AG."}
+  must_not_claim: ["Switch to an aldosterone antagonist as the replacement for ACE inhibitors."]
+  cognitive_level: apply
+  difficulty: medium
+  concepts: [UCMC, chẹn thụ thể AG, suy tim]
+
+- id: Q2-EVAL-008
+  split: eval
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  typing: no_diacritics
+  question: "Lieu eplerenone trong dieu tri suy tim bat dau bao nhieu va tang toi da bao nhieu mg moi ngay?"
+  answerable: true
+  expected_answer: "Eplerenone 25 mg mỗi ngày, tăng lên đến 50 mg mỗi ngày."
+  answer_points:
+    - {id: P1, text: "Bắt đầu 25 mg mỗi ngày, tăng lên đến 50 mg mỗi ngày.", required: true}
+  expected_sources: [{source_id: C2-11, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-11, heading_path: "", supports: [P1], quote: "**Eplerenone:** 25 mg mỗi ngày, tăng lên đến 50 mg mỗi ngày"}
+  must_not_claim: ["The spironolactone dose (5 mg up to 25 mg) given as the eplerenone dose."]
+  cognitive_level: recall
+  difficulty: medium
+  failure_mode: no_diacritics
+  concepts: [eplerenone, kháng aldosterone]
+
+- id: Q2-EVAL-009
+  split: eval
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  question: "Ran nổ trong hội chứng đông đặc phổi có âm sắc như thế nào và nghe rõ nhất vào lúc nào?"
+  answerable: true
+  expected_answer: "Âm sắc khô, nhỏ, lép bép như tiếng muối rang; nghe rõ ở cuối thì hít vào và rõ hơn khi ho."
+  answer_points:
+    - {id: P1, text: "Âm sắc khô, nhỏ, lép bép như tiếng muối rang.", required: true}
+    - {id: P2, text: "Nghe rõ ở cuối thì hít vào, rõ hơn khi ho.", required: true}
+  expected_sources: [{source_id: C2-16, heading_path: "Ran nổ", slot: S1}]
+  evidence:
+    - {source_id: C2-16, heading_path: "Ran nổ", supports: [P1], quote: "Âm sắc: khô, nhỏ lép bép như tiếng muối rang."}
+    - {source_id: C2-16, heading_path: "Ran nổ", supports: [P2], quote: "Nghe rõ ở cuối thì hít vào, khi ho nghe rõ hơn."}
+  must_not_claim: ["The features of the bronchial breath sound (âm thổi ống) given as those of crackles."]
+  cognitive_level: recall
+  difficulty: easy
+  concepts: [ran nổ, đông đặc phổi]
+
+- id: Q2-EVAL-010
+  split: eval
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  question: "Vì sao nhu mô phổi bị đông đặc lại chìm khi bỏ vào nước?"
+  answerable: true
+  expected_answer: "Vì tỷ trọng nhu mô phổi tăng và mất tính xốp, do nhu mô bị viêm phù nề, xung huyết, tiết dịch hoặc xẹp lại."
+  answer_points:
+    - {id: P1, text: "Tỷ trọng nhu mô phổi tăng, mất tính xốp.", required: true}
+    - {id: P2, text: "Do nhu mô bị viêm phù nề, xung huyết, tiết dịch hoặc xẹp lại.", required: true}
+  expected_sources: [{source_id: C2-16, heading_path: "1. Khái niệm :", slot: S1}]
+  evidence:
+    - {source_id: C2-16, heading_path: "1. Khái niệm :", supports: [P1, P2], quote: "Tỷ trọng nhu mô phổi↑, mất tính xốp (chìm khi bỏ vào nước) do nhu mô phổi bị viêm phù nề, xung huyết, tiết dịch/xẹp lại."}
+  must_not_claim: ["Causes of consolidation (e.g. tuberculosis) given instead of the mechanism."]
+  cognitive_level: explain
+  difficulty: medium
+  concepts: [đông đặc phổi, nhu mô phổi]
+
+- id: Q2-EVAL-011
+  split: eval
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  question: "Trong ca bệnh thông liên thất ở trẻ 9 tháng tuổi, khi nào thì cần điều trị ngoại khoa và phẫu thuật làm gì?"
+  answerable: true
+  expected_answer: "Khi lâm sàng xấu, không đáp ứng điều trị nội khoa hoặc áp lực động mạch phổi tăng nhanh: mổ tim hở vá lỗ thông; nếu không mổ tim hở được thì làm vòng đai làm hẹp thân động mạch phổi để bảo vệ phổi."
+  answer_points:
+    - {id: P1, text: "Chỉ định: lâm sàng xấu không đáp ứng nội khoa hoặc áp lực ĐMP tăng nhanh.", required: true}
+    - {id: P2, text: "Mổ tim hở vá lỗ thông.", required: true}
+    - {id: P3, text: "Nếu không mổ tim hở được: làm vòng đai làm hẹp thân ĐMP.", required: false}
+  expected_sources: [{source_id: C2-24, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-24, heading_path: "", supports: [P1, P2, P3], quote: "Ngoại khoa: Khi lâm sàng xấu không đáp ứng với điều trị nội khoa hoặc áp lực ĐMP tăng nhanh. Mổ tim hở để vá lỗ thông, nếu điều kiện không cho phép mổ tim hở thì có thể làm vòng đai làm hẹp thân của ĐMP để bảo vệ phổi."}
+  must_not_claim: ["Device closure through catheterisation presented as the surgical (ngoại khoa) option."]
+  cognitive_level: apply
+  difficulty: medium
+  concepts: [thông liên thất, điều trị ngoại khoa]
+
+- id: Q2-EVAL-012
+  split: eval
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  typing: no_diacritics
+  question: "Sieu am tim cua benh nhi thong lien that cho thay lo thong o vi tri nao, kich thuoc bao nhieu va shunt theo chieu nao?"
+  answerable: true
+  expected_answer: "Thông liên thất dưới van động mạch chủ, kích thước 5.0 mm, shunt trái sang phải (T->P)."
+  answer_points:
+    - {id: P1, text: "Vị trí dưới van động mạch chủ.", required: true}
+    - {id: P2, text: "Kích thước 5.0 mm, shunt trái sang phải.", required: true}
+  expected_sources: [{source_id: C2-24, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-24, heading_path: "", supports: [P1, P2], quote: "Thông liên thất dưới van động mạch chủ=5.0mm Shunt T->P"}
+  must_not_claim: ["A right-to-left shunt."]
+  cognitive_level: recall
+  difficulty: medium
+  concepts: [siêu âm tim, thông liên thất]
+
+- id: Q2-EVAL-013
+  split: eval
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  question: "Khi tính nghiệm bền phần đầu piston, tiết diện nguy hiểm được lấy ở vị trí nào?"
+  answerable: true
+  expected_answer: "Tiết diện nguy hiểm là tiết diện cắt ngang của rãnh xéc măng dầu."
+  answer_points:
+    - {id: P1, text: "Tiết diện cắt ngang của rãnh xéc măng dầu.", required: true}
+  expected_sources: [{source_id: C2-25, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-25, heading_path: "", supports: [P1], quote: "Tiết diện nguy hiểm của phần đầu piston là tiết diện cắt ngang của rãnh xéc măng dầu."}
+  must_not_claim: ["The piston pin boss is the critical section of the piston head."]
+  cognitive_level: recall
+  difficulty: medium
+  concepts: [piston, tiết diện nguy hiểm]
+
+- id: Q2-EVAL-014
+  split: eval
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  question: "Chốt piston làm việc trong trạng thái chịu lực nào, và khi tính ứng suất uốn thì chốt được mô hình hóa ra sao?"
+  answerable: true
+  expected_answer: "Chốt piston chịu uốn, chịu cắt, chịu va đập và biến dạng; khi tính ứng suất uốn, chốt được coi như một dầm đặt tự do trên hai gối đỡ."
+  answer_points:
+    - {id: P1, text: "Chịu uốn, chịu cắt, chịu va đập và biến dạng.", required: true}
+    - {id: P2, text: "Coi như dầm đặt tự do trên hai gối đỡ.", required: true}
+  expected_sources: [{source_id: C2-25, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-25, heading_path: "", supports: [P1], quote: "Chốt piston làm việc trong trạng thái chịu uốn, chịu cắt, chịu va đập và biến dạng."}
+    - {source_id: C2-25, heading_path: "", supports: [P2], quote: "Nếu coi chốt piston như một dầm đặt tự do trên hai gối đỡ"}
+  must_not_claim: ["The pin is modelled as a cantilever (dầm công-xôn)."]
+  cognitive_level: explain
+  difficulty: hard
+  failure_mode: fragmented_extraction
+  concepts: [chốt piston, ứng suất uốn]
+
+- id: Q2-EVAL-015
+  split: eval
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  question: "Trong tính toán nhiệt động cơ, chỉ số nén đa biến n1 được xác định bằng cách nào?"
+  answerable: true
+  expected_answer: "Chọn trước n1, thế vào phương trình của quá trình nén rồi xác định n1 bằng phương pháp gần đúng (thử dần)."
+  answer_points:
+    - {id: P1, text: "Chọn trước n1, thế vào phương trình và xác định bằng phương pháp gần đúng.", required: true}
+  expected_sources: [{source_id: C2-26, heading_path: "Tính toán các thông số của chu trình: > Tính quá trình nén", slot: S1}]
+  evidence:
+    - {source_id: C2-26, heading_path: "Tính toán các thông số của chu trình: > Tính quá trình nén", supports: [P1], quote: "Chọn trước n1, thế vào phương trình sau, xác định n1 bằng phương pháp gần đúng."}
+  must_not_claim: ["A specific formula or numeric value for n1 (the equation is only an image in the document)."]
+  cognitive_level: explain
+  difficulty: medium
+  concepts: [chỉ số nén đa biến, quá trình nén]
+
+- id: Q2-EVAL-016
+  split: eval
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  typing: no_diacritics
+  question: "Phan tinh toan nhiet dong co giup sinh vien dat duoc nhung muc dich gi?"
+  answerable: true
+  expected_answer: "Giúp sinh viên vận dụng kiến thức môn Nguyên lý động cơ đốt trong để tính các quá trình nhiệt, hiểu quan hệ giữa các thông số nhiệt động của chu trình, xác định chỉ tiêu kinh tế kỹ thuật, kiểm nghiệm kích thước cơ bản của động cơ, và từ đó xây dựng đồ thị công lý thuyết."
+  answer_points:
+    - {id: P1, text: "Vận dụng kiến thức môn Nguyên lý động cơ đốt trong để tính các quá trình nhiệt trong động cơ.", required: true}
+    - {id: P2, text: "Hiểu quan hệ giữa các thông số nhiệt động, xác định chỉ tiêu kinh tế kỹ thuật, kiểm nghiệm kích thước cơ bản.", required: true}
+    - {id: P3, text: "Từ kết quả tính nhiệt xây dựng được đồ thị công lý thuyết.", required: false}
+  expected_sources: [{source_id: C2-26, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-26, heading_path: "", supports: [P1, P2], quote: "Mục đích phần tính toán nhiệt động cơ giúp cho sinh viên vận dụng kiến thức đã học trong môn học *“Nguyên lý động cơ đốt trong”* để tính toán các quá trình nhiệt trong động cơ"}
+    - {source_id: C2-26, heading_path: "", supports: [P2], quote: "hiểu rõ được các quan hệ giữa các thông số nhiệt động của chu trình, xác định được các chỉ tiêu kinh tế kỹ thuật và kiểm nghiệm lại các kích thước cơ bản của động cơ."}
+    - {source_id: C2-26, heading_path: "", supports: [P3], quote: "Từ kết quả tính toán nhiệt, sinh viên có thể xây dựng được đồ thị công lý thuyết của động cơ."}
+  must_not_claim: ["The purpose is to design the engine's cooling system."]
+  cognitive_level: recall
+  difficulty: easy
+  concepts: [tính toán nhiệt, đồ thị công]
+
+- id: Q2-EVAL-017
+  split: eval
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  question: "Sau khi tiêm vắc-xin viêm gan B thì cơ thể tạo ra kháng thể nào, và xét nghiệm anti-HBc có dương tính do tiêm chủng không?"
+  answerable: true
+  expected_answer: "Tiêm chủng chỉ tạo ra một loại kháng thể duy nhất là Anti HBs; Anti HBc chỉ được tạo ra khi nhiễm HBV, không tạo ra khi chủng ngừa."
+  answer_points:
+    - {id: P1, text: "Chỉ tạo ra Anti HBs.", required: true}
+    - {id: P2, text: "Anti HBc không được tạo ra khi chủng ngừa, chỉ khi nhiễm HBV.", required: true}
+  expected_sources: [{source_id: C2-29, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-29, heading_path: "", supports: [P1], quote: "Chủng ngừa chỉ có thể tạo ra một loại kháng thể duy nhất là Anti HBs."}
+    - {source_id: C2-29, heading_path: "", supports: [P2], quote: "Anti HBc chỉ được tạo ra khi nhiễm HBV, không tạo ra được khi chủng ngừa."}
+  must_not_claim: ["Vaccination makes anti-HBc positive."]
+  cognitive_level: explain
+  difficulty: medium
+  concepts: [Anti HBs, Anti HBc, chủng ngừa HBV]
+
+- id: Q2-EVAL-018
+  split: eval
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  question: "Hội nghị khoa học trẻ 2026 về AI và pháp luật yêu cầu gửi tóm tắt và bài toàn văn trước những ngày nào?"
+  answerable: true
+  expected_answer: "Tên và tóm tắt bài viết (tiếng Việt và tiếng Anh) gửi trước ngày 30/7/2026; bài toàn văn trước ngày 05/9/2026."
+  answer_points:
+    - {id: P1, text: "Tóm tắt (tiếng Việt và tiếng Anh) trước ngày 30/7/2026.", required: true}
+    - {id: P2, text: "Toàn văn trước ngày 05/9/2026.", required: true}
+  expected_sources: [{source_id: C2-30, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-30, heading_path: "", supports: [P1], quote: "Thời hạn gửi tên và tóm tắt bài viết (tiếng Việt & tiếng Anh): Trước ngày 30/7/2026."}
+    - {source_id: C2-30, heading_path: "", supports: [P2], quote: "Thời hạn thu nhận bài toàn văn: Trước ngày 05/9/2026."}
+  must_not_claim: ["10/8/2026 is the full-paper deadline (it is the review notification date)."]
+  cognitive_level: recall
+  difficulty: easy
+  concepts: [thời hạn nộp bài, hội nghị khoa học]
+
+- id: Q2-EVAL-019
+  split: eval
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  typing: no_diacritics
+  question: "Hoi nghi khoa hoc tre ve tri tue nhan tao va phap luat du kien to chuc thang may va theo hinh thuc nao?"
+  answerable: true
+  expected_answer: "Dự kiến tổ chức tháng 10 năm 2026, hình thức trực tiếp kết hợp trực tuyến."
+  answer_points:
+    - {id: P1, text: "Dự kiến tháng 10 năm 2026.", required: true}
+    - {id: P2, text: "Trực tiếp kết hợp trực tuyến.", required: true}
+  expected_sources: [{source_id: C2-30, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-30, heading_path: "", supports: [P1], quote: "Thời gian tổ chức: Dự kiến tháng 10 năm 2026."}
+    - {source_id: C2-30, heading_path: "", supports: [P2], quote: "Hình thức tổ chức: Trực tiếp kết hợp trực tuyến."}
+  must_not_claim: ["The conference is online only."]
+  cognitive_level: recall
+  difficulty: easy
+  concepts: [hội nghị khoa học, hình thức tổ chức]
+
+- id: Q2-EVAL-020
+  split: eval
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  question: "Theo hướng dẫn xử trí phản ứng sau tiêm chủng, trường hợp phản ứng phản vệ được xử trí theo sơ đồ nào và căn cứ thông tư nào?"
+  answerable: true
+  expected_answer: "Thực hiện chi tiết theo sơ đồ 2, theo thông tư số 51/2017/TT-BYT."
+  answer_points:
+    - {id: P1, text: "Theo sơ đồ 2, thông tư số 51/2017/TT-BYT.", required: true}
+  expected_sources: [{source_id: C2-32, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-32, heading_path: "", supports: [P1], quote: "Phản ứng phản vệ: thực hiện chi tiết theo sơ đồ 2 (thông tư số 51/2017/TT-BYT)"}
+  must_not_claim: ["Drug doses or steps of the anaphylaxis algorithm (the diagram itself is not in the text)."]
+  cognitive_level: recall
+  difficulty: hard
+  failure_mode: fragmented_extraction
+  concepts: [phản vệ, xử trí sau tiêm chủng]
