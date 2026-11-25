@@ -68,8 +68,8 @@ investigated: **TBD**. On all cores the same K = 10 eval took a median 1,945 ms 
 
 - **@5: no reranker beats `none`** (no p < 0.2); `none` is already near the candidate ceiling (§3: corpus 2 48 of
   at most 49). **@1 on corpus 2 improves** (bge-m3 31 → 41, b = 1, c = 11, p = 0.006; gte 31 → 38, p = 0.065), so
-  the right chunk comes first more often. On corpus 1 @1 does not improve (local) or drops (Gemini dense: gte 19 → 13,
-  p = 0.031; bge-m3 19 → 15).
+  the right chunk comes first more often. On corpus 1 @1 drops: local v1 15 → 12 (gte), 15 → 14 (bge-m3); E 9 → 7
+  for both (b = 2, c = 0); Gemini dense v1 19 → 13 (gte, p = 0.031), 19 → 15 (bge-m3).
 - Section MRR@5 (local): corpus 2 0.885 → 0.968 (gte), 0.952 (bge-m3); v1 0.919 → 0.911, 0.914.
 - Per category / language / typing (local, v2, @5): bge-m3 equals `none` in every cell (A 17/20, B 13/14, C 8/8,
   D 10/10, E 10/10; vi 39/42, en 19/20; diacritics 33/33, no_diacritics 6/9). gte is one case lower in A, E, vi, en
@@ -102,9 +102,12 @@ investigated: **TBD**. On all cores the same K = 10 eval took a median 1,945 ms 
 
 - **Default: off** (`RERANK_PROVIDER=none`), by the pre-registered rule: both models are over 2 s at K = 10 on the
   low-end profile (gte 5.6 s, bge-m3 13.8 s median) and over the ~0.5 GB RAM budget.
-- **Opt-in "high quality" mode: bge-m3 int8, K = 10, local embedder.** It never lost an @5 case against `none` on local
-  hybrid (v1 27 vs 26, corpus 2 48 vs 48, E 10 vs 10) and puts the evidence first more often on corpus 2 (@1 41 vs
-  31, p = 0.006). Real cost: median 4.2 s per question on the i7-12700H with ONNX Runtime's default threads (full profile), 13.8 s on the low-end
+- **Opt-in "high quality" mode: bge-m3 int8, K = 10, local embedder.** Its @5 total is never below `none` on local
+  hybrid (v1 27 vs 26: 1 case lost, 2 gained; corpus 2 48 vs 48 and E 10 vs 10, identical cases) and it puts the
+  evidence first more often on corpus 2 (@1 41 vs 31, p = 0.006), at the cost of @1 on corpus 1 (v1 14 vs 15, E 7 vs
+  9). **How this was chosen:** §1 fixed K and the default-off rule, not the choice between gte and bge-m3 nor
+  "local embedder only"; both were made on these eval results, and no @5 comparison between the models or against
+  `none` is significant, so treat the choice as provisional. Real cost: median 4.2 s per question on the i7-12700H with ONNX Runtime's default threads (full profile), 13.8 s on the low-end
   profile, about 1.6 GB more RAM. With the Gemini embedder (dense) it lowers @1 and @5 on v1: not recommended there.
 - **Gate:** no reranker gate value is adopted; the dense gate stays (0.686 / 0.5417, known limitation on corpus 2).
   Reranker values above are PROVISIONAL; next step for a usable value: owner-approved new dev questions.
