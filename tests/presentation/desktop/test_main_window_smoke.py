@@ -9,7 +9,7 @@ import pytest
 pytest.importorskip("PySide6")
 
 from PySide6.QtCore import Qt, QUrl  # noqa: E402
-from PySide6.QtGui import QGuiApplication, QImage  # noqa: E402
+from PySide6.QtGui import QColor, QGuiApplication, QImage  # noqa: E402
 from PySide6.QtTest import QTest  # noqa: E402
 from PySide6.QtWidgets import QApplication  # noqa: E402
 
@@ -186,11 +186,22 @@ def test_hit_badge_survives_a_narrow_source_list(app):
     lst = win.source_list
     row = next(lst.item(i) for i in range(lst.count()) if lst.item(i).data(HIT_ROLE))
     assert row.text() == "Dependency Injection Guide" and row.toolTip().endswith("2 cited")
+    assert row.data(Qt.ItemDataRole.AccessibleTextRole).endswith("2 cited")
     assert isinstance(lst.itemDelegate(), SourceItemDelegate)
-    lst.resize(120, lst.height())
+    win.splitter.setSizes([190, 1000, 0])  # narrow enough that the long name must be elided
+    app.processEvents()
     image = QImage(lst.viewport().size(), QImage.Format.Format_ARGB32)
     image.fill(0)
-    lst.viewport().render(image)  # paints without error at a width where the name must be elided
+    lst.viewport().render(image)
+    badge = QColor(win.c["accent-soft"]).rgb()
+
+    def badge_pixels(item) -> int:  # badge-coloured pixels in the right third of the row (no row is selected)
+        r = lst.visualItemRect(item)
+        return sum(image.pixel(x, y) == badge for x in range(r.right() - r.width() // 3, r.right())
+                   for y in range(r.top(), r.bottom()))
+
+    other = next(lst.item(i) for i in range(lst.count()) if not lst.item(i).data(HIT_ROLE))
+    assert badge_pixels(row) > 50 and badge_pixels(other) == 0
 
 
 def test_opening_the_viewer_takes_width_from_the_conversation(app):
@@ -204,5 +215,16 @@ def test_opening_the_viewer_takes_width_from_the_conversation(app):
     assert viewer == theme.VIEWER_WIDTH and center > 0
     win.splitter.setSizes([side, center + viewer - 300, 300])  # the user drags the viewer narrower
     QTest.keyClick(win, Qt.Key.Key_Escape)
+    assert not win.viewer.isVisible()
     win.thread.anchorClicked.emit(QUrl("cite:0:2"))
-    assert win.splitter.sizes()[2] == 300  # reopened at the dragged width
+    assert win.viewer.isVisible() and win.splitter.sizes()[2] == 300  # reopened at the dragged width
+
+
+def test_opening_the_viewer_keeps_a_narrowed_source_list(app):
+    vm, win = make()
+    ask(win, "What is DI?")
+    pump(app, lambda: vm.state is ViewState.ANSWER)
+    side, center, _ = win.splitter.sizes()
+    win.splitter.setSizes([200, side + center - 200, 0])  # the user drags the source list narrower
+    win.thread.anchorClicked.emit(QUrl("cite:0:1"))
+    assert win.splitter.sizes()[0] == 200

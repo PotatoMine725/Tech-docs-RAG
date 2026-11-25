@@ -367,7 +367,9 @@ class MainWindow(QMainWindow):
             name = item.data(Qt.ItemDataRole.UserRole)
             n = hits.get(name, 0)
             item.setData(HIT_ROLE, n)  # the delegate paints it as a badge the name's elision cannot hide
-            item.setToolTip(f"{name} · {n} cited" if n else name)
+            label = f"{name} · {n} cited" if n else name
+            item.setToolTip(label)
+            item.setData(Qt.ItemDataRole.AccessibleTextRole, label)  # screen readers hear the count the badge shows
             item.setSelected(name == current)
         lst.blockSignals(False)
 
@@ -508,11 +510,10 @@ class MainWindow(QMainWindow):
             self.viewer_source.setText(f"Source: {html.escape(sel.source_url)}" if sel.source_url else "")
 
     def _fit_viewer(self, side: int, center: int) -> None:
-        """Give the viewer its width out of the conversation, not the source list: a splitter sized while the viewer
-        was hidden would otherwise shrink every pane, the source list down to its minimum."""
+        """Give the viewer its width out of the conversation; the source list keeps the width it had (collapsed,
+        dragged narrower or wider). Left to the splitter, showing the viewer shrinks every pane instead."""
         total = side + center
         self.splitter.refresh()  # apply the viewer's show now, so the sizes below are not redistributed later
-        side = max(side, theme.SIDEBAR_WIDTH) if side else 0  # a collapsed source list stays collapsed
         viewer = min(self._viewer_width, max(0, total - side - self.center.minimumSizeHint().width()))
         self.splitter.setSizes([side, total - side - viewer, viewer])
 
