@@ -429,7 +429,8 @@ def report(args: argparse.Namespace) -> int:
         if not mine:
             continue
         mode = EMBEDDERS[embedder][1]
-        print(f"\n### {embedder} ({mode}, Arm {ARM}): answerable eval, top 5 after reranking {CANDIDATES} candidates\n")
+        print(f"\n### {embedder} ({mode}, Arm {ARM}): answerable eval, top 5 after reranking K candidates "
+              "(K in the label)\n")
         print("| pool | reranker | n | evidence_hit@1 | evidence_hit@5 | MRR@5 (section) | vs none @5: b / c / p "
               "| vs none @1: b / c / p |")
         print("|---|---|---:|---:|---:|---:|---|---|")
@@ -489,7 +490,8 @@ def cost(workers: list[dict]) -> None:
         fmed = f"{statistics.median(r['ms'] for r in f['results']):.0f}" if f else "–"
         over = [x for x, bad in (("RAM", added > BUDGET_MB), ("latency", median > BUDGET_MS)) if bad]
         windows = statistics.median(r["windows"] for r in w["results"])
-        print(f"| {shown(label_of(w))} | {w['batch_size']} | {w['onnx_mb']:.0f} | {w['cases']} | {windows:.0f} | "
+        cell = label_of(w) if label_of(w) in (_preregistered or set()) else f"{label_of(w)} (K selection, speed only)"
+        print(f"| {cell} | {w['batch_size']} | {w['onnx_mb']:.0f} | {w['cases']} | {windows:.0f} | "
               f"{w['load_s']:.1f} | "
               f"{median:.0f} | {p95:.0f} | {lat[-1]:.0f} | {before:.0f} | {peak:.0f} | {added:.0f} | {fmed} | "
               f"{'**over: ' + ', '.join(over) + '**' if over else 'within'} |")
@@ -529,9 +531,9 @@ def gate_tables(rows: list[dict], configs: list[str]) -> None:
                             f"{sum(r['rerank_top1'] < value for r in an)}/{len(an)}")
                 else:
                     info = "| "
-                shown = f"{value:.4f}" if value > 0 else "no usable threshold (<= 0)"
+                value_cell = f"{value:.4f}" if value > 0 else "no usable threshold (<= 0)"
                 print(f"| {shown(config)} | {label} | {len(ans)} | {len(una)} | {low:.4f} | "
-                      f"{'–' if high is None else f'{high:.4f}'} | {shown} | {overlap} | {info} |")
+                      f"{'–' if high is None else f'{high:.4f}'} | {value_cell} | {overlap} | {info} |")
         print(f"\nPer case ({embedder}, dev):\n")
         print("| case | set | answerable | dense top-1 | " + " | ".join(configs[1:]) + " |")
         print("|---|---|---|---:|" + "---:|" * (len(configs) - 1))

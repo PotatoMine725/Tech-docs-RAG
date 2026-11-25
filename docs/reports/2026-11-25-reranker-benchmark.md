@@ -1,7 +1,7 @@
 # Reranker benchmark, retrieval only (plan §7.1 step 4b, ADR-0009)
 
-Date: 2026-11-25. Status: **pre-registered, not run yet**. This section was committed before any speed or quality
-number of the configuration below existed; the results are appended under it, never edited into it.
+Date: 2026-11-25 (runs 2026-11-26). Status: **run once, as pre-registered**. §1 was committed in 6ad584d before any
+speed or quality number of its configuration existed and is unchanged since; results are in §2.
 
 ## 1. Pre-registered procedure (owner decisions 2026-11-25)
 
@@ -35,7 +35,81 @@ number of the configuration below existed; the results are appended under it, ne
 
 ## 2. Results
 
-TBD (appended after the runs).
+Every number comes from `scripts/benchmark/reranker_bench.py` (run folder `data/experiments/rerank-bench/20261125-run3`,
+git-ignored; candidates at commit 6ad584d, `git_dirty` false; `report` regenerates every table). No LLM call.
+Machine: i7-12700H; low-end profile = logical CPUs 12-15 (E-cores), 4 threads.
+
+**Step 1, K on speed (dev questions, local hybrid candidates, n = 12, before any accuracy was computed):**
+
+| model (int8) | K | median ms / question | p95 ms | median windows | peak RAM MB | <= 2 s |
+|---|---:|---:|---:|---:|---:|---|
+| gte | 20 | 12,752 | 18,032 | 21 | 2,310 | no |
+| gte | 15 | 9,782 | 13,464 | 16 | 2,147 | no |
+| gte | 10 | 5,590 | 8,788 | 10 | 2,136 | no |
+| bge-m3 | 20 | 29,801 | 41,806 | 21 | 1,675 | no |
+| bge-m3 | 15 | 22,989 | 30,835 | 16 | 1,673 | no |
+| bge-m3 | 10 | 13,781 | 19,911 | 10 | 1,673 | no |
+
+Both models are over 2 s even at K = 10, so by §1 each ran its one eval at **K = 10** and the default ships **off**.
+Windows: about one per candidate (median 21 for 20 candidates), as expected with 512-token pairs. Added RAM (peak
+working set − before load, 44 MB) is 2,092 MB for gte and 1,629 MB for bge-m3: both over the ~0.5 GB budget. gte's
+peak is above its 325 MB file and above bge-m3's; why (e.g. ONNX Runtime's arena for the gte graph) is not
+investigated: **TBD**. On all cores the same K = 10 eval took a median 1,945 ms (gte) and 4,178 ms (bge-m3).
+
+**Step 2, one eval per model at K = 10.** evidence_hit@5 (@1), answerable eval, Arm A. Paired exact McNemar vs `none`
+(b = only `none` hits, c = only the reranker hits), raw p.
+
+| embedder (mode) | pool | n | none | gte | p @5 / @1 | bge-m3 | p @5 / @1 |
+|---|---|---:|---|---|---|---|---|
+| local (hybrid) | v1 eval, corpus 1 | 32 | 26 (15) | 26 (12) | 1.000 / 0.250 | 27 (14) | 1.000 / 1.000 |
+| local (hybrid) | v2 eval, corpus 2 A-D | 52 | 48 (31) | 47 (38) | 1.000 / 0.065 | 48 (41) | 1.000 / **0.006** |
+| local (hybrid) | v2 eval, corpus 1 E | 10 | 10 (9) | 9 (7) | 1.000 / 0.500 | 10 (7) | 1.000 / 0.500 |
+| Gemini (dense) | v1 eval, corpus 1 | 32 | 30 (19) | 26 (13) | 0.219 / **0.031** | 27 (15) | 0.250 / 0.219 |
+
+- **@5: no reranker beats `none`** (no p < 0.2); `none` is already near the candidate ceiling (§3: corpus 2 48 of
+  at most 49). **@1 on corpus 2 improves** (bge-m3 31 → 41, b = 1, c = 11, p = 0.006; gte 31 → 38, p = 0.065), so
+  the right chunk comes first more often. On corpus 1 @1 does not improve (local) or drops (Gemini dense: gte 19 → 13,
+  p = 0.031; bge-m3 19 → 15).
+- Section MRR@5 (local): corpus 2 0.885 → 0.968 (gte), 0.952 (bge-m3); v1 0.919 → 0.911, 0.914.
+- Per category / language / typing (local, v2, @5): bge-m3 equals `none` in every cell (A 17/20, B 13/14, C 8/8,
+  D 10/10, E 10/10; vi 39/42, en 19/20; diacritics 33/33, no_diacritics 6/9). gte is one case lower in A, E, vi, en
+  and diacritics. Subgroups (n 8-20) are not tested.
+- Gemini v2: **TBD** (no corpus-2 Gemini index; v2 queries not cached).
+- Note: the hybrid retriever is not fully deterministic between runs (near-tie RRF order; dense top-1 identical): two
+  candidate builds of the same commit differed in 3 of 120 20-lists and 1 of 120 top-5 lists. Every comparison here
+  uses one candidate file, so `none` and the rerankers see the same lists.
+
+**Step 3, gate (PROVISIONAL, dev v1 + v2 only; reranker top-1 sigmoid; rule lowest answerable − 0.05):**
+
+| embedder | model | pool | answerable / unanswerable n | lowest answerable | highest unanswerable | rule value | overlap |
+|---|---|---|---|---:|---:|---:|---|
+| local | gte | corpus 1 / corpus 2 | 4/2, 5/1 | 0.5362, 0.4783 | 0.5163, 0.4235 | 0.4862, 0.4283 | no, no |
+| local | gte | pooled | 9/3 | 0.4783 | 0.5163 | 0.4283 | **yes: DECISION REQUIRED** |
+| local | bge-m3 | corpus 1 / corpus 2 | 4/2, 5/1 | 0.1080, 0.0861 | 0.4042, 0.0003 | 0.0580, 0.0361 | **yes**, no |
+| local | bge-m3 | pooled | 9/3 | 0.0861 | 0.4042 | 0.0361 | **yes: DECISION REQUIRED** |
+| Gemini | gte / bge-m3 | corpus 1 | 4/2 | 0.5394 / 0.1354 | 0.5019 / 0.4477 | 0.4894 / 0.0854 | no / **yes** |
+
+- Pooled across corpora, answerable and unanswerable reranker scores **overlap for both models**, like the dense
+  cosine did (ADR-0007 amendment). The overlap comes from one unanswerable corpus-1 near miss, Q-DEV-005 (gte 0.5163,
+  bge-m3 0.4042), against answerable cases the reranker scores low: gte Q2-DEV-002 0.4783; bge-m3 Q2-DEV-002 0.0861
+  and Q-DEV-004 0.1080.
+- With 9 answerable and 3 unanswerable dev cases no value is reliable: **PROVISIONAL**, no default changed. A reliable
+  threshold needs 15-20 new dev questions approved by the owner (frozen eval sets untouched).
+- Information only, never used to set a value: at the pooled rule value the eval split would be refused, gte 2/14
+  unanswerable and 2/94 answerable; bge-m3 7/14 and 3/94.
+
+## Recommendation
+
+- **Default: off** (`RERANK_PROVIDER=none`), by the pre-registered rule: both models are over 2 s at K = 10 on the
+  low-end profile (gte 5.6 s, bge-m3 13.8 s median) and over the ~0.5 GB RAM budget.
+- **Opt-in "high quality" mode: bge-m3 int8, K = 10, local embedder.** It never lost an @5 case against `none` on local
+  hybrid (v1 27 vs 26, corpus 2 48 vs 48, E 10 vs 10) and puts the evidence first more often on corpus 2 (@1 41 vs
+  31, p = 0.006). Real cost: median 4.2 s per question on the i7-12700H with ONNX Runtime's default threads (full profile), 13.8 s on the low-end
+  profile, about 1.6 GB more RAM. With the Gemini embedder (dense) it lowers @1 and @5 on v1: not recommended there.
+- **Gate:** no reranker gate value is adopted; the dense gate stays (0.686 / 0.5417, known limitation on corpus 2).
+  Reranker values above are PROVISIONAL; next step for a usable value: owner-approved new dev questions.
+- Open: Gemini v2 (TBD, quota); gte's RAM (TBD); a smaller/faster multilingual long-input cross-encoder that fits
+  2 s would need a new candidate list from the owner.
 
 ## 3. Exploratory run before the procedure (head cut, chosen before the owner decisions)
 

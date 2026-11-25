@@ -35,3 +35,4 @@ Refines: ADR-0004 D10 (embedding model), ADR-0005 (cache key, collection key). P
 - The desktop app creates the embedding provider once (the local model loads once per run) and serializes query
   embedding with a lock.
 - Reranking is not wired into retrieval yet; the hybrid-search step adds a real reranker behind `Reranker`.
+  Done in ADR-0009 (2026-11-26): `RERANK_PROVIDER=cross-encoder`, opt-in, default `none`.

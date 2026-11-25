@@ -227,7 +227,7 @@ class RerankSettings:
 
 def get_rerank_settings() -> RerankSettings:
     model_dir = os.getenv("RERANK_MODEL_DIR")
-    candidates = int(os.getenv("RERANK_CANDIDATES", "20"))
+    candidates = int(os.getenv("RERANK_CANDIDATES", "10"))  # K chosen on speed, ADR-0009
     max_tokens = int(os.getenv("RERANK_MAX_TOKENS", "512"))
     window_overlap = int(os.getenv("RERANK_WINDOW_OVERLAP", "128"))
     batch_size = int(os.getenv("RERANK_BATCH_SIZE", "8"))

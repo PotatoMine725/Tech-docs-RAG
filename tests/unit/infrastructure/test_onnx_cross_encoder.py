@@ -201,7 +201,7 @@ def clean_env(monkeypatch):
 def test_config_defaults_and_selection(clean_env, tmp_path):
     assert isinstance(create_reranker(), NoOpReranker) and get_rerank_model_id() == "none"
     settings = get_rerank_settings()
-    assert (settings.variant, settings.candidates, settings.max_tokens, settings.window_overlap) == ("int8", 20, 512,
+    assert (settings.variant, settings.candidates, settings.max_tokens, settings.window_overlap) == ("int8", 10, 512,
                                                                                                       128)
     model = tmp_path / "mmarco"
     model.mkdir()
