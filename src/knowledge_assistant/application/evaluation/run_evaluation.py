@@ -48,7 +48,8 @@ SCHEMA_VERSION = 1
 # RunConfig keys added after runs were recorded, with the value those runs used: a manifest without the key compares as
 # this value, so a dense run recorded before ADR-0007 still resumes with the default settings; every run recorded before
 # corpus 2 (ADR-0008) searched corpus 1.
-LEGACY_DEFAULTS = {"retrieval_mode": "dense", "rrf_k": RRF_K, "corpus": "corpus1"}
+LEGACY_DEFAULTS = {"retrieval_mode": "dense", "rrf_k": RRF_K, "corpus": "corpus1", "rerank_model": "none",
+                   "rerank_candidates": 0}
 
 QUOTA, MAX_LLM_CALLS, ABORTED = "quota", "max_llm_calls", "aborted"  # RunSummary.stopped
 CASE_ERRORS = (LLMError, GenerationError, EmbeddingError, RetrievalError)  # a case fails; anything else is a bug
@@ -78,6 +79,8 @@ class RunConfig:
     retrieval_mode: str = "dense"  # ADR-0007; runs recorded before it have no key and were dense (LEGACY_DEFAULTS)
     rrf_k: int = RRF_K  # used by hybrid mode only
     corpus: str = "corpus1"  # ADR-0008; a resume with another corpus is refused like any other setting
+    rerank_model: str = "none"  # ADR-0009; `none` or the cross-encoder's model id
+    rerank_candidates: int = 0  # passages reranked per question; 0 without a reranker
 
     def __post_init__(self) -> None:
         if self.arm not in ARMS:
