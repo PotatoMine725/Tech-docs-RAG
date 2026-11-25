@@ -16,13 +16,16 @@ from knowledge_assistant.config import (
     get_answer_settings,
     get_chroma_path,
     get_chunks_dir,
+    get_corpus,
+    get_keyword_index_dir,
+    get_normalized_path,
     get_embedding_settings,
     get_logs_dir,
     get_retrieval_settings,
 )
 from knowledge_assistant.core.exceptions import ConfigurationError
 
-PATH_VARS = ("CHROMA_PATH", "CHUNKS_DIR", "LOGS_DIR", "EMBEDDING_CACHE_PATH")
+PATH_VARS = ("CHROMA_PATH", "CHUNKS_DIR", "LOGS_DIR", "EMBEDDING_CACHE_PATH", "KEYWORD_INDEX_DIR", "CORPUS")
 
 
 @pytest.fixture
@@ -94,7 +97,9 @@ def test_the_chunk_builder_writes_where_config_reads(no_path_env):
     spec = importlib.util.spec_from_file_location("build_chunks_script", script)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    assert Path(module.CHUNKS_DIR) == get_chunks_dir()
+    # the script has no path constant of its own: it writes to config's (corpus-scoped) chunk dir
+    assert not hasattr(module, "CHUNKS_DIR") and module.get_chunks_dir is get_chunks_dir
+    assert module.get_normalized_path is get_normalized_path
 
 
 ANSWER_V1_COMMIT = "e12eba8"  # the commit that created answer_v1.md; the first live dev answers used this text
@@ -259,3 +264,31 @@ def test_keyword_index_dir_resolves_from_the_repo_root(monkeypatch):
     assert get_keyword_index_dir() == PROJECT_ROOT / "data" / "keyword"
     monkeypatch.setenv("KEYWORD_INDEX_DIR", "elsewhere/kw")
     assert get_keyword_index_dir() == PROJECT_ROOT / "elsewhere" / "kw"
+
+
+# --- corpus-scoped paths (ADR-0008) --------------------------------------------------------------------------------
+
+def test_corpus1_paths_are_unchanged_with_or_without_corpus_env(no_path_env, monkeypatch):
+    before = (get_chroma_path(), get_chunks_dir(), get_keyword_index_dir(), get_normalized_path())
+    assert before == (PROJECT_ROOT / "data" / "chroma", PROJECT_ROOT / "data" / "processed" / "chunks",
+                      PROJECT_ROOT / "data" / "keyword",
+                      PROJECT_ROOT / "data" / "processed" / "documents" / "normalized.jsonl")
+    monkeypatch.setenv("CORPUS", "corpus1")
+    assert (get_chroma_path(), get_chunks_dir(), get_keyword_index_dir(), get_normalized_path()) == before
+
+
+def test_corpus2_gets_sibling_paths_also_under_an_env_override(no_path_env, monkeypatch, tmp_path):
+    monkeypatch.setenv("CORPUS", "corpus2")
+    assert get_chroma_path() == PROJECT_ROOT / "data" / "chroma-corpus2"
+    assert get_keyword_index_dir() == PROJECT_ROOT / "data" / "keyword-corpus2"
+    assert get_chunks_dir() == PROJECT_ROOT / "data" / "processed" / "chunks-corpus2"
+    assert get_normalized_path() == PROJECT_ROOT / "data" / "processed" / "documents-corpus2" / "normalized.jsonl"
+    monkeypatch.setenv("CHROMA_PATH", str(tmp_path / "chroma"))  # a worktree pointing at the main checkout's data
+    assert get_chroma_path() == tmp_path / "chroma-corpus2"
+    assert get_chroma_path("corpus1") == tmp_path / "chroma"
+
+
+def test_unknown_corpus_is_refused(monkeypatch):
+    monkeypatch.setenv("CORPUS", "corpus3")
+    with pytest.raises(ConfigurationError, match="CORPUS"):
+        get_corpus()

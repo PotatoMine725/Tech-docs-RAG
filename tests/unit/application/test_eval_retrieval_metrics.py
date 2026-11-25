@@ -183,6 +183,17 @@ def test_evidence_hit_ignores_whitespace_differences():
     assert evidence_hit_at_k([chunk("11", 0, 99, text)], {"P1": [QUOTE]}, k=5) == 1
 
 
+@pytest.mark.parametrize("quote_form, chunk_form", [("NFD", "NFC"), ("NFC", "NFD"), ("NFD", "NFD")])
+def test_evidence_hit_compares_quote_and_chunk_in_nfc(quote_form, chunk_form):
+    """ADR-0008: frozen corpus-2 quotes copy the stored NFD text (C2-07/08/25); indexed chunks are NFC."""
+    import unicodedata
+
+    quote = "Nhiễm HBV mạn khi HBsAg xuất hiện kéo dài trên 6 tháng."
+    text = unicodedata.normalize(chunk_form, f"Mở đầu. {quote} Kết thúc.")
+    quote = unicodedata.normalize(quote_form, quote)
+    assert evidence_hit_at_k([chunk("C2-29", 0, 99, text)], {"P1": [quote]}, k=5) == 1
+
+
 def test_evidence_hit_respects_k():
     ranked = [chunk("09", 0, 10, "noise")] * 5 + [chunk("11", 0, 99, QUOTE)]
     assert evidence_hit_at_k(ranked, {"P1": [QUOTE]}, k=5) == 0

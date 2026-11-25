@@ -15,14 +15,40 @@ def resolve_project_path(value: str | Path) -> Path:
     return path if path.is_absolute() else PROJECT_ROOT / path
 
 
-def get_chroma_path() -> Path:
-    """OD-7 (ADR-0005): repo-local, git-ignored, rebuilt by script."""
-    return resolve_project_path(os.getenv("CHROMA_PATH", "data/chroma"))
+CORPORA = ("corpus1", "corpus2")  # corpus 2 = ADR-0008; each corpus has its own chunks, collections and keyword index
 
 
-def get_chunks_dir() -> Path:
-    """Chunk files written by scripts/ingestion/build_chunks.py (arm-a.jsonl, arm-b.jsonl)."""
-    return resolve_project_path(os.getenv("CHUNKS_DIR", "data/processed/chunks"))
+def get_corpus() -> str:
+    """Which corpus the ingestion scripts, the stores and the evaluation runner work on (CORPUS; default corpus1)."""
+    value = (os.getenv("CORPUS") or "corpus1").strip().lower()
+    if value not in CORPORA:
+        raise ConfigurationError(f"CORPUS={value!r} is not one of {', '.join(CORPORA)}")
+    return value
+
+
+def corpus_scoped(path: Path, corpus: str | None = None) -> Path:
+    """Corpus 1 keeps the path as is (every existing index and run stays where it is); another corpus gets the sibling
+    `<name>-<corpus>`, also when the base comes from an environment override, so two corpora never share a Chroma
+    directory, a keyword-index file or a chunk file (collection names are keyed by chunker config, which both share)."""
+    corpus = corpus or get_corpus()
+    return path if corpus == "corpus1" else path.with_name(f"{path.name}-{corpus}")
+
+
+def get_chroma_path(corpus: str | None = None) -> Path:
+    """OD-7 (ADR-0005): repo-local, git-ignored, rebuilt by script. Scoped per corpus (`corpus_scoped`)."""
+    return corpus_scoped(resolve_project_path(os.getenv("CHROMA_PATH", "data/chroma")), corpus)
+
+
+def get_chunks_dir(corpus: str | None = None) -> Path:
+    """Chunk files written by scripts/ingestion/build_chunks.py (arm-a.jsonl, arm-b.jsonl). Scoped per corpus; the
+    corpus-2 chunks hold non-redistributable text and are git-ignored (ADR-0008)."""
+    return corpus_scoped(resolve_project_path(os.getenv("CHUNKS_DIR", "data/processed/chunks")), corpus)
+
+
+def get_normalized_path(corpus: str | None = None) -> Path:
+    """The ingested document text (normalized.jsonl) that chunking reads. Scoped per corpus like the chunks."""
+    documents = corpus_scoped(resolve_project_path("data/processed/documents"), corpus)
+    return documents / "normalized.jsonl"
 
 
 def get_logs_dir() -> Path:
@@ -328,6 +354,6 @@ def get_retrieval_settings() -> RetrievalSettings:
     )
 
 
-def get_keyword_index_dir() -> Path:
-    """The FTS5 keyword index files, one per arm (ADR-0007); git-ignored, rebuilt by build_index.py."""
-    return resolve_project_path(os.getenv("KEYWORD_INDEX_DIR", "data/keyword"))
+def get_keyword_index_dir(corpus: str | None = None) -> Path:
+    """The FTS5 keyword index files, one per arm (ADR-0007); git-ignored, rebuilt by build_index.py. Scoped per corpus."""
+    return corpus_scoped(resolve_project_path(os.getenv("KEYWORD_INDEX_DIR", "data/keyword")), corpus)

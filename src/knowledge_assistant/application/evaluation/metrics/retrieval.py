@@ -16,6 +16,7 @@ values the rule changed for a case, so a report can count them.
   `evidence_hit_via_alternate_only_at_k` flags hits earned only outside the expected spans.
 Corpus-insufficient cases have no spans and are excluded from these metrics; passing them in raises ValueError.
 """
+import unicodedata
 from collections.abc import Mapping
 from dataclasses import dataclass, replace
 
@@ -162,11 +163,17 @@ def _quotes_found(chunks: list[RankedChunk], quotes: list[str], k: int) -> list[
     """Per quote: is it contained whole in one top-k chunk? Both sides go through
     `validate_questions.collapse_whitespace` (every run of Unicode whitespace, incl. U+00A0, becomes one space), the
     same normalization that verified the quotes against the corpus. A quote split across two chunks does not count.
+    Both sides are also composed to Unicode NFC (ADR-0008): frozen corpus-2 quotes copy the stored NFD form of C2-07,
+    C2-08 and C2-25, while the indexed chunk text is NFC.
     """
     if k < 1:
         raise ValueError(f"k must be >= 1, got {k}")
-    texts = [collapse_whitespace(chunk.text) for chunk in chunks[:k]]
-    return [any(collapse_whitespace(quote) in text for text in texts) for quote in quotes]
+    texts = [_comparable(chunk.text) for chunk in chunks[:k]]
+    return [any(_comparable(quote) in text for text in texts) for quote in quotes]
+
+
+def _comparable(text: str) -> str:
+    return collapse_whitespace(unicodedata.normalize("NFC", text))
 
 
 def evidence_hit_at_k(chunks: list[RankedChunk], point_quotes: dict[str, list[str]], k: int) -> int:

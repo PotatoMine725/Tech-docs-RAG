@@ -1,9 +1,10 @@
 """Embed one arm's chunks and index them in Chroma, and index their text in the keyword index (RAG-001b, ADR-0005,
 ADR-0007).
 
-    python scripts/ingestion/build_index.py --arm A|B [--dry-run]
+    python scripts/ingestion/build_index.py --arm A|B [--corpus corpus1|corpus2] [--dry-run]
 
-Reads data/processed/chunks/arm-<a|b>.jsonl. Chunks already in the arm's collection are skipped and
+Reads the corpus's arm-<a|b>.jsonl (corpus 1: data/processed/chunks/). --corpus sets CORPUS for this process: corpus 2
+gets its own Chroma directory, keyword-index directory and chunk dir (config.corpus_scoped), never corpus 1's. Chunks already in the arm's collection are skipped and
 texts already in the embedding cache cost no quota, so a stopped run is resumed by running it again.
 The keyword index (SQLite FTS5, data/keyword/kw_<chunker config>.sqlite) is built first from the same chunks with
 the same resume rule (chunk_ids already present are skipped); it costs no quota and needs no model, so a run stopped
@@ -17,6 +18,7 @@ A real run appends its IndexReport to validation/retrieval/indexing-log.jsonl.
 import argparse
 import json
 import logging
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -34,9 +36,11 @@ from knowledge_assistant.application.ingestion.index_corpus import (  # noqa: E4
 )
 from knowledge_assistant.composition import create_embedder, embedding_cache_path  # noqa: E402
 from knowledge_assistant.config import (  # noqa: E402
+    CORPORA,
     get_active_embedding_model_id,
     get_chroma_path,
     get_chunks_dir,
+    get_corpus,
     get_embedding_settings,
     get_keyword_index_dir,
     get_logs_dir,
@@ -57,7 +61,7 @@ def setup_logging(arm: str) -> Path:
     """Warnings (retry waits, the first 429's raw body with the key redacted) go to stderr and a log file."""
     logs_dir = get_logs_dir()
     logs_dir.mkdir(parents=True, exist_ok=True)
-    log_path = logs_dir / f"build-index-arm-{arm.lower()}.log"
+    log_path = logs_dir / f"build-index-{get_corpus()}-arm-{arm.lower()}.log"
     handlers = [logging.StreamHandler(), logging.FileHandler(log_path, encoding="utf-8")]
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s", handlers=handlers)
     for noisy in ("httpx", "chromadb", "google_genai"):
@@ -97,7 +101,8 @@ def dry_run(arm: str, chunks_path: Path) -> int:
         to_send = cache.missing([chunk.embed_text for chunk in pending], EmbeddingTask.DOCUMENT)
     plan = embedder.plan_calls(to_send)
     tokens = sum(estimate_tokens(text) for text in to_send)
-    print(f"DRY RUN arm {arm} ({config}), collection {store.name} ({'exists' if store.exists else 'not created yet'})")
+    print(f"DRY RUN {get_corpus()} arm {arm} ({config}), collection {store.name} in {get_chroma_path()} "
+          f"({'exists' if store.exists else 'not created yet'})")
     print(f"embedder: {embedder.model_id}")
     keywords = Fts5KeywordIndex(get_keyword_index_dir(), config, create=False)
     keyword_present = keywords.get_ids()
@@ -136,6 +141,7 @@ def run(arm: str, chunks_path: Path) -> int:
             print(f"cache kept every paid vector: {cache.stats()}; store count {store.count()}; run again after the reset")
             return 3
     entry = {
+        "corpus": get_corpus(),
         "arm": arm,
         "collection": store.name,
         **report.to_dict(),
@@ -163,9 +169,12 @@ def run(arm: str, chunks_path: Path) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--arm", required=True, choices=["A", "B"])
+    parser.add_argument("--corpus", choices=CORPORA, help="default: CORPUS from the environment, else corpus1")
     parser.add_argument("--dry-run", action="store_true", help="print the cost estimate only; no API call")
     args = parser.parse_args()
     load_dotenv(PROJECT_ROOT / ".env")
+    if args.corpus:
+        os.environ["CORPUS"] = args.corpus
     chunks_path = get_chunks_dir() / f"arm-{args.arm.lower()}.jsonl"
     return dry_run(args.arm, chunks_path) if args.dry_run else run(args.arm, chunks_path)
 
