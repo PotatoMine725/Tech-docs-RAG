@@ -54,3 +54,15 @@ Refines: ADR-0002 (formats), ADR-0003 D5/D6 (heading-path citations). Plan Phase
   Normalizing at ingestion is **DECISION REQUIRED** (indexing step); it would change chunk text, not this manifest.
 - Image inspection (sampled, 2026-11-25) found 47 image-only facts in 17 of 18 documents with images; C2-26 keeps
   almost all formulas as WMF images and C2-27 has nearly all explanations in screenshots.
+
+## Open items for the indexing step (owner, 2026-11-25; not done here)
+1. **PDF lines starting with `#`.** MarkItDown keeps them, so the chunker reads them as Markdown headings (C2-21:
+   heading paths such as `number Please answer # 7.`, cited by Q2-EVAL-048 / 049). Escape such lines in PDF
+   conversion so they stay text. This changes C2-21's converted text, so its `converted_sha256` and the affected
+   heading paths must be updated together.
+2. **Heading-less and single-heading documents** (C2-07, whose only heading `*1.1.* Hoàn cảnh quốc tế…` is a
+   conversion artifact, and most PDFs). There section_hit ≈ source_hit, so evidence_hit is the main corpus-2 metric;
+   section-level results on these documents are reported as source-level.
+3. **NFD Vietnamese text** (C2-07, C2-08). NFC normalization at ingestion is still **DECISION REQUIRED**. It affects
+   keyword (FTS) search, which misses NFC queries on NFD text, and evidence matching, which must normalize both sides
+   or keep copying the stored form.

@@ -26,7 +26,8 @@
   category: D_vi_on_mixed
   corpus: corpus2
   language: vi
-  question: "Phương thức getPort() và getLocalPort() của lớp Socket khác nhau thế nào?"
+  typing: no_diacritics  # owner 2026-11-25: one no_diacritics question in D; was "Phương thức getPort() và getLocalPort() của lớp Socket khác nhau thế nào?"
+  question: "Phuong thuc getPort() va getLocalPort() cua lop Socket khac nhau the nao?"
   answerable: true
   expected_answer: "getPort() cho biết số hiệu cổng mà Socket kết nối tới ở host (máy xa), còn getLocalPort() cho biết số hiệu cổng ở host local."
   answer_points:

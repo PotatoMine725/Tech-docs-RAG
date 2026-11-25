@@ -347,8 +347,8 @@
   category: C_vi_on_en
   corpus: corpus2
   language: vi
-  typing: diacritics
-  question: "Một học viên trong FA Management có GPA 88% thì được xếp Level gì và hưởng Allowance Rate bao nhiêu?"
+  typing: no_diacritics  # owner 2026-11-25: one no_diacritics question in C; was "Một học viên trong FA Management có GPA 88% thì được xếp Level gì và hưởng Allowance Rate bao nhiêu?"
+  question: "Mot hoc vien trong FA Management co GPA 88% thi duoc xep Level gi va huong Allowance Rate bao nhieu?"
   answerable: true
   expected_answer: "GPA 88% chưa đạt mức 93% (A+) nhưng thỏa điều kiện GPA ≥ 86%, nên học viên được xếp Level A với Allowance Rate 110%."
   answer_points:
@@ -362,6 +362,7 @@
   must_not_claim: ["GPA 88% gives Level A+ and 120%.", "GPA 88% gives Level B and 100%."]
   cognitive_level: apply
   difficulty: hard
+  failure_mode: cross_language  # kept; typing records no_diacritics
   concepts: [business rule, allowance calculation, GPA level]
 
 - id: Q2-EVAL-054

@@ -36,7 +36,7 @@ allocation:  # category -> source -> {count, typing split}
     C2-27: {field: it,                          count: 1}
   C_vi_on_en:  # 8 (cross-language retrieval: Vietnamese question, English document)
     C2-01: {field: english-learning,            count: 1}
-    C2-13: {field: software-engineering,        count: 2}
+    C2-13: {field: software-engineering,        count: 2, no_diacritics: 1}  # owner 2026-11-25 (Q2-EVAL-053)
     C2-15: {field: intercultural-communication, count: 1}
     C2-18: {field: international-relations,     count: 2}
     C2-19: {field: it,                          count: 1}
@@ -45,7 +45,7 @@ allocation:  # category -> source -> {count, typing split}
     C2-03: {field: medicine,  count: 1}
     C2-04+C2-22: {field: business-it, count: 2, note: near-duplicate pair; 1 asks a fact found in both (either cites), 1 a fact found in one version only}
     C2-05: {field: it,        count: 2}
-    C2-06: {field: it,        count: 2, note: identifiers (Socket, ServerSocket, getPort)}
+    C2-06: {field: it,        count: 2, no_diacritics: 1, note: identifiers (Socket, ServerSocket, getPort)}  # owner 2026-11-25 (Q2-EVAL-022)
     C2-08: {field: it,        count: 2, note: identifiers (XmlDocument, XPath)}
     C2-28: {field: medicine,  count: 1}
   E_identifier_c1:  # 10 = 6 en + 4 vi, spread over corpus 1 IT docs; identifiers chosen at drafting time
