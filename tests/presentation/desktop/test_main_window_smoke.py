@@ -9,7 +9,7 @@ import pytest
 pytest.importorskip("PySide6")
 
 from PySide6.QtCore import Qt, QUrl  # noqa: E402
-from PySide6.QtGui import QGuiApplication  # noqa: E402
+from PySide6.QtGui import QGuiApplication, QImage  # noqa: E402
 from PySide6.QtTest import QTest  # noqa: E402
 from PySide6.QtWidgets import QApplication  # noqa: E402
 
@@ -18,7 +18,8 @@ from knowledge_assistant.presentation.desktop.viewmodels.fake_ask_question impor
     FAKE_SOURCES,
     FakeAskQuestion,
 )
-from knowledge_assistant.presentation.desktop.windows.main_window import MainWindow  # noqa: E402
+from knowledge_assistant.presentation.desktop import theme  # noqa: E402
+from knowledge_assistant.presentation.desktop.windows.main_window import HIT_ROLE, MainWindow, SourceItemDelegate  # noqa: E402
 from knowledge_assistant.presentation.desktop.workers import QtExecutor  # noqa: E402
 
 
@@ -68,7 +69,8 @@ def test_ask_flow_stays_responsive_and_renders(app):
     # each citation: the chip in the answer, plus a chip and the document name in the Sources row
     assert html.count('href="cite:0:1"') == 3 and html.count('href="cite:0:2"') == 3
     assert 'href="copy:0"' in html and 'href="retry:0"' in html
-    assert "Dependency Injection Guide  ·  2 cited" in [win.source_list.item(i).text() for i in range(2)]
+    hits = {win.source_list.item(i).text(): win.source_list.item(i).data(HIT_ROLE) for i in range(2)}
+    assert hits == {"ASP.NET Core Middleware": 0, "Dependency Injection Guide": 2}  # painted as a badge
 
     win.thread.anchorClicked.emit(QUrl("cite:0:2"))  # a chip click opens the viewer
     assert win.viewer.isVisible() and win.viewer_pos.text() == "2 of 2"
@@ -174,3 +176,33 @@ def test_arm_is_chosen_in_the_settings_menu(app):
     ask(win, "What is DI?")
     pump(app, lambda: vm.state is ViewState.ANSWER)
     assert "Arm B" in win.thread.toPlainText()
+
+
+def test_hit_badge_survives_a_narrow_source_list(app):
+    """The "N cited" badge is painted apart from the name, so eliding a long name cannot hide it."""
+    vm, win = make()
+    ask(win, "What is DI?")
+    pump(app, lambda: vm.state is ViewState.ANSWER)
+    lst = win.source_list
+    row = next(lst.item(i) for i in range(lst.count()) if lst.item(i).data(HIT_ROLE))
+    assert row.text() == "Dependency Injection Guide" and row.toolTip().endswith("2 cited")
+    assert isinstance(lst.itemDelegate(), SourceItemDelegate)
+    lst.resize(120, lst.height())
+    image = QImage(lst.viewport().size(), QImage.Format.Format_ARGB32)
+    image.fill(0)
+    lst.viewport().render(image)  # paints without error at a width where the name must be elided
+
+
+def test_opening_the_viewer_takes_width_from_the_conversation(app):
+    vm, win = make()
+    ask(win, "What is DI?")
+    pump(app, lambda: vm.state is ViewState.ANSWER)
+    side_before = win.splitter.sizes()[0]
+    win.thread.anchorClicked.emit(QUrl("cite:0:1"))
+    side, center, viewer = win.splitter.sizes()
+    assert side == side_before >= theme.SIDEBAR_WIDTH  # the source list keeps its width
+    assert viewer == theme.VIEWER_WIDTH and center > 0
+    win.splitter.setSizes([side, center + viewer - 300, 300])  # the user drags the viewer narrower
+    QTest.keyClick(win, Qt.Key.Key_Escape)
+    win.thread.anchorClicked.emit(QUrl("cite:0:2"))
+    assert win.splitter.sizes()[2] == 300  # reopened at the dragged width

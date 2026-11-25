@@ -9,15 +9,59 @@ from __future__ import annotations
 import html
 
 from PySide6.QtCore import QSize, Qt, QUrl, Signal
-from PySide6.QtGui import QAction, QActionGroup, QCursor, QFont, QGuiApplication, QKeySequence, QShortcut
+from PySide6.QtGui import (QAction, QActionGroup, QColor, QCursor, QFont, QFontMetrics, QGuiApplication, QKeySequence,
+                           QShortcut)
 from PySide6.QtWidgets import (QFrame, QHBoxLayout, QLabel, QLineEdit, QListWidget, QListWidgetItem, QMainWindow,
-                               QPlainTextEdit, QProgressBar, QPushButton, QSplitter, QTextBrowser, QToolTip,
+                               QPlainTextEdit, QProgressBar, QPushButton, QSizePolicy, QSplitter, QStyle, QStyledItemDelegate,
+                               QStyleOptionViewItem, QTextBrowser, QToolTip,
                                QVBoxLayout, QWidget)
 
 from .. import theme
 from ..viewmodels.ask_viewmodel import ARMS, AskViewModel, Turn, ViewState
 
 _INSUFFICIENT_TITLE = "Not enough information in the documents"
+HIT_ROLE = Qt.ItemDataRole.UserRole + 1  # source list: how many citations of the latest cited answer name the row
+
+
+class SourceItemDelegate(QStyledItemDelegate):
+    """Paints a source row as its name, elided, plus a right-aligned "N cited" badge that is never elided away."""
+
+    PAD = 6
+
+    def __init__(self, colors) -> None:
+        super().__init__()
+        self._colors = colors  # callable -> the window's current colour tokens
+
+    def paint(self, painter, option, index) -> None:  # noqa: D102 - Qt override
+        hits = index.data(HIT_ROLE) or 0
+        if not hits:
+            super().paint(painter, option, index)
+            return
+        badge = f"{hits} cited"
+        metrics = QFontMetrics(option.font)
+        badge_w = metrics.horizontalAdvance(badge) + 2 * self.PAD
+        opt = QStyleOptionViewItem(option)
+        self.initStyleOption(opt, index)
+        opt.text = ""
+        style = opt.widget.style() if opt.widget else None
+        if style:  # background, selection and hover, without text
+            style.drawControl(QStyle.ControlElement.CE_ItemViewItem, opt, painter, opt.widget)
+        rect = option.rect.adjusted(self.PAD, 0, -self.PAD, 0)
+        text_rect = (style.subElementRect(QStyle.SubElement.SE_ItemViewItemText, opt, opt.widget) if style
+                     else rect)  # where an unbadged row puts its name, so every name starts at the same x
+        name_rect = text_rect.adjusted(0, 0, -(text_rect.right() - rect.right()) - badge_w - self.PAD, 0)
+        badge_rect = rect.adjusted(rect.width() - badge_w, 3, 0, -3)
+        c = self._colors()
+        painter.save()
+        painter.setPen(QColor(c["ink"]))
+        name = metrics.elidedText(index.data(Qt.ItemDataRole.UserRole), Qt.TextElideMode.ElideRight, name_rect.width())
+        painter.drawText(name_rect, Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft, name)
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(QColor(c["accent-soft"]))
+        painter.drawRoundedRect(badge_rect, 3, 3)
+        painter.setPen(QColor(c["accent"]))
+        painter.drawText(badge_rect, Qt.AlignmentFlag.AlignCenter, badge)
+        painter.restore()
 
 
 def _font(families: list[str], point: float | None = None, weight: QFont.Weight | None = None) -> QFont:
@@ -90,6 +134,7 @@ class MainWindow(QMainWindow):
         self.splitter.setStretchFactor(1, 1)
         rest = theme.WINDOW_SIZE[0] - theme.SIDEBAR_WIDTH - theme.VIEWER_WIDTH
         self.splitter.setSizes([theme.SIDEBAR_WIDTH, rest, theme.VIEWER_WIDTH])
+        self._viewer_width = theme.VIEWER_WIDTH
         root = QWidget(objectName="root")
         lay = QVBoxLayout(root)
         lay.setContentsMargins(0, 0, 0, 0)
@@ -139,6 +184,7 @@ class MainWindow(QMainWindow):
         self.source_list = QListWidget(objectName="sourceList")
         self.source_list.setTextElideMode(Qt.TextElideMode.ElideRight)  # one line each; the full name on hover
         self.source_list.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.source_list.setItemDelegate(SourceItemDelegate(lambda: self.c))
         self.source_list.itemClicked.connect(self._source_clicked)
         lay = QVBoxLayout(self.sources_panel)
         lay.setContentsMargins(12, 12, 8, 12)
@@ -172,6 +218,9 @@ class MainWindow(QMainWindow):
         row.addWidget(self.send_button, 0, Qt.AlignmentFlag.AlignBottom)
         self.hint = QLabel(objectName="hint")
         self.hint.setFont(_font(theme.MONO, 8.5))
+        # the one-line shortcut hint is clipped when narrow; left at its natural width it set the conversation's
+        # minimum (~750 px) and the splitter squeezed the source list and the viewer to their minimums instead
+        self.hint.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
 
         bottom = QVBoxLayout()
         bottom.setContentsMargins(24, 8, 24, 12)
@@ -317,7 +366,8 @@ class MainWindow(QMainWindow):
             item = lst.item(i)
             name = item.data(Qt.ItemDataRole.UserRole)
             n = hits.get(name, 0)
-            item.setText(f"{name}  ·  {n} cited" if n else name)
+            item.setData(HIT_ROLE, n)  # the delegate paints it as a badge the name's elision cannot hide
+            item.setToolTip(f"{name} · {n} cited" if n else name)
             item.setSelected(name == current)
         lst.blockSignals(False)
 
@@ -430,7 +480,13 @@ class MainWindow(QMainWindow):
     def _render_viewer(self) -> None:
         vm, c = self.vm, self.c
         sel = vm.selected
+        opening = sel is not None and self.viewer.isHidden()
+        if sel is None and self.viewer.isVisible() and self.splitter.sizes()[2]:
+            self._viewer_width = self.splitter.sizes()[2]  # closing: keep a width the user dragged
+        before = self.splitter.sizes()  # showing the viewer redistributes every pane: keep what was there
         self.viewer.setVisible(sel is not None)
+        if opening:
+            self._fit_viewer(before[0], before[1])
         if sel is None:
             self.detail.clear()
             return
@@ -450,6 +506,15 @@ class MainWindow(QMainWindow):
             self.viewer_source.setText(f"Source: <a href=\"{url}\" style=\"color:{c['link']};\">{url}</a>")
         else:  # not a web address: shown, never clickable
             self.viewer_source.setText(f"Source: {html.escape(sel.source_url)}" if sel.source_url else "")
+
+    def _fit_viewer(self, side: int, center: int) -> None:
+        """Give the viewer its width out of the conversation, not the source list: a splitter sized while the viewer
+        was hidden would otherwise shrink every pane, the source list down to its minimum."""
+        total = side + center
+        self.splitter.refresh()  # apply the viewer's show now, so the sizes below are not redistributed later
+        side = max(side, theme.SIDEBAR_WIDTH) if side else 0  # a collapsed source list stays collapsed
+        viewer = min(self._viewer_width, max(0, total - side - self.center.minimumSizeHint().width()))
+        self.splitter.setSizes([side, total - side - viewer, viewer])
 
     def sizeHint(self) -> QSize:  # noqa: N802 - Qt override
         return QSize(*theme.WINDOW_SIZE)
