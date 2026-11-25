@@ -1,6 +1,6 @@
 # Erratum eval-v2.1: C2-21 heading paths after the PDF `#` escape
 
-Date: 2026-11-25. Status: **pending owner OK** (tag `eval-freeze-v2.1` not created yet).
+Date: 2026-11-25. Status: **approved by the owner 2026-11-25, incl. Q2-EVAL-058**; tag `eval-freeze-v2.1` (5ca88e2).
 Cause: owner decision 2026-11-25 (ADR-0008, open item 1). PDF conversion now escapes lines that start with `#`
 (`\#`), so they stay text and are no longer read as Markdown headings
 (`infrastructure/parsing/markitdown_parser.py`, PDF only).
@@ -30,7 +30,7 @@ Every `heading_path` that pointed at a removed C2-21 heading becomes `""`, in `e
 | Q2-EVAL-058 | `no. number` | `""` | expected_sources[0], evidence[0..1] |
 
 **Q2-EVAL-058 was not named in the owner's note** (which listed 048/049). It cites C2-21 under `no. number`,
-which no longer exists, so it must change too or the frozen validation fails. Needs owner OK.
+which no longer exists, so it must change too or the frozen validation fails. Owner approved it.
 
 Unchanged: questions, answers, answer points, quotes, sources, statuses, every other case, `dev-v2.jsonl`,
 `evidence-map-v2.yaml` (a field-by-field diff against `eval-freeze-v2` shows exactly the 10 fields above).
