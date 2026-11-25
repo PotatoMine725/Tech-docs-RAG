@@ -100,11 +100,24 @@ def test_frozen_validation_rejects_draft_cases(monkeypatch):
     monkeypatch.setattr(validator, "load_corpus2", lambda: C2)
     monkeypatch.setattr(validator.v1, "read_jsonl", lambda path: [])
     monkeypatch.setattr(validator, "_absence_errors", lambda *args: [])
+    monkeypatch.setattr(validator, "_conversion_errors", lambda texts: [])
     cases = {"eval": [_case()], "dev": []}
     assert validator.validate(cases) == []
     assert validator.validate(cases, frozen=True) == ["Q2-EVAL-001: still DRAFT (freeze needs owner approval of every case)"]
     approved = builder.expand(_draft(review_status="approved"), SIZES, {})
     assert validator.validate({"eval": [approved], "dev": []}, frozen=True) == []
+
+
+def test_converted_text_must_match_the_pinned_hash(tmp_path, monkeypatch):
+    import hashlib
+    import json
+
+    manifest = tmp_path / "manifest.json"
+    pinned = hashlib.sha256(TEXT.encode("utf-8")).hexdigest()
+    manifest.write_text(json.dumps({"documents": [{"id": "C2-01", "converted_sha256": pinned}]}), encoding="utf-8")
+    monkeypatch.setattr(validator, "C2_MANIFEST", manifest)
+    assert validator._conversion_errors({"C2-01": TEXT}) == []
+    assert len(validator._conversion_errors({"C2-01": TEXT + "x"})) == 1
 
 
 def test_heading_less_documents_get_one_whole_document_section():
