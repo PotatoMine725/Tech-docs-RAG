@@ -3,10 +3,12 @@
 Scores (question, passage) pairs jointly; the score is sigmoid(logit) of the model's single relevance logit, a fixed
 0..1 scale, so `absolute_scores` is true and a gate can read it.
 
-Length: the question is cut to MAX_QUERY_TOKENS; each passage then gets min(`max_passage_tokens`, positions left), so
-the pair never exceeds the model's positions (`config.json` `max_position_embeddings`, minus XLM-R's offset of 2:
-512 for mMiniLM, 8192 for gte and bge-m3). Cuts are made on the tokenizer's character offsets. Only the inputs the
-ONNX graph declares are fed (XLM-R exports have no `token_type_ids`).
+Length (MaxP, owner decisions 2026-11-25): no head cut. The question is cut to MAX_QUERY_TOKENS. The pair limit is
+min(`max_tokens`, the model's positions: `config.json` `max_position_embeddings`, minus XLM-R's offset of 2); a window
+is that limit minus the question and 4 special tokens, consecutive windows overlap by `window_overlap` tokens (the last
+ends at the passage end), every window is scored with the question, and the passage score is its best window's. With
+512 / 128 a typical chunk (corpus 2 median 394 tokens) is one window. Windows are cut on the tokenizer's character
+offsets. Only the inputs the ONNX graph declares are fed (XLM-R exports have no `token_type_ids`).
 
 onnxruntime / tokenizers / numpy are the optional `[local]` extra, imported on first use; the model loads on the
 first `rerank`. Supported exports: cross-encoder/mmarco-mMiniLMv2-L12-H384-v1 (int8 = `model_quint8_avx2.onnx`),
@@ -67,6 +69,7 @@ class OnnxCrossEncoderReranker:
         self._tokenizer = tokenizer
         self._inputs: set[str] | None = None
         self._lock = threading.Lock()
+        self.windows_scored = 0  # (question, window) pairs scored so far, for cost reports
 
     @property
     def model_id(self) -> str:
@@ -76,12 +79,27 @@ class OnnxCrossEncoderReranker:
     def absolute_scores(self) -> bool:
         return True
 
-    def truncate(self, text: str, limit: int | None = None) -> str:
-        """`text` cut after its first `limit` tokens (default `max_passage_tokens`), at that token's end offset."""
+    def truncate(self, text: str, limit: int) -> str:
+        """`text` cut after its first `limit` tokens, at that token's end offset."""
         _, tokenizer = self._load()
-        limit = self._settings.max_passage_tokens if limit is None else limit
         offsets = tokenizer.encode(text, add_special_tokens=False).offsets
         return text if len(offsets) <= limit else text[: offsets[limit - 1][1]]
+
+    def windows(self, text: str, size: int) -> list[str]:
+        """`text` as windows of `size` tokens, consecutive ones overlapping by `window_overlap` tokens; the last one
+        ends at the text end. A text of at most `size` tokens is one window."""
+        _, tokenizer = self._load()
+        offsets = tokenizer.encode(text, add_special_tokens=False).offsets
+        if len(offsets) <= size:
+            return [text]
+        stride = max(1, size - self._settings.window_overlap)
+        out, start = [], 0
+        while True:
+            end = min(start + size, len(offsets))
+            out.append(text[offsets[start][0] : offsets[end - 1][1]])
+            if end == len(offsets):
+                return out
+            start += stride
 
     def rerank(self, query: str, passages: list[str], top_n: int | None = None) -> list[RerankResult]:
         if not passages:
@@ -92,13 +110,26 @@ class OnnxCrossEncoderReranker:
         return [RerankResult(index=i, score=scores[i]) for i in order[:count]]
 
     def score(self, query: str, passages: list[str]) -> list[float]:
-        """sigmoid(logit) per passage, in input order."""
-        import numpy as np
-
+        """sigmoid(logit) per passage (its best window, MaxP), in input order."""
         session, tokenizer = self._load()
         query = self.truncate(query, MAX_QUERY_TOKENS)
-        room = self.positions - len(tokenizer.encode(query, add_special_tokens=False).ids) - SPECIAL_TOKENS
-        pairs = [(query, self.truncate(p, max(1, min(self._settings.max_passage_tokens, room)))) for p in passages]
+        question_tokens = len(tokenizer.encode(query, add_special_tokens=False).ids)
+        size = max(1, min(self._settings.max_tokens, self.positions) - question_tokens - SPECIAL_TOKENS)
+        owners, pairs = [], []
+        for index, passage in enumerate(passages):
+            for window in self.windows(passage, size):
+                owners.append(index)
+                pairs.append((query, window))
+        self.windows_scored += len(pairs)
+        window_scores = self._score_pairs(session, tokenizer, pairs)
+        scores = [0.0] * len(passages)
+        for owner, value in zip(owners, window_scores):
+            scores[owner] = max(scores[owner], value)
+        return scores
+
+    def _score_pairs(self, session: Any, tokenizer: Any, pairs: list[tuple[str, str]]) -> list[float]:
+        import numpy as np
+
         scores: list[float] = []
         size = self._settings.batch_size
         for start in range(0, len(pairs), size):

@@ -197,19 +197,23 @@ def get_rerank_provider() -> str:
 class RerankSettings:
     """Local ONNX cross-encoder reranker (ADR-0009), CPU only, loaded on the first `rerank`. `model_dir` holds
     `tokenizer.json` and `onnx/` (fp32 `model.onnx`; int8 `model_int8.onnx` or `model_quint8_avx2.onnx`). The retriever
-    reranks its best `candidates` unique passages, each cut to `max_passage_tokens` tokens (the question is never cut).
-    `threads` 0 lets ONNX Runtime pick. Nothing is downloaded by the app."""
+    reranks its best `candidates` unique passages. Each (question, window) pair is at most `max_tokens` tokens (and
+    never more than the model's positions): a window is `max_tokens` - question - 4 special tokens long, consecutive
+    windows overlap by `window_overlap` tokens, and the passage score is its best window's (MaxP; owner decisions
+    2026-11-25: no head cut, window from the model limit, nothing tuned on the test set). `threads` 0 lets ONNX
+    Runtime pick. Nothing is downloaded by the app."""
 
     model_dir: Path | None
     variant: str
     candidates: int
-    max_passage_tokens: int
+    max_tokens: int
+    window_overlap: int
     batch_size: int
     threads: int
 
     @property
     def model_id(self) -> str:
-        """Folder name, export revision, variant and passage token limit: each changes the scores."""
+        """Folder name, export revision, variant, pair length and overlap: each changes the scores."""
         name = self.model_dir.name if self.model_dir else "unset"
         revision = ""
         if self.model_dir is not None:
@@ -218,22 +222,27 @@ class RerankSettings:
                 revision = f"-{commit[:8]}" if commit else ""
             except OSError:
                 pass
-        return f"{name}{revision}-{self.variant}-p{self.max_passage_tokens}"
+        return f"{name}{revision}-{self.variant}-t{self.max_tokens}o{self.window_overlap}"
 
 
 def get_rerank_settings() -> RerankSettings:
     model_dir = os.getenv("RERANK_MODEL_DIR")
     candidates = int(os.getenv("RERANK_CANDIDATES", "20"))
-    max_passage_tokens = int(os.getenv("RERANK_MAX_PASSAGE_TOKENS", "256"))
-    batch_size = int(os.getenv("RERANK_BATCH_SIZE", "20"))
+    max_tokens = int(os.getenv("RERANK_MAX_TOKENS", "512"))
+    window_overlap = int(os.getenv("RERANK_WINDOW_OVERLAP", "128"))
+    batch_size = int(os.getenv("RERANK_BATCH_SIZE", "8"))
     threads = int(os.getenv("RERANK_THREADS", "0"))
-    if candidates < 1 or max_passage_tokens < 1 or batch_size < 1 or threads < 0:
-        raise ConfigurationError("RERANK_CANDIDATES, _MAX_PASSAGE_TOKENS, _BATCH_SIZE must be >= 1, _THREADS >= 0")
+    if candidates < 1 or batch_size < 1 or threads < 0:
+        raise ConfigurationError("RERANK_CANDIDATES and RERANK_BATCH_SIZE must be >= 1, RERANK_THREADS >= 0")
+    if max_tokens < 16 or not 0 <= window_overlap < max_tokens // 2:
+        raise ConfigurationError(f"RERANK_MAX_TOKENS={max_tokens} must be >= 16 and RERANK_WINDOW_OVERLAP="
+                                 f"{window_overlap} between 0 and half of it")
     return RerankSettings(
         model_dir=resolve_project_path(model_dir) if model_dir else None,
         variant=_choice("RERANK_VARIANT", "int8", RERANK_VARIANTS),
         candidates=candidates,
-        max_passage_tokens=max_passage_tokens,
+        max_tokens=max_tokens,
+        window_overlap=window_overlap,
         batch_size=batch_size,
         threads=threads,
     )

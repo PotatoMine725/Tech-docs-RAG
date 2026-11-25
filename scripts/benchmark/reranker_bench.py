@@ -1,24 +1,27 @@
 """Reranker benchmark, retrieval only (no LLM; plan §7.1 step 4b, ADR-0009). Measures; changes no default.
 
-Three steps, each writing into one output folder (default data/experiments/rerank-bench/<stamp>/, git-ignored):
+Procedure fixed before any run (owner decisions 2026-11-25; docs/reports/2026-11-25-reranker-benchmark.md):
+models gte and bge-m3, int8, MaxP windows (pair <= 512 tokens, overlap 128), K chosen on speed only, one eval per model.
+Steps, each writing into one output folder (default data/experiments/rerank-bench/<stamp>/, git-ignored):
 
 1. ``candidates``: for every question set and embedder, the production retriever (``composition.create_retriever``,
-   RERANK_PROVIDER=none) returns its best 20 unique passages (TOP_K=20) in the embedder's best mode, Arm A. The
-   query embeddings come from the on-disk cache; a Gemini query that is not cached is never sent: that set is
-   skipped and reported TBD. The dense top-1 cosine (the current gate input) is kept per case.
-2. ``run``: each (reranker, variant, profile) runs in its own subprocess, so peak memory is its own. The worker
-   reranks every case's candidates with the production code (``retrieve.rerank_chunks`` over
-   ``OnnxCrossEncoderReranker``) and records the new order, the scores and the time of each ``rerank`` call.
-   Profiles as in the embedding benchmark: ``full`` (all cores, every case: the quality numbers) and ``lowend``
-   (pinned to 4 efficiency cores, 4 intra-op threads, the first ``--lowend-cases`` cases of the v2 corpus-2 eval set:
-   latency and RAM only; indicative, it cannot emulate the target's instruction set or memory bandwidth).
-3. ``report``: the top 5 of each order become records in the evaluation schema and are scored by
-   ``scoring.score_record`` (evidence_hit@1/@5, section MRR@5); paired exact McNemar against ``none`` (the
-   production retriever, TOP_K=5, recorded with the candidates). Gate table: reranker top-1 on dev v1 + v2, Arm A, rule of
-   retrieval-spec.md (lowest answerable - 0.05), on the sigmoid scale.
+   RERANK_PROVIDER=none) in the embedder's best mode, Arm A, returns its best 10, 15 and 20 unique passages (each
+   with its own fetch depth, as RERANK_CANDIDATES=K would) and the production top 5 (`none`). Query embeddings come
+   from the on-disk cache; a Gemini query that is not cached is never sent: that set is skipped and reported TBD.
+2. ``run --profiles lowend``: speed on the dev questions only, pinned to 4 efficiency cores with 4 intra-op threads
+   (a rough stand-in for a 4-core gen-10 laptop; it cannot emulate the target's instruction set or memory bandwidth).
+   Each (model, variant, K, profile) runs in its own subprocess, so peak memory is its own.
+3. ``choose-k``: per model, the largest K in {20, 15, 10} whose low-end median is <= 2 s. Speed only.
+4. ``run --profiles full --rerankers M --candidates K``: one eval per model at its K (all cores; quality).
+   The worker reranks with the production code (``retrieve.rerank_chunks`` over ``OnnxCrossEncoderReranker``).
+5. ``report``: the top 5 of each order become records in the evaluation schema and are scored by
+   ``scoring.score_record`` (evidence_hit@1/@5, section MRR@5); paired exact McNemar against ``none``. Anything outside
+   the pre-registered set is labelled exploratory. Gate table: reranker top-1 on dev v1 + v2 only (PROVISIONAL).
 
     python scripts/benchmark/reranker_bench.py candidates --out DIR
-    python scripts/benchmark/reranker_bench.py run --out DIR --models-root E:/models/rerankers
+    python scripts/benchmark/reranker_bench.py run --out DIR --models-root E:/models/rerankers --profiles lowend
+    python scripts/benchmark/reranker_bench.py choose-k --out DIR
+    python scripts/benchmark/reranker_bench.py run --out DIR --models-root E:/models/rerankers --profiles full         --rerankers gte --candidates K
     python scripts/benchmark/reranker_bench.py report --out DIR > report.md
 """
 from __future__ import annotations
@@ -56,10 +59,29 @@ RERANKERS = {  # name -> folder under --models-root
     "bge": "bge-reranker-v2-m3",
 }
 VARIANTS = ("int8", "fp32")
+# Owner decision 2026-11-25: mmarco is dropped (worse on corpus 1 where the head cut was not the cause); only
+# multilingual long-input models are compared. It stays selectable for exploratory runs.
+PREREGISTERED_MODELS = ["gte", "bge"]
 CATEGORIES = ("A_vi_on_vi", "B_en_on_en", "C_vi_on_en", "D_vi_on_mixed", "E_identifier_c1")
 MIN_TEST_N = 10
 GATE_MARGIN = 0.05
-BUDGET_MB, BUDGET_MS = 512, 1000
+BUDGET_MB = 512  # brief: reranker <= ~0.5 GB
+BUDGET_MS = 2000  # owner decision 2026-11-25: ~2 s added per question on CPU (low-end profile)
+K_CHOICES = (20, 15, 10)  # owner decision 2026-11-25: the largest K whose low-end median <= BUDGET_MS on dev
+CHOSEN_K = "chosen-k.json"
+_preregistered: set[str] | None = None
+
+
+def preregistered(out: Path) -> set[str]:
+    """int8, 512 / 128, each model at its speed-chosen K (fp32 excluded up front: its file alone is over BUDGET_MB)."""
+    chosen = json.loads((out / CHOSEN_K).read_text(encoding="utf-8")) if (out / CHOSEN_K).exists() else {}
+    return {f"{model}-int8-t512o128-c{row['k']}" for model, row in chosen.items()}
+
+
+def shown(config: str) -> str:
+    """Labels every configuration outside the pre-registered set as exploratory (owner decision 2026-11-25)."""
+    return config if config == "none" or config in (_preregistered or set()) else \
+        f"{config} (exploratory, chosen on test)"
 
 
 def read_jsonl(path: Path) -> list[dict]:
@@ -125,7 +147,9 @@ def candidates(args: argparse.Namespace) -> int:
                     os.environ["TOP_K"] = str(TOP_K)
                     production = create_retriever(ARM, embedder, store)  # the `none` baseline, as recorded runs
                     os.environ["TOP_K"] = "10"
-                    ten = create_retriever(ARM, embedder, store)  # the 10-candidate list (own fetch depth)
+                    ten = create_retriever(ARM, embedder, store)  # the 10- and 15-candidate lists (own fetch depth)
+                    os.environ["TOP_K"] = "15"
+                    fifteen = create_retriever(ARM, embedder, store)
                     os.environ["TOP_K"] = str(CANDIDATES)
                 except Exception as error:  # a missing index for this corpus/embedder is reported, not fatal
                     meta["skipped"][f"{embedder_name}/{name}"] = f"{type(error).__name__}: {error}"
@@ -135,6 +159,7 @@ def candidates(args: argparse.Namespace) -> int:
                     result = retriever.retrieve(case["question"])
                     base = production.retrieve(case["question"])
                     short = ten.retrieve(case["question"])
+                    mid = fifteen.retrieve(case["question"])
                     rows.append({"embedder": embedder_name, "mode": mode, "set": name, "case_id": case["id"],
                                  "gate_score": result.gate_score,
                                  "chunk_ids": [h.chunk.chunk_id for h in result.chunks],
@@ -145,7 +170,10 @@ def candidates(args: argparse.Namespace) -> int:
                                  "base_duplicate_chunk_ids": [list(h.duplicate_chunk_ids) for h in base.chunks],
                                  "c10_chunk_ids": [h.chunk.chunk_id for h in short.chunks],
                                  "c10_scores": [h.score for h in short.chunks],
-                                 "c10_duplicate_chunk_ids": [list(h.duplicate_chunk_ids) for h in short.chunks]})
+                                 "c10_duplicate_chunk_ids": [list(h.duplicate_chunk_ids) for h in short.chunks],
+                                 "c15_chunk_ids": [h.chunk.chunk_id for h in mid.chunks],
+                                 "c15_scores": [h.score for h in mid.chunks],
+                                 "c15_duplicate_chunk_ids": [list(h.duplicate_chunk_ids) for h in mid.chunks]})
                 meta["sets"][f"{embedder_name}/{name}"] = len(cases)
                 print(f"{embedder_name} {mode} {name}: {len(cases)} cases", flush=True)
         write_jsonl(out / f"candidates-{embedder_name}.jsonl", rows)
@@ -173,14 +201,14 @@ def corpus_of(set_label: str) -> str:
 
 # ------------------------------------------------------------------------------------------------------ 2. worker
 
-def stem_of(name: str, variant: str, tokens: int, count: int, batch: int, profile: str) -> str:
-    return f"rerank-{name}-{variant}-p{tokens}-c{count}-b{batch}-{profile}"
+def stem_of(name: str, variant: str, max_tokens: int, overlap: int, count: int, batch: int, profile: str) -> str:
+    return f"rerank-{name}-{variant}-t{max_tokens}o{overlap}-c{count}-b{batch}-{profile}"
 
 
 def label_of(worker_record: dict) -> str:
     """Quality label: batch size and profile do not change the order."""
     w = worker_record
-    return f"{w['reranker']}-{w['variant']}-p{w['max_passage_tokens']}-c{w['candidates']}"
+    return f"{w['reranker']}-{w['variant']}-t{w['max_tokens']}o{w['window_overlap']}-c{w['candidates']}"
 
 
 def worker(args: argparse.Namespace) -> int:
@@ -195,15 +223,15 @@ def worker(args: argparse.Namespace) -> int:
 
     out = Path(args.out)
     rows = load_candidates(out)
-    if args.profile == "lowend":
-        lowend = sorted({r["case_id"] for r in rows if r["set"] == "v2-corpus2-eval"})[: args.lowend_cases]
-        rows = [r for r in rows if r["set"] == "v2-corpus2-eval" and r["embedder"] == "local" and r["case_id"] in lowend]
+    if args.profile == "lowend":  # speed only, on the dev questions (owner decision 2026-11-25), local candidates
+        rows = [r for r in rows if r["set"].endswith("-dev") and r["embedder"] == "local"]
     lookups = {corpus: chunk_lookup(corpus) for corpus in {corpus_of(r["set"]) for r in rows}}
     questions = {}
     for _, _, _, file in SETS:
         questions.update({c["id"]: c["question"] for c in read_jsonl(QUESTIONS / file)})
     settings = RerankSettings(model_dir=Path(args.model_dir), variant=args.variant, candidates=args.candidates,
-                              max_passage_tokens=args.max_passage_tokens, batch_size=args.batch_size,
+                              max_tokens=args.max_tokens, window_overlap=args.window_overlap,
+                              batch_size=args.batch_size,
                               threads=args.threads)
     reranker = OnnxCrossEncoderReranker(settings)
     mem_before = memory_mb()
@@ -214,14 +242,16 @@ def worker(args: argparse.Namespace) -> int:
     results = []
     for row in rows:
         lookup = lookups[corpus_of(row["set"])]
-        prefix = "" if args.candidates == CANDIDATES else "c10_"
+        prefix = "" if args.candidates == CANDIDATES else f"c{args.candidates}_"
         hits = [RetrievedChunk(chunk=lookup[cid], rank=i, score=s, duplicate_chunk_ids=tuple(d))
                 for i, (cid, s, d) in enumerate(zip(row[f"{prefix}chunk_ids"], row[f"{prefix}scores"],
                                                     row[f"{prefix}duplicate_chunk_ids"]), 1)]
+        before = reranker.windows_scored
         t0 = time.perf_counter()
         ranked = rerank_chunks(reranker, questions[row["case_id"]], hits, len(hits))
         ms = (time.perf_counter() - t0) * 1000.0
         results.append({"embedder": row["embedder"], "set": row["set"], "case_id": row["case_id"], "ms": ms,
+                        "windows": reranker.windows_scored - before,
                         "chunk_ids": [h.chunk.chunk_id for h in ranked], "scores": [h.score for h in ranked]})
     record = {"reranker": args.name, "variant": args.variant, "profile": args.profile, "model_id": reranker.model_id,
               "onnx_file": onnx_file(Path(args.model_dir), args.variant).name,
@@ -230,9 +260,11 @@ def worker(args: argparse.Namespace) -> int:
               * (args.variant == "fp32"),
               "threads": args.threads, "pinned_cpus": args.pin or None, "cases": len(results), "load_s": load_s,
               "mem_before_mb": mem_before, "mem_loaded_mb": mem_loaded, "mem_end_mb": memory_mb(),
-              "max_passage_tokens": args.max_passage_tokens, "positions": reranker.positions,
+              "max_tokens": args.max_tokens, "window_overlap": args.window_overlap,
+              "positions": reranker.positions,
               "candidates": args.candidates, "batch_size": args.batch_size, "results": results}
-    stem = stem_of(args.name, args.variant, args.max_passage_tokens, args.candidates, args.batch_size, args.profile)
+    stem = stem_of(args.name, args.variant, args.max_tokens, args.window_overlap, args.candidates, args.batch_size,
+                   args.profile)
     (out / f"{stem}.json").write_text(json.dumps(record), encoding="utf-8")
     lat = [r["ms"] for r in results]
     print(f"    {stem}: {len(results)} cases, load {load_s:.1f}s, median {statistics.median(lat):.0f} ms, "
@@ -247,25 +279,56 @@ def run(args: argparse.Namespace) -> int:
     cores = efficiency_cores() if os.name == "nt" else {"e": [], "p": []}
     lowend_cpus = (cores["e"] or list(range(os.cpu_count() or 4)))[: args.lowend_threads]
     (out / "machine.json").write_text(json.dumps(machine_info(lowend_cpus), indent=1), encoding="utf-8")
-    grid = [(n, v, p, c, b, profile) for profile in args.profiles for n in args.rerankers for v in args.variants
-            for p in args.passage_tokens for c in args.candidates for b in args.batch_sizes]
-    for name, variant, tokens, count, batch, profile in grid:
-        stem = out / f"{stem_of(name, variant, tokens, count, batch, profile)}.json"
+    grid = [(n, v, w, c, b, profile) for profile in args.profiles for n in args.rerankers for v in args.variants
+            for w in args.max_tokens for c in args.candidates for b in args.batch_sizes]
+    for name, variant, max_tokens, count, batch, profile in grid:
+        stem = out / f"{stem_of(name, variant, max_tokens, args.window_overlap, count, batch, profile)}.json"
         if stem.exists():
             continue
         cmd = [sys.executable, str(Path(__file__).resolve()), "worker", "--out", str(out), "--name", name,
-               "--variant", variant, "--profile", profile, "--max-passage-tokens", str(tokens),
+               "--variant", variant, "--profile", profile, "--max-tokens", str(max_tokens),
+               "--window-overlap", str(args.window_overlap),
                "--candidates", str(count), "--batch-size", str(batch),
                "--model-dir", str(Path(args.models_root) / RERANKERS[name])]
         if profile == "lowend":
             cmd += ["--threads", str(args.lowend_threads), "--pin", ",".join(map(str, lowend_cpus)),
-                    "--lowend-cases", str(args.lowend_cases)]
+                    ]
         else:
             cmd += ["--threads", "0"]
         print(f"--> {stem.stem}", flush=True)
         proc = subprocess.run(cmd)
         if proc.returncode != 0:
             print(f"    FAILED (exit {proc.returncode}); continuing", flush=True)
+    return 0
+
+
+def choose_k(args: argparse.Namespace) -> int:
+    """Per model: the largest K in K_CHOICES whose low-end median latency on the dev questions is <= BUDGET_MS. Reads
+    speed only (no quality is computed here). Writes chosen-k.json; `over_budget` means even K=10 is over."""
+    out = Path(args.out)
+    lowend = [json.loads(p.read_text(encoding="utf-8")) for p in sorted(out.glob("rerank-*-lowend.json"))]
+    chosen = {}
+    print("| model | K | dev questions | median ms | p95 ms | median windows | peak RAM MB | within 2 s |")
+    print("|---|---:|---:|---:|---:|---:|---:|---|")
+    for model in PREREGISTERED_MODELS:
+        runs = {w["candidates"]: w for w in lowend if w["reranker"] == model and w["variant"] == "int8"}
+        for k in K_CHOICES:
+            if k not in runs:
+                continue
+            lat = sorted(r["ms"] for r in runs[k]["results"])
+            median = statistics.median(lat)
+            p95 = lat[min(len(lat) - 1, round(0.95 * (len(lat) - 1)))]
+            windows = statistics.median(r["windows"] for r in runs[k]["results"])
+            peak = runs[k]["mem_end_mb"].get("peak_working_set", float("nan"))
+            print(f"| {model} | {k} | {len(lat)} | {median:.0f} | {p95:.0f} | {windows:.0f} | {peak:.0f} | "
+                  f"{'yes' if median <= BUDGET_MS else 'no'} |")
+            if model not in chosen and median <= BUDGET_MS:
+                chosen[model] = {"k": k, "median_ms": median, "over_budget": False}
+        if model not in chosen and 10 in runs:
+            median = statistics.median(r["ms"] for r in runs[10]["results"])
+            chosen[model] = {"k": 10, "median_ms": median, "over_budget": True}
+    (out / CHOSEN_K).write_text(json.dumps(chosen, indent=1), encoding="utf-8")
+    print(f"\nchosen: {json.dumps(chosen)}")
     return 0
 
 
@@ -301,7 +364,8 @@ def scored_rows(out: Path) -> tuple[list[dict], list[dict]]:
     dups = {(r["embedder"], r["set"], r["case_id"], cid): d for r in cands
             for cid, d in [*zip(r["chunk_ids"], r["duplicate_chunk_ids"]),
                            *zip(r["base_chunk_ids"], r["base_duplicate_chunk_ids"]),
-                           *zip(r["c10_chunk_ids"], r["c10_duplicate_chunk_ids"])]}
+                           *zip(r["c10_chunk_ids"], r["c10_duplicate_chunk_ids"]),
+                           *zip(r["c15_chunk_ids"], r["c15_duplicate_chunk_ids"])]}
     rows = []
     for config, order in orders:
         for key, (chunk_ids, scores) in order.items():
@@ -337,8 +401,8 @@ def _mean(values: list) -> str:
 
 def _configs(rows: list[dict]) -> list[str]:
     def key(label: str):
-        name, variant, tokens, count = label.split("-")
-        return list(RERANKERS).index(name), VARIANTS.index(variant), int(tokens[1:]), int(count[1:])
+        name, variant, window, count = label.split("-")
+        return list(RERANKERS).index(name), VARIANTS.index(variant), window, int(count[1:])
 
     names = sorted({r["config"] for r in rows} - {"none"}, key=key)
     return ["none"] + names
@@ -347,7 +411,9 @@ def _configs(rows: list[dict]) -> list[str]:
 def report(args: argparse.Namespace) -> int:
     from knowledge_assistant.application.evaluation.stats import mcnemar_exact
 
+    global _preregistered
     out = Path(args.out)
+    _preregistered = preregistered(out)
     rows, workers = scored_rows(out)
     meta = json.loads((out / "candidates-meta.json").read_text(encoding="utf-8"))
     machine = json.loads((out / "machine.json").read_text(encoding="utf-8"))
@@ -385,7 +451,7 @@ def report(args: argparse.Namespace) -> int:
                     mine_m = {r["case_id"]: r[metric] for r in sub}
                     res = mcnemar_exact([base[i][metric] for i in ids], [mine_m[i] for i in ids])
                     tests.append(f"{res.b} / {res.c} / {res.p_value:.3f}")
-                print(f"| {label} | {config} | {len(sub)} | {_rate([r['e1'] for r in sub])} | "
+                print(f"| {label} | {shown(config)} | {len(sub)} | {_rate([r['e1'] for r in sub])} | "
                       f"{_rate([r['e5'] for r in sub])} | {_mean([r['mrr'] for r in sub])} | {tests[0]} | {tests[1]} |")
         v2 = [r for r in mine if r["qset"] == "v2" and r["split"] == "eval"]
         if v2:
@@ -399,7 +465,7 @@ def report(args: argparse.Namespace) -> int:
                 print("|---|" + "---:|" * len(values))
                 for config in configs:
                     cells = [_rate([r["e5"] for r in v2 if r["config"] == config and r[field] == v]) for v in values]
-                    print(f"| {config} | " + " | ".join(cells) + " |")
+                    print(f"| {shown(config)} | " + " | ".join(cells) + " |")
     cost(workers)
     gate_tables(rows, configs)
     return 0
@@ -408,9 +474,10 @@ def report(args: argparse.Namespace) -> int:
 def cost(workers: list[dict]) -> None:
     print(f"\n### Cost per reranker (budget: added RAM <= {BUDGET_MB} MB, added latency <= {BUDGET_MS} ms per question "
           "on the low-end profile)\n")
-    print("| config | batch | ONNX MB | low-end cases | load s | median ms / question | p95 ms | max ms | "
+    print("| config | batch | ONNX MB | low-end cases | median windows / question | load s | median ms / question | "
+          "p95 ms | max ms | "
           "RAM before load MB | peak RAM MB | added RAM MB | full-profile median ms | budget |")
-    print("|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|")
+    print("|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|")
     full = {label_of(w): w for w in workers if w["profile"] == "full"}
     for w in sorted((w for w in workers if w["profile"] == "lowend"), key=lambda w: (label_of(w), w["batch_size"])):
         lat = sorted(r["ms"] for r in w["results"])
@@ -421,15 +488,18 @@ def cost(workers: list[dict]) -> None:
         f = full.get(label_of(w))
         fmed = f"{statistics.median(r['ms'] for r in f['results']):.0f}" if f else "–"
         over = [x for x, bad in (("RAM", added > BUDGET_MB), ("latency", median > BUDGET_MS)) if bad]
-        print(f"| {label_of(w)} | {w['batch_size']} | {w['onnx_mb']:.0f} | {w['cases']} | {w['load_s']:.1f} | "
+        windows = statistics.median(r["windows"] for r in w["results"])
+        print(f"| {shown(label_of(w))} | {w['batch_size']} | {w['onnx_mb']:.0f} | {w['cases']} | {windows:.0f} | "
+              f"{w['load_s']:.1f} | "
               f"{median:.0f} | {p95:.0f} | {lat[-1]:.0f} | {before:.0f} | {peak:.0f} | {added:.0f} | {fmed} | "
               f"{'**over: ' + ', '.join(over) + '**' if over else 'within'} |")
 
 
 def gate_tables(rows: list[dict], configs: list[str]) -> None:
-    print("\n### Gate calibration: reranker top-1 (sigmoid) on dev v1 + v2, Arm A; rule of retrieval-spec.md "
-          f"(lowest answerable - {GATE_MARGIN}). The {GATE_MARGIN} margin was set on the cosine scale; on the "
-          "sigmoid scale it is **DECISION REQUIRED**.\n")
+    print("\n### Gate calibration (PROVISIONAL): reranker top-1 (sigmoid) on dev v1 + v2 only, Arm A; rule of "
+          f"retrieval-spec.md (lowest answerable - {GATE_MARGIN}). The {GATE_MARGIN} margin was set on the cosine "
+          "scale; on the sigmoid scale it is **DECISION REQUIRED**. The eval columns are information only, never "
+          "used to set the value.\n")
     dev = [r for r in rows if r["split"] == "dev"]
     for embedder in ("local", "gemini"):
         mine = [r for r in dev if r["embedder"] == embedder and r["config"] != "none"]
@@ -460,7 +530,7 @@ def gate_tables(rows: list[dict], configs: list[str]) -> None:
                 else:
                     info = "| "
                 shown = f"{value:.4f}" if value > 0 else "no usable threshold (<= 0)"
-                print(f"| {config} | {label} | {len(ans)} | {len(una)} | {low:.4f} | "
+                print(f"| {shown(config)} | {label} | {len(ans)} | {len(una)} | {low:.4f} | "
                       f"{'–' if high is None else f'{high:.4f}'} | {shown} | {overlap} | {info} |")
         print(f"\nPer case ({embedder}, dev):\n")
         print("| case | set | answerable | dense top-1 | " + " | ".join(configs[1:]) + " |")
@@ -485,27 +555,30 @@ def main(argv=None) -> int:
     p = sub.add_parser("run")
     p.add_argument("--out", required=True)
     p.add_argument("--models-root", required=True)
-    p.add_argument("--rerankers", nargs="+", choices=list(RERANKERS), default=list(RERANKERS))
-    p.add_argument("--variants", nargs="+", choices=VARIANTS, default=list(VARIANTS))
+    p.add_argument("--rerankers", nargs="+", choices=list(RERANKERS), default=PREREGISTERED_MODELS)
+    p.add_argument("--variants", nargs="+", choices=VARIANTS, default=["int8"])
     p.add_argument("--profiles", nargs="+", choices=["full", "lowend"], default=["full", "lowend"])
     p.add_argument("--lowend-threads", type=int, default=4)
-    p.add_argument("--lowend-cases", type=int, default=30)
-    p.add_argument("--passage-tokens", nargs="+", type=int, default=[256])
-    p.add_argument("--candidates", nargs="+", type=int, choices=[10, CANDIDATES], default=[CANDIDATES])
-    p.add_argument("--batch-sizes", nargs="+", type=int, default=[CANDIDATES])
+    p.add_argument("--max-tokens", nargs="+", type=int, default=[512])
+    p.add_argument("--window-overlap", type=int, default=128)
+    p.add_argument("--candidates", nargs="+", type=int, choices=K_CHOICES, default=list(K_CHOICES))
+    p.add_argument("--batch-sizes", nargs="+", type=int, default=[8])
     p = sub.add_parser("worker")
-    p.add_argument("--candidates", type=int, choices=[10, CANDIDATES], default=CANDIDATES)
-    p.add_argument("--batch-size", type=int, default=CANDIDATES)
+    p.add_argument("--candidates", type=int, choices=K_CHOICES, default=CANDIDATES)
+    p.add_argument("--batch-size", type=int, default=8)
     for name in ("--out", "--name", "--variant", "--profile", "--model-dir"):
         p.add_argument(name, required=True)
     p.add_argument("--threads", type=int, default=0)
     p.add_argument("--pin", default="")
-    p.add_argument("--lowend-cases", type=int, default=30)
-    p.add_argument("--max-passage-tokens", type=int, default=256)
+    p.add_argument("--max-tokens", type=int, default=512)
+    p.add_argument("--window-overlap", type=int, default=128)
+    p = sub.add_parser("choose-k")
+    p.add_argument("--out", required=True)
     p = sub.add_parser("report")
     p.add_argument("--out", required=True)
     args = parser.parse_args(argv)
-    return {"candidates": candidates, "run": run, "worker": worker, "report": report}[args.command](args)
+    return {"candidates": candidates, "run": run, "worker": worker, "choose-k": choose_k,
+            "report": report}[args.command](args)
 
 
 if __name__ == "__main__":
