@@ -1,0 +1,1258 @@
+{
+ "schema_version": 1,
+ "rule": "As expected-spans-v1.json. Offsets index the ingested text: corpus 1 normalized.jsonl, corpus 2 the NFC text (ADR-0008). Corpus-2 heading path \"\" = the whole document (heading-less) or its preamble.",
+ "inputs": {
+  "questions": {
+   "eval-v2.jsonl": {
+    "path": "data/evaluation/questions/eval-v2.jsonl",
+    "sha256": "f49a1fe40f553d7c5a53b1e11501b0d084e427b0b6989dea475d06fd7d3dfda3"
+   },
+   "dev-v2.jsonl": {
+    "path": "data/evaluation/questions/dev-v2.jsonl",
+    "sha256": "a50aa6151d11b49258bec941b2eb03d0e2166a578dc3d52a090414f0ed28821a"
+   }
+  },
+  "corpus2_sections_sha256": "194cc7c675eaff7602a40b3fa6f63256223d90f6447e7ad47e952f56203d596a"
+ },
+ "cases": {
+  "Q2-EVAL-001": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-29",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 3034
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-002": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-10",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 8253
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-003": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-10",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 8253
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-004": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-07",
+      "heading_path": "*1.1.* Hoàn cảnh quốc tế cuối thế kỷ XIX, đầu thế kỷ XX",
+      "variant": 1,
+      "char_start": 401,
+      "char_end": 63131
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-005": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-07",
+      "heading_path": "*1.1.* Hoàn cảnh quốc tế cuối thế kỷ XIX, đầu thế kỷ XX",
+      "variant": 1,
+      "char_start": 401,
+      "char_end": 63131
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-006": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-07",
+      "heading_path": "*1.1.* Hoàn cảnh quốc tế cuối thế kỷ XIX, đầu thế kỷ XX",
+      "variant": 1,
+      "char_start": 401,
+      "char_end": 63131
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-007": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-11",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 22193
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-008": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-11",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 22193
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-009": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-16",
+      "heading_path": "Ran nổ",
+      "variant": 1,
+      "char_start": 1411,
+      "char_end": 2245
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-010": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-16",
+      "heading_path": "1. Khái niệm :",
+      "variant": 1,
+      "char_start": 278,
+      "char_end": 735
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-011": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-24",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 12908
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-012": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-24",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 12908
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-013": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-25",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 278678
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-014": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-25",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 278678
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-015": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-26",
+      "heading_path": "Tính toán các thông số của chu trình: > Tính quá trình nén",
+      "variant": 1,
+      "char_start": 4131,
+      "char_end": 5476
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-016": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-26",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 869
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-017": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-29",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 3034
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-018": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-30",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 14819
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-019": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-30",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 14819
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-020": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-32",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 33113
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-021": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-06",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 27381
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-022": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-06",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 27381
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-023": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-08",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 27484
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-024": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-08",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 27484
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-025": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-05",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 8248
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-026": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-05",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 8248
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-027": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-04",
+      "heading_path": "**BÁO CÁO CHIẾN LƯỢC KINH DOANH VÀ KIẾN TRÚC KỸ THUẬT TỐI ƯU HÓA CHI PHÍ & LỢI NHUẬN** > **PHẦN I: TỔNG QUAN CHIẾN LƯỢC KINH DOANH & MÔ HÌNH TÀI CHÍNH** > **2. Dòng thác Doanh thu Chuẩn mực (Revenue Waterfall)**",
+      "variant": 1,
+      "char_start": 1870,
+      "char_end": 3520
+     },
+     {
+      "role": "alternate",
+      "source_id": "C2-22",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 21936
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-028": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-04",
+      "heading_path": "**BÁO CÁO CHIẾN LƯỢC KINH DOANH VÀ KIẾN TRÚC KỸ THUẬT TỐI ƯU HÓA CHI PHÍ & LỢI NHUẬN** > **PHẦN I: TỔNG QUAN CHIẾN LƯỢC KINH DOANH & MÔ HÌNH TÀI CHÍNH** > **3. Chiến lược Giá Pilot (Zero-Barrier Pilot Pricing) & Lộ trình Thương mại hóa**",
+      "variant": 1,
+      "char_start": 3520,
+      "char_end": 4626
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-029": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-03",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 18543
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-030": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-28",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 76805
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-031": {
+   "answerable": false,
+   "corpus": "corpus2",
+   "slots": {}
+  },
+  "Q2-EVAL-032": {
+   "answerable": false,
+   "corpus": "corpus2",
+   "slots": {}
+  },
+  "Q2-EVAL-033": {
+   "answerable": false,
+   "corpus": "corpus2",
+   "slots": {}
+  },
+  "Q2-EVAL-034": {
+   "answerable": false,
+   "corpus": "corpus2",
+   "slots": {}
+  },
+  "Q2-EVAL-035": {
+   "answerable": false,
+   "corpus": "corpus2",
+   "slots": {}
+  },
+  "Q2-EVAL-036": {
+   "answerable": false,
+   "corpus": "corpus2",
+   "slots": {}
+  },
+  "Q2-EVAL-037": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-01",
+      "heading_path": "Some people think that good health is very important to every person, so medical services should not be run by profit-making companies. Do the advantages outweigh the disadvantages?",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 2351
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-038": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-13",
+      "heading_path": "Introduction > Purpose",
+      "variant": 1,
+      "char_start": 8306,
+      "char_end": 9253
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-039": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-13",
+      "heading_path": "Use Case Specifications > Class Management > UC7: Cancel Class",
+      "variant": 1,
+      "char_start": 27743,
+      "char_end": 29087
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-040": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-13",
+      "heading_path": "Use Case Specifications > Trainee Management > UC 33: Calculate Committed Working Duration",
+      "variant": 1,
+      "char_start": 70375,
+      "char_end": 71410
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-041": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-15",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 9574
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-042": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-18",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 73010
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-043": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-18",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 73010
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-044": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-18",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 73010
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-045": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-19",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 158021
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-046": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-19",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 158021
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-047": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-19",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 158021
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-048": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-21",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 72976
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-049": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-21",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 72976
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-050": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-27",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 3524
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-051": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-01",
+      "heading_path": "Some people think that the government has the duty to ensure its citizens to have a healthy diet, while others argue it is the responsibility of each individual. Discuss both views and give your opinion.",
+      "variant": 1,
+      "char_start": 2351,
+      "char_end": 4530
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-052": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-13",
+      "heading_path": "Use Case Specifications > Common Business Rules",
+      "variant": 1,
+      "char_start": 72745,
+      "char_end": 74407
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-053": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-13",
+      "heading_path": "Use Case Specifications > Trainee Management > UC 34: Calculate Allowance",
+      "variant": 1,
+      "char_start": 71410,
+      "char_end": 72745
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-054": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-15",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 9574
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-055": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-18",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 73010
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-056": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-18",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 73010
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-057": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-19",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 158021
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-058": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-21",
+      "heading_path": "",
+      "variant": 1,
+      "char_start": 0,
+      "char_end": 72976
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-059": {
+   "answerable": true,
+   "corpus": "corpus1",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > Disable status code pages",
+      "variant": 1,
+      "char_start": 24282,
+      "char_end": 24946
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > Disable status code pages",
+      "variant": 2,
+      "char_start": 71271,
+      "char_end": 71935
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > Disable status code pages",
+      "variant": 3,
+      "char_start": 115828,
+      "char_end": 116492
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > Disable status code pages",
+      "variant": 4,
+      "char_start": 154115,
+      "char_end": 154779
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > Disable status code pages",
+      "variant": 5,
+      "char_start": 190648,
+      "char_end": 191312
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > Disable status code pages",
+      "variant": 6,
+      "char_start": 215193,
+      "char_end": 215892
+     },
+     {
+      "role": "expected",
+      "source_id": "13",
+      "heading_path": "Handle errors in ASP.NET Core > Disable status code pages",
+      "variant": 7,
+      "char_start": 232766,
+      "char_end": 233376
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-060": {
+   "answerable": true,
+   "corpus": "corpus1",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "23",
+      "heading_path": "Routing in ASP.NET Core > Host matching in routes with RequireHost",
+      "variant": 1,
+      "char_start": 77928,
+      "char_end": 80439
+     },
+     {
+      "role": "expected",
+      "source_id": "23",
+      "heading_path": "Routing in ASP.NET Core > Host matching in routes with RequireHost",
+      "variant": 2,
+      "char_start": 178903,
+      "char_end": 180619
+     },
+     {
+      "role": "expected",
+      "source_id": "23",
+      "heading_path": "Routing in ASP.NET Core > Host matching in routes with RequireHost",
+      "variant": 3,
+      "char_start": 273980,
+      "char_end": 275696
+     },
+     {
+      "role": "expected",
+      "source_id": "23",
+      "heading_path": "Routing in ASP.NET Core > Host matching in routes with RequireHost",
+      "variant": 4,
+      "char_start": 367316,
+      "char_end": 369395
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-061": {
+   "answerable": true,
+   "corpus": "corpus1",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "10",
+      "heading_path": "Dependency injection in ASP.NET Core > Keyed services",
+      "variant": 1,
+      "char_start": 18087,
+      "char_end": 22242
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-062": {
+   "answerable": true,
+   "corpus": "corpus1",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "01",
+      "heading_path": "Asynchronous programming with async and await > Apply await expressions to tasks efficiently",
+      "variant": 1,
+      "char_start": 22291,
+      "char_end": 24735
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-063": {
+   "answerable": true,
+   "corpus": "corpus1",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "16",
+      "heading_path": "Integral numeric types (C# reference) > Integer literals",
+      "variant": 1,
+      "char_start": 3974,
+      "char_end": 6831
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-064": {
+   "answerable": true,
+   "corpus": "corpus1",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "17",
+      "heading_path": "Integration tests in ASP.NET Core > Inject mock services",
+      "variant": 1,
+      "char_start": 36264,
+      "char_end": 42962
+     },
+     {
+      "role": "expected",
+      "source_id": "17",
+      "heading_path": "Integration tests in ASP.NET Core > Inject mock services",
+      "variant": 2,
+      "char_start": 90444,
+      "char_end": 94183
+     },
+     {
+      "role": "expected",
+      "source_id": "17",
+      "heading_path": "Integration tests in ASP.NET Core > Inject mock services",
+      "variant": 3,
+      "char_start": 131600,
+      "char_end": 136166
+     },
+     {
+      "role": "expected",
+      "source_id": "17",
+      "heading_path": "Integration tests in ASP.NET Core > Inject mock services",
+      "variant": 4,
+      "char_start": 174509,
+      "char_end": 179075
+     },
+     {
+      "role": "expected",
+      "source_id": "17",
+      "heading_path": "Integration tests in ASP.NET Core > Inject mock services",
+      "variant": 5,
+      "char_start": 227797,
+      "char_end": 234492
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-065": {
+   "answerable": true,
+   "corpus": "corpus1",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "02",
+      "heading_path": "Asynchronous programming scenarios > Review considerations for asynchronous programming > Consider using ValueTask type",
+      "variant": 1,
+      "char_start": 16370,
+      "char_end": 16984
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-066": {
+   "answerable": true,
+   "corpus": "corpus1",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "12",
+      "heading_path": "Handle errors in ASP.NET Core APIs > Client and Server error responses",
+      "variant": 1,
+      "char_start": 7555,
+      "char_end": 10190
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-067": {
+   "answerable": true,
+   "corpus": "corpus1",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "04",
+      "heading_path": "Built-in types and literals > The `dynamic` type",
+      "variant": 1,
+      "char_start": 9216,
+      "char_end": 10060
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-068": {
+   "answerable": true,
+   "corpus": "corpus1",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "21",
+      "heading_path": "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Discard pattern",
+      "variant": 1,
+      "char_start": 23228,
+      "char_end": 24878
+     }
+    ]
+   }
+  },
+  "Q2-EVAL-069": {
+   "answerable": false,
+   "corpus": "corpus1",
+   "slots": {}
+  },
+  "Q2-EVAL-070": {
+   "answerable": false,
+   "corpus": "corpus1",
+   "slots": {}
+  },
+  "Q2-EVAL-071": {
+   "answerable": false,
+   "corpus": "corpus1",
+   "slots": {}
+  },
+  "Q2-EVAL-072": {
+   "answerable": false,
+   "corpus": "corpus1",
+   "slots": {}
+  },
+  "Q2-DEV-001": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-16",
+      "heading_path": "4. Nguyên nhân",
+      "variant": 1,
+      "char_start": 3291,
+      "char_end": 3639
+     }
+    ]
+   }
+  },
+  "Q2-DEV-002": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-16",
+      "heading_path": "2. Lâm sàng:",
+      "variant": 1,
+      "char_start": 849,
+      "char_end": 1071
+     }
+    ]
+   }
+  },
+  "Q2-DEV-003": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-04",
+      "heading_path": "**BÁO CÁO CHIẾN LƯỢC KINH DOANH VÀ KIẾN TRÚC KỸ THUẬT TỐI ƯU HÓA CHI PHÍ & LỢI NHUẬN** > **PHẦN II: THIẾT KẾ KỸ THUẬT, BẢN QUYỀN & KIỂM SOÁT CHI PHÍ (TECH LEAD)** > **4. Cơ chế Kiểm soát Rủi ro & Vận hành Kỹ thuật (Technical Guardrails)**",
+      "variant": 1,
+      "char_start": 11441,
+      "char_end": 12542
+     }
+    ]
+   }
+  },
+  "Q2-DEV-004": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-04",
+      "heading_path": "**BÁO CÁO CHIẾN LƯỢC KINH DOANH VÀ KIẾN TRÚC KỸ THUẬT TỐI ƯU HÓA CHI PHÍ & LỢI NHUẬN** > **PHẦN II: THIẾT KẾ KỸ THUẬT, BẢN QUYỀN & KIỂM SOÁT CHI PHÍ (TECH LEAD)** > **3. Kiểm soát Tuân thủ Thuật toán & Nền tảng Mạng xã hội (Compliance-First Strategy)**",
+      "variant": 1,
+      "char_start": 10193,
+      "char_end": 11441
+     }
+    ]
+   }
+  },
+  "Q2-DEV-005": {
+   "answerable": true,
+   "corpus": "corpus2",
+   "slots": {
+    "S1": [
+     {
+      "role": "expected",
+      "source_id": "C2-13",
+      "heading_path": "Introduction > Intended Audience and Reading Suggestions",
+      "variant": 1,
+      "char_start": 10281,
+      "char_end": 10851
+     }
+    ]
+   }
+  },
+  "Q2-DEV-006": {
+   "answerable": false,
+   "corpus": "corpus2",
+   "slots": {}
+  }
+ }
+}

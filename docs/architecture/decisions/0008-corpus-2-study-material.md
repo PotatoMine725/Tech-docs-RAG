@@ -66,3 +66,14 @@ Refines: ADR-0002 (formats), ADR-0003 D5/D6 (heading-path citations). Plan Phase
 3. **NFD Vietnamese text** (C2-07, C2-08). NFC normalization at ingestion is still **DECISION REQUIRED**. It affects
    keyword (FTS) search, which misses NFC queries on NFD text, and evidence matching, which must normalize both sides
    or keep copying the stored form.
+
+## Resolutions (owner, 2026-11-25; indexing step)
+1. **`#` lines:** PDF conversion escapes heading-shaped lines as `\#` (PDF only). Only C2-21 changed; its heading
+   paths in Q2-EVAL-048 / 049 / 058 become `""`. See the erratum
+   [`eval-v2.1-erratum.md`](../../reviews/evaluation/eval-v2.1-erratum.md) (tag `eval-freeze-v2.1`).
+2. **Metric:** evidence_hit is the main corpus-2 metric; section_hit is reported but ≈ source_hit on heading-less
+   documents.
+3. **NFC:** all text is normalized to Unicode NFC at ingestion (indexed text and questions), after conversion, so the
+   converted text and its `converted_sha256` stay as pinned. Evidence matching compares both sides in NFC.
+   Correction to the note above: **C2-25** is not NFC either (found at indexing; composing reorders its combining
+   marks without changing its length), besides C2-07 and C2-08.

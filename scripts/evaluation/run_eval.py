@@ -1,7 +1,8 @@
 """EVAL-003a: run the evaluation questions through one arm and record what came out. Generation only: no scoring.
 
     python scripts/evaluation/run_eval.py --arm A|B --mode retrieval|full --split dev|eval
-        [--run-id ID] [--max-llm-calls N] [--cases ID,ID] [--estimate-only]
+        [--questions v1|v2] [--corpus corpus1|corpus2] [--run-id ID] [--max-llm-calls N] [--cases ID,ID]
+        [--estimate-only]
 
 `retrieval` mode embeds the questions and searches (no LLM); `full` mode runs the whole pipeline. Both write
 `data/evaluation/results/<run_id>/`: `run.json` (settings, git state, one entry per invocation), `records.jsonl` (one
@@ -9,8 +10,12 @@ line per case, flushed as it is written) and `errors.jsonl` (failed cases, the f
 key redacted, and any model-purity violation). Read `records.jsonl` with `records.latest_records`: a retried case
 leaves its error line and its ok line.
 
-Before it does anything else the script checks BOTH frozen question files against the hashes in
-docs/snapshots/evaluation/eval-v1.md and records the eval-freeze-v1 tag. Then it prints an estimate (uncached query
+Before it does anything else the script checks BOTH frozen question files of the question set and records its tag:
+v1 against the hashes in docs/snapshots/evaluation/eval-v1.md (tag eval-freeze-v1); v2 (benchmark v2, ADR-0008) byte
+for byte against the files at the tag eval-freeze-v2.1 (git), refusing to run while the tag is missing.
+Corpus (ADR-0008): a run searches one corpus's indexes (--corpus, default CORPUS from the environment, else corpus1)
+and takes only the cases whose `corpus` field names it (v1 cases have none: corpus1); a --cases id of the other corpus
+is refused. v2 mixes both corpora, so it needs one run per corpus. The corpus is recorded in RunConfig. Then it prints an estimate (uncached query
 embeddings, LLM requests, time at the throttle rate, share of the daily quota) and starts. Full mode always runs with
 the fallback model OFF, whatever ALLOW_FALLBACK says: every answer comes from the one answer model, and a record from
 any other model aborts the run.
@@ -47,6 +52,7 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 from knowledge_assistant.application.evaluation.integrity import verify_frozen_files  # noqa: E402
 from knowledge_assistant.application.evaluation.run_evaluation import (  # noqa: E402
     ARMS,
+    CORPORA,
     FULL,
     MODES,
     SPLITS,
@@ -64,6 +70,7 @@ from knowledge_assistant.composition import (  # noqa: E402
 )
 from knowledge_assistant.config import (  # noqa: E402
     get_active_embedding_model_id,
+    get_corpus,
     get_answer_settings,
     get_retrieval_settings,
 )
@@ -85,6 +92,19 @@ QUESTIONS_DIR = Path("data/evaluation/questions")
 RESULTS_DIR = Path("data/evaluation/results")
 SPLIT_FILES = {"eval": "eval-v1.jsonl", "dev": "dev-v1.jsonl"}
 FREEZE_TAG = "eval-freeze-v1"
+
+
+@dataclass(frozen=True)
+class QuestionSet:
+    files: dict  # split -> file name in QUESTIONS_DIR
+    freeze_tag: str
+    snapshot: Path | None  # v1: hashes in a snapshot doc; None: compare with the files at the tag
+
+
+QUESTION_SETS = {
+    "v1": QuestionSet(SPLIT_FILES, FREEZE_TAG, SNAPSHOT),
+    "v2": QuestionSet({"eval": "eval-v2.jsonl", "dev": "dev-v2.jsonl"}, "eval-freeze-v2.1", None),
+}
 EXIT_OK, EXIT_ERRORS, EXIT_STOPPED, EXIT_ABORTED = 0, 1, 2, 3
 
 
@@ -134,15 +154,31 @@ def _git(root: Path, *args: str) -> str:
     return completed.stdout.strip()
 
 
-def collect_git_state(root: Path) -> tuple[RunEnvironment, str]:
+def collect_git_state(root: Path, tag: str = FREEZE_TAG) -> tuple[RunEnvironment, str]:
     """(where this invocation runs, the commit the freeze tag points to). Dirty = tracked files that differ from HEAD."""
     commit = _git(root, "rev-parse", "HEAD")
     dirty = tuple(line for line in _git(root, "diff", "--name-only", "HEAD").splitlines() if line)
     try:
-        tag_commit = _git(root, "rev-parse", f"{FREEZE_TAG}^{{commit}}")
+        tag_commit = _git(root, "rev-parse", f"{tag}^{{commit}}")
     except IntegrityError as error:
-        raise IntegrityError(f"the git tag {FREEZE_TAG} is missing ({error}); it marks the frozen question files") from error
+        raise IntegrityError(f"the git tag {tag} is missing ({error}); it marks the frozen question files") from error
     return RunEnvironment(commit, bool(dirty), dirty), tag_commit
+
+
+def verify_against_tag(root: Path, tag: str, files: dict[str, bytes]) -> dict[str, str]:
+    """{file name: SHA-256} when every file equals its version at `tag`; otherwise IntegrityError."""
+    hashes = {}
+    for name, data in files.items():
+        spec = f"{tag}:{(QUESTIONS_DIR / name).as_posix()}"
+        frozen = subprocess.run(["git", "-C", str(root), "show", spec], capture_output=True)
+        if frozen.returncode != 0:
+            raise IntegrityError(f"cannot read {spec} (is the tag {tag} missing?): "
+                                 f"{frozen.stderr.decode('utf-8', 'replace').strip()}")
+        if frozen.stdout.replace(b"\r\n", b"\n") != data.replace(b"\r\n", b"\n"):
+            raise IntegrityError(f"{name} differs from its frozen version at {tag}; a change must be a logged "
+                                 "erratum with a new tag, never a quiet edit. Refusing to run.")
+        hashes[name] = hashlib.sha256(data).hexdigest()
+    return hashes
 
 
 def default_run_id(today: date, split: str, arm: str, mode: str, commit: str) -> str:
@@ -158,19 +194,32 @@ def load_cases(data: bytes, split: str) -> list[dict]:
     return cases
 
 
-def select_cases(cases: list[dict], wanted: str | None, split: str) -> list[dict]:
+def case_corpus(case: dict) -> str:
+    return case.get("corpus", "corpus1")  # v1 cases have no corpus field: they are all corpus 1
+
+
+def select_cases(cases: list[dict], wanted: str | None, split: str, corpus: str = "corpus1") -> list[dict]:
+    """The cases to run: every case of the run's corpus, or the --cases ids (each must exist and be of that corpus)."""
     if not wanted:
-        return cases
+        selected = [case for case in cases if case_corpus(case) == corpus]
+        if not selected:
+            raise EvaluationError(f"split {split} has no case of {corpus}")
+        return selected
     ids = [item.strip() for item in wanted.split(",") if item.strip()]
     unknown = [item for item in ids if item not in {case["id"] for case in cases}]
     if unknown:
         raise EvaluationError(f"unknown case id(s) for split {split}: {', '.join(unknown)}")
-    return [case for case in cases if case["id"] in set(ids)]
+    selected = [case for case in cases if case["id"] in set(ids)]
+    other = [f"{case['id']} ({case_corpus(case)})" for case in selected if case_corpus(case) != corpus]
+    if other:
+        raise EvaluationError(f"case(s) of another corpus than the run's {corpus}: {', '.join(other)}; refusing to run "
+                              "them against this corpus's index")
+    return selected
 
 
 def resume_command(run_id: str, args: argparse.Namespace) -> str:
     parts = ["python", "scripts/evaluation/run_eval.py", "--arm", args.arm, "--mode", args.mode, "--split", args.split,
-             "--run-id", run_id]
+             "--questions", args.questions, "--corpus", args.corpus, "--run-id", run_id]
     if args.cases:
         parts += ["--cases", args.cases]
     if args.mode == FULL:
@@ -184,6 +233,8 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
     parser.add_argument("--arm", choices=ARMS, required=True)
     parser.add_argument("--mode", choices=MODES, required=True)
     parser.add_argument("--split", choices=SPLITS, required=True)
+    parser.add_argument("--questions", choices=tuple(QUESTION_SETS), default="v1", help="question set (default v1)")
+    parser.add_argument("--corpus", choices=CORPORA, help="corpus to search (default: CORPUS env, else corpus1)")
     parser.add_argument("--run-id", help="resume this run if it exists; default <date>-<split>-<arm>-<mode>-<sha>")
     parser.add_argument("--max-llm-calls", type=int, default=200, help="LLM requests per invocation, retries included")
     parser.add_argument("--cases", help="comma-separated case ids (default: every case of the split)")
@@ -202,19 +253,32 @@ def main(argv=None, *, services=open_services, git_state=collect_git_state, root
     def emit(text: str) -> None:
         print(text, file=out, flush=True)
 
+    previous = os.environ.get("CORPUS")
     try:
+        args.corpus = args.corpus or get_corpus()
+        os.environ["CORPUS"] = args.corpus  # the stores opened by composition read it (config.corpus_scoped)
         return _run(args, emit, services, git_state, root, today)
     except (EvaluationError, ConfigurationError, VectorStoreError) as error:
         print(f"ABORTED: {redact_key(str(error))}", file=err, flush=True)
         return EXIT_ABORTED
+    finally:  # leave the process environment as found (tests call main() repeatedly)
+        if previous is None:
+            os.environ.pop("CORPUS", None)
+        else:
+            os.environ["CORPUS"] = previous
 
 
 def _run(args, emit, services, git_state, root: Path, today) -> int:
-    # 1. integrity first: both frozen files, whichever split runs
-    files = {name: (root / QUESTIONS_DIR / name).read_bytes() for name in SPLIT_FILES.values()}
-    hashes = verify_frozen_files((root / SNAPSHOT).read_text(encoding="utf-8"), files)
-    environment, tag_commit = git_state(root)
-    cases = select_cases(load_cases(files[SPLIT_FILES[args.split]], args.split), args.cases, args.split)
+    # 1. integrity first: both frozen files of the question set, whichever split runs
+    question_set = QUESTION_SETS[args.questions]
+    files = {name: (root / QUESTIONS_DIR / name).read_bytes() for name in question_set.files.values()}
+    if question_set.snapshot is not None:
+        hashes = verify_frozen_files((root / question_set.snapshot).read_text(encoding="utf-8"), files)
+    else:
+        hashes = verify_against_tag(root, question_set.freeze_tag, files)
+    environment, tag_commit = git_state(root, question_set.freeze_tag)
+    cases = select_cases(load_cases(files[question_set.files[args.split]], args.split), args.cases, args.split,
+                         args.corpus)
 
     # 2. the settings this run uses (full mode: the fallback model is forced off) and its identity
     settings = replace(get_answer_settings(), allow_fallback=False)
@@ -228,20 +292,23 @@ def _run(args, emit, services, git_state, root: Path, today) -> int:
         embedding_model=embedding_model, embedding_dim=embedding_dim, throttle_rpm=settings.limits.throttle_rpm,
         threshold=retrieval.insufficient_score_threshold, prompt_version=settings.prompt_version,
         prompt_sha256=hashlib.sha256(prompt_file.read_bytes()).hexdigest(), top_k=retrieval.top_k,
-        overfetch=retrieval.overfetch, freeze_tag=FREEZE_TAG, freeze_tag_commit=tag_commit, question_files=hashes,
-        retrieval_mode=retrieval.mode, rrf_k=retrieval.rrf_k,
+        overfetch=retrieval.overfetch, freeze_tag=question_set.freeze_tag, freeze_tag_commit=tag_commit,
+        question_files=hashes, retrieval_mode=retrieval.mode, rrf_k=retrieval.rrf_k, corpus=args.corpus,
     )
     run_id = args.run_id or default_run_id(today(), args.split, args.arm, args.mode, environment.git_commit)
+    if args.run_id is None and (args.questions, args.corpus) != ("v1", "corpus1"):  # keep v1/corpus-1 ids as they were
+        run_id = run_id.replace(f"-{args.split}-", f"-{args.questions}-{args.corpus}-{args.split}-", 1)
     directory = root / RESULTS_DIR / run_id
     if args.run_id is None and directory.exists():
         raise EvaluationError(f"run {run_id} already exists; pass --run-id {run_id} to resume it, or choose another --run-id")
     store = JsonlRecordStore(directory, redact=redact_key)
 
     # 3. estimate, then run
-    emit(f"run {run_id}: arm {args.arm}, mode {args.mode}, split {args.split} -> {RESULTS_DIR.as_posix()}/{run_id}/")
+    emit(f"run {run_id}: arm {args.arm}, mode {args.mode}, split {args.split}, questions {args.questions} "
+         f"({len(cases)} cases of {args.corpus}) -> {RESULTS_DIR.as_posix()}/{run_id}/")
     emit(f"settings: answer model {config.answer_model} (fallback off), retrieval {config.retrieval_mode}, embedding "
          f"{config.embedding_model}@{config.embedding_dim}, threshold {config.threshold} (dense top-1), top-k "
-         f"{config.top_k}+{config.overfetch}, prompt {config.prompt_version}, freeze tag {FREEZE_TAG} ({tag_commit[:7]})")
+         f"{config.top_k}+{config.overfetch}, prompt {config.prompt_version}, freeze tag {question_set.freeze_tag} ({tag_commit[:7]})")
     with services(args.arm, args.mode, settings, FirstProviderErrors(store, run_id)) as opened:
         evaluation = RunEvaluation(run_id, config, store, opened.retriever, opened.answerer,
                                    max_llm_calls=args.max_llm_calls, progress=emit, stats=opened.stats)

@@ -14,7 +14,11 @@ from knowledge_assistant.core.models import Document
 from knowledge_assistant.infrastructure.chunking.factory import load_arm
 from knowledge_assistant.infrastructure.parsing.markdown_parser import MarkdownParser
 from knowledge_assistant.infrastructure.parsing.markdown_normalizer import section_spans
-from knowledge_assistant.infrastructure.parsing.markitdown_parser import MARKITDOWN_EXTENSIONS, MarkItDownParser
+from knowledge_assistant.infrastructure.parsing.markitdown_parser import (
+    MARKITDOWN_EXTENSIONS,
+    MarkItDownParser,
+    escape_heading_like_lines,
+)
 from knowledge_assistant.infrastructure.parsing.registry import default_registry
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -126,6 +130,28 @@ def test_pdf_text_is_extracted_without_headings(tmp_path):
     parsed = _parse(tmp_path, "notes.pdf", _pdf(["Retry policy overview", "Use exponential backoff."]))
     assert "Retry policy overview" in parsed.text and "Use exponential backoff." in parsed.text
     assert parsed.sections == ()  # plain PDF text has no Markdown headings
+
+
+def test_pdf_lines_starting_with_hash_stay_text(tmp_path):
+    """ADR-0008 open item 1 (C2-21): '# number' in a symbol table must not become a heading."""
+    parsed = _parse(tmp_path, "symbols.pdf", _pdf(["# number Please answer # 7.", "#s numbers", "Plain line."]))
+    assert parsed.sections == ()
+    assert "\\# number Please answer # 7." in parsed.text
+    assert "#s numbers" in parsed.text and "\\#s" not in parsed.text  # not heading-shaped: left as is
+
+
+@pytest.mark.parametrize("line, expected", [
+    ("# number", "\\# number"), ("   ## x", "   \\## x"), ("#", "\\#"), ("###### six", "\\###### six"),
+    ("#s numbers", "#s numbers"), ("####### seven", "####### seven"), ("    # code", "    # code"),
+    ("text # mid", "text # mid"),
+])
+def test_escape_heading_like_lines(line, expected):
+    assert escape_heading_like_lines(f"a\n{line}\nb") == f"a\n{expected}\nb"
+
+
+def test_hash_lines_in_non_pdf_formats_keep_their_headings(tmp_path):
+    parsed = _parse(tmp_path, "notes.txt", "# Real heading\n\nBody.\n")
+    assert parsed.text.startswith("# Real heading") and len(parsed.sections) == 1
 
 
 def test_txt_keeps_text(tmp_path):

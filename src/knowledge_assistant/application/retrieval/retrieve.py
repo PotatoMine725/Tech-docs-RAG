@@ -18,8 +18,11 @@ by (score desc, chunk_id), keep the first hit of each `passage_hash` (the link-s
 `content_hash` is not used: chunks whose text differs only in a link URL (e.g. doc 17's repeated sections) have
 different content hashes but the same passage and the same vector. `duplicates_dropped` counts the over-fetched
 hits dropped this way. In hybrid mode dedup runs on the fused list.
+
+The question is composed to Unicode NFC before it is embedded or searched, like the indexed text (ADR-0008).
 """
 import time
+import unicodedata
 from collections.abc import Callable
 from dataclasses import dataclass
 
@@ -112,6 +115,7 @@ class Retriever:
         self._clock = clock
 
     def retrieve(self, question: str) -> RetrievalResult:
+        question = unicodedata.normalize("NFC", question)
         start = self._clock()
         vectors = self._embedder.embed([question], EmbeddingTask.QUERY)
         embedded = self._clock()

@@ -240,3 +240,10 @@ output/exports/*
 # Corpus 2 (ADR-0008): raw files and converted text are not redistributable; only the manifest is committed
 corpus2/incoming/
 corpus2/converted/
+# Corpus 2 ingestion output (config.corpus_scoped): text of non-redistributable documents and rebuilt indexes
+**/data/chroma-corpus2/
+**/data/keyword-corpus2/
+**/data/processed/chunks-corpus2/
+**/data/processed/documents-corpus2/
+# Corpus-2 run folders hold retrieved chunk text of non-redistributable documents (ADR-0008): local only
+data/evaluation/results/*-corpus2-*/

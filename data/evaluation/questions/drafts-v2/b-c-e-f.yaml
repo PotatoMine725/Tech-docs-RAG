@@ -261,10 +261,10 @@
   answer_points:
     - {id: P1, text: "Use the first few letters of the word, just enough to remember it.", required: true}
     - {id: P2, text: "Remove all or most vowels and keep the key consonants (e.g. mngmt for management).", required: true}
-  expected_sources: [{source_id: C2-21, heading_path: "number", slot: S1}]
+  expected_sources: [{source_id: C2-21, heading_path: "", slot: S1}]
   evidence:
-    - {source_id: C2-21, heading_path: "number", supports: [P1], quote: "1 Use the first few letters of the word – just enough to remember what the abbreviation"}
-    - {source_id: C2-21, heading_path: "number", supports: [P2], quote: "2 Remove all (or most of) the vowels from the word and use just the key consonants bunched together e.g. mngmt for ‘management’"}
+    - {source_id: C2-21, heading_path: "", supports: [P1], quote: "1 Use the first few letters of the word – just enough to remember what the abbreviation"}
+    - {source_id: C2-21, heading_path: "", supports: [P2], quote: "2 Remove all (or most of) the vowels from the word and use just the key consonants bunched together e.g. mngmt for ‘management’"}
   must_not_claim: ["The techniques are to use only the last letters of a word.", "Vowels should be kept and consonants removed."]
   cognitive_level: recall
   difficulty: easy
@@ -284,11 +284,11 @@
     - {id: P1, text: "Leave out a, an, or the, and dot i's / cross t's later.", required: true}
     - {id: P2, text: "Use 1, 2, 3 instead of one, two, three.", required: true}
     - {id: P3, text: "Abbreviate any word by leaving out the vowels.", required: true}
-  expected_sources: [{source_id: C2-21, heading_path: "number Please answer # 7.", slot: S1}]
+  expected_sources: [{source_id: C2-21, heading_path: "", slot: S1}]
   evidence:
-    - {source_id: C2-21, heading_path: "number Please answer # 7.", supports: [P1], quote: "1. If you are in a hurry, leave out a, an, or the, and dot your i’s and cross your t’s later."}
-    - {source_id: C2-21, heading_path: "number Please answer # 7.", supports: [P2], quote: "2. Always use 1, 2, 3,...instead of one, two three."}
-    - {source_id: C2-21, heading_path: "number Please answer # 7.", supports: [P3], quote: "3. Abbreviate any word by leaving out the vowels."}
+    - {source_id: C2-21, heading_path: "", supports: [P1], quote: "1. If you are in a hurry, leave out a, an, or the, and dot your i’s and cross your t’s later."}
+    - {source_id: C2-21, heading_path: "", supports: [P2], quote: "2. Always use 1, 2, 3,...instead of one, two three."}
+    - {source_id: C2-21, heading_path: "", supports: [P3], quote: "3. Abbreviate any word by leaving out the vowels."}
   must_not_claim: ["You should write numbers out in words.", "You should record the lecture word for word."]
   cognitive_level: recall
   difficulty: easy
@@ -482,10 +482,10 @@
   answer_points:
     - {id: P1, text: "Reference list chỉ gồm các nguồn được nhắc tới trong bài; tên trong bài và trong danh sách phải khớp nhau.", required: true}
     - {id: P2, text: "Bibliography đưa thêm các nguồn bổ sung có thể hữu ích cho người đọc.", required: true}
-  expected_sources: [{source_id: C2-21, heading_path: "no. number", slot: S1}]
+  expected_sources: [{source_id: C2-21, heading_path: "", slot: S1}]
   evidence:
-    - {source_id: C2-21, heading_path: "no. number", supports: [P1], quote: "A reference list includes only those sources which are referred to in the text. The names in the text and the reference list should match."}
-    - {source_id: C2-21, heading_path: "no. number", supports: [P2], quote: "A bibliography gives extra sources which the reader may find helpful."}
+    - {source_id: C2-21, heading_path: "", supports: [P1], quote: "A reference list includes only those sources which are referred to in the text. The names in the text and the reference list should match."}
+    - {source_id: C2-21, heading_path: "", supports: [P2], quote: "A bibliography gives extra sources which the reader may find helpful."}
   must_not_claim: ["A bibliography contains only sources cited in the text.", "The two terms always mean exactly the same thing."]
   cognitive_level: compare
   difficulty: medium

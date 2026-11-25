@@ -127,3 +127,16 @@ def test_retriever_result_feeds_the_evaluation_metrics():
     assert reciprocal_rank(ranked, spans) == 0.5
     assert evidence_hit_at_k(ranked, {"P1": ["created at startup"]}, 2) == 1
     assert evidence_hit_at_k(ranked, {"P1": ["created at startup"]}, 1) == 0
+
+
+def test_question_is_composed_to_nfc_before_it_is_embedded():
+    """ADR-0008: the indexed text is NFC, so a decomposed (NFD) question must reach the embedder composed."""
+    import unicodedata
+
+    embedder = FakeEmbedder()
+    chunks = [make_chunk("C2-08", i, f"text {i}") for i in range(6)]
+    store = _store(chunks, {c.chunk_id: 0.9 - i / 100 for i, c in enumerate(chunks)})
+    decomposed = unicodedata.normalize("NFD", "Viêm gan B là gì?")
+    assert decomposed != "Viêm gan B là gì?"
+    Retriever(embedder, store, top_k=5).retrieve(decomposed)
+    assert embedder.calls == [(["Viêm gan B là gì?"], EmbeddingTask.QUERY)]

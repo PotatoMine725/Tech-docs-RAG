@@ -90,7 +90,7 @@ def go(project, *argv, services=None, git_state=None):
     out, err = io.StringIO(), io.StringIO()
     code = run_eval.main(
         list(argv), services=services or FakeServices(), root=project, today=lambda: TODAY,
-        git_state=git_state or (lambda root: (ENVIRONMENT, TAG_COMMIT)), out=out, err=err,
+        git_state=git_state or (lambda root, tag=None: (ENVIRONMENT, TAG_COMMIT)), out=out, err=err,
     )
     return code, out.getvalue(), err.getvalue()
 
@@ -163,7 +163,7 @@ def test_a_changed_question_file_aborts_before_any_service_is_opened_or_anything
 
 
 def test_a_missing_freeze_tag_aborts(project):
-    def no_tag(root):
+    def no_tag(root, tag=None):
         raise run_eval.IntegrityError("git tag eval-freeze-v1 does not exist")
 
     code, _, err = go(project, "--arm", "A", "--mode", "full", "--split", "dev", git_state=no_tag)
@@ -197,7 +197,8 @@ def test_max_llm_calls_stops_with_exit_2_and_the_printed_resume_command_finishes
     assert code == 2 and "STOPPED (max_llm_calls)" in out
     command = next(line for line in out.splitlines() if line.startswith("resume with: "))
     argv = shlex.split(command.removeprefix("resume with: python scripts/evaluation/run_eval.py"))
-    assert argv == ["--arm", "A", "--mode", "full", "--split", "dev", "--run-id", DEFAULT_ID, "--max-llm-calls", "1"]
+    assert argv == ["--arm", "A", "--mode", "full", "--split", "dev", "--questions", "v1", "--corpus", "corpus1",
+                    "--run-id", DEFAULT_ID, "--max-llm-calls", "1"]
     assert len(services.llm.requests) == 1
 
     resumed = FakeServices()
@@ -305,3 +306,88 @@ def test_the_real_wiring_builds_the_throttles_once_and_shares_them(monkeypatch):
                                     "llm_http_requests": 0, "llm_http_requests_by_model": {"a-model": 2}}
     with run_eval.open_services("A", "retrieval", settings, hook) as services:  # retrieval: no LLM, no throttles
         assert len(built) == 1 and len(llms) == 1 and services.answerer is None and services.throttles is None
+
+
+# --- corpus as a run dimension, question set v2 (ADR-0008) ---------------------------------------------------------
+
+@pytest.fixture
+def no_corpus_env(monkeypatch):
+    monkeypatch.delenv("CORPUS", raising=False)
+
+
+def test_resuming_with_another_corpus_aborts_and_the_environment_is_restored(project, no_corpus_env):
+    import os
+
+    assert go(project, "--arm", "A", "--mode", "retrieval", "--split", "dev", "--run-id", "r1")[0] == 0
+    _, _, err = go(project, "--arm", "A", "--mode", "retrieval", "--split", "dev", "--run-id", "r1",
+                   "--corpus", "corpus2", "--cases", "Q-TEST-001")
+    assert "another corpus" in err  # the v1 case is corpus 1: refused before the run is even opened
+    assert "CORPUS" not in os.environ
+
+
+def test_a_run_takes_only_its_corpus_cases_and_records_the_corpus(project, no_corpus_env):
+    questions = project / "data" / "evaluation" / "questions"
+    cases = [json.loads(line) for line in (questions / "dev-v1.jsonl").read_text(encoding="utf-8").splitlines()]
+    cases[1]["corpus"] = "corpus2"
+    digest = _write_jsonl(questions / "dev-v1.jsonl", cases)
+    snapshot = project / "docs" / "snapshots" / "evaluation" / "eval-v1.md"
+    lines = [line for line in snapshot.read_text(encoding="utf-8").splitlines() if "dev-v1" not in line]
+    snapshot.write_text("\n".join(lines + [f"| `data/evaluation/questions/dev-v1.jsonl` SHA-256 | `{digest}` |"]),
+                        encoding="utf-8")
+    services = FakeServices()
+    code, out, _ = go(project, "--arm", "A", "--mode", "retrieval", "--split", "dev", "--run-id", "c2",
+                      "--corpus", "corpus2", services=services)
+    assert code == 0 and "1 cases of corpus2" in out
+    manifest = json.loads((project / "data/evaluation/results/c2/run.json").read_text(encoding="utf-8"))
+    assert manifest["config"]["corpus"] == "corpus2"
+    assert [r["case_id"] for r in results(project, "c2")[1]] == [cases[1]["id"]]
+    code, _, err = go(project, "--arm", "A", "--mode", "retrieval", "--split", "dev", "--run-id", "c2",
+                      "--corpus", "corpus1")
+    assert code == 3 and ("corpus" in err)
+
+
+def test_a_run_recorded_before_the_corpus_key_resumes_as_corpus1(project, no_corpus_env):
+    assert go(project, "--arm", "A", "--mode", "retrieval", "--split", "dev", "--run-id", "old",
+              "--cases", "Q-TEST-001")[0] == 0
+    path = project / "data/evaluation/results/old/run.json"
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    del manifest["config"]["corpus"]
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+    assert go(project, "--arm", "A", "--mode", "retrieval", "--split", "dev", "--run-id", "old")[0] == 0
+    code, _, err = go(project, "--arm", "A", "--mode", "retrieval", "--split", "dev", "--run-id", "old",
+                      "--corpus", "corpus2")
+    assert code == 3
+
+
+def test_v1_has_no_corpus2_case(project, no_corpus_env):
+    code, _, err = go(project, "--arm", "A", "--mode", "retrieval", "--split", "dev", "--corpus", "corpus2")
+    assert code == 3 and "no case of corpus2" in err
+
+
+def _git(root, *args):
+    import subprocess
+
+    subprocess.run(["git", "-C", str(root), "-c", "user.name=t", "-c", "user.email=t@t", *args], check=True,
+                   capture_output=True)
+
+
+def test_v2_files_must_equal_their_version_at_the_freeze_tag(project, no_corpus_env):
+    questions = project / "data" / "evaluation" / "questions"
+    dev = [dict(make_case(n), id=f"Q2-DEV-{n:03d}", split="dev", corpus="corpus2") for n in (1, 2)]
+    _write_jsonl(questions / "dev-v2.jsonl", dev)
+    _write_jsonl(questions / "eval-v2.jsonl", [dict(make_case(9), id="Q2-EVAL-001", split="eval")])
+    code, _, err = go(project, "--arm", "A", "--mode", "retrieval", "--split", "dev", "--questions", "v2",
+                      "--corpus", "corpus2")
+    assert code == 3 and "eval-freeze-v2.1" in err  # no git repo / no tag: refused
+    _git(project, "init", "-q")
+    _git(project, "add", "data")
+    _git(project, "commit", "-qm", "freeze")
+    _git(project, "tag", "eval-freeze-v2.1")
+    services = FakeServices()
+    code, out, _ = go(project, "--arm", "A", "--mode", "retrieval", "--split", "dev", "--questions", "v2",
+                      "--corpus", "corpus2", "--run-id", "v2", services=services)
+    assert code == 0 and "2 cases of corpus2" in out and "eval-freeze-v2.1" in out
+    _write_jsonl(questions / "dev-v2.jsonl", dev[:1])
+    code, _, err = go(project, "--arm", "A", "--mode", "retrieval", "--split", "dev", "--questions", "v2",
+                      "--corpus", "corpus2", "--run-id", "v2")
+    assert code == 3 and "differs from its frozen version" in err

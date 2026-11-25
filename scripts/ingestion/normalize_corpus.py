@@ -3,6 +3,7 @@
 Reads only the documents listed as accepted in corpus/manifest.json; sources are never written.
 Also checks that every section-inventory heading path has a character span in the normalized text
 (needed for section hit@5) and exits 1 if any cannot be located.
+Text is composed to Unicode NFC after normalization (ADR-0008; corpus 1 is already NFC, so a no-op).
 Deterministic: re-running on unchanged sources produces an identical file.
 """
 import json
@@ -20,6 +21,7 @@ from knowledge_assistant.application.ingestion.normalize_corpus import (  # noqa
     write_jsonl,
 )
 from knowledge_assistant.infrastructure.parsing.markdown_normalizer import MarkdownNormalizer  # noqa: E402
+from knowledge_assistant.infrastructure.parsing.nfc_normalizer import NfcNormalizer  # noqa: E402
 from knowledge_assistant.infrastructure.parsing.registry import default_registry  # noqa: E402
 
 MANIFEST = PROJECT_ROOT / "corpus" / "manifest.json"
@@ -29,7 +31,7 @@ OUTPUT = PROJECT_ROOT / "data" / "processed" / "documents" / "normalized.jsonl"
 
 def build() -> list[dict]:
     documents = load_accepted_documents(MANIFEST, PROJECT_ROOT)
-    normalized = NormalizeCorpus(default_registry().get, MarkdownNormalizer()).run(documents)
+    normalized = NormalizeCorpus(default_registry().get, NfcNormalizer(MarkdownNormalizer())).run(documents)
     return [
         to_record(doc, Path(source.path).relative_to(PROJECT_ROOT).as_posix())
         for doc, source in zip(normalized, documents)

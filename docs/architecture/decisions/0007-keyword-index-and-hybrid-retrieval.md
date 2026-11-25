@@ -3,7 +3,7 @@
 Date: 2026-11-23
 Status: Accepted (owner, 2026-11-23: keep Gemini as the default embedder; next step hybrid search, then re-measure).
 D3, the tokenizer, is **PROVISIONAL** (owner decision 2026-11-23). D6, the gate in hybrid/sparse mode, is
-**TBD until the reranker step**.
+**TBD until the reranker step**. Amended 2026-11-25 (owner): see "Amendment: gate across domains" below.
 Refines: ADR-0005 (index storage), ADR-0006 (Reranker contract, not wired yet). Plan step 4a of
 `docs/plans/local-rag-upgrade-plan.md` §7.1. The reranker (step 4b) is out of scope here.
 
@@ -81,3 +81,14 @@ ingestion, plan §7.2) and must not add a dependency.
 - Memory/latency on the 8 GB target: not measured in this step (TBD with the reranker, plan §2 RAM budget).
 - Sparse rankings do not depend on the embedder. The gemini and the embeddinggemma sparse runs differ only in the
   gate column.
+
+## Amendment: gate across domains (owner decision, 2026-11-25)
+- **Finding** (`docs/reports/2026-11-25-corpus2-retrieval-eval.md`, dev v1 + v2, Arm A, dense top-1): for
+  embeddinggemma the dense-cosine gate does **not** separate answerable from unanswerable questions across domains.
+  Corpus-2 answerable scores go down to 0.3923, corpus-1 unanswerable up to 0.5869; one threshold cannot split them.
+- **Decision:** no per-corpus thresholds (the app cannot know which "corpus" a user's question belongs to) and no pooled
+  value (0.3423 would pass both unanswerable corpus-1 dev cases). Refusal moves to the **reranker's absolute score**
+  (next step, plan §7.1), with the LLM refusal (OD-9 layer b) as the second layer.
+- **Until then** the embeddinggemma default 0.5417 stays unchanged. Known limitation: it over-refuses on corpus 2
+  (3 of 5 answerable v2 dev questions; 16/52 Arm A and 21/52 Arm B answerable corpus-2 eval questions).
+- **Gemini:** re-checked the same way once Gemini v2 runs exist (**TBD**, embedding quota).
