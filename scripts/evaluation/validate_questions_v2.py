@@ -130,6 +130,15 @@ def _absence_errors(cases: list[dict], c1_texts: dict, c2_texts: dict) -> list[s
     return errors
 
 
+def _conversion_errors(texts: dict) -> list[str]:
+    """Quotes index locally converted text: it must be the text the manifest pinned (converted_sha256)."""
+    import hashlib
+
+    pinned = {d["id"]: d.get("converted_sha256") for d in json.loads(C2_MANIFEST.read_text(encoding="utf-8"))["documents"]}
+    return [f"{i}: converted text differs from the manifest's converted_sha256 (re-run convert_corpus2.py --check)"
+            for i, text in sorted(texts.items()) if pinned.get(i) != hashlib.sha256(text.encode("utf-8")).hexdigest()]
+
+
 def _corpus1_texts(accepted: set) -> dict:
     return {r["id"]: r["text"] for r in v1.read_jsonl(v1.NORMALIZED) if r["id"] in accepted}
 
@@ -163,6 +172,7 @@ def validate(cases_by_split: dict, frozen: bool = False) -> list[str]:
     if sections[0] & sections[1]:
         errors.append(f"eval-v2 and dev-v2 share expected sections: {sorted(sections[0] & sections[1])}")
     errors += _absence_errors(eval_cases + dev_cases, _corpus1_texts(c1[0]), c2[2])
+    errors += _conversion_errors(c2[2])
     return errors
 
 

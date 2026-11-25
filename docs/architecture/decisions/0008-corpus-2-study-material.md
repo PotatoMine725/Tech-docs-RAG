@@ -40,8 +40,13 @@ Refines: ADR-0002 (formats), ADR-0003 D5/D6 (heading-path citations). Plan Phase
 - In heading-less documents, section_hit is effectively document-level (heading path `""`). Span metrics are based
   on the evidence quotes and stay precise. Results for corpus 2 must be reported apart from corpus 1, not pooled
   without saying so.
-- The v2 validator reads `corpus2/converted/sections.jsonl`, so validation needs a local conversion run first: the
-  manifest's sha256 values pin the inputs.
+- The v2 validator reads `corpus2/converted/sections.jsonl`, so validation needs a local conversion run first. The
+  manifest pins both ends: `sha256` (raw file) and `converted_sha256` (converted text), plus the converter library
+  versions. The validator fails if the local text differs; `convert_corpus2.py --check` fails if the converter no
+  longer reproduces it (e.g. after a library upgrade), so frozen quotes cannot drift silently.
+- `application/evaluation/metrics/spans.py` indexes sections from the parser's section list, which has no
+  whole-document span for heading-less documents. Span metrics for corpus 2 therefore need the corpus-2 inventory
+  (`sections.jsonl` rule above) in the indexing step: **TBD** there. Chunk heading paths already join to `""`.
 - Words split across table cells in slide PDFs (C2-03, C2-05, C2-06, C2-32) and parts of C2-13 and C2-25 make keyword
   matching weaker on those documents. This is a property of the extraction, recorded here, not fixed.
 - C2-08 (1549 combining marks) and C2-07 (26) are stored in decomposed Unicode (NFD); questions are typed in NFC,

@@ -5,7 +5,9 @@ writes, git-ignored:
 - corpus2/converted/<id>.md        converted text of every accepted document;
 - corpus2/converted/sections.jsonl the section inventory used by the v2 question validator: H1-H3 spans as for
   corpus 1, plus one whole-document span (heading_path "") for documents without headings.
-Measured fields written back into the manifest: sha256, bytes, pages, image_count, has_images, chars, headings.
+Measured fields written back into the manifest: sha256, bytes, pages, image_count, has_images, chars, headings,
+converted_sha256 (the converted text) and, at the top, the converter library versions. --check fails when the
+converted text no longer matches converted_sha256 (e.g. after a library upgrade): frozen quotes depend on it.
 Files in incoming/ that the manifest does not list are reported and get the next free ID with status "pending".
 Converting is not indexing: no chunks, embeddings or vector store are built here.
 
@@ -31,7 +33,20 @@ INCOMING = CORPUS2 / "incoming"
 CONVERTED = CORPUS2 / "converted"
 SECTIONS = CONVERTED / "sections.jsonl"
 ID_FORMAT = "C2-{:02d}"
-MEASURED = ("sha256", "bytes", "pages", "image_count", "has_images", "chars", "headings")
+MEASURED = ("sha256", "bytes", "pages", "image_count", "has_images", "chars", "headings", "converted_sha256")
+LIBRARIES = ("markitdown", "pdfminer.six", "mammoth", "python-pptx")
+
+
+def library_versions() -> dict:
+    from importlib.metadata import PackageNotFoundError, version
+
+    found = {}
+    for name in LIBRARIES:
+        try:
+            found[name] = version(name)
+        except PackageNotFoundError:
+            found[name] = None
+    return found
 
 
 def sha256(path: Path) -> str:
@@ -90,7 +105,7 @@ def main() -> int:
     check = args.parse_args().check
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     by_file = {d["file"]: d for d in manifest["documents"]}
-    errors, inventory = [], []
+    errors, warnings, inventory = [], [], []
     for path in sorted(INCOMING.iterdir()) if INCOMING.is_dir() else []:
         if path.name not in by_file:
             used = [int(d["id"].split("-")[1]) for d in manifest["documents"]]
@@ -118,17 +133,26 @@ def main() -> int:
         doc["pages"], doc["image_count"] = pages_and_images(path, parsed.text)
         doc["has_images"] = doc["image_count"] > 0
         doc["chars"], doc["headings"] = len(parsed.text), len(parsed.sections)
+        converted = hashlib.sha256(parsed.text.encode("utf-8")).hexdigest()
+        if doc.get("converted_sha256") and doc["converted_sha256"] != converted:
+            (errors if check else warnings).append(f"{doc['id']}: converted text changed (converter output differs)")
+        doc["converted_sha256"] = converted
         inventory += sections(doc["id"], parsed)
         if not check:
             CONVERTED.mkdir(parents=True, exist_ok=True)
             (CONVERTED / f"{doc['id']}.md").write_text(parsed.text, encoding="utf-8", newline="\n")
+    if check and manifest.get("converter") and manifest["converter"] != library_versions():
+        warnings.append(f"converter libraries differ from the manifest: {library_versions()}")
     if not check:
+        manifest["converter"] = library_versions()
         with SECTIONS.open("w", encoding="utf-8", newline="\n") as handle:
             handle.writelines(json.dumps(r, ensure_ascii=False) + "\n" for r in inventory)
         with MANIFEST.open("w", encoding="utf-8", newline="\n") as handle:
             handle.write(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
     accepted = sum(d["status"] == "accepted" for d in manifest["documents"])
     print(f"{len(manifest['documents'])} documents, {accepted} accepted, {len(inventory)} sections")
+    for warning in warnings:
+        print(f"WARNING {warning}")
     for error in errors:
         print(f"ERROR {error}")
     return 1 if errors else 0
