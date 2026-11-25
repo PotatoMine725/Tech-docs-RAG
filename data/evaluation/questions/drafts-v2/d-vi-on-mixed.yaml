@@ -1,0 +1,223 @@
+# Category D (Vietnamese questions on mixed VI-EN corpus-2 documents). DRAFT, owner review pending.
+# C2-08 is stored in decomposed Unicode (NFD); its quotes are written with \u escapes so they match the text exactly.
+- id: Q2-EVAL-021
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: D_vi_on_mixed
+  corpus: corpus2
+  language: vi
+  question: "Trong Java, constructor Socket(String host, int port) làm gì và khai báo ném ra những ngoại lệ nào?"
+  answerable: true
+  expected_answer: "Nó tạo một socket TCP với host và cổng xác định và thực hiện liên kết với host; khai báo ném UnknownHostException và IOException."
+  answer_points:
+    - {id: P1, text: "Tạo socket TCP với host và cổng xác định và liên kết với host.", required: true}
+    - {id: P2, text: "Ném UnknownHostException và IOException.", required: true}
+  expected_sources: [{source_id: C2-06, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-06, heading_path: "", supports: [P2], quote: "public Socket(String host, int port) throws UnknownHostException, IOException"}
+    - {source_id: C2-06, heading_path: "", supports: [P1], quote: "Tạo một socket TCP với host và cổng xác định và thực hiện liên kết với host."}
+  must_not_claim: ["The constructor only creates an unconnected socket."]
+  cognitive_level: recall
+  difficulty: easy
+  failure_mode: exact_identifier
+  concepts: [Socket, UnknownHostException]
+
+- id: Q2-EVAL-022
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: D_vi_on_mixed
+  corpus: corpus2
+  language: vi
+  typing: no_diacritics  # owner 2026-11-25: one no_diacritics question in D; was "Phương thức getPort() và getLocalPort() của lớp Socket khác nhau thế nào?"
+  question: "Phuong thuc getPort() va getLocalPort() cua lop Socket khac nhau the nao?"
+  answerable: true
+  expected_answer: "getPort() cho biết số hiệu cổng mà Socket kết nối tới ở host (máy xa), còn getLocalPort() cho biết số hiệu cổng ở host local."
+  answer_points:
+    - {id: P1, text: "getPort(): cổng ở host mà socket kết nối tới.", required: true}
+    - {id: P2, text: "getLocalPort(): cổng ở host local.", required: true}
+  expected_sources: [{source_id: C2-06, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-06, heading_path: "", supports: [P1], quote: "public int getPort(): Cho biết số hiệu cổng mà Socket kết nối tới host"}
+    - {source_id: C2-06, heading_path: "", supports: [P2], quote: "public int getLocalPort(): cho biết số hiệu cổng ở host local"}
+  must_not_claim: ["getPort() returns the local port."]
+  cognitive_level: compare
+  difficulty: easy
+  failure_mode: exact_identifier
+  concepts: [getPort, getLocalPort]
+
+- id: Q2-EVAL-023
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: D_vi_on_mixed
+  corpus: corpus2
+  language: vi
+  question: "Lớp XmlDocument có SelectNodes() và SelectSingleNode(); hai phương thức này trả về kết quả khác nhau ra sao?"
+  answerable: true
+  expected_answer: "SelectNodes() trả về một tập hợp các node kiểu XmlNodeList; SelectSingleNode() chỉ trả về duy nhất một nút, là nút đầu tiên được tìm thấy."
+  answer_points:
+    - {id: P1, text: "SelectNodes trả về tập hợp node kiểu XmlNodeList.", required: true}
+    - {id: P2, text: "SelectSingleNode trả về duy nhất một nút: nút đầu tiên tìm thấy.", required: true}
+  expected_sources: [{source_id: C2-08, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-08, heading_path: "", supports: [P1, P2], quote: "V\u01a1\u0301i selectNodes, tra\u0309 v\u00ea\u0300 la\u0300 m\u00f4\u0323t t\u00e2\u0323p h\u01a1\u0323p ca\u0301c node co\u0301 ki\u00ea\u0309u d\u01b0\u0303 li\u00ea\u0323u la\u0300 XmlNodeList trong khi \u0111o\u0301 SelectSingleNode tra\u0309 v\u00ea\u0300 duy nh\u1ea5t m\u00f4\u0323t nu\u0301t, la\u0300 nu\u0301t \u0111\u00e2\u0300u ti\u00ean \u0111\u01b0\u01a1\u0323c ti\u0300m th\u1ea5y."}
+  must_not_claim: ["SelectSingleNode returns the last matching node."]
+  cognitive_level: compare
+  difficulty: medium
+  failure_mode: exact_identifier
+  retrieval_challenges: [D_vi_on_mixed, nfd_unicode_text]
+  concepts: [XmlDocument, SelectNodes, SelectSingleNode, XmlNodeList]
+
+- id: Q2-EVAL-024
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: D_vi_on_mixed
+  corpus: corpus2
+  language: vi
+  question: "XPath nhìn một văn bản XML theo cấu trúc nào, và theo tài liệu thì có bao nhiêu dạng nút?"
+  answerable: true
+  expected_answer: "XPath xem văn bản XML như một cấu trúc cây, mọi phần tử là một nút của cây; có 7 dạng nút."
+  answer_points:
+    - {id: P1, text: "Cấu trúc dạng cây, mỗi phần tử là một nút.", required: true}
+    - {id: P2, text: "Có 7 dạng nút.", required: true}
+  expected_sources: [{source_id: C2-08, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-08, heading_path: "", supports: [P1, P2], quote: "XPATH xem 1 v\u0103n ba\u0309n XML nh\u01b0 la\u0300 c\u1ea5u tr\u00fac da\u0323ng c\u00e2y va\u0300 t\u1ea5t ca\u0309 ca\u0301c ph\u00e2\u0300n t\u01b0\u0309 trong XML \u0111\u00ea\u0300u \u0111\u01b0\u01a1\u0323c xem nh\u01b0 la\u0300 1 nu\u0301t cu\u0309a c\u1ea5u tru\u0301c c\u00e2y na\u0300y. Chu\u0301ng ta 7 da\u0323ng nu\u0301t."}
+  must_not_claim: ["XPath treats an XML document as a relational table."]
+  cognitive_level: recall
+  difficulty: easy
+  retrieval_challenges: [D_vi_on_mixed, nfd_unicode_text]
+  concepts: [XPath, node types]
+
+- id: Q2-EVAL-025
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: D_vi_on_mixed
+  corpus: corpus2
+  language: vi
+  question: "Khi lập trình mạng bằng Java, nên dùng lớp nào thay cho câu lệnh SQL ghép chuỗi để tránh SQL Injection?"
+  answerable: true
+  expected_answer: "Dùng PreparedStatement thay cho câu lệnh SQL để tránh SQL Injection."
+  answer_points:
+    - {id: P1, text: "Dùng PreparedStatement.", required: true}
+  expected_sources: [{source_id: C2-05, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-05, heading_path: "", supports: [P1], quote: "Sử dụng PreparedStatement thay cho câu lệnh SQL (tránh SQL Injection)."}
+  must_not_claim: ["Escaping strings manually is the recommended fix."]
+  cognitive_level: apply
+  difficulty: easy
+  failure_mode: exact_identifier
+  concepts: [PreparedStatement, SQL Injection]
+
+- id: Q2-EVAL-026
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: D_vi_on_mixed
+  corpus: corpus2
+  language: vi
+  question: "Một JSON Web Token gồm những phần nào, và tại sao không nên để thông tin nhạy cảm trong payload?"
+  answerable: true
+  expected_answer: "JWT gồm Header (thuật toán ký, ví dụ HS256, RS256), Payload (dữ liệu/claims như userId, role, expiration time) và Signature (tạo từ Header + Payload + secret key). Không lưu thông tin nhạy cảm trong payload vì ai cũng có thể decode."
+  answer_points:
+    - {id: P1, text: "Ba phần: Header, Payload, Signature.", required: true}
+    - {id: P2, text: "Payload ai cũng decode được nên không chứa thông tin nhạy cảm.", required: true}
+  expected_sources: [{source_id: C2-05, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-05, heading_path: "", supports: [P1], quote: "Header: Chứa thông tin thuật toán ký (HS256, RS256, v.v.)"}
+    - {source_id: C2-05, heading_path: "", supports: [P1], quote: "Payload: Chứa dữ liệu (claims) — như userId, role, expiration time."}
+    - {source_id: C2-05, heading_path: "", supports: [P1], quote: "Signature: Được tạo từ Header + Payload + secret key"}
+    - {source_id: C2-05, heading_path: "", supports: [P2], quote: "Không lưu thông tin nhạy cảm trong payload (vì ai cũng có thể decode)."}
+  must_not_claim: ["The payload is encrypted, so secrets are safe in it."]
+  cognitive_level: explain
+  difficulty: medium
+  concepts: [JWT, payload, signature]
+
+- id: Q2-EVAL-027
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: D_vi_on_mixed
+  corpus: corpus2
+  language: vi
+  question: "Trong báo cáo chiến lược AI Review Content Factory, hoa hồng của Creator bị giữ lại bao lâu trước khi được thanh toán, và để làm gì?"
+  answerable: true
+  expected_answer: "Có thời gian giữ tiền (Hold Period) 14–30 ngày: hoa hồng chỉ được giải ngân/tất toán sau thời hạn đổi trả/hoàn tiền, để triệt tiêu rủi ro do hoàn tiền."
+  answer_points:
+    - {id: P1, text: "Hold Period 14–30 ngày.", required: true}
+    - {id: P2, text: "Chỉ thanh toán sau thời hạn đổi trả/hoàn tiền, để loại rủi ro hoàn tiền.", required: true}
+  expected_sources:
+    - {source_id: C2-04, heading_path: "**BÁO CÁO CHIẾN LƯỢC KINH DOANH VÀ KIẾN TRÚC KỸ THUẬT TỐI ƯU HÓA CHI PHÍ & LỢI NHUẬN** > **PHẦN I: TỔNG QUAN CHIẾN LƯỢC KINH DOANH & MÔ HÌNH TÀI CHÍNH** > **2. Dòng thác Doanh thu Chuẩn mực (Revenue Waterfall)**", slot: S1}
+  acceptable_alternate_sources:
+    - {source_id: C2-22, heading_path: "", slot: S1}
+  evidence:
+    - {source_id: C2-04, heading_path: "**BÁO CÁO CHIẾN LƯỢC KINH DOANH VÀ KIẾN TRÚC KỸ THUẬT TỐI ƯU HÓA CHI PHÍ & LỢI NHUẬN** > **PHẦN I: TỔNG QUAN CHIẾN LƯỢC KINH DOANH & MÔ HÌNH TÀI CHÍNH** > **2. Dòng thác Doanh thu Chuẩn mực (Revenue Waterfall)**", supports: [P1], quote: "Hold Period 14–30 ngày"}
+    - {source_id: C2-04, heading_path: "**BÁO CÁO CHIẾN LƯỢC KINH DOANH VÀ KIẾN TRÚC KỸ THUẬT TỐI ƯU HÓA CHI PHÍ & LỢI NHUẬN** > **PHẦN I: TỔNG QUAN CHIẾN LƯỢC KINH DOANH & MÔ HÌNH TÀI CHÍNH** > **2. Dòng thác Doanh thu Chuẩn mực (Revenue Waterfall)**", supports: [P2], quote: "Hoa hồng của Creator và Platform Take-Rate chỉ được tất toán sau khi vượt qua thời hạn cho phép đổi trả/hoàn tiền của Merchant để triệt tiêu rủi ro âm vốn do hoàn tiền."}
+    - {source_id: C2-22, heading_path: "", supports: [P1], quote: "Hold Period 14–30 ngày"}
+    - {source_id: C2-22, heading_path: "", supports: [P2], quote: "Hoa hồng của Creator chỉ được giải ngân sau thời gian đổi trả/hoàn tiền của sản phẩm SaaS"}
+  must_not_claim: ["Commission is paid out immediately after the sale."]
+  cognitive_level: explain
+  difficulty: medium
+  failure_mode: near_duplicate_version
+  concepts: [Hold Period, hoa hồng affiliate]
+
+- id: Q2-EVAL-028
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: D_vi_on_mixed
+  corpus: corpus2
+  language: vi
+  question: "Gói Chuyên nghiệp (Pro Tier) trong chiến lược giá của dự án có giá bao nhiêu một tháng và phí sàn giảm còn bao nhiêu?"
+  answerable: true
+  expected_answer: "Pro Tier giá $49 – $99/tháng, phí sàn giảm còn 10%, và video được ưu tiên vào Top Creator Library."
+  answer_points:
+    - {id: P1, text: "$49 – $99 mỗi tháng.", required: true}
+    - {id: P2, text: "Phí sàn giảm còn 10%.", required: true}
+  expected_sources:
+    - {source_id: C2-04, heading_path: "**BÁO CÁO CHIẾN LƯỢC KINH DOANH VÀ KIẾN TRÚC KỸ THUẬT TỐI ƯU HÓA CHI PHÍ & LỢI NHUẬN** > **PHẦN I: TỔNG QUAN CHIẾN LƯỢC KINH DOANH & MÔ HÌNH TÀI CHÍNH** > **3. Chiến lược Giá Pilot (Zero-Barrier Pilot Pricing) & Lộ trình Thương mại hóa**", slot: S1}
+  evidence:
+    - {source_id: C2-04, heading_path: "**BÁO CÁO CHIẾN LƯỢC KINH DOANH VÀ KIẾN TRÚC KỸ THUẬT TỐI ƯU HÓA CHI PHÍ & LỢI NHUẬN** > **PHẦN I: TỔNG QUAN CHIẾN LƯỢC KINH DOANH & MÔ HÌNH TÀI CHÍNH** > **3. Chiến lược Giá Pilot (Zero-Barrier Pilot Pricing) & Lộ trình Thương mại hóa**", supports: [P1, P2], quote: "$49 – $99 / tháng, phí sàn giảm còn 10%, ưu tiên video vào Top Creator Library."}
+  near_miss_sources: [C2-22]
+  must_not_claim: ["The 20% take-rate applies to the Pro Tier.", "Pricing taken from C2-22 (that version has no Pro Tier)."]
+  cognitive_level: recall
+  difficulty: hard
+  failure_mode: near_duplicate_version
+  concepts: [Pro Tier, pricing]
+
+- id: Q2-EVAL-029
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: D_vi_on_mixed
+  corpus: corpus2
+  language: vi
+  question: "Theo cập nhật ASH 2026 về thiếu máu thiếu sắt, ngưỡng ferritin nào cho thấy tủy xương đang thiếu dự trữ sắt, với độ nhạy và độ đặc hiệu bao nhiêu?"
+  answerable: true
+  expected_answer: "Ferritin < 30 ng/mL, có độ đặc hiệu 98% và độ nhạy 92%."
+  answer_points:
+    - {id: P1, text: "Ferritin < 30 ng/mL.", required: true}
+    - {id: P2, text: "Độ đặc hiệu 98%, độ nhạy 92%.", required: true}
+  expected_sources: [{source_id: C2-03, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-03, heading_path: "", supports: [P1, P2], quote: "Ferritin < 30 ng/mL, có độ đặc hiệu 98% độ nhạy 92% cho tủy xương đang thiếu dự trữ sắt"}
+  must_not_claim: ["The threshold is ferritin < 100 ng/mL (that figure concerns inflammation)."]
+  cognitive_level: recall
+  difficulty: medium
+  concepts: [ferritin, thiếu máu thiếu sắt]
+
+- id: Q2-EVAL-030
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: D_vi_on_mixed
+  corpus: corpus2
+  language: vi
+  question: "Thời gian bán hủy của BNP và NT-proBNP là bao lâu, và điều đó giải thích gì về nồng độ NT-proBNP trong huyết thanh?"
+  answerable: true
+  expected_answer: "BNP có thời gian bán hủy 20 phút, NT-proBNP 120 phút; điều đó giải thích vì sao nồng độ NT-proBNP huyết thanh cao hơn khoảng 6 lần so với BNP."
+  answer_points:
+    - {id: P1, text: "BNP 20 phút, NT-proBNP 120 phút.", required: true}
+    - {id: P2, text: "Nên nồng độ NT-proBNP huyết thanh cao hơn khoảng 6 lần BNP.", required: true}
+  expected_sources: [{source_id: C2-28, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-28, heading_path: "", supports: [P1], quote: "Thời gian bán hủy của phân tử BNP là 20 phút và NT-proBNP là 120 phút."}
+    - {source_id: C2-28, heading_path: "", supports: [P2], quote: "giá trị nồng độ NT- proBNP huyết thanh cao hơn 6 lần so với BNP"}
+  must_not_claim: ["NT-proBNP has the shorter half-life."]
+  cognitive_level: explain
+  difficulty: medium
+  concepts: [NT-proBNP, BNP, thời gian bán hủy]

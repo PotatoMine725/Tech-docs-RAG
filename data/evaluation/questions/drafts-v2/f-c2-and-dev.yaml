@@ -1,0 +1,226 @@
+# Category F (unanswerable, near corpus-2 topics) + v2 dev split (tuning only, never reported). DRAFT.
+- id: Q2-EVAL-031
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: F_unanswerable
+  corpus: corpus2
+  language: vi
+  typing: no_diacritics
+  question: "Sot xuat huyet Dengue co nhung dau hieu canh bao nao can cho benh nhan nhap vien ngay?"
+  answerable: false
+  absence:
+    topic: Dengue warning signs (its only document, C2-23, is an excluded scanned PDF)
+    zero_hit_terms: [dengue, sốt xuất huyết, sot xuat huyet]
+    closest_corpus_text: "C2-32 (reactions after vaccination: fever, shock management) and C2-16 (pulmonary consolidation); neither covers dengue."
+  near_miss_sources: [C2-32]
+  must_not_claim: ["Any list of dengue warning signs presented as coming from the documents."]
+  cognitive_level: recall
+  difficulty: medium
+
+- id: Q2-EVAL-032
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: F_unanswerable
+  corpus: corpus2
+  language: vi
+  question: "Chiến dịch Điện Biên Phủ năm 1954 kết thúc ra sao và dẫn tới hiệp định nào?"
+  answerable: false
+  absence:
+    topic: Điện Biên Phủ 1954 and the Geneva Accords (C2-07 covers 1930-1945 only)
+    zero_hit_terms: [Điện Biên Phủ, Dien Bien Phu, Giơ-ne-vơ, "1954"]
+    closest_corpus_text: "C2-07 ends with the August Revolution of 1945."
+  near_miss_sources: [C2-07]
+  must_not_claim: ["Any date, outcome or treaty for 1954 presented as from the documents."]
+  cognitive_level: recall
+  difficulty: easy
+
+- id: Q2-EVAL-033
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: F_unanswerable
+  corpus: corpus2
+  language: vi
+  typing: no_diacritics
+  question: "Nhiem HBV man thi nen dung thuoc khang virus nao, tenofovir hay entecavir?"
+  answerable: false
+  absence:
+    topic: Antiviral treatment of chronic hepatitis B (C2-29 covers serological markers only)
+    zero_hit_terms: [tenofovir, entecavir, interferon, kháng virus]
+    closest_corpus_text: "C2-29 explains HBsAg / anti-HBs / anti-HBc markers; no treatment."
+  near_miss_sources: [C2-29]
+  must_not_claim: ["A recommended antiviral or dose presented as from the documents."]
+  cognitive_level: apply
+  difficulty: medium
+
+- id: Q2-EVAL-034
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: F_unanswerable
+  corpus: corpus2
+  language: en
+  question: "Under the Paris Agreement, what temperature goal did countries agree to, and how often must they update their national pledges?"
+  answerable: false
+  absence:
+    topic: Paris Agreement commitments (C2-18 names climate change as a global issue only)
+    zero_hit_terms: [Paris Agreement, UNFCCC, COP21, Kyoto]
+    closest_corpus_text: "C2-18 lists climate change among global issues without any treaty detail; C2-10 covers the NPT, not climate."
+  near_miss_sources: [C2-18, C2-10]
+  must_not_claim: ["A 1.5 / 2 degree target or a five-year cycle presented as from the documents."]
+  cognitive_level: recall
+  difficulty: medium
+
+- id: Q2-EVAL-035
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: F_unanswerable
+  corpus: corpus2
+  language: en
+  question: "How do I make a Unity camera smoothly follow the player using Cinemachine?"
+  answerable: false
+  absence:
+    topic: Cinemachine camera follow in Unity
+    zero_hit_terms: [Cinemachine, virtual camera, CinemachineVirtualCamera]
+    closest_corpus_text: "C2-19 and C2-27 cover Unity basics and C# scripting; no Cinemachine."
+  near_miss_sources: [C2-19, C2-27]
+  must_not_claim: ["Cinemachine component or property names presented as from the documents."]
+  cognitive_level: apply
+  difficulty: medium
+
+- id: Q2-EVAL-036
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: F_unanswerable
+  corpus: corpus2
+  language: en
+  question: "How should I draw a mind map when taking notes in a lecture?"
+  answerable: false
+  absence:
+    topic: Mind-mapping as a note-taking method (C2-21 covers abbreviations and symbols)
+    zero_hit_terms: [mind map, mind-map, mindmap]
+    closest_corpus_text: "C2-21 lists note-taking abbreviations and symbols."
+  near_miss_sources: [C2-21]
+  must_not_claim: ["Mind-map steps presented as from the documents."]
+  cognitive_level: apply
+  difficulty: easy
+
+# ------------------------------------------------------------------ dev (disjoint sections from eval)
+- id: Q2-DEV-001
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: dev
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  question: "Hội chứng đông đặc phổi có thể do những nguyên nhân nào?"
+  answerable: true
+  expected_answer: "Viêm phổi do vi khuẩn không lao hoặc lao phổi; viêm phổi do virus, Mycoplasma, nấm, ký sinh trùng; áp xe phổi; xẹp phổi; nhồi máu phổi."
+  answer_points:
+    - {id: P1, text: "Viêm phổi do vi khuẩn (không lao) hoặc lao phổi; viêm phổi do virus, Mycoplasma, nấm, ký sinh trùng.", required: true}
+    - {id: P2, text: "Áp xe phổi, xẹp phổi, nhồi máu phổi.", required: true}
+  expected_sources: [{source_id: C2-16, heading_path: "4. Nguyên nhân", slot: S1}]
+  evidence:
+    - {source_id: C2-16, heading_path: "4. Nguyên nhân", supports: [P1], quote: "VP do vk không lao/Lao phổi"}
+    - {source_id: C2-16, heading_path: "4. Nguyên nhân", supports: [P1], quote: "VP virus, Mycoplasma pneu., nấm, KST"}
+    - {source_id: C2-16, heading_path: "4. Nguyên nhân", supports: [P2], quote: "Abcès phổi"}
+    - {source_id: C2-16, heading_path: "4. Nguyên nhân", supports: [P2], quote: "Xẹp phổi"}
+    - {source_id: C2-16, heading_path: "4. Nguyên nhân", supports: [P2], quote: "Nhồi máu phổi"}
+  must_not_claim: ["Pleural effusion listed as a cause from the slides."]
+  cognitive_level: recall
+  difficulty: easy
+
+- id: Q2-DEV-002
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: dev
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  typing: no_diacritics
+  question: "Kham thuc the benh nhan co hoi chung dong dac phoi thuong thay nhung dau hieu gi?"
+  answerable: true
+  expected_answer: "Rung thanh tăng, gõ đục không liên quan tư thế, ran nổ và âm thổi ống (kèm lồng ngực ít di động, ấn đau)."
+  answer_points:
+    - {id: P1, text: "Rung thanh tăng, gõ đục không liên quan tư thế.", required: true}
+    - {id: P2, text: "Ran nổ, âm thổi ống.", required: true}
+  expected_sources: [{source_id: C2-16, heading_path: "2. Lâm sàng:", slot: S1}]
+  evidence:
+    - {source_id: C2-16, heading_path: "2. Lâm sàng:", supports: [P1, P2], quote: "+ Rung thanh tăng + Gõ đục ko liên quan tư thế + Ran nổ + Âm thổi ống"}
+  must_not_claim: ["Decreased vocal fremitus (that fits pleural effusion)."]
+  cognitive_level: recall
+  difficulty: medium
+
+- id: Q2-DEV-003
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: dev
+  category: D_vi_on_mixed
+  corpus: corpus2
+  language: vi
+  question: "Mỗi job sinh nội dung trong hệ thống AI Review bị giới hạn chi phí bao nhiêu, và khi token vượt ngưỡng thì worker xử lý thế nào?"
+  answerable: true
+  expected_answer: "Trần ngân sách cứng generation_jobs.cost_usd ≤ $0.05 mỗi job; nếu token vượt ngưỡng bất thường, worker tự động ngắt (finish_reason = BUDGET_EXCEEDED) và gửi cảnh báo về hệ thống quản trị."
+  answer_points:
+    - {id: P1, text: "cost_usd ≤ $0.05 mỗi job.", required: true}
+    - {id: P2, text: "Worker tự ngắt với BUDGET_EXCEEDED và gửi cảnh báo.", required: true}
+  expected_sources: [{source_id: C2-04, heading_path: "**BÁO CÁO CHIẾN LƯỢC KINH DOANH VÀ KIẾN TRÚC KỸ THUẬT TỐI ƯU HÓA CHI PHÍ & LỢI NHUẬN** > **PHẦN II: THIẾT KẾ KỸ THUẬT, BẢN QUYỀN & KIỂM SOÁT CHI PHÍ (TECH LEAD)** > **4. Cơ chế Kiểm soát Rủi ro & Vận hành Kỹ thuật (Technical Guardrails)**", slot: S1}]
+  evidence:
+    - {source_id: C2-04, heading_path: "**BÁO CÁO CHIẾN LƯỢC KINH DOANH VÀ KIẾN TRÚC KỸ THUẬT TỐI ƯU HÓA CHI PHÍ & LỢI NHUẬN** > **PHẦN II: THIẾT KẾ KỸ THUẬT, BẢN QUYỀN & KIỂM SOÁT CHI PHÍ (TECH LEAD)** > **4. Cơ chế Kiểm soát Rủi ro & Vận hành Kỹ thuật (Technical Guardrails)**", supports: [P1], quote: 'generation\_jobs.cost\_usd ≤ $0.05'}
+    - {source_id: C2-04, heading_path: "**BÁO CÁO CHIẾN LƯỢC KINH DOANH VÀ KIẾN TRÚC KỸ THUẬT TỐI ƯU HÓA CHI PHÍ & LỢI NHUẬN** > **PHẦN II: THIẾT KẾ KỸ THUẬT, BẢN QUYỀN & KIỂM SOÁT CHI PHÍ (TECH LEAD)** > **4. Cơ chế Kiểm soát Rủi ro & Vận hành Kỹ thuật (Technical Guardrails)**", supports: [P2], quote: 'Nếu token vượt ngưỡng bất thường, worker tự động ngắt (finish\_reason = BUDGET\_EXCEEDED) và gửi cảnh báo về hệ thống quản trị.'}
+  must_not_claim: ["A monthly budget cap instead of a per-job cap."]
+  cognitive_level: recall
+  difficulty: medium
+  failure_mode: exact_identifier
+
+- id: Q2-DEV-004
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: dev
+  category: D_vi_on_mixed
+  corpus: corpus2
+  language: vi
+  question: "Thay vì nhân bản một video cho nhiều tài khoản, chiến lược Compliance-first của dự án tạo bao nhiêu góc tiếp cận cho một sản phẩm, đó là những góc nào?"
+  answerable: true
+  expected_answer: "5 góc tiếp cận: Dành cho Sinh viên, Dành cho Lập trình viên, Dành cho Dân văn phòng, So sánh giải pháp, Mẹo tiết kiệm chi phí."
+  answer_points:
+    - {id: P1, text: "5 góc tiếp cận khác nhau.", required: true}
+    - {id: P2, text: "Sinh viên, Lập trình viên, Dân văn phòng, So sánh giải pháp, Mẹo tiết kiệm chi phí.", required: false}
+  expected_sources: [{source_id: C2-04, heading_path: "**BÁO CÁO CHIẾN LƯỢC KINH DOANH VÀ KIẾN TRÚC KỸ THUẬT TỐI ƯU HÓA CHI PHÍ & LỢI NHUẬN** > **PHẦN II: THIẾT KẾ KỸ THUẬT, BẢN QUYỀN & KIỂM SOÁT CHI PHÍ (TECH LEAD)** > **3. Kiểm soát Tuân thủ Thuật toán & Nền tảng Mạng xã hội (Compliance-First Strategy)**", slot: S1}]
+  evidence:
+    - {source_id: C2-04, heading_path: "**BÁO CÁO CHIẾN LƯỢC KINH DOANH VÀ KIẾN TRÚC KỸ THUẬT TỐI ƯU HÓA CHI PHÍ & LỢI NHUẬN** > **PHẦN II: THIẾT KẾ KỸ THUẬT, BẢN QUYỀN & KIỂM SOÁT CHI PHÍ (TECH LEAD)** > **3. Kiểm soát Tuân thủ Thuật toán & Nền tảng Mạng xã hội (Compliance-First Strategy)**", supports: [P1], quote: "hệ thống sản xuất **5 góc tiếp cận khác nhau (Angles)** cho cùng 1 sản phẩm"}
+    - {source_id: C2-04, heading_path: "**BÁO CÁO CHIẾN LƯỢC KINH DOANH VÀ KIẾN TRÚC KỸ THUẬT TỐI ƯU HÓA CHI PHÍ & LỢI NHUẬN** > **PHẦN II: THIẾT KẾ KỸ THUẬT, BẢN QUYỀN & KIỂM SOÁT CHI PHÍ (TECH LEAD)** > **3. Kiểm soát Tuân thủ Thuật toán & Nền tảng Mạng xã hội (Compliance-First Strategy)**", supports: [P2], quote: "*Dành cho Sinh viên, Dành cho Lập trình viên, Dành cho Dân văn phòng, So sánh giải pháp, Mẹo tiết kiệm chi phí*"}
+  must_not_claim: ["The project posts the same video to 50 accounts."]
+  cognitive_level: recall
+  difficulty: easy
+
+- id: Q2-DEV-006
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: dev
+  category: F_unanswerable
+  corpus: corpus2
+  language: vi
+  question: "Phương pháp Pomodoro chia thời gian học và nghỉ như thế nào?"
+  answerable: false
+  absence:
+    topic: Pomodoro study technique (C2-21 covers note-taking symbols only)
+    zero_hit_terms: [Pomodoro]
+    closest_corpus_text: "C2-21 (abbreviations and symbols for note-taking)."
+  near_miss_sources: [C2-21]
+  must_not_claim: ["A 25/5-minute schedule presented as from the documents."]
+  cognitive_level: recall
+  difficulty: easy
+
+- id: Q2-DEV-005
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: dev
+  category: B_en_on_en
+  corpus: corpus2
+  language: en
+  question: "In the FA Management requirement spec, which team is responsible for the data migration scripts, and who runs the user acceptance test sessions?"
+  answerable: true
+  expected_answer: "The Data Migration team creates the data migration scripts and performs the data migration; the UAT team conducts user acceptance test sessions with end users."
+  answer_points:
+    - {id: P1, text: "The Data Migration team creates the migration scripts and performs the data migration.", required: true}
+    - {id: P2, text: "The UAT team conducts user acceptance test sessions with end users.", required: true}
+  expected_sources: [{source_id: C2-13, heading_path: "Introduction > Intended Audience and Reading Suggestions", slot: S1}]
+  evidence:
+    - {source_id: C2-13, heading_path: "Introduction > Intended Audience and Reading Suggestions", supports: [P1], quote: "Data Migration team: Responsible to create data migration scripts, and perform data migration for the application."}
+    - {source_id: C2-13, heading_path: "Introduction > Intended Audience and Reading Suggestions", supports: [P2], quote: "UAT team: Responsible to conduct user acceptance test sessions with end users."}
+  must_not_claim: ["The development team runs user acceptance testing."]
+  cognitive_level: recall
+  difficulty: easy

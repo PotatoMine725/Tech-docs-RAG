@@ -1,0 +1,57 @@
+# Benchmark v2 blueprint: ALLOCATION ONLY (step 2). Owner approves the counts before any question is written.
+# Design: docs/architecture/decisions/0008-corpus-2-study-material.md; plan Phase 0 item 3.
+# v1 files and the eval-freeze-v1 tag are never edited; v2 is additive (v1 36 eval + v2 = >= 100 eval questions).
+# Ground truth comes only from corpus2/converted (C2-*) or corpus 1 sources; quotes are verbatim (<= 300 chars), prose only.
+# typing: "diacritics" (normal Vietnamese) | "no_diacritics" (Vietnamese typed without tone/shape marks) | "en".
+# Every slot becomes one DRAFT question in step 3; per-slot objectives, sources and heading paths are filled then.
+version: 2
+created: 2026-11-25
+status: approved  # allocation approved by the owner 2026-11-25; questions are DRAFT until reviewed
+categories:
+  A_vi_on_vi:      {question_language: vi, corpus: corpus2, docs_language: vi}
+  B_en_on_en:      {question_language: en, corpus: corpus2, docs_language: en}
+  C_vi_on_en:      {question_language: vi, corpus: corpus2, docs_language: en}
+  D_vi_on_mixed:   {question_language: vi, corpus: corpus2, docs_language: mixed}
+  E_identifier_c1: {question_language: [en, vi], corpus: corpus1, note: exact class / method / option / error names}
+  F_unanswerable:  {question_language: [en, vi], corpus: [corpus1, corpus2], note: topic near the corpus, not answered by it}
+allocation:  # category -> source -> {count, typing split}
+  A_vi_on_vi:  # 20 = 13 diacritics + 7 no_diacritics
+    C2-07: {field: history-politics,        count: 3, no_diacritics: 1}
+    C2-10: {field: international-relations, count: 2, no_diacritics: 1}
+    C2-11: {field: medicine,                count: 2, no_diacritics: 1}
+    C2-16: {field: medicine,                count: 2, no_diacritics: 0}
+    C2-24: {field: medicine,                count: 2, no_diacritics: 1}
+    C2-25: {field: mechanical-engineering,  count: 2, no_diacritics: 0}
+    C2-26: {field: mechanical-engineering,  count: 2, no_diacritics: 1}
+    C2-29: {field: medicine,                count: 2, no_diacritics: 1}
+    C2-30: {field: law,                     count: 2, no_diacritics: 1}
+    C2-32: {field: medicine,                count: 1, no_diacritics: 0}
+  B_en_on_en:  # 14
+    C2-01: {field: english-learning,            count: 1}
+    C2-13: {field: software-engineering,        count: 3}
+    C2-15: {field: intercultural-communication, count: 1}
+    C2-18: {field: international-relations,     count: 3}
+    C2-19: {field: it,                          count: 3}
+    C2-21: {field: study-skills,                count: 2}
+    C2-27: {field: it,                          count: 1}
+  C_vi_on_en:  # 8 (cross-language retrieval: Vietnamese question, English document)
+    C2-01: {field: english-learning,            count: 1}
+    C2-13: {field: software-engineering,        count: 2, no_diacritics: 1}  # owner 2026-11-25 (Q2-EVAL-053)
+    C2-15: {field: intercultural-communication, count: 1}
+    C2-18: {field: international-relations,     count: 2}
+    C2-19: {field: it,                          count: 1}
+    C2-21: {field: study-skills,                count: 1}
+  D_vi_on_mixed:  # 10
+    C2-03: {field: medicine,  count: 1}
+    C2-04+C2-22: {field: business-it, count: 2, note: near-duplicate pair; 1 asks a fact found in both (either cites), 1 a fact found in one version only}
+    C2-05: {field: it,        count: 2}
+    C2-06: {field: it,        count: 2, no_diacritics: 1, note: identifiers (Socket, ServerSocket, getPort)}  # owner 2026-11-25 (Q2-EVAL-022)
+    C2-08: {field: it,        count: 2, note: identifiers (XmlDocument, XPath)}
+    C2-28: {field: medicine,  count: 1}
+  E_identifier_c1:  # 10 = 6 en + 4 vi, spread over corpus 1 IT docs; identifiers chosen at drafting time
+    corpus1: {count: 10, en: 6, vi: 4}
+  F_unanswerable:  # 10 = 5 en + 5 vi (2 of the vi no_diacritics)
+    corpus2_topics: {count: 6, note: "e.g. dengue (only in the excluded scanned C2-23), topics adjacent to C2-07/C2-10/C2-11/C2-19"}
+    corpus1_topics: {count: 4, note: "adjacent to corpus 1 IT docs, absent from every accepted source"}
+totals: {A: 20, B: 14, C: 8, D: 10, E: 10, F: 10, v2_eval: 72, v1_eval: 36, all_eval: 108}
+dev_split: {count: 6, A_vi_on_vi: 2, D_vi_on_mixed: 2, B_en_on_en: 1, F_unanswerable: 1}  # owner 2026-11-25; tuning only, never reported

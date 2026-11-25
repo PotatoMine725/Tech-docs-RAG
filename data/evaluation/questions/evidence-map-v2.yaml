@@ -1,0 +1,103 @@
+# Benchmark v2 absence proofs: why each unanswerable v2 question is not answered by the corpus.
+# Scope: corpus/sources (24 accepted) + corpus2/converted (accepted C2-* only). Method: case-insensitive
+# fixed-string search; validate_questions_v2.py re-runs every zero_hit_terms search.
+version: 2
+absence_proofs:
+- id: ABS2-001
+  question: Q2-DEV-006
+  topic: Pomodoro study technique (C2-21 covers note-taking symbols only)
+  zero_hit_terms:
+  - Pomodoro
+  closest_corpus_text: C2-21 (abbreviations and symbols for note-taking).
+- id: ABS2-002
+  question: Q2-EVAL-031
+  topic: Dengue warning signs (its only document, C2-23, is an excluded scanned PDF)
+  zero_hit_terms:
+  - dengue
+  - sốt xuất huyết
+  - sot xuat huyet
+  closest_corpus_text: 'C2-32 (reactions after vaccination: fever, shock management) and C2-16 (pulmonary consolidation);
+    neither covers dengue.'
+- id: ABS2-003
+  question: Q2-EVAL-032
+  topic: Điện Biên Phủ 1954 and the Geneva Accords (C2-07 covers 1930-1945 only)
+  zero_hit_terms:
+  - Điện Biên Phủ
+  - Dien Bien Phu
+  - Giơ-ne-vơ
+  - '1954'
+  closest_corpus_text: C2-07 ends with the August Revolution of 1945.
+- id: ABS2-004
+  question: Q2-EVAL-033
+  topic: Antiviral treatment of chronic hepatitis B (C2-29 covers serological markers only)
+  zero_hit_terms:
+  - tenofovir
+  - entecavir
+  - interferon
+  - kháng virus
+  closest_corpus_text: C2-29 explains HBsAg / anti-HBs / anti-HBc markers; no treatment.
+- id: ABS2-005
+  question: Q2-EVAL-034
+  topic: Paris Agreement commitments (C2-18 names climate change as a global issue only)
+  zero_hit_terms:
+  - Paris Agreement
+  - UNFCCC
+  - COP21
+  - Kyoto
+  closest_corpus_text: C2-18 lists climate change among global issues without any treaty detail; C2-10 covers the NPT, not
+    climate.
+- id: ABS2-006
+  question: Q2-EVAL-035
+  topic: Cinemachine camera follow in Unity
+  zero_hit_terms:
+  - Cinemachine
+  - virtual camera
+  - CinemachineVirtualCamera
+  closest_corpus_text: C2-19 and C2-27 cover Unity basics and C# scripting; no Cinemachine.
+- id: ABS2-007
+  question: Q2-EVAL-036
+  topic: Mind-mapping as a note-taking method (C2-21 covers abbreviations and symbols)
+  zero_hit_terms:
+  - mind map
+  - mind-map
+  - mindmap
+  closest_corpus_text: C2-21 lists note-taking abbreviations and symbols.
+- id: ABS2-008
+  question: Q2-EVAL-069
+  topic: ASP.NET Core output caching middleware (AddOutputCache / UseOutputCache / CacheOutput)
+  zero_hit_terms:
+  - AddOutputCache
+  - UseOutputCache
+  - CacheOutput
+  - OutputCache
+  closest_corpus_text: '#13 only shows a [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    attribute on the error page model; no document explains output caching.'
+- id: ABS2-009
+  question: Q2-EVAL-070
+  topic: Hosted services / background workers in ASP.NET Core (BackgroundService, IHostedService)
+  zero_hit_terms:
+  - BackgroundService
+  - IHostedService
+  - AddHostedService
+  - hosted service
+  closest_corpus_text: '#10 covers service registration and lifetimes ("Service registration methods can be used to register
+    multiple service instances of the same service type.") but never hosted or background services.'
+- id: ABS2-010
+  question: Q2-EVAL-071
+  topic: EF Core migrations and data seeding (Add-Migration, dotnet ef migrations, HasData)
+  zero_hit_terms:
+  - Add-Migration
+  - MigrationBuilder
+  - HasData
+  - dotnet ef migrations
+  closest_corpus_text: '#22 only covers querying: "EF Core passes a representation of the LINQ query to the database provider."'
+- id: ABS2-011
+  question: Q2-EVAL-072
+  topic: Throttling async concurrency in C# (SemaphoreSlim, Parallel.ForEachAsync, MaxDegreeOfParallelism)
+  zero_hit_terms:
+  - SemaphoreSlim
+  - Parallel.ForEachAsync
+  - MaxDegreeOfParallelism
+  - WaitAsync
+  closest_corpus_text: '#01 describes Task.WhenAll / Task.WhenAny for waiting on several tasks ("returns a Task object that
+    completes when all the tasks in its argument list are complete") but nothing about limiting how many run at once.'

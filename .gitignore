@@ -236,3 +236,7 @@ output/exports/*
 **/data/keyword/
 # Run logs (indexing, evaluation).
 **/data/logs/
+
+# Corpus 2 (ADR-0008): raw files and converted text are not redistributable; only the manifest is committed
+corpus2/incoming/
+corpus2/converted/

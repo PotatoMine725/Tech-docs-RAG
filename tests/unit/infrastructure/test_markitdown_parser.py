@@ -230,3 +230,17 @@ def _write(tmp_path: Path, name: str, text: str) -> Document:
     path = tmp_path / name
     path.write_text(text, encoding="utf-8", newline="\n")  # EOL-explicit: Windows would write CRLF
     return Document("90", path.stem, str(path))
+
+
+def test_pptx_slides_become_markdown_text(tmp_path):
+    from pptx import Presentation
+
+    deck = Presentation()
+    slide = deck.slides.add_slide(deck.slide_layouts[1])  # title + content
+    slide.shapes.title.text = "Retry policy"
+    slide.placeholders[1].text = "Retries back off exponentially."
+    path = tmp_path / "deck.pptx"
+    deck.save(path)
+    parsed = MarkItDownParser().parse(Document("94", "deck", str(path)))
+    assert "Retry policy" in parsed.text and "Retries back off exponentially." in parsed.text
+    assert parsed.normalized is False

@@ -1,0 +1,800 @@
+# Categories B (EN on EN corpus 2), C (VI on EN corpus 2), E (exact identifiers, corpus 1), F (unanswerable near corpus 1).
+# DRAFT, owner review pending. Quotes are exact substrings of the converted / normalized text (whitespace collapsed).
+
+# ---------------------------------------------------------------- B_en_on_en
+- id: Q2-EVAL-037
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: B_en_on_en
+  corpus: corpus2
+  language: en
+  typing: en
+  question: "In the IELTS essay about profit-making healthcare, what did private clinics do during COVID-19, and which healthcare model does the writer finally recommend?"
+  answerable: true
+  expected_answer: "During the COVID-19 pandemic private clinics helped expand testing capacity and supported vaccination efforts; in the conclusion the writer recommends a public-private healthcare model as the most practical and effective approach for most nations."
+  answer_points:
+    - {id: P1, text: "Private clinics played a crucial role in expanding testing capacity and supporting vaccination during COVID-19.", required: true}
+    - {id: P2, text: "The writer recommends a public-private healthcare model as the most practical and effective approach for most nations.", required: true}
+  expected_sources: [{source_id: C2-01, heading_path: "Some people think that good health is very important to every person, so medical services should not be run by profit-making companies. Do the advantages outweigh the disadvantages?", slot: S1}]
+  evidence:
+    - {source_id: C2-01, heading_path: "Some people think that good health is very important to every person, so medical services should not be run by profit-making companies. Do the advantages outweigh the disadvantages?", supports: [P1], quote: "During the COVID-19 pandemic, private clinics played a crucial role in expanding testing capacity and supporting vaccination efforts"}
+    - {source_id: C2-01, heading_path: "Some people think that good health is very important to every person, so medical services should not be run by profit-making companies. Do the advantages outweigh the disadvantages?", supports: [P2], quote: "In my opinion, a public-private healthcare model would be the most practical and effective approach for most nations."}
+  must_not_claim: ["The writer recommends a fully private healthcare system.", "The writer recommends a fully public healthcare system with no private providers."]
+  cognitive_level: recall
+  difficulty: medium
+  concepts: [private healthcare, COVID-19, public-private model]
+
+- id: Q2-EVAL-038
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: B_en_on_en
+  corpus: corpus2
+  language: en
+  typing: en
+  question: "How is the FA Management functional requirements specification meant to help with testing whether the delivered solution is right?"
+  answerable: true
+  expected_answer: "One of its stated purposes is to establish a basis for defining the acceptance tests for the solution, so that the team can confirm that what is delivered meets the requirements."
+  answer_points:
+    - {id: P1, text: "The specification establishes a basis for defining the acceptance tests for the solution.", required: true}
+    - {id: P2, text: "The acceptance tests confirm that what is delivered meets the requirements.", required: true}
+  expected_sources: [{source_id: C2-13, heading_path: "Introduction > Purpose", slot: S1}]
+  evidence:
+    - {source_id: C2-13, heading_path: "Introduction > Purpose", supports: [P1, P2], quote: "Establish a basis for defining the acceptance tests for the solution to confirm that what is delivered meets requirements."}
+  must_not_claim: ["The specification itself contains the finished unit test cases.", "Testing is out of the specification's scope."]
+  cognitive_level: recall
+  difficulty: easy
+  concepts: [functional requirements specification, acceptance testing]
+
+- id: Q2-EVAL-039
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: B_en_on_en
+  corpus: corpus2
+  language: en
+  typing: en
+  question: "In the FA Management system, which class statuses allow a user to cancel a class, and what status does the class get afterwards?"
+  answerable: true
+  expected_answer: "A class can only be cancelled when its [Status] is \"Draft\" or \"Submitted\"; on cancellation the system updates the [Status] field to \"Cancelled\"."
+  answer_points:
+    - {id: P1, text: "Pre-condition: the class status must be Draft or Submitted.", required: true}
+    - {id: P2, text: "After cancelling, the system sets the status to Cancelled.", required: true}
+  expected_sources: [{source_id: C2-13, heading_path: "Use Case Specifications > Class Management > UC7: Cancel Class", slot: S1}]
+  evidence:
+    - {source_id: C2-13, heading_path: "Use Case Specifications > Class Management > UC7: Cancel Class", supports: [P1], quote: "The value of [Status] is equal to “Draft” or “Submitted”."}
+    - {source_id: C2-13, heading_path: "Use Case Specifications > Class Management > UC7: Cancel Class", supports: [P2], quote: "Update the value of [Status] field as “Cancelled”."}
+  must_not_claim: ["An in-progress or approved class can be cancelled.", "A cancelled class is set to Draft again."]
+  cognitive_level: recall
+  difficulty: easy
+  concepts: [use case, class status, cancel class]
+
+- id: Q2-EVAL-040
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: B_en_on_en
+  corpus: corpus2
+  language: en
+  typing: en
+  question: "A trainee's learning path in FA Management has 45 learning days. What Committed Working Duration will the system set, and how is it worked out?"
+  answerable: true
+  expected_answer: "Training Duration = number of learning days / 30, rounded up to the unit digit: 45 / 30 = 1.5, rounded up to 2 months. Because 1 month < Training Duration <= 2 months, the Committed Working Duration is set to 6 months."
+  answer_points:
+    - {id: P1, text: "Training Duration is the number of learning days divided by 30, rounded up (45 / 30 = 1.5, so 2 months).", required: true}
+    - {id: P2, text: "A Training Duration over 1 month and up to 2 months gives a Committed Working Duration of 6 months.", required: true}
+  expected_sources: [{source_id: C2-13, heading_path: "Use Case Specifications > Trainee Management > UC 33: Calculate Committed Working Duration", slot: S1}]
+  evidence:
+    - {source_id: C2-13, heading_path: "Use Case Specifications > Trainee Management > UC 33: Calculate Committed Working Duration", supports: [P1], quote: "Calculate Training Duration as the following formula (round up to unit digit): *Number of learning days / 30"}
+    - {source_id: C2-13, heading_path: "Use Case Specifications > Trainee Management > UC 33: Calculate Committed Working Duration", supports: [P2], quote: "If 1 month < Training Duration ≤ 2 months, set the value of [Committed Working Duration] as “6 months”."}
+  must_not_claim: ["The Committed Working Duration is 4 months or 12 months.", "Training Duration is computed by dividing the learning days by 20 or by 7."]
+  cognitive_level: apply
+  difficulty: hard
+  concepts: [business rule, committed working duration, training duration]
+
+- id: Q2-EVAL-041
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: B_en_on_en
+  corpus: corpus2
+  language: en
+  typing: en
+  question: "According to the notes on the W-shaped culture adjustment model, what factors decide how quickly and how deeply a person adjusts to a new culture?"
+  answerable: true
+  expected_answer: "Four factors: the cultural distance between the home culture and the host culture; the person's personality and previous cross-cultural experiences; the social support and resources available; and the length of time spent in the new cultural environment."
+  answer_points:
+    - {id: P1, text: "The degree of cultural distance between the home culture and the host culture.", required: true}
+    - {id: P2, text: "The individual's personality and previous cross-cultural experiences.", required: true}
+    - {id: P3, text: "The level of social support and resources available.", required: true}
+    - {id: P4, text: "The length of time spent in the new cultural environment.", required: true}
+  expected_sources: [{source_id: C2-15, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-15, heading_path: "", supports: [P1], quote: "The speed and depth of this adjustment process can vary significantly depending on factors such as: - The degree of cultural distance between an individual's home culture and the host culture."}
+    - {source_id: C2-15, heading_path: "", supports: [P2, P3, P4], quote: "- The individual's personality and previous cross-cultural experiences. - The level of social support and resources available to the individual. - The length of time an individual spends in the new cultural environment."}
+  must_not_claim: ["Age or gender is listed as one of the factors.", "The adjustment speed is the same for everyone."]
+  cognitive_level: recall
+  difficulty: medium
+  concepts: [cultural adjustment, W-curve model]
+
+- id: Q2-EVAL-042
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: B_en_on_en
+  corpus: corpus2
+  language: en
+  typing: en
+  question: "What common features does the World Bank's introduction to global issues say every global issue shares?"
+  answerable: true
+  expected_answer: "Each global issue affects many people on different sides of national borders; it is a significant concern to all or most countries (often shown by a major U.N. declaration or a global conference); and it needs a global regulatory approach because no single government can impose a solution and market forces alone will not solve it."
+  answer_points:
+    - {id: P1, text: "It affects a large number of people on different sides of national boundaries.", required: true}
+    - {id: P2, text: "It is a significant concern to all or most countries, often evidenced by a major U.N. declaration or a global conference.", required: true}
+    - {id: P3, text: "It requires a global regulatory approach: no one government can impose a solution and market forces alone will not solve it.", required: true}
+  expected_sources: [{source_id: C2-18, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-18, heading_path: "", supports: [P1], quote: "Each issue affects a large number of people on different sides of national boundaries."}
+    - {source_id: C2-18, heading_path: "", supports: [P2], quote: "Each issue is one of signiﬁcant concern, directly or indirectly, to all or most of the countries of the world, often as evidenced by a major U.N. declaration or the holding of a global conference on the issue."}
+    - {source_id: C2-18, heading_path: "", supports: [P3], quote: "Each issue has implications that require a global regulatory approach; no one government has the power or the authority to impose a solu- tion, and market forces alone will not solve the problem."}
+  must_not_claim: ["Market forces alone can solve a global issue.", "A global issue only affects developing countries."]
+  cognitive_level: recall
+  difficulty: medium
+  concepts: [global issues, definition]
+
+- id: Q2-EVAL-043
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: B_en_on_en
+  corpus: corpus2
+  language: en
+  typing: en
+  question: "When was the HIPC Initiative launched, and what campaign led to it?"
+  answerable: true
+  expected_answer: "The Heavily Indebted Poor Countries (HIPC) Initiative was launched in 1996. It came out of the Jubilee movement, an international advocacy campaign to forgive the debts of the poorest countries with huge debt burdens."
+  answer_points:
+    - {id: P1, text: "The HIPC Initiative was launched in 1996.", required: true}
+    - {id: P2, text: "It was led by the Jubilee movement, a campaign to forgive the debts of the poorest, heavily indebted countries.", required: true}
+  expected_sources: [{source_id: C2-18, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-18, heading_path: "", supports: [P2], quote: "Their plight sparked an international advocacy campaign, popularly know as the Jubilee movement, to forgive the debts of the poorest countries with huge debt burdens."}
+    - {source_id: C2-18, heading_path: "", supports: [P1], quote: "This campaign led in turn to the launch of the Heavily Indebted Poor Countries (HIPC) Initiative in 1996, to address the excessive debt burdens of the world’s poorest nations."}
+  must_not_claim: ["The HIPC Initiative was launched at the 2005 Gleneagles summit.", "The HIPC Initiative was created by the WTO."]
+  cognitive_level: recall
+  difficulty: easy
+  concepts: [debt relief, HIPC Initiative, Jubilee movement]
+
+- id: Q2-EVAL-044
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: B_en_on_en
+  corpus: corpus2
+  language: en
+  typing: en
+  question: "How can international migration benefit both the countries that receive migrants and the countries they come from?"
+  answerable: true
+  expected_answer: "In receiving countries, migrants can fill labor shortages in certain industries. In sending countries, migration can ease unemployment and other social pressures and increases financial inflows through remittances that migrants send to their families back home."
+  answer_points:
+    - {id: P1, text: "Receiving countries: migrants fill labor shortages in certain industries.", required: true}
+    - {id: P2, text: "Sending countries: migration eases unemployment and social pressures.", required: true}
+    - {id: P3, text: "Sending countries gain financial inflows as remittances to migrants' families.", required: true}
+  expected_sources: [{source_id: C2-18, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-18, heading_path: "", supports: [P1], quote: "In the receiving countries, migrants can ﬁll labor shortages in certain industries."}
+    - {source_id: C2-18, heading_path: "", supports: [P2, P3], quote: "In the sending countries, they can help ease unemployment and other social pressures while increasing ﬁnancial inﬂows, in the form of remittances from the migrants to their families back home."}
+  must_not_claim: ["Migration only benefits the receiving countries.", "Remittances flow from the home country to the migrants."]
+  cognitive_level: explain
+  difficulty: medium
+  concepts: [international migration, remittances]
+
+- id: Q2-EVAL-045
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: B_en_on_en
+  corpus: corpus2
+  language: en
+  typing: en
+  question: "I'm making a Unity game with 3D models but an orthographic bird's-eye camera. Should I start the editor in 2D or 3D mode?"
+  answerable: true
+  expected_answer: "Start in 3D mode. Games that use 3D geometry with an orthographic camera (sometimes called 2.5D) should still use the editor in 3D mode because, even without perspective, you are working with 3D models and assets; you just switch the camera and scene view to Orthographic."
+  answer_points:
+    - {id: P1, text: "Use 3D mode.", required: true}
+    - {id: P2, text: "Reason: even without perspective you are still working with 3D models and assets.", required: true}
+    - {id: P3, text: "This orthographic bird's-eye style is a common technique sometimes called 2.5D.", required: false}
+  expected_sources: [{source_id: C2-19, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-19, heading_path: "", supports: [P1, P2], quote: "If you’re making a game like this, you should also use the editor in3Dmode, because even though there is noperspective, you will still be working with 3D models and assets."}
+    - {source_id: C2-19, heading_path: "", supports: [P3], quote: "Sometimes games use 3D geometry, but use an orthographic camera instead of perspective. This is a common technique used in games which give you a bird’s-eye view of the action"}
+  must_not_claim: ["An orthographic camera means you must start in 2D mode.", "The mode can never be changed after the project is created."]
+  cognitive_level: apply
+  difficulty: easy
+  concepts: [Unity, 2D vs 3D mode, orthographic camera]
+
+- id: Q2-EVAL-046
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: B_en_on_en
+  corpus: corpus2
+  language: en
+  typing: en
+  question: "In Unity, how does Start differ from Awake in terms of which script instances it runs on and when it is called?"
+  answerable: true
+  expected_answer: "Start is similar to Awake, but unlike Awake it only runs on active instances (a script that starts disabled gets Start only when it is later enabled), and all Start methods are called only after every Awake method has run, which makes it easy to control initialization order."
+  answer_points:
+    - {id: P1, text: "Start is only carried out on active (enabled) script instances, unlike Awake.", required: true}
+    - {id: P2, text: "Start methods are called only after all Awake methods have executed.", required: true}
+  expected_sources: [{source_id: C2-19, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-19, heading_path: "", supports: [P1], quote: "However, unlike Awake , this method is only carried out on active instances."}
+    - {source_id: C2-19, heading_path: "", supports: [P2], quote: "In addition, the Start methods are only called after all Awake methods have been executed"}
+  must_not_claim: ["Start runs before Awake.", "Start is called every frame."]
+  cognitive_level: compare
+  difficulty: hard
+  concepts: [Unity, MonoBehaviour, Awake, Start]
+
+- id: Q2-EVAL-047
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: B_en_on_en
+  corpus: corpus2
+  language: en
+  typing: en
+  question: "My Unity coroutine waits with WaitForSeconds, but very short waits are never timed more precisely than one frame. Why does that happen?"
+  answerable: true
+  expected_answer: "An interruption with WaitForSeconds can only be as precise as the frame duration, so if each frame lasts 0.02 seconds the wait cannot be more accurate than that."
+  answer_points:
+    - {id: P1, text: "WaitForSeconds can only be as precise as the frame duration.", required: true}
+    - {id: P2, text: "Example: with 0.02-second frames, the accuracy cannot be better than 0.02 seconds.", required: false}
+  expected_sources: [{source_id: C2-19, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-19, heading_path: "", supports: [P1, P2], quote: "Please note that an interruption with WaitForSeconds can only be as precise as the frame duration. So if every frame lasts 0.02 seconds, the accuracy of WaitForSeconds cannot be better."}
+  must_not_claim: ["WaitForSeconds is accurate to the millisecond regardless of frame rate.", "The imprecision is caused by a bug in the float parameter."]
+  cognitive_level: diagnose
+  difficulty: medium
+  concepts: [Unity, coroutine, WaitForSeconds, frame duration]
+
+- id: Q2-EVAL-048
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: B_en_on_en
+  corpus: corpus2
+  language: en
+  typing: en
+  question: "What two techniques does the notetaking handout suggest for making your own abbreviations of words?"
+  answerable: true
+  expected_answer: "First, use the first few letters of the word, just enough to remember what it stands for (e.g. imp, info, eval). Second, remove all or most of the vowels and keep just the key consonants (e.g. mngmt for management)."
+  answer_points:
+    - {id: P1, text: "Use the first few letters of the word, just enough to remember it.", required: true}
+    - {id: P2, text: "Remove all or most vowels and keep the key consonants (e.g. mngmt for management).", required: true}
+  expected_sources: [{source_id: C2-21, heading_path: "number", slot: S1}]
+  evidence:
+    - {source_id: C2-21, heading_path: "number", supports: [P1], quote: "1 Use the first few letters of the word – just enough to remember what the abbreviation"}
+    - {source_id: C2-21, heading_path: "number", supports: [P2], quote: "2 Remove all (or most of) the vowels from the word and use just the key consonants bunched together e.g. mngmt for ‘management’"}
+  must_not_claim: ["The techniques are to use only the last letters of a word.", "Vowels should be kept and consonants removed."]
+  cognitive_level: recall
+  difficulty: easy
+  concepts: [notetaking, abbreviation techniques]
+
+- id: Q2-EVAL-049
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: B_en_on_en
+  corpus: corpus2
+  language: en
+  typing: en
+  question: "What quick tips are given for writing notes faster when you are in a hurry during a lecture?"
+  answerable: true
+  expected_answer: "Leave out a, an and the (and dot your i's and cross your t's later); always write numerals 1, 2, 3 instead of one, two, three; and abbreviate any word by leaving out the vowels."
+  answer_points:
+    - {id: P1, text: "Leave out a, an, or the, and dot i's / cross t's later.", required: true}
+    - {id: P2, text: "Use 1, 2, 3 instead of one, two, three.", required: true}
+    - {id: P3, text: "Abbreviate any word by leaving out the vowels.", required: true}
+  expected_sources: [{source_id: C2-21, heading_path: "number Please answer # 7.", slot: S1}]
+  evidence:
+    - {source_id: C2-21, heading_path: "number Please answer # 7.", supports: [P1], quote: "1. If you are in a hurry, leave out a, an, or the, and dot your i’s and cross your t’s later."}
+    - {source_id: C2-21, heading_path: "number Please answer # 7.", supports: [P2], quote: "2. Always use 1, 2, 3,...instead of one, two three."}
+    - {source_id: C2-21, heading_path: "number Please answer # 7.", supports: [P3], quote: "3. Abbreviate any word by leaving out the vowels."}
+  must_not_claim: ["You should write numbers out in words.", "You should record the lecture word for word."]
+  cognitive_level: recall
+  difficulty: easy
+  concepts: [notetaking, tips]
+
+- id: Q2-EVAL-050
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: B_en_on_en
+  corpus: corpus2
+  language: en
+  typing: en
+  question: "Unity is royalty free, so when does a developer have to switch to Unity Pro or Enterprise?"
+  answerable: true
+  expected_answer: "When the revenue or funding is greater than $200K in the last 12 months, the developer is required to use Pro or Enterprise."
+  answer_points:
+    - {id: P1, text: "When revenue or funding exceeds $200K in the last 12 months.", required: true}
+  expected_sources: [{source_id: C2-27, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-27, heading_path: "", supports: [P1], quote: "Unity is royalty free. If revenue or funding is greater than $200K in the last 12 months, you are required to use Pro or Enterprise."}
+  must_not_claim: ["Unity charges 5% royalties once revenue exceeds $1,000,000 (that is the Unreal rule).", "The threshold is $100K."]
+  cognitive_level: recall
+  difficulty: easy
+  concepts: [Unity licensing, Unity Pro]
+
+# ---------------------------------------------------------------- C_vi_on_en
+- id: Q2-EVAL-051
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: C_vi_on_en
+  corpus: corpus2
+  language: vi
+  typing: diacritics
+  question: "Trong bài luận IELTS về chế độ ăn lành mạnh, tác giả lấy ví dụ gì về Mexico để cho thấy chính phủ có thể làm giảm tiêu thụ đồ uống có đường?"
+  answerable: true
+  expected_answer: "Năm 2014 chính phủ Mexico tăng thuế đồ uống có đường thêm 10%, kết quả là lượng tiêu thụ nước ngọt giảm 5,5% ngay trong năm đầu tiên."
+  answer_points:
+    - {id: P1, text: "Mexico tăng thuế đồ uống có đường thêm 10% vào năm 2014.", required: true}
+    - {id: P2, text: "Tiêu thụ nước ngọt giảm 5,5% trong năm đầu tiên.", required: true}
+  expected_sources: [{source_id: C2-01, heading_path: "Some people think that the government has the duty to ensure its citizens to have a healthy diet, while others argue it is the responsibility of each individual. Discuss both views and give your opinion.", slot: S1}]
+  evidence:
+    - {source_id: C2-01, heading_path: "Some people think that the government has the duty to ensure its citizens to have a healthy diet, while others argue it is the responsibility of each individual. Discuss both views and give your opinion.", supports: [P1, P2], quote: "For example, the Mexican government increased its taxes on sugary drinks by 10% in 2014, resulting in a 5.5% drop in soft drink consumption in the first year."}
+  must_not_claim: ["Mexico banned sugary drinks completely.", "Consumption dropped by 10%."]
+  cognitive_level: recall
+  difficulty: easy
+  concepts: [healthy diet, sugar tax, government policy]
+
+- id: Q2-EVAL-052
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: C_vi_on_en
+  corpus: corpus2
+  language: vi
+  typing: diacritics
+  question: "Trong hệ thống FA Management, trường số điện thoại [Phone] bị kiểm tra theo những quy tắc nào và sai thì hiện thông báo gì?"
+  answerable: true
+  expected_answer: "Theo CBR 2: nếu số điện thoại không bắt đầu bằng số 0 thì hệ thống hiện MSG 9; nếu số điện thoại ngắn hơn 10 ký tự hoặc dài hơn 14 ký tự thì hiện MSG 24."
+  answer_points:
+    - {id: P1, text: "Số điện thoại phải bắt đầu bằng số 0, nếu không hiện MSG 9.", required: true}
+    - {id: P2, text: "Số điện thoại dưới 10 hoặc trên 14 ký tự thì hiện MSG 24.", required: true}
+  expected_sources: [{source_id: C2-13, heading_path: "Use Case Specifications > Common Business Rules", slot: S1}]
+  evidence:
+    - {source_id: C2-13, heading_path: "Use Case Specifications > Common Business Rules", supports: [P1], quote: "If the value of [Phone] field does not start by “0” number, system will display MSG 9."}
+    - {source_id: C2-13, heading_path: "Use Case Specifications > Common Business Rules", supports: [P2], quote: "If the value of [Phone] field is under 10 characters or above 14 characters, system will display MSG 24."}
+  must_not_claim: ["The phone number must have exactly 10 digits.", "A wrong phone number shows MSG 4."]
+  cognitive_level: recall
+  difficulty: medium
+  concepts: [validation rules, common business rules]
+
+- id: Q2-EVAL-053
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: C_vi_on_en
+  corpus: corpus2
+  language: vi
+  typing: no_diacritics  # owner 2026-11-25: one no_diacritics question in C; was "Một học viên trong FA Management có GPA 88% thì được xếp Level gì và hưởng Allowance Rate bao nhiêu?"
+  question: "Mot hoc vien trong FA Management co GPA 88% thi duoc xep Level gi va huong Allowance Rate bao nhieu?"
+  answerable: true
+  expected_answer: "GPA 88% chưa đạt mức 93% (A+) nhưng thỏa điều kiện GPA ≥ 86%, nên học viên được xếp Level A với Allowance Rate 110%."
+  answer_points:
+    - {id: P1, text: "GPA từ 86% trở lên (dưới 93%) được Level A.", required: true}
+    - {id: P2, text: "Allowance Rate tương ứng là 110%.", required: true}
+    - {id: P3, text: "Mức A+ / 120% chỉ áp dụng khi GPA ≥ 93%.", required: false}
+  expected_sources: [{source_id: C2-13, heading_path: "Use Case Specifications > Trainee Management > UC 34: Calculate Allowance", slot: S1}]
+  evidence:
+    - {source_id: C2-13, heading_path: "Use Case Specifications > Trainee Management > UC 34: Calculate Allowance", supports: [P1, P2], quote: "If GPA ≥ 86%: - Set the value of [Level] field as “A”. - Set the value of [Allowance Rate] field as “110%”."}
+    - {source_id: C2-13, heading_path: "Use Case Specifications > Trainee Management > UC 34: Calculate Allowance", supports: [P3], quote: "If GPA ≥ 93%: - Set the value of [Level] field as “A+”. - Set the value of [Allowance Rate] field as “120%”."}
+  must_not_claim: ["GPA 88% gives Level A+ and 120%.", "GPA 88% gives Level B and 100%."]
+  cognitive_level: apply
+  difficulty: hard
+  failure_mode: cross_language  # kept; typing records no_diacritics
+  concepts: [business rule, allowance calculation, GPA level]
+
+- id: Q2-EVAL-054
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: C_vi_on_en
+  corpus: corpus2
+  language: vi
+  typing: diacritics
+  question: "Ở giai đoạn trầm cảm (depression) trong mô hình chữ W, người sống ở nước ngoài thường cảm thấy thế nào, ai dễ bị kẹt lại ở giai đoạn này và điều gì giúp họ vượt qua?"
+  answerable: true
+  expected_answer: "Họ xa gia đình và bạn bè thân trong thời gian dài nên cảm thấy cô đơn. Một số người bị kẹt lại ở giai đoạn này, nhất là khi chưa tìm được việc làm. Sự hỗ trợ tinh thần từ gia đình, bạn bè và cộng đồng là rất quan trọng để vượt qua những cảm xúc tiêu cực."
+  answer_points:
+    - {id: P1, text: "Xa gia đình và bạn bè lâu ngày nên cảm thấy cô đơn.", required: true}
+    - {id: P2, text: "Một số người kẹt lại ở giai đoạn này, đặc biệt khi chưa tìm được việc làm.", required: true}
+    - {id: P3, text: "Hỗ trợ tinh thần từ gia đình, bạn bè và cộng đồng là rất quan trọng.", required: true}
+  expected_sources: [{source_id: C2-15, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-15, heading_path: "", supports: [P1], quote: "Individuals have been away from their family and good friends for a long period of time and may feel lonely."}
+    - {source_id: C2-15, heading_path: "", supports: [P2], quote: "Some individuals remain at this stage, particularly if they haven’t been able to find a job."}
+    - {source_id: C2-15, heading_path: "", supports: [P3], quote: "Receiving emotional support from family, friends, and the community is crucial during this stage to help the individual overcome these negative feelings"}
+  must_not_claim: ["The depression stage is the first stage of the model.", "Everyone passes through this stage quickly without support."]
+  cognitive_level: explain
+  difficulty: medium
+  concepts: [cultural adjustment, depression stage, W-curve model]
+
+- id: Q2-EVAL-055
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: C_vi_on_en
+  corpus: corpus2
+  language: vi
+  typing: diacritics
+  question: "Theo chương giới thiệu về các vấn đề toàn cầu, kiều hối trên thế giới năm 2004 đạt bao nhiêu và bao nhiêu trong đó chảy về các nước đang phát triển?"
+  answerable: true
+  expected_answer: "Kiều hối toàn cầu đã tăng gấp đôi trong thập kỷ trước, đạt 216 tỷ USD năm 2004 theo số liệu chính thức, trong đó khoảng 151 tỷ USD được ước tính chảy về các nước đang phát triển."
+  answer_points:
+    - {id: P1, text: "Kiều hối toàn cầu đạt 216 tỷ USD năm 2004 (đã tăng gấp đôi trong một thập kỷ).", required: true}
+    - {id: P2, text: "Khoảng 151 tỷ USD trong đó về các nước đang phát triển.", required: true}
+  expected_sources: [{source_id: C2-18, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-18, heading_path: "", supports: [P1], quote: "Worldwide remittances have doubled in the last decade, reaching $216 billion in 2004"}
+    - {source_id: C2-18, heading_path: "", supports: [P2], quote: "of which $151 billion is estimated to have gone to developing countries."}
+  must_not_claim: ["Remittances reached $151 billion in total.", "Remittances fell during the last decade."]
+  cognitive_level: recall
+  difficulty: easy
+  concepts: [remittances, international migration]
+
+- id: Q2-EVAL-056
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: C_vi_on_en
+  corpus: corpus2
+  language: vi
+  typing: diacritics
+  question: "Vì sao cuốn sách về các vấn đề toàn cầu của World Bank không có chương nào về hòa bình và an ninh?"
+  answerable: true
+  expected_answer: "Vì các vấn đề hòa bình và an ninh tuy rất quan trọng nhưng nằm ngoài chuyên môn và nhiệm vụ (mandate) của World Bank; sách chỉ chọn những vấn đề mà World Bank có chuyên môn."
+  answer_points:
+    - {id: P1, text: "Hòa bình và an ninh nằm ngoài chuyên môn và nhiệm vụ của World Bank, dù rất quan trọng.", required: true}
+  expected_sources: [{source_id: C2-18, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-18, heading_path: "", supports: [P1], quote: "peace and security are also very important but are beyond the expertise and mandate of the World Bank."}
+  must_not_claim: ["Peace and security are not considered global issues.", "Peace and security are covered in Part Four of the book."]
+  cognitive_level: explain
+  difficulty: easy
+  concepts: [global issues, World Bank mandate]
+
+- id: Q2-EVAL-057
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: C_vi_on_en
+  corpus: corpus2
+  language: vi
+  typing: diacritics
+  question: "Trong Unity, nếu gọi CancelInvoke mà không truyền tên method nào thì chuyện gì xảy ra?"
+  answerable: true
+  expected_answer: "CancelInvoke bình thường nhận tên method cần hủy; nếu không truyền tên nào thì tất cả các method đã được khởi chạy bằng lệnh Invoke đều bị hủy."
+  answer_points:
+    - {id: P1, text: "Không truyền tên thì mọi method đã khởi chạy bằng Invoke đều bị hủy.", required: true}
+    - {id: P2, text: "Khi truyền tên, chỉ method có tên đó bị hủy.", required: false}
+  expected_sources: [{source_id: C2-19, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-19, heading_path: "", supports: [P1, P2], quote: "You pass the name of the method you want to cancel. If you don't pass any, all methods that you started with an Invoke command are aborted."}
+  must_not_claim: ["Calling CancelInvoke without a name throws an exception.", "Calling CancelInvoke without a name does nothing."]
+  cognitive_level: recall
+  difficulty: medium
+  concepts: [Unity, Invoke, InvokeRepeating, CancelInvoke]
+
+- id: Q2-EVAL-058
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: C_vi_on_en
+  corpus: corpus2
+  language: vi
+  typing: diacritics
+  question: "Reference list và bibliography khác nhau thế nào theo hướng dẫn viết học thuật trong tài liệu ghi chép?"
+  answerable: true
+  expected_answer: "Reference list chỉ gồm các nguồn được dẫn trong bài, và tên trong bài phải khớp với reference list; bibliography thì liệt kê thêm các nguồn bổ sung mà người đọc có thể thấy hữu ích."
+  answer_points:
+    - {id: P1, text: "Reference list chỉ gồm các nguồn được nhắc tới trong bài; tên trong bài và trong danh sách phải khớp nhau.", required: true}
+    - {id: P2, text: "Bibliography đưa thêm các nguồn bổ sung có thể hữu ích cho người đọc.", required: true}
+  expected_sources: [{source_id: C2-21, heading_path: "no. number", slot: S1}]
+  evidence:
+    - {source_id: C2-21, heading_path: "no. number", supports: [P1], quote: "A reference list includes only those sources which are referred to in the text. The names in the text and the reference list should match."}
+    - {source_id: C2-21, heading_path: "no. number", supports: [P2], quote: "A bibliography gives extra sources which the reader may find helpful."}
+  must_not_claim: ["A bibliography contains only sources cited in the text.", "The two terms always mean exactly the same thing."]
+  cognitive_level: compare
+  difficulty: medium
+  concepts: [referencing, reference list, bibliography]
+
+# ---------------------------------------------------------------- E_identifier_c1
+- id: Q2-EVAL-059
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: E_identifier_c1
+  corpus: corpus1
+  language: en
+  typing: en
+  question: "What does the `[SkipStatusCodePages]` attribute do in ASP.NET Core, and what should I use instead to turn status code pages off for specific requests in a Razor Pages handler?"
+  answerable: true
+  expected_answer: "`[SkipStatusCodePages]` disables status code pages for an MVC controller or action method. To disable them for specific requests in a Razor Pages handler method (or an MVC controller), use `IStatusCodePagesFeature` (get the feature and set `Enabled = false`)."
+  answer_points:
+    - {id: P1, text: "[SkipStatusCodePages] disables status code pages for an MVC controller or action method.", required: true}
+    - {id: P2, text: "For specific requests in a Razor Pages handler, use IStatusCodePagesFeature.", required: true}
+  expected_sources: [{source_id: "13", heading_path: "Handle errors in ASP.NET Core > Disable status code pages", slot: S1}]
+  evidence:
+    - {source_id: "13", heading_path: "Handle errors in ASP.NET Core > Disable status code pages", supports: [P1], quote: "To disable status code pages for an MVC controller or action method, use the [[SkipStatusCodePages]](/en-us/dotnet/api/microsoft.aspnetcore.mvc.skipstatuscodepagesattribute) attribute."}
+    - {source_id: "13", heading_path: "Handle errors in ASP.NET Core > Disable status code pages", supports: [P2], quote: "To disable status code pages for specific requests in a Razor Pages handler method or in an MVC controller, use [IStatusCodePagesFeature"}
+  must_not_claim: ["[SkipStatusCodePages] removes the status code pages middleware for the whole app.", "Status code pages can only be disabled by removing UseStatusCodePages."]
+  cognitive_level: recall
+  difficulty: medium
+  size_class: huge
+  concepts: [status code pages, SkipStatusCodePages, IStatusCodePagesFeature]
+
+- id: Q2-EVAL-060
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: E_identifier_c1
+  corpus: corpus1
+  language: en
+  typing: en
+  question: "If I pass `*:5000` to `RequireHost` on an ASP.NET Core endpoint, what requests does it match, and what happens if I pass several host parameters?"
+  answerable: true
+  expected_answer: "`*:5000` is a port-only parameter: it matches port 5000 with any host. When multiple parameters are given to `RequireHost` (or `[Host]`), the constraint matches hosts that are valid for any of the parameters."
+  answer_points:
+    - {id: P1, text: "*:5000 matches port 5000 with any host.", required: true}
+    - {id: P2, text: "With several parameters, the constraint matches hosts valid for any of them.", required: true}
+  expected_sources: [{source_id: "23", heading_path: "Routing in ASP.NET Core > Host matching in routes with RequireHost", slot: S1}]
+  evidence:
+    - {source_id: "23", heading_path: "Routing in ASP.NET Core > Host matching in routes with RequireHost", supports: [P1], quote: "- Port: `*:5000`, matches port 5000 with any host."}
+    - {source_id: "23", heading_path: "Routing in ASP.NET Core > Host matching in routes with RequireHost", supports: [P2], quote: "Multiple parameters can be specified using `RequireHost` or `[Host]`. The constraint matches hosts valid for any of the parameters."}
+  must_not_claim: ["*:5000 matches only localhost on port 5000.", "All parameters must match at the same time."]
+  cognitive_level: apply
+  difficulty: hard
+  size_class: huge
+  concepts: [routing, RequireHost, host matching]
+
+- id: Q2-EVAL-061
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: E_identifier_c1
+  corpus: corpus1
+  language: en
+  typing: en
+  question: "What is the `[FromKeyedServices]` attribute for in ASP.NET Core dependency injection?"
+  answerable: true
+  expected_answer: "Keyed services register and retrieve services using keys. `[FromKeyedServices]` lets you access a registered service by specifying its key, e.g. `[FromKeyedServices(\"cache1\")] IStringCache` in a Minimal API endpoint; the service is registered with a key through methods such as `AddKeyedSingleton`, `AddKeyedScoped` or `AddKeyedTransient`."
+  answer_points:
+    - {id: P1, text: "It accesses (resolves) a registered service by specifying its key.", required: true}
+    - {id: P2, text: "Keyed services register and retrieve services using keys.", required: true}
+    - {id: P3, text: "A key is attached at registration through keyed registration extension methods (AddKeyedSingleton/Scoped/Transient).", required: false}
+  expected_sources: [{source_id: "10", heading_path: "Dependency injection in ASP.NET Core > Keyed services", slot: S1}]
+  evidence:
+    - {source_id: "10", heading_path: "Dependency injection in ASP.NET Core > Keyed services", supports: [P1], quote: "Access a registered service by specifying the key with the [`[FromKeyedServices]` attribute](/en-us/dotnet/api/microsoft.extensions.dependencyinjection.fromkeyedservicesattribute)."}
+    - {source_id: "10", heading_path: "Dependency injection in ASP.NET Core > Keyed services", supports: [P2], quote: "*Keyed services* registers and retrieves services using keys."}
+    - {source_id: "10", heading_path: "Dependency injection in ASP.NET Core > Keyed services", supports: [P3], quote: "A service is associated with a key by calling any of the following extension methods for service registration:"}
+  must_not_claim: ["[FromKeyedServices] registers a new service.", "[FromKeyedServices] changes the service lifetime to scoped."]
+  cognitive_level: recall
+  difficulty: easy
+  size_class: medium
+  concepts: [dependency injection, keyed services, FromKeyedServices]
+
+- id: Q2-EVAL-062
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: E_identifier_c1
+  corpus: corpus1
+  language: en
+  typing: en
+  question: "What does `Task.WhenAny` return, and when does the returned task complete?"
+  answerable: true
+  expected_answer: "`WhenAny` returns a `Task<Task>` that completes when any of its argument tasks completes; awaiting it gives you the finished task, which you can process and then remove from the list before calling `WhenAny` again."
+  answer_points:
+    - {id: P1, text: "It returns a Task<Task>.", required: true}
+    - {id: P2, text: "The returned task completes when any of its argument tasks completes.", required: true}
+  expected_sources: [{source_id: "01", heading_path: "Asynchronous programming with async and await > Apply await expressions to tasks efficiently", slot: S1}]
+  evidence:
+    - {source_id: "01", heading_path: "Asynchronous programming with async and await > Apply await expressions to tasks efficiently", supports: [P1, P2], quote: "Another option is to use the [WhenAny](/en-us/dotnet/api/system.threading.tasks.task.whenany) method, which returns a `Task<Task>` object that completes when any of its arguments complete."}
+  must_not_claim: ["WhenAny completes only when all tasks complete.", "WhenAny returns the result value directly instead of a task."]
+  cognitive_level: recall
+  difficulty: easy
+  size_class: medium
+  concepts: [async, Task.WhenAny]
+
+- id: Q2-EVAL-063
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: E_identifier_c1
+  corpus: corpus1
+  language: en
+  typing: en
+  question: "In C#, if an integer literal ends with the `U` suffix, which type does the compiler give it?"
+  answerable: true
+  expected_answer: "With the `U` (or `u`) suffix the compiler picks the first of `uint` and `ulong` in which the literal's value can be represented."
+  answer_points:
+    - {id: P1, text: "The type is the first of uint, ulong that can represent the value.", required: true}
+  expected_sources: [{source_id: "16", heading_path: "Integral numeric types (C# reference) > Integer literals", slot: S1}]
+  evidence:
+    - {source_id: "16", heading_path: "Integral numeric types (C# reference) > Integer literals", supports: [P1], quote: "If the literal includes the `U` or `u` suffix, the compiler assigns the type as the first of the following types in which its value can be represented: `uint`, `ulong`."}
+  must_not_claim: ["A U-suffixed literal is always ulong.", "A U-suffixed literal can be typed as long."]
+  cognitive_level: recall
+  difficulty: easy
+  size_class: medium
+  concepts: [integer literals, literal suffix, uint, ulong]
+
+- id: Q2-EVAL-064
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: E_identifier_c1
+  corpus: corpus1
+  language: en
+  typing: en
+  question: "In ASP.NET Core integration tests, how do I swap a real service for a mock with `ConfigureTestServices`, and how do I keep that override limited to a single test?"
+  answerable: true
+  expected_answer: "Call `ConfigureTestServices` on the host builder to override services in a test. To scope the overridden services to the test itself, get the host builder through `WebApplicationFactory.WithWebHostBuilder`."
+  answer_points:
+    - {id: P1, text: "Services are overridden by calling ConfigureTestServices on the host builder.", required: true}
+    - {id: P2, text: "WithWebHostBuilder retrieves a host builder so the override is scoped to that test.", required: true}
+  expected_sources: [{source_id: "17", heading_path: "Integration tests in ASP.NET Core > Inject mock services", slot: S1}]
+  evidence:
+    - {source_id: "17", heading_path: "Integration tests in ASP.NET Core > Inject mock services", supports: [P1], quote: "Services can be overridden in a test with a call to [ConfigureTestServices](/en-us/dotnet/api/microsoft.aspnetcore.testhost.webhostbuilderextensions.configuretestservices) on the host builder."}
+    - {source_id: "17", heading_path: "Integration tests in ASP.NET Core > Inject mock services", supports: [P2], quote: "To scope the overridden services to the test itself, the [WithWebHostBuilder](/en-us/dotnet/api/microsoft.aspnetcore.mvc.testing.webapplicationfactory-1.withwebhostbuilder) method is used to retrieve a host builder."}
+  must_not_claim: ["You must edit Program.cs of the app under test to inject mocks.", "ConfigureTestServices is called on the HttpClient."]
+  cognitive_level: apply
+  difficulty: hard
+  size_class: huge
+  concepts: [integration tests, ConfigureTestServices, WithWebHostBuilder, WebApplicationFactory]
+
+- id: Q2-EVAL-065
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: E_identifier_c1
+  corpus: corpus1
+  language: vi
+  typing: diacritics
+  question: "Tại sao tài liệu khuyên nên cân nhắc dùng `ValueTask` khi một method async thường trả về kết quả đã cache hoặc chạy xong đồng bộ?"
+  answerable: true
+  expected_answer: "Vì `Task` là kiểu tham chiếu nên mỗi đối tượng `Task` được cấp phát trên heap. Khi method `async` trả kết quả cache hoặc hoàn thành đồng bộ, các lần cấp phát thừa này tốn đáng kể thời gian ở những đoạn code cần hiệu năng cao, nhất là trong vòng lặp chặt."
+  answer_points:
+    - {id: P1, text: "Task là kiểu tham chiếu nên được cấp phát trên heap.", required: true}
+    - {id: P2, text: "Với method trả kết quả cache hoặc hoàn thành đồng bộ, các cấp phát thừa gây tốn thời gian đáng kể ở đoạn code cần hiệu năng.", required: true}
+  expected_sources: [{source_id: "02", heading_path: "Asynchronous programming scenarios > Review considerations for asynchronous programming > Consider using ValueTask type", slot: S1}]
+  evidence:
+    - {source_id: "02", heading_path: "Asynchronous programming scenarios > Review considerations for asynchronous programming > Consider using ValueTask type", supports: [P1], quote: "Because `Task` is a reference type, a `Task` object is allocated from the heap."}
+    - {source_id: "02", heading_path: "Asynchronous programming scenarios > Review considerations for asynchronous programming > Consider using ValueTask type", supports: [P2], quote: "If a method declared with the `async` modifier returns a cached result or completes synchronously, the extra allocations can accrue significant time costs in performance critical sections of code."}
+  must_not_claim: ["Task is a value type allocated on the stack.", "ValueTask should replace Task in every async method."]
+  cognitive_level: explain
+  difficulty: medium
+  size_class: medium
+  concepts: [async, ValueTask, heap allocation, performance]
+
+- id: Q2-EVAL-066
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: E_identifier_c1
+  corpus: corpus1
+  language: vi
+  typing: diacritics
+  question: "Trong web API controller của ASP.NET Core, kết quả có HTTP status code nào thì bị coi là error result và được MVC chuyển thành `ProblemDetails`?"
+  answerable: true
+  expected_answer: "Error result là kết quả có HTTP status code từ 400 trở lên; với web API controller, MVC chuyển error result đó thành một `ProblemDetails`."
+  answer_points:
+    - {id: P1, text: "Error result là kết quả có status code từ 400 trở lên.", required: true}
+    - {id: P2, text: "MVC biến error result thành ProblemDetails cho web API controller.", required: true}
+  expected_sources: [{source_id: "12", heading_path: "Handle errors in ASP.NET Core APIs > Client and Server error responses", slot: S1}]
+  evidence:
+    - {source_id: "12", heading_path: "Handle errors in ASP.NET Core APIs > Client and Server error responses", supports: [P1], quote: "An *error result* is defined as a result with an HTTP status code of 400 or higher."}
+    - {source_id: "12", heading_path: "Handle errors in ASP.NET Core APIs > Client and Server error responses", supports: [P2], quote: "For web API controllers, MVC transforms an error result to produce a [ProblemDetails](/en-us/dotnet/api/microsoft.aspnetcore.mvc.problemdetails)."}
+  must_not_claim: ["Only 500-level status codes are error results.", "ProblemDetails must always be created manually."]
+  cognitive_level: recall
+  difficulty: easy
+  size_class: medium
+  concepts: [web API, error result, ProblemDetails]
+
+- id: Q2-EVAL-067
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: E_identifier_c1
+  corpus: corpus1
+  language: vi
+  typing: diacritics
+  question: "Biến khai báo kiểu `dynamic` trong C# được kiểm tra kiểu vào lúc nào, và lỗi sai kiểu sẽ lộ ra ở đâu?"
+  answerable: true
+  expected_answer: "Kiểu `dynamic` bỏ qua kiểm tra kiểu lúc biên dịch; compiler để các thao tác trên biến `dynamic` được giải quyết lúc chạy. Vì vậy những lỗi mà compiler thường bắt được sẽ trở thành exception lúc chạy (run-time exception)."
+  answer_points:
+    - {id: P1, text: "dynamic bỏ qua kiểm tra kiểu lúc biên dịch; thao tác được giải quyết lúc chạy.", required: true}
+    - {id: P2, text: "Lỗi lẽ ra compiler bắt được sẽ thành exception lúc chạy.", required: true}
+  expected_sources: [{source_id: "04", heading_path: "Built-in types and literals > The `dynamic` type", slot: S1}]
+  evidence:
+    - {source_id: "04", heading_path: "Built-in types and literals > The `dynamic` type", supports: [P1], quote: "The `dynamic` type bypasses compile-time type checking. The compiler resolves operations on a `dynamic` variable at run time instead:"}
+    - {source_id: "04", heading_path: "Built-in types and literals > The `dynamic` type", supports: [P2], quote: "Errors that the compiler normally catches become run-time exceptions instead."}
+  must_not_claim: ["dynamic is the same as var and is checked at compile time.", "Type errors on dynamic variables are reported as compiler errors."]
+  cognitive_level: explain
+  difficulty: medium
+  size_class: medium
+  concepts: [dynamic type, compile-time checking, run-time exceptions]
+
+- id: Q2-EVAL-068
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: E_identifier_c1
+  corpus: corpus1
+  language: vi
+  typing: diacritics
+  question: "Mình viết `if (x is _)` để match mọi giá trị nhưng không được. Discard pattern `_` dùng được ở đâu, và trong biểu thức `is` thì phải viết thế nào?"
+  answerable: true
+  expected_answer: "Discard pattern `_` không dùng được làm pattern trong biểu thức `is` hay câu lệnh `switch`; nó chỉ dùng được trong `switch` expression. Muốn match mọi biểu thức trong `is` hoặc `switch` statement thì dùng `var` pattern kèm discard: `var _`."
+  answer_points:
+    - {id: P1, text: "Discard pattern không dùng được trong biểu thức is hoặc switch statement.", required: true}
+    - {id: P2, text: "Thay vào đó dùng var pattern với discard: var _.", required: true}
+    - {id: P3, text: "Discard pattern dùng được trong switch expression.", required: true}
+  expected_sources: [{source_id: "21", heading_path: "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Discard pattern", slot: S1}]
+  evidence:
+    - {source_id: "21", heading_path: "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Discard pattern", supports: [P1, P2], quote: "A discard pattern can't be a pattern in an `is` expression or a `switch` statement. In those cases, to match any expression, use a [`var` pattern](#var-pattern) with a discard: `var _`."}
+    - {source_id: "21", heading_path: "Pattern matching - the `is` and `switch` expressions, and operators `and`, `or`, and `not` in patterns > Discard pattern", supports: [P3], quote: "A discard pattern can be a pattern in a `switch` expression."}
+  must_not_claim: ["`x is _` is valid and matches everything.", "Use `x is null` to match any value."]
+  cognitive_level: diagnose
+  difficulty: hard
+  size_class: medium
+  concepts: [pattern matching, discard pattern, var pattern]
+
+# ---------------------------------------------------------------- F_unanswerable
+- id: Q2-EVAL-069
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: F_unanswerable
+  corpus: corpus1
+  language: en
+  typing: en
+  question: "How do I turn on output caching for a minimal API endpoint in ASP.NET Core with `AddOutputCache` and `CacheOutput()`?"
+  answerable: false
+  absence:
+    topic: "ASP.NET Core output caching middleware (AddOutputCache / UseOutputCache / CacheOutput)"
+    zero_hit_terms: [AddOutputCache, UseOutputCache, CacheOutput, OutputCache]
+    closest_corpus_text: "#13 only shows a [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)] attribute on the error page model; no document explains output caching."
+  near_miss_sources: ["13", "23"]
+  must_not_claim: ["The corpus documents how to configure output caching policies.", "Output caching is enabled with the [ResponseCache] attribute shown in the corpus."]
+  cognitive_level: apply
+  difficulty: medium
+  concepts: [output caching, ASP.NET Core middleware]
+
+- id: Q2-EVAL-070
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: F_unanswerable
+  corpus: corpus1
+  language: en
+  typing: en
+  question: "How do I run a recurring background job in ASP.NET Core by subclassing `BackgroundService` and registering it with `AddHostedService`?"
+  answerable: false
+  absence:
+    topic: "Hosted services / background workers in ASP.NET Core (BackgroundService, IHostedService)"
+    zero_hit_terms: [BackgroundService, IHostedService, AddHostedService, hosted service]
+    closest_corpus_text: "#10 covers service registration and lifetimes (\"Service registration methods can be used to register multiple service instances of the same service type.\") but never hosted or background services."
+  near_miss_sources: ["10", "02"]
+  must_not_claim: ["The corpus explains BackgroundService.ExecuteAsync for background jobs.", "A background job is registered with AddSingleton according to the corpus."]
+  cognitive_level: apply
+  difficulty: medium
+  concepts: [hosted services, background jobs]
+
+- id: Q2-EVAL-071
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: F_unanswerable
+  corpus: corpus1
+  language: vi
+  typing: diacritics
+  question: "Làm sao tạo migration trong EF Core bằng `Add-Migration` rồi seed dữ liệu mẫu bằng `HasData`?"
+  answerable: false
+  absence:
+    topic: "EF Core migrations and data seeding (Add-Migration, dotnet ef migrations, HasData)"
+    zero_hit_terms: [Add-Migration, MigrationBuilder, HasData, dotnet ef migrations]
+    closest_corpus_text: "#22 only covers querying: \"EF Core passes a representation of the LINQ query to the database provider.\""
+  near_miss_sources: ["22", "10"]
+  must_not_claim: ["The corpus explains how to create and apply EF Core migrations.", "HasData seeding is described in the Querying Data document."]
+  cognitive_level: apply
+  difficulty: medium
+  concepts: [EF Core, migrations, data seeding]
+
+- id: Q2-EVAL-072
+  review_status: approved  # owner 2026-11-25 (review sheet: approve all 78)
+  split: eval
+  category: F_unanswerable
+  corpus: corpus1
+  language: vi
+  typing: diacritics
+  question: "Trong C#, làm sao giới hạn chỉ tối đa 5 tác vụ async chạy cùng lúc bằng `SemaphoreSlim` hoặc `Parallel.ForEachAsync`?"
+  answerable: false
+  absence:
+    topic: "Throttling async concurrency in C# (SemaphoreSlim, Parallel.ForEachAsync, MaxDegreeOfParallelism)"
+    zero_hit_terms: [SemaphoreSlim, Parallel.ForEachAsync, MaxDegreeOfParallelism, WaitAsync]
+    closest_corpus_text: "#01 describes Task.WhenAll / Task.WhenAny for waiting on several tasks (\"returns a Task object that completes when all the tasks in its argument list are complete\") but nothing about limiting how many run at once."
+  near_miss_sources: ["01", "02"]
+  must_not_claim: ["Task.WhenAll limits the number of tasks running concurrently.", "The corpus shows a SemaphoreSlim throttling example."]
+  cognitive_level: apply
+  difficulty: hard
+  concepts: [async concurrency, throttling]
