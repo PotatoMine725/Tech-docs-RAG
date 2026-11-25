@@ -394,13 +394,13 @@
       "pages": 57,
       "image_count": 25,
       "has_images": true,
-      "chars": 72973,
-      "headings": 3,
+      "chars": 72976,
+      "headings": 0,
       "image_only_facts": [
         "p.16 library catalogue screenshot example record: 'Adat Atjeh' (1958, publisher M. Nijhoff), subject 'Aceh (Indonesia) -- History -- Sources' with 'Sources' circled"
       ],
       "image_inspection": "sampled: pages 16, 19, 44 of 57 (rendered); Other images are decorative (key clipart, cartoon student, university logos).",
-      "converted_sha256": "6168c7b050f0fb1776daa9b9ddcc2b43b287a6efbf46ed8941715de13d6c5125"
+      "converted_sha256": "25311bcd6a2d6f868d1ce65881ab92d89b3ba1c89a4971264da58f3cd729ad60"
     },
     {
       "id": "C2-22",

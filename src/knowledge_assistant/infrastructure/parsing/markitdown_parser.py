@@ -7,7 +7,10 @@ the content and returned damaged or mismatched files (a zip renamed `.docx`, a h
 The result is a raw `ParsedDocument` (`normalized=False`): the ADR-0003 D1 normalizer is specific to the
 web-exported corpus pages and is not applied. Line endings are unified and the H1-H3 sections are computed the
 same way as for normalized text, so both chunkers can take the document as-is.
+PDF text has no Markdown structure, so a PDF line that starts with `#` (e.g. "# number" in a symbol table, corpus 2
+C2-21) is escaped as `\\#` and stays text instead of becoming a heading (owner decision 2026-11-25, ADR-0008).
 """
+import re
 from pathlib import Path
 
 from knowledge_assistant.core.exceptions import DocumentParseError
@@ -24,6 +27,13 @@ _CONVERTERS = {
     ".txt": "PlainTextConverter",
 }
 MARKITDOWN_EXTENSIONS = tuple(_CONVERTERS)
+# a line an ATX-heading reader would take as a heading (same shape as chunking.markdown_structure._ATX)
+_HEADING_LIKE = re.compile(r"^( {0,3})(#{1,6}(?:[ \t]|$))", re.MULTILINE)
+
+
+def escape_heading_like_lines(text: str) -> str:
+    """Prefix a backslash to every line that would read as a Markdown heading, so it stays plain text."""
+    return _HEADING_LIKE.sub(r"\1\\\2", text)
 
 
 class MarkItDownParser:
@@ -49,6 +59,8 @@ class MarkItDownParser:
         text = result.markdown.removeprefix("\ufeff").replace("\r\n", "\n").replace("\r", "\n").strip("\n")
         if not text.strip():  # e.g. a scanned PDF: an empty document must not vanish silently from the index
             raise DocumentParseError(f"cannot convert {where}: no text extracted")
+        if extension == ".pdf":
+            text = escape_heading_like_lines(text)
         text += "\n"
         return ParsedDocument(
             document=document,
