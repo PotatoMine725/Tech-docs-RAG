@@ -245,3 +245,5 @@ corpus2/converted/
 **/data/keyword-corpus2/
 **/data/processed/chunks-corpus2/
 **/data/processed/documents-corpus2/
+# Corpus-2 run folders hold retrieved chunk text of non-redistributable documents (ADR-0008): local only
+data/evaluation/results/*-corpus2-*/
