@@ -79,12 +79,15 @@ p < 0.5 (n 10-20). C (n=8) and no_diacritics (n=9) are **not tested: n too small
 | Local | corpus 2 | 5 | 0.3923 | 0.3041 | 0.3423 | no |
 | Local | pooled | 9 | 0.3923 | 0.5869 | 0.3423 | **yes** |
 
-**DECISION REQUIRED (local gate):** corpus-2 scores are lower overall. The current 0.5417 refuses 3 of 5 answerable
-v2 dev questions (Q2-DEV-002 0.3923 no_diacritics, -003 0.4702, -005 0.5061) and, for information, 16/52 (arm A) and
-21/52 (arm B) answerable corpus-2 eval questions. Pooling corpora makes answerable and unanswerable overlap
-(0.3923 < 0.5869), so one threshold cannot separate them. Options for the owner: per-corpus thresholds, the
-pooled rule value 0.3423 (would pass both unanswerable corpus-1 dev cases, Q-DEV-005 0.5869 and Q-DEV-006 0.5378), or leave it to the LLM layer / a reranker
-score (retrieval-spec.md: hybrid gate TBD until a reranker). Dev n is 9-11: small.
+**Owner decision 2026-11-25 (local gate):** corpus-2 scores are lower overall, and pooling corpora makes answerable
+and unanswerable overlap (0.3923 < 0.5869), so the dense-cosine gate does not separate them across domains for
+embeddinggemma. No per-corpus thresholds (the app cannot know a user's corpus), no pooled 0.3423 (it would pass both
+unanswerable corpus-1 dev cases, Q-DEV-005 0.5869 and Q-DEV-006 0.5378). Refusal moves to the reranker's absolute
+score (next step) with the LLM refusal second; recorded in ADR-0007 (amendment) and retrieval-spec.md.
+**Known limitation until then:** the default 0.5417 stays and over-refuses on corpus 2: it refuses 3 of 5 answerable
+v2 dev questions (Q2-DEV-002 0.3923 no_diacritics, -003 0.4702, -005 0.5061) and 16/52 (arm A) / 21/52 (arm B)
+answerable corpus-2 eval questions. Dev n is 9-11: small. Gemini gate: re-checked the same way once Gemini v2 runs
+exist (**TBD**).
 
 ## Recommendation (provisional until Gemini v2)
 - **Best so far:** on corpus 1, Gemini dense arm A (0.938). On corpus 2 the local embedder's best is hybrid arm A
@@ -93,7 +96,7 @@ score (retrieval-spec.md: hybrid gate TBD until a reranker). Dev n is 9-11: smal
   mode is best on corpus 2: **TBD (Gemini v2)**.
 - **Where local lags:** v1 dense (23 vs 30, p=0.016); no-diacritics questions (dense A 4/9); gate calibration on
   corpus 2 (above). Sparse alone fails cross-language C (1/8), as expected without translation.
-- **Next step:** a **reranker** before a fine-tune. Section hits exceed evidence hits (v1 local dense A: section
+- **Next step (owner, 2026-11-25):** reranker benchmark (plan §7.1), not fine-tuning. Section hits exceed evidence hits (v1 local dense A: section
   29/32, evidence 23/32). Checked offline against the arm's whole chunk file (same NFC + whitespace rule): in every
   section-hit / evidence-miss case the required quotes are contained whole in some chunk of the arm, i.e. the misses
   are ranking, not chunking: v1 local dense A 6/6, v1 local dense B 5/5, corpus-2 local dense A 4/4, hybrid A 3/3,
