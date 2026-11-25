@@ -14,12 +14,14 @@ the evaluation runner does the opposite in its own process).
 """
 from __future__ import annotations
 
+import json
+import os
 import threading
 from dataclasses import replace
 
 from knowledge_assistant.application.generation.answer_question import AnswerQuestion
 from knowledge_assistant.composition import build_answer_service, create_embedder, create_llm, open_embedder
-from knowledge_assistant.config import get_answer_settings
+from knowledge_assistant.config import get_answer_settings, resolve_project_path
 from knowledge_assistant.core.interfaces.embedding import EmbeddingTask
 
 from .viewmodels.core_ask_question import CoreAskQuestion
@@ -56,3 +58,18 @@ def build_real_port() -> CoreAskQuestion:
         return build_answer_service(arm, llm, embedder)
 
     return CoreAskQuestion(service_for_arm)
+
+
+def load_source_titles(manifest_path: str | None = None) -> tuple[str, ...]:
+    """Titles of the accepted documents, A to Z, for the window's source list.
+
+    They come from the corpus manifest (`CORPUS_MANIFEST`, default `corpus/manifest.json`); each title is the
+    `document_name` that citations carry. A missing or unreadable manifest gives an empty list: the window still
+    opens and answers, it only shows no sources.
+    """
+    path = resolve_project_path(manifest_path or os.getenv("CORPUS_MANIFEST", "corpus/manifest.json"))
+    try:
+        documents = json.loads(path.read_text(encoding="utf-8"))["documents"]
+        return tuple(sorted({d["title"] for d in documents}, key=str.casefold))
+    except (OSError, ValueError, KeyError, TypeError):
+        return ()
