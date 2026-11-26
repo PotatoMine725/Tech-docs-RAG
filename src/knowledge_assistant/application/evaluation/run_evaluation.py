@@ -407,6 +407,7 @@ class RunEvaluation:
             prompt_tokens=llm.prompt_tokens if llm else None,
             output_tokens=llm.output_tokens if llm else None,
             thoughts_tokens=llm.thoughts_tokens if llm else None,
+            time_to_first_token_ms=llm.time_to_first_token_ms if llm else None,
             prompt_version=answer.prompt_version,
         )
         return fields, (llm.retry_count + 1 if llm else 0)

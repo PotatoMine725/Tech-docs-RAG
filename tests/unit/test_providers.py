@@ -52,10 +52,24 @@ def test_unknown_values_fail_loudly(monkeypatch, name, value):
         create_reranker()
 
 
-def test_llamacpp_is_reserved_but_not_built_yet(monkeypatch):
+def test_llamacpp_needs_a_pinned_model_id(monkeypatch):
     monkeypatch.setenv("LLM_PROVIDER", "llamacpp")
-    with pytest.raises(ConfigurationError, match="not implemented"):
+    monkeypatch.delenv("LOCAL_LLM_MODEL", raising=False)
+    with pytest.raises(ConfigurationError, match="LOCAL_LLM_MODEL"):
         create_llm()
+
+
+def test_llamacpp_is_selected_and_names_the_answer_model(monkeypatch):
+    from knowledge_assistant.composition import active_answer_model
+    from knowledge_assistant.infrastructure.llm.llamacpp import LlamaCppLLM
+
+    monkeypatch.setenv("LLM_PROVIDER", "llamacpp")
+    monkeypatch.setenv("LOCAL_LLM_MODEL", "qwen3.5-2b-q4_k_m")
+    llm = create_llm()
+    assert isinstance(llm, LlamaCppLLM) and llm.model == "qwen3.5-2b-q4_k_m"
+    assert active_answer_model() == "qwen3.5-2b-q4_k_m"
+    monkeypatch.setenv("LLM_PROVIDER", "gemini")
+    assert active_answer_model() == "gemini-3.5-flash-lite"
 
 
 def test_noop_reranker_keeps_order_and_respects_top_n():

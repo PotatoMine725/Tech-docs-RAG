@@ -63,7 +63,9 @@ from knowledge_assistant.application.evaluation.run_evaluation import (  # noqa:
 from knowledge_assistant.application.generation.answer_question import AnswerQuestion  # noqa: E402
 from knowledge_assistant.application.retrieval.retrieve import Retriever  # noqa: E402
 from knowledge_assistant.composition import (  # noqa: E402
+    active_answer_model,
     build_answer_service,
+    create_llm,
     create_reranker,
     create_retriever,
     open_embedder,
@@ -85,7 +87,6 @@ from knowledge_assistant.core.exceptions import (  # noqa: E402
 )
 from knowledge_assistant.core.interfaces.embedding import EmbeddingTask  # noqa: E402
 from knowledge_assistant.infrastructure.gemini_retry import redact_key  # noqa: E402
-from knowledge_assistant.infrastructure.llm.gemini import GeminiLLM  # noqa: E402
 from knowledge_assistant.infrastructure.llm.gemini.gemini_llm import build_throttles  # noqa: E402
 from knowledge_assistant.infrastructure.llm.gemini.provider_error_log import FirstProviderErrors  # noqa: E402
 from knowledge_assistant.infrastructure.persistence.jsonl_record_store import JsonlRecordStore  # noqa: E402
@@ -114,7 +115,8 @@ EXIT_OK, EXIT_ERRORS, EXIT_STOPPED, EXIT_ABORTED = 0, 1, 2, 3
 @dataclass
 class Services:
     """What the run needs from the outside world. `throttles` is the one per-model throttle mapping of this process;
-    a judge (EVAL-003b) that runs in the same process must build its GeminiLLM with it."""
+    a judge (EVAL-003b) that runs in the same process must build its GeminiLLM with it. The answer LLM comes from
+    LLM_PROVIDER (`create_llm`); the local provider ignores the throttles."""
 
     retriever: Retriever
     answerer: AnswerQuestion | None
@@ -136,7 +138,7 @@ def open_services(arm: str, mode: str, settings, on_provider_error):
         answerer = llm = throttles = None
         if mode == FULL:
             throttles = build_throttles(settings)
-            llm = GeminiLLM(settings, throttles=throttles, on_provider_error=on_provider_error)
+            llm = create_llm(settings, throttles=throttles, on_provider_error=on_provider_error)  # LLM_PROVIDER
             answerer = build_answer_service(arm, llm, embedder, store=store, reranker=reranker)
 
         def stats() -> dict:
@@ -293,7 +295,7 @@ def _run(args, emit, services, git_state, root: Path, today) -> int:
     embedding_dim = int(dim)
     prompt_file = settings.prompts_dir / f"{settings.prompt_version}.md"
     config = RunConfig(
-        arm=args.arm, mode=args.mode, split=args.split, answer_model=settings.model,
+        arm=args.arm, mode=args.mode, split=args.split, answer_model=active_answer_model(settings),
         fallback_model=settings.fallback_model, allow_fallback=settings.allow_fallback,
         embedding_model=embedding_model, embedding_dim=embedding_dim, throttle_rpm=settings.limits.throttle_rpm,
         threshold=retrieval.insufficient_score_threshold, prompt_version=settings.prompt_version,

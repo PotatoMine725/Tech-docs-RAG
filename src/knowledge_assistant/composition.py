@@ -20,6 +20,7 @@ from knowledge_assistant.config import (
     get_embedding_provider,
     get_embedding_settings,
     get_keyword_index_dir,
+    get_llamacpp_settings,
     get_llm_provider,
     get_local_embedding_settings,
     get_rerank_provider,
@@ -36,6 +37,7 @@ from knowledge_assistant.infrastructure.embeddings.embeddinggemma_embedder impor
 from knowledge_assistant.infrastructure.embeddings.gemini_embedder import GeminiEmbedder
 from knowledge_assistant.infrastructure.keyword_index.fts5_index import Fts5KeywordIndex
 from knowledge_assistant.infrastructure.llm.gemini import GeminiLLM
+from knowledge_assistant.infrastructure.llm.llamacpp import LlamaCppLLM
 from knowledge_assistant.infrastructure.persistence.embedding_cache import CachingEmbedder, PlannedEmbedder
 from knowledge_assistant.infrastructure.rerank.noop_reranker import NoOpReranker
 from knowledge_assistant.infrastructure.rerank.onnx_cross_encoder import OnnxCrossEncoderReranker
@@ -72,11 +74,18 @@ def open_embedder(max_attempts: int | None = None, inner: PlannedEmbedder | None
 
 
 def create_llm(settings: AnswerSettings | None = None, **provider_options) -> LLM:
-    """The configured answer LLM (LLM_PROVIDER). `provider_options` go to the provider (Gemini: throttles,
-    on_provider_error). The local llama.cpp provider is reserved, not built yet."""
+    """The configured answer LLM (LLM_PROVIDER). `settings` and `provider_options` (throttles, on_provider_error) are
+    Gemini's; the local llama.cpp provider reads its own settings (LOCAL_LLM_*, LLAMACPP_URL) and ignores them."""
     if get_llm_provider() == "llamacpp":
-        raise ConfigurationError("LLM_PROVIDER=llamacpp is not implemented yet; use gemini")
+        return LlamaCppLLM(get_llamacpp_settings())
     return GeminiLLM(settings, **provider_options)
+
+
+def active_answer_model(settings: AnswerSettings | None = None) -> str:
+    """The id of the model that writes the answers (records, model-purity check)."""
+    if get_llm_provider() == "llamacpp":
+        return get_llamacpp_settings().model
+    return (settings or get_answer_settings()).model
 
 
 def create_reranker() -> Reranker:

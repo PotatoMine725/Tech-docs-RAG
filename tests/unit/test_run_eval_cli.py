@@ -293,7 +293,7 @@ def test_the_real_wiring_builds_the_throttles_once_and_shares_them(monkeypatch):
     monkeypatch.setattr(run_eval, "open_embedder", lambda: _Embedder())
     monkeypatch.setattr(run_eval, "open_vector_store", lambda arm: InMemoryVectorStore())
     monkeypatch.setattr(run_eval, "build_throttles", lambda settings: built.append(settings) or throttles)
-    monkeypatch.setattr(run_eval, "GeminiLLM", SpyLLM)
+    monkeypatch.setattr(run_eval, "create_llm", SpyLLM)
     settings = run_eval.replace(run_eval.get_answer_settings(), allow_fallback=False)
     hook = object()
     with run_eval.open_services("A", "full", settings, hook) as services:
@@ -348,7 +348,7 @@ def test_full_mode_builds_one_reranker_and_both_retrievers_of_an_arm_share_it(mo
     monkeypatch.setattr(run_eval, "open_embedder", lambda: _Embedder())
     monkeypatch.setattr(run_eval, "open_vector_store", lambda arm: _low_score_store())
     monkeypatch.setattr(run_eval, "build_throttles", lambda settings: {})
-    monkeypatch.setattr(run_eval, "GeminiLLM", lambda settings, throttles, on_provider_error: ScriptedLLM())
+    monkeypatch.setattr(run_eval, "create_llm", lambda settings, throttles, on_provider_error: ScriptedLLM())
     monkeypatch.setattr(composition, "create_reranker", create_reranker)  # what an unshared service would build its own with
     monkeypatch.setattr(run_eval, "create_reranker", create_reranker, raising=False)
     settings = run_eval.replace(run_eval.get_answer_settings(), allow_fallback=False)
