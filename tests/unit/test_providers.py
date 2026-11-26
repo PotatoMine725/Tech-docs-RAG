@@ -65,3 +65,12 @@ def test_noop_reranker_keeps_order_and_respects_top_n():
     assert results[0].score > results[1].score
     assert [r.index for r in reranker.rerank("q", ["a", "b"])] == [0, 1]
     assert reranker.rerank("q", []) == []
+
+
+def test_bad_rerank_settings_do_not_break_retrieval_when_reranking_is_off(monkeypatch):
+    from knowledge_assistant.composition import create_retriever
+    from tests.fakes import FakeEmbedder, InMemoryVectorStore
+
+    monkeypatch.setenv("RERANK_CANDIDATES", "0")  # invalid, but ignored while RERANK_PROVIDER is none
+    retriever = create_retriever("A", FakeEmbedder(), InMemoryVectorStore({}))
+    assert retriever.rerank_candidates == 20

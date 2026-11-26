@@ -72,6 +72,8 @@ from knowledge_assistant.config import (  # noqa: E402
     get_active_embedding_model_id,
     get_corpus,
     get_answer_settings,
+    get_rerank_model_id,
+    get_rerank_settings,
     get_retrieval_settings,
 )
 from knowledge_assistant.core.exceptions import (  # noqa: E402
@@ -294,6 +296,8 @@ def _run(args, emit, services, git_state, root: Path, today) -> int:
         prompt_sha256=hashlib.sha256(prompt_file.read_bytes()).hexdigest(), top_k=retrieval.top_k,
         overfetch=retrieval.overfetch, freeze_tag=question_set.freeze_tag, freeze_tag_commit=tag_commit,
         question_files=hashes, retrieval_mode=retrieval.mode, rrf_k=retrieval.rrf_k, corpus=args.corpus,
+        rerank_model=get_rerank_model_id(),
+        rerank_candidates=0 if get_rerank_model_id() == "none" else get_rerank_settings().candidates,
     )
     run_id = args.run_id or default_run_id(today(), args.split, args.arm, args.mode, environment.git_commit)
     if args.run_id is None and (args.questions, args.corpus) != ("v1", "corpus1"):  # keep v1/corpus-1 ids as they were

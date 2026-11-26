@@ -3,7 +3,8 @@
 Date: 2026-11-23
 Status: Accepted (owner, 2026-11-23: keep Gemini as the default embedder; next step hybrid search, then re-measure).
 D3, the tokenizer, is **PROVISIONAL** (owner decision 2026-11-23). D6, the gate in hybrid/sparse mode, is
-**TBD until the reranker step**. Amended 2026-11-25 (owner): see "Amendment: gate across domains" below.
+**TBD until the reranker step**. Amended 2026-11-25 (owner): see "Amendment: gate across domains" below. Reranker
+step done in ADR-0009 (2026-11-26): its gate value is PROVISIONAL, so D6 still reads the dense top-1.
 Refines: ADR-0005 (index storage), ADR-0006 (Reranker contract, not wired yet). Plan step 4a of
 `docs/plans/local-rag-upgrade-plan.md` §7.1. The reranker (step 4b) is out of scope here.
 

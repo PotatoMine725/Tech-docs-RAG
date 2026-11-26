@@ -35,7 +35,9 @@ Two layers:
   `insufficient_reason = "retrieval_gate"`. score == threshold passes the gate (strict <).
   **Per retrieval mode (ADR-0007 D6):** the gate score is always the **dense** top-1 cosine of the active embedder,
   also in `sparse` and `hybrid` mode (RRF and BM25 scores cannot say "nothing relevant"). In dense mode this is the
-  rank-1 score, as before. Hybrid/sparse gate: **TBD** until the reranker step gives an absolute relevance score.
+  rank-1 score, as before. Hybrid/sparse gate: still the dense top-1. The reranker step (ADR-0009, 2026-11-26) gives
+  an absolute score, but its dev threshold is **PROVISIONAL** (pooled dev overlap, 9 answerable cases), so no
+  reranker gate is in use; reranking itself is opt-in (`RERANK_PROVIDER=cross-encoder`, default `none`).
 - (b) **LLM layer:** the model answers `"insufficient": true` → `insufficient_reason = "llm"` (generation-spec.md).
 
 **Threshold per embedding provider** (scores of different embedders are not comparable; `config.GATE_THRESHOLDS`,

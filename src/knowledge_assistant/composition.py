@@ -23,6 +23,7 @@ from knowledge_assistant.config import (
     get_llm_provider,
     get_local_embedding_settings,
     get_rerank_provider,
+    get_rerank_settings,
     get_retrieval_settings,
 )
 from knowledge_assistant.core.exceptions import ConfigurationError, KeywordIndexError, VectorStoreError
@@ -37,6 +38,7 @@ from knowledge_assistant.infrastructure.keyword_index.fts5_index import Fts5Keyw
 from knowledge_assistant.infrastructure.llm.gemini import GeminiLLM
 from knowledge_assistant.infrastructure.persistence.embedding_cache import CachingEmbedder, PlannedEmbedder
 from knowledge_assistant.infrastructure.rerank.noop_reranker import NoOpReranker
+from knowledge_assistant.infrastructure.rerank.onnx_cross_encoder import OnnxCrossEncoderReranker
 from knowledge_assistant.infrastructure.vector_store.chromadb.chroma_store import ChromaVectorStore
 
 ARMS = ("A", "B")
@@ -78,8 +80,10 @@ def create_llm(settings: AnswerSettings | None = None, **provider_options) -> LL
 
 
 def create_reranker() -> Reranker:
-    """The configured reranker (RERANK_PROVIDER); only `none` exists until hybrid search."""
-    get_rerank_provider()  # validates the value
+    """The configured reranker (RERANK_PROVIDER, ADR-0009): `none` (default) or the local ONNX cross-encoder. Building
+    it is cheap: the model loads on its first `rerank`."""
+    if get_rerank_provider() == "cross-encoder":
+        return OnnxCrossEncoderReranker(get_rerank_settings())
     return NoOpReranker()
 
 
@@ -114,16 +118,21 @@ def open_keyword_index(arm: str) -> Fts5KeywordIndex:
 
 
 def create_retriever(
-    arm: str, embedder: Embedder, store: VectorStore | None = None, keyword_index: KeywordIndex | None = None
+    arm: str, embedder: Embedder, store: VectorStore | None = None, keyword_index: KeywordIndex | None = None,
+    reranker: Reranker | None = None,
 ) -> Retriever:
-    """The retriever of one arm in the configured RETRIEVAL_MODE. Dense mode (the default) never opens the keyword
-    index, so a setup without one keeps working."""
+    """The retriever of one arm in the configured RETRIEVAL_MODE and RERANK_PROVIDER. Dense mode (the default) never
+    opens the keyword index, so a setup without one keeps working. Pass `reranker` to reuse one instance (the model
+    then loads once per process)."""
     retrieval = get_retrieval_settings()
     if retrieval.mode != "dense" and keyword_index is None:
         keyword_index = open_keyword_index(arm)
     return Retriever(
         embedder, store or open_vector_store(arm), retrieval.top_k, retrieval.overfetch,
         keyword_index=keyword_index if retrieval.mode != "dense" else None, mode=retrieval.mode, rrf_k=retrieval.rrf_k,
+        reranker=reranker or create_reranker(),
+        # RERANK_* settings are read only when reranking is on, so `none` never fails on them
+        rerank_candidates=get_rerank_settings().candidates if get_rerank_provider() != "none" else 20,
     )
 
 
@@ -134,14 +143,17 @@ def build_answer_service(
     *,
     store: VectorStore | None = None,
     gate_off: bool = False,
+    reranker: Reranker | None = None,
 ) -> AnswerQuestion:
     """One `AnswerQuestion` for one arm. `gate_off=True` disables the retrieval gate so a low-scoring question still
-    reaches the LLM: a diagnostic for checking the LLM's own "insufficient" path, never used for evaluation."""
+    reaches the LLM: a diagnostic for checking the LLM's own "insufficient" path, never used for evaluation.
+    `reranker`: pass one instance to share it between services (the GUI builds both arms on one reranker, so its model
+    loads once); left out, each service builds the configured one."""
     answer = get_answer_settings()
     retrieval = get_retrieval_settings()
     threshold = float("-inf") if gate_off else retrieval.insufficient_score_threshold
     return AnswerQuestion(
-        create_retriever(arm, embedder, store),
+        create_retriever(arm, embedder, store, reranker=reranker),
         llm,
         PromptBuilder.from_dir(answer.prompts_dir, answer.prompt_version),
         load_messages(answer.messages_path),

@@ -19,6 +19,13 @@ by (score desc, chunk_id), keep the first hit of each `passage_hash` (the link-s
 different content hashes but the same passage and the same vector. `duplicates_dropped` counts the over-fetched
 hits dropped this way. In hybrid mode dedup runs on the fused list.
 
+Rerank (ADR-0009, optional): with a reranker whose scores are absolute, the retriever keeps the best
+`rerank_candidates` unique passages (dedup as above, cut to that many instead of `top_k`), scores each as
+"heading path + blank line + passage body" with the cross-encoder, and returns the `top_k` best by reranker score
+(ties: original rank). `chunks[i].score` is then the reranker score and `rerank_score` its top-1. `gate_score` stays the
+dense top-1 cosine: which score the gate reads with a reranker is an owner decision (ADR-0009, DECISION REQUIRED).
+A reranker without absolute scores (`none`) is not called, so the default path is unchanged.
+
 The question is composed to Unicode NFC before it is embedded or searched, like the indexed text (ADR-0008).
 """
 import time
@@ -26,12 +33,13 @@ import unicodedata
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from knowledge_assistant.application.common.passage import passage_hash
+from knowledge_assistant.application.common.passage import passage_body, passage_hash
 from knowledge_assistant.core.exceptions import RetrievalError
 from knowledge_assistant.core.interfaces.embedding import Embedder, EmbeddingTask
 from knowledge_assistant.core.interfaces.keyword_index import KeywordIndex
+from knowledge_assistant.core.interfaces.reranker import Reranker
 from knowledge_assistant.core.interfaces.vector_store import VectorStore
-from knowledge_assistant.core.models import RetrievedChunk
+from knowledge_assistant.core.models import HEADING_PATH_SEPARATOR, DocumentChunk, RetrievedChunk
 
 DENSE, SPARSE, HYBRID = "dense", "sparse", "hybrid"
 RETRIEVAL_MODES = (DENSE, SPARSE, HYBRID)
@@ -44,6 +52,7 @@ class RetrievalResult:
     duplicates_dropped: int
     latency_ms: dict[str, float]  # embed_query, retrieve
     gate_score: float | None = None  # dense top-1 cosine (the OD-9 gate input); None = chunks[0].score
+    rerank_score: float | None = None  # reranker top-1 (absolute, ADR-0009); None without a reranker
 
     def __post_init__(self) -> None:
         if self.gate_score is None and self.chunks:
@@ -84,6 +93,22 @@ def reciprocal_rank_fusion(lists: list[list[RetrievedChunk]], k: int = RRF_K) ->
             for rank, chunk_id in enumerate(ordered, start=1)]
 
 
+def rerank_passage(chunk: DocumentChunk) -> str:
+    """What the reranker reads: heading path, blank line, link-stripped passage body (what the LLM sees)."""
+    heading = HEADING_PATH_SEPARATOR.join(chunk.heading_path)
+    body = passage_body(chunk)
+    return f"{heading}\n\n{body}" if heading else body
+
+
+def rerank_chunks(reranker: Reranker, question: str, candidates: list[RetrievedChunk], top_k: int
+                  ) -> list[RetrievedChunk]:
+    """The `top_k` candidates with the best reranker score, ranked 1..k, `score` = reranker score."""
+    results = reranker.rerank(question, [rerank_passage(hit.chunk) for hit in candidates], top_n=top_k)
+    return [RetrievedChunk(chunk=candidates[r.index].chunk, rank=rank, score=r.score,
+                           duplicate_chunk_ids=candidates[r.index].duplicate_chunk_ids)
+            for rank, r in enumerate(results, start=1)]
+
+
 class Retriever:
     def __init__(
         self,
@@ -96,6 +121,8 @@ class Retriever:
         keyword_index: KeywordIndex | None = None,
         mode: str = DENSE,
         rrf_k: int = RRF_K,
+        reranker: Reranker | None = None,
+        rerank_candidates: int = 20,
     ) -> None:
         if top_k < 1 or overfetch < 0:
             raise ValueError(f"top_k must be >= 1 and overfetch >= 0, got {top_k}, {overfetch}")
@@ -105,6 +132,8 @@ class Retriever:
             raise ValueError(f"retrieval mode {mode} needs a keyword index")
         if rrf_k < 1:
             raise ValueError(f"rrf_k must be >= 1, got {rrf_k}")
+        if rerank_candidates < 1:
+            raise ValueError(f"rerank_candidates must be >= 1, got {rerank_candidates}")
         self._embedder = embedder
         self._store = store
         self._keywords = keyword_index
@@ -112,6 +141,8 @@ class Retriever:
         self.overfetch = overfetch
         self.mode = mode
         self.rrf_k = rrf_k
+        self._reranker = reranker if reranker is not None and reranker.absolute_scores else None
+        self.rerank_candidates = max(top_k, rerank_candidates)
         self._clock = clock
 
     def retrieve(self, question: str) -> RetrievalResult:
@@ -121,7 +152,8 @@ class Retriever:
         embedded = self._clock()
         if len(vectors) != 1:
             raise RetrievalError(f"expected 1 query embedding, got {len(vectors)}")
-        fetch = self.top_k + self.overfetch
+        keep = self.rerank_candidates if self._reranker else self.top_k
+        fetch = keep + self.overfetch
         dense = self._store.search(vectors[0], fetch)
         if not dense:
             raise RetrievalError("the vector store returned no chunks (is the collection indexed?)")
@@ -137,10 +169,17 @@ class Retriever:
             else:
                 hits = reciprocal_rank_fusion([dense, sparse], self.rrf_k)
         searched = self._clock()
-        chunks, dropped = dedupe_by_passage(hits, self.top_k)
+        chunks, dropped = dedupe_by_passage(hits, keep)
+        latency = {"embed_query": (embedded - start) * 1000.0, "retrieve": (searched - embedded) * 1000.0}
+        rerank_score = None
+        if self._reranker:
+            chunks = rerank_chunks(self._reranker, question, chunks, self.top_k)
+            latency["rerank"] = (self._clock() - searched) * 1000.0
+            rerank_score = chunks[0].score if chunks else None
         return RetrievalResult(
             chunks=tuple(chunks),
             duplicates_dropped=dropped,
-            latency_ms={"embed_query": (embedded - start) * 1000.0, "retrieve": (searched - embedded) * 1000.0},
+            latency_ms=latency,
             gate_score=gate_score,
+            rerank_score=rerank_score,
         )
