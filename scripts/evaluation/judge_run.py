@@ -10,7 +10,7 @@ records already judged ok (cache key: case, arm, sha256 of the answer, judge pro
 retried. The judge prompt's file hash and the judge model are checked against earlier ok lines: a mismatch refuses
 the run.
 
-The judge is JUDGE_MODEL from config (the answer model, ADR-0004 D12), temperature 0, no fallback model, its own 13-RPM
+The judge is JUDGE_MODEL from config (gemini-3.8-flash since plan amendment A4; key JUDGE_API_KEY, else GEMINI_API_KEY), temperature 0, no fallback model, its own 13-RPM
 throttle. It runs as a separate step AFTER generation, never at the same time as run_eval.py on the same key: the
 throttle windows are per process, so two processes could exceed the model's 15 RPM together. The script refuses a run
 whose last run_eval.py invocation has no finish time (it may still be running); pass --allow-unfinished only when you
@@ -39,7 +39,12 @@ from knowledge_assistant.application.evaluation.judge import (  # noqa: E402
     parse_template,
 )
 from knowledge_assistant.application.evaluation.run_evaluation import FULL  # noqa: E402
-from knowledge_assistant.config import get_answer_settings, get_judge_settings  # noqa: E402
+from knowledge_assistant.config import (  # noqa: E402
+    get_answer_settings,
+    get_judge_api_key,
+    get_judge_settings,
+    judge_api_key_source,
+)
 from knowledge_assistant.core.exceptions import ConfigurationError, EvaluationError  # noqa: E402
 from knowledge_assistant.infrastructure.gemini_retry import redact_key  # noqa: E402
 from knowledge_assistant.infrastructure.llm.gemini import GeminiLLM  # noqa: E402
@@ -59,7 +64,8 @@ def judge_llm_settings(judge):
 
 def build_llm(judge, store, run_id):
     settings = judge_llm_settings(judge)
-    return GeminiLLM(settings, throttles=build_throttles(settings), on_provider_error=FirstProviderErrors(store, run_id))
+    return GeminiLLM(settings, throttles=build_throttles(settings), on_provider_error=FirstProviderErrors(store, run_id),
+                     api_key=get_judge_api_key)
 
 
 def run_split(manifest: dict, records: list[dict]) -> str:
@@ -130,7 +136,8 @@ def _run(args, emit, llm_factory, root: Path) -> int:
                          max_output_tokens=judge.max_output_tokens)
     templates = parse_template(prompt_bytes.decode("utf-8"))
     emit(f"judge run {args.run_id} (split {split}, arm {manifest['config']['arm']}): model {config.model} (fallback off, "
-         f"temperature 0, throttle {judge.limits.throttle_rpm} RPM), prompt {config.prompt_version} "
+         f"temperature 0, throttle {judge.limits.throttle_rpm} RPM, key from {judge_api_key_source()}), "
+         f"prompt {config.prompt_version} "
          f"({config.prompt_sha256[:12]})")
 
     llm = None if args.estimate_only else llm_factory(judge, store, args.run_id)

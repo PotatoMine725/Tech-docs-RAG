@@ -44,7 +44,7 @@ Pricing page (https://ai.google.dev/gemini-api/docs/pricing): free-tier content 
 - Reasons: 500 RPD / 15 RPM fits a full evaluation run in one day. It was the fastest in the availability check (speed is a user priority). The app and the evaluation use the same model, so reported results describe the real system.
 - Pinned by exact name in configuration, never hard-coded in code and never a `-latest` alias (aliases can change silently and break reproducibility).
 
-**D12 Fallback: `gemini-3.5-flash`. Answer-quality judge: `gemini-3.5-flash-lite`.** (Amended; originally fallback + judge = `gemini-3.5-flash-lite`.)
+**D12 Fallback: `gemini-3.5-flash`. Answer-quality judge: `gemini-3.5-flash-lite`.** (Amended; originally fallback + judge = `gemini-3.5-flash-lite`. Judge amended again 2026-11-26 to `gemini-3.8-flash`, see the last section.)
 - The fallback is used when D11 fails after retries; its 20 RPD is enough for occasional fallback use only.
 - The judge shares D11's quota. Because the judge is the same model that wrote the answers (self-grading bias), a manual spot-check of a sample of judge verdicts is required and reported.
 - Every answer records which model produced it, so fallback answers are visible in evaluation.
@@ -111,3 +111,15 @@ TPM and RPD are configuration for planning a run; the adapter enforces the reque
 **Accounting (`LLMResponse`, copied into `AnswerResult.llm`).** `model_used`, `retry_count`, `fallback_used`; `prompt_tokens`, `output_tokens`, `thoughts_tokens` (None when the provider does not report them, never 0); `latency_ms` is the model time of the call that produced the answer; `retry_wait_ms` is the total time spent in backoff. `AnswerResult.latency_ms` gains `retry_wait` (backoff) and `throttle_wait` (client-side throttle) next to `generate` (the wall time of the whole call), so the latency report can separate model time from waiting. Both keys are absent when the retrieval gate answered without an LLM call. `throttle_wait` is an addition to the owner's list, needed because at 13 RPM a full run is throttled and would otherwise inflate `generate`.
 
 **Fallback output budget (owner decision, RAG-003 verify 2026-09-27).** The fallback call is sent with `FALLBACK_MAX_OUTPUT_TOKENS` (default 2048); the answer model keeps the request's 1024. No `thinking_config` is set. A `MAX_TOKENS` finish raises `GenerationError` naming the model and the limit. Whether thinking tokens count against `max_output_tokens` is unverified (no live call was made); see the Limitations bullet in `docs/specs/generation-spec.md`.
+
+
+## Amendment 2026-11-26: judge model `gemini-3.8-flash` on its own key (owner)
+
+Owner decision during the local-LLM stage 2 (plan `docs/plans/local-llm-preregistration.md`, amendment A4): the
+answer-quality judge becomes **`gemini-3.8-flash`** (`JUDGE_MODEL`), called with a separate free-tier key
+**`JUDGE_API_KEY`** (falls back to `GEMINI_API_KEY` when unset; the judge prints which variable it used, never the
+key). The answer model and fallback (D11/D12) are unchanged, and the Gemini answer baseline keeps
+`gemini-3.5-flash-lite` on `GEMINI_API_KEY`. Reasons: the flash-lite judge repeated an output error on 11 stage-2
+answers (corpus source ids written as citation markers), and judging spent the answer key's daily quota. Every run
+compared in one table is judged by one judge model; verdicts of the two judges are never mixed. Free-tier limits of
+`gemini-3.8-flash` are TBD: `JUDGE_LIMIT_*` / `JUDGE_THROTTLE_RPM` keep the flash-lite defaults until measured.

@@ -32,10 +32,10 @@ Vietnamese). Image input is out of scope here (OCR is TBD); multimodal projector
   markers, refusal sentinel `[[INSUFFICIENT]]` on the first line, answer in the question's language, excerpts stay
   English. Gemini runs the same `answer_v3` as the baseline.
 - **Runtime:** `llama-server` (pinned llama.cpp release, CPU build), temperature 0, fixed seed, context 4,096, one
-  slot, threads = physical cores, thinking mode **off** (chat-template switch per model, recorded), answer cap
+  slot, `--cache-ram 0` (A3), threads = physical cores, thinking mode **off** (chat-template switch per model, recorded), answer cap
   512 tokens.
 - **Low-end profile:** `-t 4`, `--ngl 0`. iGPU (Vulkan, `--ngl 99`) is a separate, later configuration.
-- **Judge:** `gemini-3.5-flash-lite`, `judge_v1`, existing label table (`metrics/mapping.py`); manual spot-check of
+- **Judge:** `gemini-3.8-flash` (A4; was `gemini-3.5-flash-lite`), `judge_v1`, existing label table (`metrics/mapping.py`); manual spot-check of
   10% of verdicts (ADR-0004 D12).
 
 ## 3. Stages
@@ -56,7 +56,7 @@ spread over days if needed (free tier ~1,000/day).
 | Lenient accuracy (correct + partial, answerable) | ≥ Gemini `answer_v3` − 10 pp |
 | Strict accuracy (correct only) | ≥ Gemini − 15 pp |
 | Hallucination on unanswerable (14 cases) | ≤ 1 of 14 |
-| False refusal on answerable | ≤ 10% |
+| False refusal on answerable, **by the LLM** (amended A2) | ≤ 10% of answerable cases that reached the LLM |
 | Missing-marker rate | ≤ 10% (**decided**, owner 2026-11-10) |
 | Answer language = question language | ≥ 95% |
 | Vietnamese owner grade (20 answers, ok / not ok) | ≥ 16 ok |
@@ -71,6 +71,31 @@ under-count them). New caps, derived from the 8 GB budget minus embedder (≤ 1 
 (~1.5 GB, estimate): **2B ≤ 3.5 GB, 4B ≤ 5.0 GB**. Effect on stage 1: the three 2B models pass, both 4B models
 (6.2-6.4 GB) are dropped. This change was made after seeing the data and is reported as such. The whole-app ≤ 8 GB
 check on the real gen-10 / 8 GB machine (stage 4) is unchanged.
+
+**Amendment A2 (owner, 2026-11-26, before stage 2; no eval-split data seen).** The retrieval gate (dense top-1 <
+0.5417) refuses before any LLM call and is identical for every model: in stage 1 it stopped 3 of 9 answerable dev
+questions in every run. Counting those against the LLM would fail every model for a retrieval cause. So false refusals
+are reported two ways: **gate** (answerable, gate fired: a retrieval / gate-threshold result, reported, no LLM
+threshold) and **LLM** (answerable, reached the LLM, LLM refused: the ≤ 10% threshold applies here, over answerable
+cases that reached the LLM). Accuracy stays over all answerable cases and is compared with Gemini on the same
+retrieval, so the gate costs every model the same. The gate itself is recalibrated after this step (§6).
+
+**Amendment A3 (owner, 2026-11-26, during stage 2; post-hoc).** Stage 2 measured 5-11 GB peak working set per model,
+against 2.5-3 GB in stage 1. Cause: `llama-server`'s host-memory prompt cache (`--cache-ram`, default 8 GB) grew with
+the number of requests (7 per server in stage 1, 76 in stage 2); a short test with `--cache-ram 0` stayed flat at about
+1.5 GB. This is a server setting the app will not ship, not a property of the model, so the stage-2 RAM figures measured
+the wrong configuration. Fix: **`--cache-ram 0` is part of the fixed runtime** (§2; the in-slot prompt-prefix reuse
+stays). RAM and TTFT are re-measured over the same stage-2 requests with that flag; caps (A1) and every other threshold
+are unchanged. Quality results are kept; the re-run compares 5-10 answers against the first run to confirm they match.
+Decided after seeing the stage-2 RAM data and reported as such.
+
+**Amendment A4 (owner, 2026-11-26, after stage-2 judging; post-hoc).** The judge changes from `gemini-3.5-flash-lite`
+to **`gemini-3.8-flash`** on a separate key (`JUDGE_API_KEY`; ADR-0004 amendment 2026-11-26). Reasons: the flash-lite
+judge failed on 11 stage-2 answers with a repeated output error (source ids written as citation markers), and judging
+shared the answer key's quota. **All** compared runs, the Gemini baseline included, are re-judged with the new judge;
+no table mixes judges. The flash-lite verdicts are kept (archived next to each run, not deleted) and reported as a
+secondary result. The Gemini answer baseline itself is unchanged (`gemini-3.5-flash-lite`). Thresholds are unchanged.
+Decided after seeing the stage-2 verdicts and reported as such.
 
 ## 5. Selection rule (fixed before the runs)
 

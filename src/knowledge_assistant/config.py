@@ -62,6 +62,19 @@ def get_gemini_api_key() -> str | None:
     return os.getenv("GEMINI_API_KEY") or None
 
 
+def get_judge_api_key() -> str | None:
+    """The judge's own key (JUDGE_API_KEY, plan amendment A4: a separate free-tier key, so judging never spends the
+    answer key's quota); GEMINI_API_KEY when it is not set. Environment only; never log or print it."""
+    return os.getenv("JUDGE_API_KEY") or get_gemini_api_key()
+
+
+def judge_api_key_source() -> str:
+    """The NAME of the variable the judge key comes from (safe to print), or "none"."""
+    if os.getenv("JUDGE_API_KEY"):
+        return "JUDGE_API_KEY"
+    return "GEMINI_API_KEY" if get_gemini_api_key() else "none"
+
+
 @dataclass(frozen=True)
 class EmbeddingSettings:
     """Embedding settings (ADR-0004 D10, ADR-0005). The model name is pinned here only."""
@@ -388,8 +401,9 @@ def get_answer_settings() -> AnswerSettings:
 
 @dataclass(frozen=True)
 class JudgeSettings:
-    """LLM judge (EVAL-003b; ADR-0004 D12: the judge is `gemini-3.5-flash-lite`, the same model as the answers, so its
-    verdicts get a manual spot-check). Temperature 0 and no fallback are fixed, not configurable: a judgement from any
+    """LLM judge (EVAL-003b; ADR-0004 D12, amended 2026-11-26 by local-LLM plan amendment A4: the judge is
+    `gemini-3.8-flash`, a stronger model than the answer model, on its own key JUDGE_API_KEY; its verdicts still get a
+    manual spot-check). Temperature 0 and no fallback are fixed, not configurable: a judgement from any
     other model is rejected. The prompt version is the file name (without .md) in `prompts_dir`."""
 
     model: str
@@ -409,7 +423,7 @@ def get_judge_settings() -> JudgeSettings:
     if max_output_tokens < 1:
         raise ConfigurationError(f"JUDGE_MAX_OUTPUT_TOKENS={max_output_tokens} must be at least 1")
     return JudgeSettings(
-        model=os.getenv("JUDGE_MODEL", "gemini-3.5-flash-lite"),
+        model=os.getenv("JUDGE_MODEL", "gemini-3.8-flash"),
         prompt_version=os.getenv("JUDGE_PROMPT_VERSION", "judge_v1"),
         prompts_dir=resolve_project_path(os.getenv("PROMPTS_DIR", "config/prompts")),
         max_attempts=max_attempts,

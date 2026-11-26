@@ -108,8 +108,10 @@ class GeminiLLM:
         jitter: Callable[[], float] = random.random,
         throttles: Mapping[str, SlidingWindowThrottle] | None = None,
         on_provider_error: Callable[[str, Failure], None] | None = None,
+        api_key: Callable[[], str | None] = get_gemini_api_key,
     ) -> None:
         self._settings = settings or get_answer_settings()
+        self._api_key = api_key  # read at the first call; the judge passes get_judge_api_key
         self._client = client
         self._clock = clock
         self._sleep = sleep
@@ -128,7 +130,7 @@ class GeminiLLM:
 
     def _get_client(self) -> Any:
         if self._client is None:
-            api_key = get_gemini_api_key()
+            api_key = self._api_key()
             if not api_key:
                 raise ConfigurationError("GEMINI_API_KEY is not set")
             self._client = genai.Client(
