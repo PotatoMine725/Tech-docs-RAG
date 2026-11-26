@@ -56,7 +56,7 @@ spread over days if needed (free tier ~1,000/day).
 | Lenient accuracy (correct + partial, answerable) | ≥ Gemini `answer_v3` − 10 pp |
 | Strict accuracy (correct only) | ≥ Gemini − 15 pp |
 | Hallucination on unanswerable (14 cases) | ≤ 1 of 14 |
-| False refusal on answerable | ≤ 10% |
+| False refusal on answerable, **by the LLM** (amended A2) | ≤ 10% of answerable cases that reached the LLM |
 | Missing-marker rate | ≤ 10% (**decided**, owner 2026-11-10) |
 | Answer language = question language | ≥ 95% |
 | Vietnamese owner grade (20 answers, ok / not ok) | ≥ 16 ok |
@@ -71,6 +71,14 @@ under-count them). New caps, derived from the 8 GB budget minus embedder (≤ 1 
 (~1.5 GB, estimate): **2B ≤ 3.5 GB, 4B ≤ 5.0 GB**. Effect on stage 1: the three 2B models pass, both 4B models
 (6.2-6.4 GB) are dropped. This change was made after seeing the data and is reported as such. The whole-app ≤ 8 GB
 check on the real gen-10 / 8 GB machine (stage 4) is unchanged.
+
+**Amendment A2 (owner, 2026-11-26, before stage 2; no eval-split data seen).** The retrieval gate (dense top-1 <
+0.5417) refuses before any LLM call and is identical for every model: in stage 1 it stopped 3 of 9 answerable dev
+questions in every run. Counting those against the LLM would fail every model for a retrieval cause. So false refusals
+are reported two ways: **gate** (answerable, gate fired: a retrieval / gate-threshold result, reported, no LLM
+threshold) and **LLM** (answerable, reached the LLM, LLM refused: the ≤ 10% threshold applies here, over answerable
+cases that reached the LLM). Accuracy stays over all answerable cases and is compared with Gemini on the same
+retrieval, so the gate costs every model the same. The gate itself is recalibrated after this step (§6).
 
 ## 5. Selection rule (fixed before the runs)
 

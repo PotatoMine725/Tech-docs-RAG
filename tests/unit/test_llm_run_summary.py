@@ -5,8 +5,8 @@ from scripts.evaluation import llm_run_summary as summary
 
 
 def _record(case_id, *, language="vi", answer="Trả lời [1].", insufficient=False, citations=1, ttft=1000.0,
-            chunks=("c1", "c2"), gate=False, note=None):
-    return {"case_id": case_id, "arm": "A", "mode": "full", "status": "ok", "language": language,
+            chunks=("c1", "c2"), gate=False, note=None, answerable=True):
+    return {"case_id": case_id, "answerable": answerable, "arm": "A", "mode": "full", "status": "ok", "language": language,
             "llm_called": not gate, "insufficient": insufficient or gate, "gate_fired": gate,
             "answer": answer, "missing_information": note, "citations": [{"marker": 1}] * citations,
             "retrieved": [{"chunk_id": c} for c in chunks], "time_to_first_token_ms": None if gate else ttft,
@@ -32,6 +32,9 @@ def test_metrics_and_same_retrieval(tmp_path, capsys):
     assert (s["answered"], s["llm_refused"], s["gate"]) == (2, 1, 1)
     assert s["missing_marker"] == 0.5 and s["missing_marker_cases"] == ["Q2"]
     assert s["lang_mismatch_cases"] == ["Q2"] and abs(s["lang_match"] - 2 / 3) < 1e-9
+    # A2: the gate refusal (Q4) and the LLM refusal (Q3) are counted apart
+    assert s["false_refusal_gate"] == 0.25 and s["false_refusal_gate_cases"] == ["Q4"]
+    assert abs(s["false_refusal_llm"] - 1 / 3) < 1e-9 and s["false_refusal_llm_cases"] == ["Q3"]
     assert s["ttft_median_ms"] == 2000.0 and s["ttft_p90_ms"] == 3000.0
     assert summary.main(["--runs", "local", "--reference", "ref"], results_dir=tmp_path) == 0
     assert "| yes |" in capsys.readouterr().out
