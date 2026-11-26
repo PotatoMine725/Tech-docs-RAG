@@ -176,7 +176,10 @@ ADR-0004 D12.
 - Runs: `data/evaluation/results/llm1-dev-v1-{gemini,qwen3.5-2b-instruct-q4_k_m,gemma-4-e2b-it-q4_k_m,
   qwen3-1.7b-q4_k_m,qwen3.5-4b-instruct-q4_k_m,gemma-4-e4b-it-q4_k_m}/` (`run.json`, `records.jsonl`,
   `judgements.jsonl`); v2 equivalents local only (§5).
-- Bench: `data/experiments/local-llm-bench/stage1-<model-id>.json` + server logs.
+- Bench: `data/experiments/local-llm-bench/stage1-<model-id>.json` (the bench's server logs next to them are
+  git-ignored by `*.log` and stay local).
+- `errors.jsonl` in four v1 run folders: the first provider errors of the judge (HTTP 503 from
+  `gemini-3.5-flash-lite`, retried within the same call); no answer-generation error in any run.
 - Model manifest (`E:\models\llm\manifest.json`, copied here):
 
 | Model id | HF repo @ revision | File | Size (bytes) | SHA-256 | Licence |
