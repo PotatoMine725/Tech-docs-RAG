@@ -64,6 +64,7 @@ from knowledge_assistant.application.generation.answer_question import AnswerQue
 from knowledge_assistant.application.retrieval.retrieve import Retriever  # noqa: E402
 from knowledge_assistant.composition import (  # noqa: E402
     build_answer_service,
+    create_reranker,
     create_retriever,
     open_embedder,
     open_vector_store,
@@ -125,15 +126,18 @@ class Services:
 @contextlib.contextmanager
 def open_services(arm: str, mode: str, settings, on_provider_error):
     """The query embedder (the configured provider behind the on-disk cache), the arm's existing collection and, in full mode, the LLM
-    with its throttles, built ONCE here. `settings` is the answer settings the run was configured with."""
+    with its throttles, built ONCE here. `settings` is the answer settings the run was configured with. ONE reranker
+    (RERANK_PROVIDER, default `none`) serves the run's retriever and, in full mode, the answer service's own retriever, so
+    the cross-encoder model (about 1.6 GB, ADR-0009) loads once per process."""
     with open_embedder() as embedder:
         store = open_vector_store(arm)
-        retriever = create_retriever(arm, embedder, store)  # RETRIEVAL_MODE; dense never opens the keyword index
+        reranker = create_reranker()  # cheap: the model loads on the first rerank
+        retriever = create_retriever(arm, embedder, store, reranker=reranker)  # RETRIEVAL_MODE; dense never opens the keyword index
         answerer = llm = throttles = None
         if mode == FULL:
             throttles = build_throttles(settings)
             llm = GeminiLLM(settings, throttles=throttles, on_provider_error=on_provider_error)
-            answerer = build_answer_service(arm, llm, embedder, store=store)
+            answerer = build_answer_service(arm, llm, embedder, store=store, reranker=reranker)
 
         def stats() -> dict:
             embedding = embedder.stats()

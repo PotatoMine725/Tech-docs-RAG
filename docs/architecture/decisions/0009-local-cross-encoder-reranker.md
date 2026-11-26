@@ -56,8 +56,9 @@ absolute score, with the LLM refusal as second layer.
   each arm's answer service built its own, so using both arms loaded the model twice, about 2 × 1.6 GB). The
   reranker is created at app start like the LLM and the embedder (its model still loads on the first rerank), so a bad
   `RERANK_*` value now fails at start, not on the first question.
-- `scripts/evaluation/run_eval.py` in full mode still builds two retrievers per arm (one in `open_services`, one inside
-  `build_answer_service`), so with reranking on it loads the model twice in one process. Not changed here
-  (TBD if a reranked full run is wanted). `scripts/ask.py` serves one arm per process and is not affected.
+- `scripts/evaluation/run_eval.py` in full mode builds two retrievers per arm (one in `open_services`, one inside
+  `build_answer_service`); `open_services` now creates ONE reranker and passes it to both, so with reranking on the
+  model loads once per process (2026-11-26, owner-requested; with `none` nothing changes). `scripts/ask.py` serves one
+  arm per process and is not affected.
 - Open: Gemini v2 (quota, TBD); gte's 2.1 GB peak (TBD); reranker gate value (moves to the local LLM step, D7); a
   smaller long-input multilingual cross-encoder within 2 s (owner to name candidates).
