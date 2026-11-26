@@ -147,7 +147,9 @@ tokens can come out a token or two longer than counted and a pair can pass the 5
 at its window's end (ADR-0009 D2); a pair that fits is never touched. The checks below only tokenize (the `tokenizers`
 library, no ONNX session, no scoring, no benchmark or eval run); the §2 numbers are the numbers of the pre-registered
 run. The scripts were throw-away replays of `reranker_bench.py`'s worker (same candidate file, `rerank_passage` text,
-windows) and are not committed.
+windows) and are not committed. Check of the replay: for both models its window count per case equals the `windows` the
+run recorded in `rerank-{bge,gte}-int8-t512o128-c10-b8-full.json` (162 cases, 1,766 windows, 0 cases differ), so it saw
+the same chunk text as the run.
 
 **Pairs the benchmark scored** (`20261125-run3` candidate lists, 162 rows = 120 local + 42 Gemini; both models'
 own `tokenizer.json`; limit 512; all candidate chunk ids resolved):
