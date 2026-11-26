@@ -88,20 +88,26 @@ at the 512-token cap (longest: 366 tokens, Qwen3.5-4B). `enable_thinking: false`
 | gemma-4-e4b-it-q4_k_m | no | **yes** (6,240 > 3,500) | no (0) | drop |
 
 **Models that go to stage 2 under the rule as written, with peak working set as the RAM measure: none.** No model
-crashed or broke the format more than 3 times. Every model fails on RAM alone.
+crashed or broke the format more than 3 times. Every model fails on RAM alone. This holds whether the caps are read
+as decimal GB or binary GiB: the smallest working set (2,556 MB) is above 2 GiB (2,147 MB), and both 4B models are
+above 3.5 GiB (3,758 MB).
 
 **The RAM measure decides the outcome, so the owner must decide it before stage 2.** The plan says "peak RAM of
 `llama-server`" and the stage-1 prompt says "peak working set", and that is what the rule table uses. But the
 working set also counts pages of the memory-mapped GGUF file, which the OS can drop and re-read. Gemma 4 E2B's peak
 working set (3,066 MB) is about the size of its file (3,107 MB), yet its private bytes are 1,684 MB. Measured by
-**private bytes** (memory only this process holds), three models are under their caps:
-- qwen3.5-2b-instruct-q4_k_m: 1,520 MB, cap 2,000
-- gemma-4-e2b-it-q4_k_m: 1,684 MB, cap 2,000
-- gemma-4-e4b-it-q4_k_m: 3,372 MB, cap 3,500
+**private bytes** (memory only this process holds), the outcome also depends on the cap's unit:
 
-The other two are over:
-- qwen3-1.7b-q4_k_m: 2,545 MB, cap 2,000
-- qwen3.5-4b-instruct-q4_k_m: 3,739 MB, cap 3,500
+| Model | Private bytes, peak | Cap as GB (decimal) | Cap as GiB (binary) |
+|---|---|---|---|
+| qwen3.5-2b-instruct-q4_k_m | 1,520 MB = 1.42 GiB | under (2,000 MB) | under (2,147 MB) |
+| gemma-4-e2b-it-q4_k_m | 1,684 MB = 1.57 GiB | under (2,000 MB) | under (2,147 MB) |
+| qwen3-1.7b-q4_k_m | 2,545 MB = 2.37 GiB | over | over |
+| qwen3.5-4b-instruct-q4_k_m | 3,739 MB = 3.48 GiB | over (3,500 MB) | **under (3,758 MB), by 0.5%** |
+| gemma-4-e4b-it-q4_k_m | 3,372 MB = 3.14 GiB | under (3,500 MB) | under (3,758 MB) |
+
+So with private bytes, three models pass with decimal GB caps and four with binary GiB caps. The extra one is
+Qwen3.5-4B, which sits within 1% of its cap.
 
 This reading is shown for the decision only. It was not pre-registered and it is not applied above. On this 23.6 GB
 machine nothing was under memory pressure, so neither number shows how a model behaves when 8 GB is tight. The
@@ -114,16 +120,23 @@ Other stage-1 observations, all from the tables above:
 
 ## 4. Judge spot-check (10%)
 
-40 ok judge verdicts across the 12 runs. A seeded draw (`random.Random(42)`, 4 = 10%) picked:
+40 ok judge verdicts across the 12 runs. A plain seeded random draw (`random.Random(42).sample`, 4 = 10%) picked
+the items below. It was not the usual stratified `make_spot_check.py` sheet:
 - v1-gemini Q-DEV-003
 - v1-qwen3.5-2b Q-DEV-003
 - v1-gemma-4-e2b Q-DEV-004
 - v2-gemma-4-e2b Q2-DEV-001
 
-**Graded by the agent (Claude), not by the owner**, against the ground truth and the cited chunk text. The result:
-**4/4 labels agree** with the judge (all `correct`). The v2 Gemma E2B case is the only one with a citation detail.
-The judge marked its citation `[1]` as not supporting the claim. The cited chunk (`C2-16:header-1600:0000`, title
-slide + objectives) does not list the causes, so the judge is right there too. The answer is still correct on content.
+**Graded by the agent (Claude), not by the owner, and not blind:** the judge's verdict was shown next to each answer.
+The answers were graded against the ground truth. The cited chunk text was read for only one item, the v2 Gemma E2B
+case.
+- The result: **4/4 labels agree** with the judge.
+- All four sampled labels are `correct`. The one hallucination (Qwen3.5-2B Q-DEV-005), the two `incorrect` verdicts and
+  every refusal check fell outside the sample, so none of them was checked.
+- In the v2 Gemma E2B case, the judge marked citation `[1]` as not supporting the claim. The cited chunk
+  (`C2-16:header-1600:0000`, title slide + objectives) does not list the causes, so the judge is right. The answer is
+  still correct on content.
+
 The owner has not graded this sample. The judge is the same model as the Gemini answer model, the same limitation as
 ADR-0004 D12.
 
@@ -138,8 +151,9 @@ ADR-0004 D12.
   - So the plan's order was followed: `ggml-org` where it has Q4_K_M (Qwen3-1.7B, Qwen3.5-4B), else `unsloth`
     (Qwen3.5-2B, Gemma 4 E2B, Gemma 4 E4B).
   - The quantizers are therefore mixed.
-  - The Qwen3.5 base repos are `Qwen/Qwen3.5-2B` / `Qwen/Qwen3.5-4B`. They have no separate "-Instruct" repo, and
-    the `-instruct` in the model id is the plan's naming.
+  - The Qwen3.5 GGUFs are quantized from `Qwen/Qwen3.5-2B` / `Qwen/Qwen3.5-4B`, the post-trained models. On the Hub,
+    `Qwen/Qwen3.5-{2B,4B}-Base` exist and `Qwen/Qwen3.5-{2B,4B}-Instruct` do not. The `-instruct` in the model id is
+    the plan's naming.
 - **Licences:** Apache-2.0 on both the GGUF repo and the base model card for all five (HF card metadata, recorded in
   the manifest). SHA-256 of every file matches the Hub's LFS hash.
 - **Corpus-2 chunk file:**
@@ -154,8 +168,12 @@ ADR-0004 D12.
   then runs `scripts/evaluation/run_eval.py` with `runpy`, with the same arguments as the commands in §1. No tracked
   file was changed. The wrapper is the only source of the thinking check in §2.
 - **Bench, `mmap=off`:** the bench's `--no-mmap` configuration failed to start on every model. llama.cpp v1.0.0
-  rejects the flag (`error: invalid argument: --no-mmap`; it now has a load-mode option instead). Only the
-  `mmap=on` rows exist. The bench script was not changed.
+  rejects the flag (`error: invalid argument: --no-mmap`; its `--help` lists `-lm, --load-mode MODE`, default
+  `auto`, instead). Only the `mmap=on` rows exist. The bench script was not changed.
+- **Change scope:** `gitnexus detect_changes` was not run. This is a worktree, and the GitNexus index is stale (last
+  indexed `c9dba7b`). Scope check instead (`git diff --name-status origin/dev`):
+  - only added files: this report, 22 files in 6 v1 run folders, 5 bench JSONs;
+  - no tracked file modified, no code changed.
 - **Order and load:**
   - The Gemini baseline ran (16:15–16:17) while the model downloads were still running (network only). No local
     model had started yet.
@@ -219,8 +237,10 @@ v2 (`--reference llm1-dev-v2-gemini`, exit 0):
 
 ## 7. Owner decisions needed (not taken here)
 
-1. **RAM measure for the cap:** the peak working set (as written: no model goes to stage 2) or the private bytes
-   (would pass qwen3.5-2b, gemma-4-e2b, gemma-4-e4b), or something else, e.g. re-measure under an 8 GB limit.
+1. **RAM measure and unit for the cap:**
+   - the peak working set, as written: no model goes to stage 2, in either unit;
+   - the private bytes: passes qwen3.5-2b, gemma-4-e2b and gemma-4-e4b with GB caps, plus qwen3.5-4b with GiB caps;
+   - something else, e.g. re-measure under an 8 GB limit.
 2. If the answer is "as written", the options of plan §5/§6.3 apply: a 4B default, cloud answering as a first-class
    opt-in, or new candidates.
 3. Whether the owner wants to grade the 4-item spot-check themselves.
