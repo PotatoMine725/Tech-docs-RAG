@@ -35,7 +35,7 @@ Vietnamese). Image input is out of scope here (OCR is TBD); multimodal projector
   slot, `--cache-ram 0` (A3), threads = physical cores, thinking mode **off** (chat-template switch per model, recorded), answer cap
   512 tokens.
 - **Low-end profile:** `-t 4`, `--ngl 0`. iGPU (Vulkan, `--ngl 99`) is a separate, later configuration.
-- **Judge:** `gemini-3.5-flash-lite`, `judge_v1`, existing label table (`metrics/mapping.py`); manual spot-check of
+- **Judge:** `gemini-3.8-flash` (A4; was `gemini-3.5-flash-lite`), `judge_v1`, existing label table (`metrics/mapping.py`); manual spot-check of
   10% of verdicts (ADR-0004 D12).
 
 ## 3. Stages
@@ -88,6 +88,14 @@ the wrong configuration. Fix: **`--cache-ram 0` is part of the fixed runtime** (
 stays). RAM and TTFT are re-measured over the same stage-2 requests with that flag; caps (A1) and every other threshold
 are unchanged. Quality results are kept; the re-run compares 5-10 answers against the first run to confirm they match.
 Decided after seeing the stage-2 RAM data and reported as such.
+
+**Amendment A4 (owner, 2026-11-26, after stage-2 judging; post-hoc).** The judge changes from `gemini-3.5-flash-lite`
+to **`gemini-3.8-flash`** on a separate key (`JUDGE_API_KEY`; ADR-0004 amendment 2026-11-26). Reasons: the flash-lite
+judge failed on 11 stage-2 answers with a repeated output error (source ids written as citation markers), and judging
+shared the answer key's quota. **All** compared runs, the Gemini baseline included, are re-judged with the new judge;
+no table mixes judges. The flash-lite verdicts are kept (archived next to each run, not deleted) and reported as a
+secondary result. The Gemini answer baseline itself is unchanged (`gemini-3.5-flash-lite`). Thresholds are unchanged.
+Decided after seeing the stage-2 verdicts and reported as such.
 
 ## 5. Selection rule (fixed before the runs)
 

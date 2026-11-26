@@ -122,6 +122,18 @@ def test_real_adapter_is_the_judge_model_with_no_fallback(monkeypatch, tmp_path)
         monkeypatch.delenv(name, raising=False)
     judge = get_judge_settings()
     settings = judge_run.judge_llm_settings(judge)
-    assert (settings.model, settings.allow_fallback, settings.limits.throttle_rpm) == ("gemini-3.5-flash-lite", False, 13)
+    assert (settings.model, settings.allow_fallback, settings.limits.throttle_rpm) == ("gemini-3.8-flash", False, 13)
     llm = judge_run.build_llm(judge, object(), "run-1")  # no client is created until the first call
-    assert isinstance(llm, GeminiLLM) and llm.model == "gemini-3.5-flash-lite"
+    assert isinstance(llm, GeminiLLM) and llm.model == "gemini-3.8-flash"
+
+
+def test_judge_uses_its_own_key_when_set(monkeypatch):
+    from knowledge_assistant.config import get_judge_api_key, judge_api_key_source
+
+    monkeypatch.setenv("GEMINI_API_KEY", "answer-key")
+    monkeypatch.delenv("JUDGE_API_KEY", raising=False)
+    assert (get_judge_api_key(), judge_api_key_source()) == ("answer-key", "GEMINI_API_KEY")
+    monkeypatch.setenv("JUDGE_API_KEY", "judge-key")
+    assert (get_judge_api_key(), judge_api_key_source()) == ("judge-key", "JUDGE_API_KEY")
+    llm = judge_run.build_llm(get_judge_settings(), object(), "run-1")
+    assert llm._api_key() == "judge-key"
