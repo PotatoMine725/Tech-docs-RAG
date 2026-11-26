@@ -20,6 +20,9 @@ from .contracts import AnswerResult, AskQuestionError, Citation
 
 _VI_CHARS = re.compile(r"[àáảãạăâđêôơưèéẻẽẹìíỉĩịòóỏõọùúủũụỳýỷỹỵ]", re.IGNORECASE)
 
+# The documents the fake cites, for the source list in --fake mode.
+FAKE_SOURCES = ("ASP.NET Core Middleware", "Dependency Injection Guide")
+
 _EXCERPT_1 = (
     "Dependency injection (DI) is a technique in which an object receives the other objects it depends on, "
     "rather than creating them itself."
