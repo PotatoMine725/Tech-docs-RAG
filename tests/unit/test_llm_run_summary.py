@@ -45,3 +45,16 @@ def test_retrieval_order_change_fails(tmp_path, capsys):
     _write(tmp_path, "other", [_record("Q1", chunks=("c2", "c1"))])
     assert summary.main(["--runs", "other", "--reference", "ref"], results_dir=tmp_path) == 1
     assert "retrieval differs from ref on Q1" in capsys.readouterr().out
+
+
+def test_known_difference_is_accepted_only_when_gated_in_both_runs(tmp_path, capsys):
+    _write(tmp_path, "ref", [_record("Q1", chunks=("c1", "c2"), gate=True), _record("Q2", chunks=("c1", "c2"))])
+    _write(tmp_path, "run", [_record("Q1", chunks=("c2", "c1"), gate=True), _record("Q2", chunks=("c2", "c1"))])
+    assert summary.main(["--runs", "run", "--reference", "ref", "--known-differences", "Q1"], results_dir=tmp_path) == 1
+    out = capsys.readouterr().out
+    assert "retrieval differs from ref on Q2" in out and "accepted known difference" in out and "Q1" in out
+    assert summary.main(["--runs", "run", "--reference", "ref", "--known-differences", "Q1,Q2"],
+                        results_dir=tmp_path) == 1  # Q2 reached the LLM: never accepted
+    _write(tmp_path, "run2", [_record("Q1", chunks=("c2", "c1"), gate=True), _record("Q2")])
+    assert summary.main(["--runs", "run2", "--reference", "ref", "--known-differences", "Q1"], results_dir=tmp_path) == 0
+    assert "| yes* |" in capsys.readouterr().out

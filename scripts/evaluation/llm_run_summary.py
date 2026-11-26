@@ -1,6 +1,6 @@
 """Local LLM comparison: the non-judge metrics of full-mode runs (docs/plans/local-llm-preregistration.md §4).
 
-    python scripts/evaluation/llm_run_summary.py --runs RUN_ID [RUN_ID ...] [--reference RUN_ID]
+    python scripts/evaluation/llm_run_summary.py --runs RUN_ID [RUN_ID ...] [--reference RUN_ID] [--known-differences ID,ID]
 
 Reads `data/evaluation/results/<run_id>/run.json` and `records.jsonl` (latest line per case). Decides nothing: it
 prints one Markdown row per run with
@@ -17,6 +17,9 @@ prints one Markdown row per run with
 - `ttft_ms` median / p90 and `gen_ms` median (the `generate` stage, wall time) over LLM calls; ttft is null for Gemini;
 - `same_retrieval`: with --reference, whether every shared case retrieved the same chunk ids in the same order as in
   the reference run (the LLM must be the only variable, plan §4.2). A mismatch lists the case ids and the exit code is 1.
+  `--known-differences` (owner-accepted deviations, logged in the report): a listed case is accepted only if the gate
+  fired on it in both the run and the reference (so no LLM saw it and it cannot enter a generation metric); it is
+  shown as `yes*`. A listed case that reached an LLM in either run, or any unlisted difference, still exits 1.
 Accuracy, false refusal and hallucination come from the judge (`judge_run.py`, `make_tables.py`), not from here.
 """
 import argparse
@@ -88,6 +91,14 @@ def summarize(config: dict, records: list[dict]) -> dict:
     }
 
 
+def accepted_differences(bad: list[str], known: set[str], records: list[dict], reference: list[dict]) -> tuple[list, list]:
+    """(accepted, rejected): a known case is accepted only when the gate fired on it in both runs."""
+    gated = lambda rows: {r["case_id"] for r in rows if r["status"] == "ok" and r["gate_fired"]}  # noqa: E731
+    both = gated(records) & gated(reference)
+    accepted = [case for case in bad if case in known and case in both]
+    return accepted, [case for case in bad if case not in accepted]
+
+
 def retrieval_mismatches(records: list[dict], reference: list[dict]) -> list[str]:
     """Case ids (present and ok in both) whose retrieved chunk ids differ in content or order."""
     ref = {r["case_id"]: [c["chunk_id"] for c in r["retrieved"]] for r in reference if r["status"] == "ok"}
@@ -109,6 +120,8 @@ def main(argv: list[str] | None = None, results_dir: Path = RESULTS_DIR) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--runs", nargs="+", required=True)
     parser.add_argument("--reference", help="run whose retrieval every other run must match")
+    parser.add_argument("--known-differences", default="",
+                        help="comma-separated case ids whose retrieval difference the owner accepted (gate-only)")
     args = parser.parse_args(argv)
     reference = load_run(args.reference, results_dir)[1] if args.reference else None
     print("| run | model | prompt | ok | errors | answered | llm_refused | gate | false_refusal gate | false_refusal llm | "
@@ -121,11 +134,15 @@ def main(argv: list[str] | None = None, results_dir: Path = RESULTS_DIR) -> int:
         s = summarize(config, records)
         same = "n/a"
         if reference is not None:
-            bad = retrieval_mismatches(records, reference)
-            same = "yes" if not bad else f"NO ({len(bad)})"
+            known = {case.strip() for case in args.known_differences.split(",") if case.strip()}
+            accepted, bad = accepted_differences(retrieval_mismatches(records, reference), known, records, reference)
+            same = f"NO ({len(bad)})" if bad else ("yes*" if accepted else "yes")
             if bad:
                 exit_code = 1
                 notes.append(f"- {run_id}: retrieval differs from {args.reference} on {', '.join(bad)}")
+            if accepted:
+                notes.append(f"- {run_id}: accepted known difference (gate fired in both runs, no LLM saw it): "
+                             f"{', '.join(accepted)}")
         print(f"| {run_id} | {s['model']} | {s['prompt']} | {s['ok']} | {s['errors']} | {s['answered']} | "
               f"{s['llm_refused']} | {s['gate']} | {_fmt(s['false_refusal_gate'], 'pct')} | "
               f"{_fmt(s['false_refusal_llm'], 'pct')} | {_fmt(s['missing_marker'], 'pct')} | {_fmt(s['lang_match'], 'pct')} | "
