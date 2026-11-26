@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "run_id": "llm1-dev-v1-qwen3-1.7b-q4_k_m",
+  "config": {
+    "arm": "A",
+    "mode": "full",
+    "split": "dev",
+    "answer_model": "qwen3-1.7b-q4_k_m",
+    "fallback_model": "gemini-3.5-flash",
+    "allow_fallback": false,
+    "embedding_model": "embeddinggemma-300m-5090578d-fp32-t2048",
+    "embedding_dim": 768,
+    "throttle_rpm": 13,
+    "threshold": 0.5417,
+    "prompt_version": "answer_v3",
+    "prompt_sha256": "18b1a08e583389f47bd15d336dca7a6432574aa1f89d04e67459ad6e4064f4b3",
+    "top_k": 5,
+    "overfetch": 10,
+    "freeze_tag": "eval-freeze-v1",
+    "freeze_tag_commit": "739676fbd5ad4ad83ef5ba411855dd6902ee59fd",
+    "question_files": {
+      "eval-v1.jsonl": "3436870ef02dfc2c25bd9d403ec6c8dd44cb46dfacbf02d586161dedd1252937",
+      "dev-v1.jsonl": "37d349e5a7fa43a179755d1c7993ef5a8438954f995bedcaee07bcfbf4da21d6"
+    },
+    "retrieval_mode": "hybrid",
+    "rrf_k": 60,
+    "corpus": "corpus1",
+    "rerank_model": "none",
+    "rerank_candidates": 0
+  },
+  "git_commit": "679f6893560b94f671c7315cf3ee75d616914a29",
+  "git_dirty": false,
+  "git_dirty_files": [],
+  "started_at": "2026-11-26T09:33:03.415+00:00",
+  "finished_at": "2026-11-26T09:34:33.722+00:00",
+  "invocations": [
+    {
+      "started_at": "2026-11-26T09:33:03.415+00:00",
+      "finished_at": "2026-11-26T09:34:33.722+00:00",
+      "git_commit": "679f6893560b94f671c7315cf3ee75d616914a29",
+      "git_dirty": false,
+      "git_dirty_files": [],
+      "max_llm_calls": 200,
+      "selected": 6,
+      "skipped": 0,
+      "ok": 6,
+      "errors": 0,
+      "llm_requests": 5,
+      "stopped": null,
+      "detail": null,
+      "embedding_requests": 0,
+      "embedding_cache_hits": 12,
+      "embedding_cache_misses": 0,
+      "llm_http_requests": 5,
+      "llm_http_requests_by_model": {
+        "qwen3-1.7b-q4_k_m": 5
+      }
+    }
+  ]
+}

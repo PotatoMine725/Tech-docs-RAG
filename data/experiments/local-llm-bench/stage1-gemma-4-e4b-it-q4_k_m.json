@@ -1,0 +1,337 @@
+{
+  "label": "stage1-gemma-4-e4b-it-q4_k_m",
+  "started": "2026-11-26T17:01:57+0700",
+  "machine": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "processor": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+    "logical_cpus": 20,
+    "total_ram_bytes": 25378844672
+  },
+  "settings": {
+    "threads": 4,
+    "prompt_tokens": [
+      800,
+      2500
+    ],
+    "gen_tokens": 200,
+    "repeats": 3,
+    "warmup_runs": 1,
+    "cache_prompt": false
+  },
+  "configs": [
+    {
+      "model": "gemma-4-E4B-it-Q4_K_M.gguf",
+      "model_bytes": 4977171584,
+      "ngl": 0,
+      "mmap": true,
+      "llama_bench": {
+        "command": [
+          "E:\\models\\llama.cpp\\v1.0.0-cpu\\llama-bench.exe",
+          "-m",
+          "E:\\models\\llm\\gemma-4-e4b-it-q4_k_m\\gemma-4-E4B-it-Q4_K_M.gguf",
+          "-t",
+          "4",
+          "-ngl",
+          "0",
+          "-p",
+          "800,2500",
+          "-n",
+          "200",
+          "-r",
+          "3",
+          "-o",
+          "json"
+        ],
+        "returncode": 0,
+        "rows": [
+          {
+            "build_commit": "b1b770d90",
+            "build_number": 12359,
+            "cpu_info": "12th Gen Intel(R) Core(TM) i7-12700H",
+            "gpu_info": "",
+            "backends": "CPU",
+            "model_filename": "E:\\models\\llm\\gemma-4-e4b-it-q4_k_m\\gemma-4-E4B-it-Q4_K_M.gguf",
+            "model_type": "gemma4 E4B Q4_K - Medium",
+            "model_size": 4961343656,
+            "model_n_params": 7518069290,
+            "n_batch": 2048,
+            "n_ubatch": 512,
+            "n_threads": 4,
+            "cpu_mask": "0x0",
+            "cpu_strict": false,
+            "poll": 50,
+            "type_k": "f16",
+            "type_v": "f16",
+            "n_gpu_layers": 0,
+            "n_cpu_moe": 0,
+            "split_mode": "layer",
+            "main_gpu": 0,
+            "no_kv_offload": false,
+            "flash_attn": -1,
+            "devices": "auto",
+            "tensor_split": "0.00",
+            "tensor_buft_overrides": "none",
+            "load_mode": "auto",
+            "lazy_mode": "auto",
+            "embeddings": false,
+            "no_op_offload": 0,
+            "no_host": false,
+            "repack": true,
+            "fit_target": 0,
+            "fit_min_ctx": 0,
+            "n_prompt": 800,
+            "n_gen": 0,
+            "n_depth": 0,
+            "test_time": "2026-11-26T10:01:59Z",
+            "avg_ns": 7487477400,
+            "stddev_ns": 43357542,
+            "avg_ts": 106.84746,
+            "stddev_ts": 0.620721,
+            "samples_ns": [
+              7516270300,
+              7437611200,
+              7508550700
+            ],
+            "samples_ts": [
+              106.436,
+              107.561,
+              106.545
+            ]
+          },
+          {
+            "build_commit": "b1b770d90",
+            "build_number": 12359,
+            "cpu_info": "12th Gen Intel(R) Core(TM) i7-12700H",
+            "gpu_info": "",
+            "backends": "CPU",
+            "model_filename": "E:\\models\\llm\\gemma-4-e4b-it-q4_k_m\\gemma-4-E4B-it-Q4_K_M.gguf",
+            "model_type": "gemma4 E4B Q4_K - Medium",
+            "model_size": 4961343656,
+            "model_n_params": 7518069290,
+            "n_batch": 2048,
+            "n_ubatch": 512,
+            "n_threads": 4,
+            "cpu_mask": "0x0",
+            "cpu_strict": false,
+            "poll": 50,
+            "type_k": "f16",
+            "type_v": "f16",
+            "n_gpu_layers": 0,
+            "n_cpu_moe": 0,
+            "split_mode": "layer",
+            "main_gpu": 0,
+            "no_kv_offload": false,
+            "flash_attn": -1,
+            "devices": "auto",
+            "tensor_split": "0.00",
+            "tensor_buft_overrides": "none",
+            "load_mode": "auto",
+            "lazy_mode": "auto",
+            "embeddings": false,
+            "no_op_offload": 0,
+            "no_host": false,
+            "repack": true,
+            "fit_target": 0,
+            "fit_min_ctx": 0,
+            "n_prompt": 2500,
+            "n_gen": 0,
+            "n_depth": 0,
+            "test_time": "2026-11-26T10:02:30Z",
+            "avg_ns": 24341571700,
+            "stddev_ns": 171825203,
+            "avg_ts": 102.708365,
+            "stddev_ts": 0.724802,
+            "samples_ns": [
+              24172330400,
+              24336515500,
+              24515869200
+            ],
+            "samples_ts": [
+              103.424,
+              102.726,
+              101.975
+            ]
+          },
+          {
+            "build_commit": "b1b770d90",
+            "build_number": 12359,
+            "cpu_info": "12th Gen Intel(R) Core(TM) i7-12700H",
+            "gpu_info": "",
+            "backends": "CPU",
+            "model_filename": "E:\\models\\llm\\gemma-4-e4b-it-q4_k_m\\gemma-4-E4B-it-Q4_K_M.gguf",
+            "model_type": "gemma4 E4B Q4_K - Medium",
+            "model_size": 4961343656,
+            "model_n_params": 7518069290,
+            "n_batch": 2048,
+            "n_ubatch": 512,
+            "n_threads": 4,
+            "cpu_mask": "0x0",
+            "cpu_strict": false,
+            "poll": 50,
+            "type_k": "f16",
+            "type_v": "f16",
+            "n_gpu_layers": 0,
+            "n_cpu_moe": 0,
+            "split_mode": "layer",
+            "main_gpu": 0,
+            "no_kv_offload": false,
+            "flash_attn": -1,
+            "devices": "auto",
+            "tensor_split": "0.00",
+            "tensor_buft_overrides": "none",
+            "load_mode": "auto",
+            "lazy_mode": "auto",
+            "embeddings": false,
+            "no_op_offload": 0,
+            "no_host": false,
+            "repack": true,
+            "fit_target": 0,
+            "fit_min_ctx": 0,
+            "n_prompt": 0,
+            "n_gen": 200,
+            "n_depth": 0,
+            "test_time": "2026-11-26T10:04:07Z",
+            "avg_ns": 22537586066,
+            "stddev_ns": 341658516,
+            "avg_ts": 8.875413,
+            "stddev_ts": 0.133386,
+            "samples_ns": [
+              22352254800,
+              22328639800,
+              22931863600
+            ],
+            "samples_ts": [
+              8.94764,
+              8.95711,
+              8.72149
+            ]
+          }
+        ]
+      },
+      "server": {
+        "command": [
+          "E:\\models\\llama.cpp\\v1.0.0-cpu\\llama-server.exe",
+          "-m",
+          "E:\\models\\llm\\gemma-4-e4b-it-q4_k_m\\gemma-4-E4B-it-Q4_K_M.gguf",
+          "-t",
+          "4",
+          "-ngl",
+          "0",
+          "-c",
+          "4096",
+          "-np",
+          "1",
+          "--host",
+          "127.0.0.1",
+          "--port",
+          "63870"
+        ],
+        "context": 4096,
+        "load_s": 3.1572487000003093,
+        "warmup": {
+          "time_to_first_token_s": 7.576152300000103,
+          "total_s": 33.11360160000004,
+          "prompt_tokens": 800,
+          "prompt_tokens_per_s": 105.6546640326959,
+          "generated_tokens": 200,
+          "generated_tokens_per_s": 7.792541707425771
+        },
+        "answers": [
+          {
+            "target_prompt_tokens": 800,
+            "runs": [
+              {
+                "time_to_first_token_s": 7.555994299999838,
+                "total_s": 33.23754949999966,
+                "prompt_tokens": 800,
+                "prompt_tokens_per_s": 106.0501336099121,
+                "generated_tokens": 200,
+                "generated_tokens_per_s": 7.748863613575464
+              },
+              {
+                "time_to_first_token_s": 7.516344300000128,
+                "total_s": 32.92569650000041,
+                "prompt_tokens": 800,
+                "prompt_tokens_per_s": 106.62218389154712,
+                "generated_tokens": 200,
+                "generated_tokens_per_s": 7.8318548772246555
+              },
+              {
+                "time_to_first_token_s": 7.447909900000013,
+                "total_s": 33.138978699999825,
+                "prompt_tokens": 800,
+                "prompt_tokens_per_s": 107.59000408169577,
+                "generated_tokens": 200,
+                "generated_tokens_per_s": 7.745997003038728
+              }
+            ],
+            "median_time_to_first_token_s": 7.516344300000128,
+            "median_prompt_tokens_per_s": 106.62218389154712,
+            "median_generated_tokens_per_s": 7.748863613575464
+          },
+          {
+            "target_prompt_tokens": 2500,
+            "runs": [
+              {
+                "time_to_first_token_s": 23.94894790000035,
+                "total_s": 50.628771400000005,
+                "prompt_tokens": 2500,
+                "prompt_tokens_per_s": 104.44954213916506,
+                "generated_tokens": 200,
+                "generated_tokens_per_s": 7.458945346358377
+              },
+              {
+                "time_to_first_token_s": 23.99364240000068,
+                "total_s": 50.770102500000576,
+                "prompt_tokens": 2500,
+                "prompt_tokens_per_s": 104.27656982640661,
+                "generated_tokens": 200,
+                "generated_tokens_per_s": 7.431977611148773
+              },
+              {
+                "time_to_first_token_s": 23.981459100000393,
+                "total_s": 52.579196100000445,
+                "prompt_tokens": 2500,
+                "prompt_tokens_per_s": 104.42541980376292,
+                "generated_tokens": 200,
+                "generated_tokens_per_s": 6.958695978139484
+              }
+            ],
+            "median_time_to_first_token_s": 23.981459100000393,
+            "median_prompt_tokens_per_s": 104.42541980376292,
+            "median_generated_tokens_per_s": 7.431977611148773
+          }
+        ],
+        "peak_memory_bytes": 6178930688
+      }
+    },
+    {
+      "model": "gemma-4-E4B-it-Q4_K_M.gguf",
+      "model_bytes": 4977171584,
+      "ngl": 0,
+      "mmap": false,
+      "server": {
+        "command": [
+          "E:\\models\\llama.cpp\\v1.0.0-cpu\\llama-server.exe",
+          "-m",
+          "E:\\models\\llm\\gemma-4-e4b-it-q4_k_m\\gemma-4-E4B-it-Q4_K_M.gguf",
+          "-t",
+          "4",
+          "-ngl",
+          "0",
+          "-c",
+          "4096",
+          "-np",
+          "1",
+          "--host",
+          "127.0.0.1",
+          "--port",
+          "53688",
+          "--no-mmap"
+        ],
+        "context": 4096,
+        "error": "RuntimeError: llama-server exited with code 1 while loading (see D:\\Code\\Python\\Knowledge assistant\\.claude\\worktrees\\local-llm-stage1\\data\\experiments\\local-llm-bench\\stage1-gemma-4-e4b-it-q4_k_m.server-gemma-4-E4B-it-Q4_K_M-ngl0-nommap.log)"
+      }
+    }
+  ]
+}
