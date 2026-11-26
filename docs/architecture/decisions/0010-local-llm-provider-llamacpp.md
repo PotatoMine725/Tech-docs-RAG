@@ -31,4 +31,4 @@ reserved), ADR-0004 (answer model). Plan: `docs/plans/local-rag-upgrade-plan.md`
 ## Consequences
 - Streaming, the GUI partial-answer state, server lifecycle and the model download (checksum, progress, manual path)
   are not built yet.
-- Model licences are checked per file at download; NVIDIA Nemotron's licence is not Apache-2.0 (redistribution TBD).
+- Model licences are checked per file at download.
