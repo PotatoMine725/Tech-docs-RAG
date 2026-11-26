@@ -1,10 +1,10 @@
 # Local LLM step: candidates and pre-registered procedure
 
-Status: **PROPOSED, awaiting owner approval (2026-11-26).** Nothing below has been run. No number in this file is
-a result; thresholds are proposals until the owner approves them. Plan reference: `local-rag-upgrade-plan.md` §6
+Status: **APPROVED by owner (2026-11-26)**: candidates, procedure, thresholds and download locations. Nothing below
+has been run; no number in this file is a result. Plan reference: `local-rag-upgrade-plan.md` §6
 (step 2 "Local LLM only", §6.2 output format, §6.3 go/no-go). Gate context: ADR-0009 D7 decision 4.
 
-## 1. Candidates (screen 5, keep 2)
+## 1. Candidates (screen 5 + 1, keep 2)
 
 Facts from public pages read on 2026-11-26; the exact GGUF repo, file size, SHA-256 and licence file are verified
 on the model card at download time and recorded in the report. Vietnamese quality is unknown for all of them and is
@@ -17,6 +17,7 @@ measured, not assumed.
 | Default (~2B) | Qwen3-1.7B, Q4_K_M | Apache-2.0 | Plan's baseline (§3); text-only, smallest |
 | Quality (~4B) | Qwen3.5-4B Instruct, Q4_K_M | Apache-2.0 | Opt-in "quality" profile |
 | Quality (~4B) | Gemma 4 E4B Instruct, Q4_K_M | Apache-2.0 | Opt-in "quality" profile |
+| Stage 1 only | NVIDIA-Nemotron-3-Nano-4B, Q4_K_M (~2.8 GB, unverified) | NVIDIA Nemotron Open Model License (commercial use stated; redistribution TBD) | Owner asked (2026-11-26). Card lists English only and thinking on by default; goes to stage 2 only if it passes stage 1 including the Vietnamese dev questions |
 
 Out: Llama 3.2 (Vietnamese not listed as supported, custom licence), SmolLM3 / Granite (no Vietnamese), anything
 above 4B (8 GB app budget), Vietnamese-only fine-tunes of older bases (licence varies; add only if all five fail
@@ -39,7 +40,7 @@ Vietnamese). Image input is out of scope here (OCR is TBD); multimodal projector
 
 ## 3. Stages
 
-1. **Smoke + speed (all 5):** dev-v1 + dev-v2 (12 questions) and `local_llm_bench.py` at 800 and 2,500 prompt
+1. **Smoke + speed (all 6):** dev-v1 + dev-v2 (12 questions) and `local_llm_bench.py` at 800 and 2,500 prompt
    tokens. Drop a model that crashes, exceeds the RAM cap (§4), or breaks the format on more than 3 of 12.
 2. **Screen (survivors):** eval-v1 + eval-v2 (108 questions, 94 answerable / 14 unanswerable), one run each.
 3. **Pick:** best in each class by the rule in §5; the owner grades a Vietnamese sample (20 answers) of the 2 picks.
@@ -48,7 +49,7 @@ Vietnamese). Image input is out of scope here (OCR is TBD); multimodal projector
 Gemini quota: the judge needs about 108 calls per model plus 216 for the Gemini baseline, so about 760 for stage 2;
 spread over days if needed (free tier ~1,000/day).
 
-## 4. Metrics and proposed go/no-go (DECISION REQUIRED, owner)
+## 4. Metrics and go/no-go (approved, owner 2026-11-26)
 
 | Metric | Proposed threshold |
 |---|---|
@@ -73,7 +74,7 @@ decides. Gemini stays the default until the owner accepts a local model on these
 LLM refusal becomes the second gate layer. Then 15–20 new dev questions (owner-approved, frozen before use) to set a
 system-level threshold: dense-score gate + LLM refusal, judged together.
 
-## 7. Downloads (RULE: owner confirms the location first)
+## 7. Downloads (location approved, owner 2026-11-26)
 
-Proposed: models in `E:\models\llm\<model>\`, llama.cpp binaries in `E:\models\llama.cpp\<release>-cpu\`.
-Total download about 10–12 GB for five Q4 files (estimate; recorded per file at download).
+Approved: models in `E:\models\llm\<model>\`, llama.cpp binaries in `E:\models\llama.cpp\<release>-cpu\`.
+Total download about 13–15 GB for six Q4 files (estimate; recorded per file at download).
