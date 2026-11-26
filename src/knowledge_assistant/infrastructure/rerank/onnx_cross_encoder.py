@@ -3,12 +3,14 @@
 Scores (question, passage) pairs jointly; the score is sigmoid(logit) of the model's single relevance logit, a fixed
 0..1 scale, so `absolute_scores` is true and a gate can read it.
 
-Length (MaxP, owner decisions 2026-11-25): no head cut. The question is cut to MAX_QUERY_TOKENS. The pair limit is
-min(`max_tokens`, the model's positions: `config.json` `max_position_embeddings`, minus XLM-R's offset of 2); a window
-is that limit minus the question and 4 special tokens, consecutive windows overlap by `window_overlap` tokens (the last
-ends at the passage end), every window is scored with the question, and the passage score is its best window's. With
-512 / 128 a typical chunk (corpus 2 median 394 tokens) is one window. Windows are cut on the tokenizer's character
-offsets. Only the inputs the ONNX graph declares are fed (XLM-R exports have no `token_type_ids`).
+Length (MaxP, owner decisions 2026-11-25): no head cut. The question is cut to MAX_QUERY_TOKENS (fewer when the pair
+limit is small). The pair limit is min(`max_tokens`, the model's positions: `config.json` `max_position_embeddings`,
+minus XLM-R's offset of 2); a window is that limit minus the question and 4 special tokens, consecutive windows overlap
+by `window_overlap` tokens (the last ends at the passage end), every window is scored with the question, and the
+passage score is its best window's. With 512 / 128 a typical chunk (corpus 2 median 394 tokens) is one window. Windows
+are cut on the tokenizer's character offsets. A pair that re-tokenizes longer than counted (boundary tokens) is cut
+back at its window's end, so no pair exceeds the limit (2026-11-26). Only the inputs the ONNX graph declares are fed
+(XLM-R exports have no `token_type_ids`).
 
 onnxruntime / tokenizers / numpy are the optional `[local]` extra, imported on first use; the model loads on the
 first `rerank`. Supported exports: cross-encoder/mmarco-mMiniLMv2-L12-H384-v1 (int8 = `model_quint8_avx2.onnx`),
@@ -69,7 +71,9 @@ class OnnxCrossEncoderReranker:
         self._tokenizer = tokenizer
         self._inputs: set[str] | None = None
         self._lock = threading.Lock()
-        self.windows_scored = 0  # (question, window) pairs scored so far, for cost reports
+        # (question, window) pairs scored so far: a report-only counter for cost reports (reranker_bench.py), never read
+        # by scoring. NOT thread-safe: `+=` from two threads can lose counts (the GUI shares one reranker between arms).
+        self.windows_scored = 0
 
     @property
     def model_id(self) -> str:
@@ -112,9 +116,11 @@ class OnnxCrossEncoderReranker:
     def score(self, query: str, passages: list[str]) -> list[float]:
         """sigmoid(logit) per passage (its best window, MaxP), in input order."""
         session, tokenizer = self._load()
-        query = self.truncate(query, MAX_QUERY_TOKENS)
+        limit = self.pair_limit
+        # at 512 this is MAX_QUERY_TOKENS; a small limit keeps at least one token of room for the window
+        query = self.truncate(query, min(MAX_QUERY_TOKENS, max(1, limit - SPECIAL_TOKENS - 1)))
         question_tokens = len(tokenizer.encode(query, add_special_tokens=False).ids)
-        size = max(1, min(self._settings.max_tokens, self.positions) - question_tokens - SPECIAL_TOKENS)
+        size = max(1, limit - question_tokens - SPECIAL_TOKENS)
         owners, pairs = [], []
         for index, passage in enumerate(passages):
             for window in self.windows(passage, size):
@@ -133,7 +139,7 @@ class OnnxCrossEncoderReranker:
         scores: list[float] = []
         size = self._settings.batch_size
         for start in range(0, len(pairs), size):
-            encoded = tokenizer.encode_batch(pairs[start : start + size])
+            encoded = self._encode_pairs(tokenizer, pairs[start : start + size])
             width = max(len(e.ids) for e in encoded)
             ids = np.full((len(encoded), width), self._pad_id, dtype=np.int64)
             mask = np.zeros((len(encoded), width), dtype=np.int64)
@@ -152,6 +158,31 @@ class OnnxCrossEncoderReranker:
                 raise RetrievalError("reranker returned a non-finite score")
             scores += [1.0 / (1.0 + math.exp(-x)) for x in logits.tolist()]
         return scores
+
+    def _encode_pairs(self, tokenizer: Any, pairs: list[tuple[str, str]]) -> list[Any]:
+        """`tokenizer.encode_batch(pairs)`, except that a pair longer than `pair_limit` is cut back at the end of its
+        window and encoded again until it fits. A window is cut on the tokens of the passage alone, but the pair
+        tokenizes the window afresh, so its boundary tokens can come out a token or two different. A pair that fits is
+        never touched. (Pair truncation inside the tokenizer is no option: `only_second` raises for the single-text
+        encodes `windows` and `truncate` make on the same tokenizer, which the arms and threads share.)"""
+        limit = self.pair_limit
+        encoded = tokenizer.encode_batch(pairs)
+        for i, (question, window) in enumerate(pairs):
+            if len(encoded[i].ids) <= limit:
+                continue
+            budget = len(tokenizer.encode(window, add_special_tokens=False).offsets)  # window tokens still allowed
+            while len(encoded[i].ids) > limit:
+                budget -= len(encoded[i].ids) - limit  # strictly less each round, so the loop ends
+                if budget < 1:
+                    raise RetrievalError(f"a reranker pair does not fit {limit} tokens even with one passage token; "
+                                         "raise RERANK_MAX_TOKENS")
+                encoded[i] = tokenizer.encode_batch([(question, self.truncate(window, budget))])[0]
+        return encoded
+
+    @property
+    def pair_limit(self) -> int:
+        """Longest (question, window) pair in tokens: `max_tokens`, or the model's positions when those are fewer."""
+        return min(self._settings.max_tokens, self.positions)
 
     @property
     def positions(self) -> int:

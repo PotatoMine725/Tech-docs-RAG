@@ -38,6 +38,47 @@ def test_gate_off_sends_the_same_low_score_question_to_the_llm():
     assert not result.insufficient and result.retrieved[0].score < get_retrieval_settings().insufficient_score_threshold
 
 
+class SpyReranker:
+    """Absolute scores (so the retriever uses it); records its calls."""
+
+    model_id = "spy"
+    absolute_scores = True
+
+    def __init__(self):
+        self.calls = []
+
+    def rerank(self, query, passages, top_n=None):
+        from knowledge_assistant.core.interfaces.reranker import RerankResult
+
+        self.calls.append(len(passages))
+        return [RerankResult(index=i, score=1 - i / 100) for i in range(len(passages))][:top_n]
+
+
+def test_a_reranker_passed_in_is_the_one_the_service_uses_and_none_is_built(monkeypatch):
+    """The GUI builds one reranker for both arms; composition must hand it on, not build a second per service."""
+    import knowledge_assistant.composition as composition
+
+    monkeypatch.delenv("RERANK_PROVIDER", raising=False)
+    monkeypatch.setattr(composition, "create_reranker", lambda: pytest.fail("a second reranker was built"))
+    shared = SpyReranker()
+    service = build_answer_service("A", FakeLLM(REPLY), FakeEmbedder(), store=_store(0.9), reranker=shared)
+    assert service.ask("Question?").insufficient is False
+    assert shared.calls == [6]  # the reranker saw the six candidates of the store
+
+
+def test_without_a_reranker_the_service_builds_the_configured_one_as_before(monkeypatch):
+    import knowledge_assistant.composition as composition
+
+    monkeypatch.delenv("RERANK_PROVIDER", raising=False)
+    built = []
+    real = composition.create_reranker
+    monkeypatch.setattr(composition, "create_reranker", lambda: built.append(real()) or built[-1])
+    llm = FakeLLM(REPLY)
+    result = build_answer_service("A", llm, FakeEmbedder(), store=_store(0.9)).ask("Question?")
+    assert len(built) == 1 and not built[0].absolute_scores  # RERANK_PROVIDER=none: a NoOpReranker, never called
+    assert not result.insufficient and len(llm.requests) == 1
+
+
 def test_a_missing_collection_is_a_vector_store_error_naming_the_build_command(tmp_path, monkeypatch):
     monkeypatch.setenv("CHROMA_PATH", str(tmp_path / "chroma"))
     monkeypatch.setenv("CHUNKS_DIR", str(tmp_path / "chunks"))  # no chunk file there either

@@ -1,7 +1,11 @@
 # Reranker benchmark, retrieval only (plan §7.1 step 4b, ADR-0009)
 
-Date: 2026-11-25 (runs 2026-11-26). Status: **run once, as pre-registered**. §1 was committed in 6ad584d before any
-speed or quality number of its configuration existed and is unchanged since; results are in §2.
+Date: 2026-11-25 (runs 2026-11-26). Status: **run once, as pre-registered**; owner decisions of 2026-11-26 (ADR-0009
+D7): merged as infrastructure, default off, opt-in mode **EXPERIMENTAL / PROVISIONAL** (chosen on eval results, not by
+the pre-registered rule), gate PROVISIONAL, no dev questions added now. §1 was committed in 6ad584d before any speed or
+quality number of its configuration existed and is unchanged since (its gate bullet's "15-20 new dev questions" is
+superseded by decision 4, see Recommendation); results are in §2. §4 (2026-11-26) is a tokenization-only check, not a
+rerun.
 
 ## 1. Pre-registered procedure (owner decisions 2026-11-25)
 
@@ -93,16 +97,25 @@ investigated: **TBD**. On all cores the same K = 10 eval took a median 1,945 ms 
   cosine did (ADR-0007 amendment). The overlap comes from one unanswerable corpus-1 near miss, Q-DEV-005 (gte 0.5163,
   bge-m3 0.4042), against answerable cases the reranker scores low: gte Q2-DEV-002 0.4783; bge-m3 Q2-DEV-002 0.0861
   and Q-DEV-004 0.1080.
-- With 9 answerable and 3 unanswerable dev cases no value is reliable: **PROVISIONAL**, no default changed. A reliable
-  threshold needs 15-20 new dev questions approved by the owner (frozen eval sets untouched).
+- With 9 answerable and 3 unanswerable dev cases no value is reliable: **PROVISIONAL**, no default changed. Owner
+  decision 2026-11-26: no dev questions are added now (frozen eval sets untouched); the gate stays on the dense score
+  and its re-calibration moves to the local LLM step.
 - Information only, never used to set a value: at the pooled rule value the eval split would be refused, gte 2/14
   unanswerable and 2/94 answerable; bge-m3 7/14 and 3/94.
 
 ## Recommendation
 
+**Owner decisions, 2026-11-26** (ADR-0009 D7): (1) merge the reranker as infrastructure, default stays
+`RERANK_PROVIDER=none`; (2) opt-in mode = bge-reranker-v2-m3 int8, K = 10, local embedder only, **EXPERIMENTAL /
+PROVISIONAL** because it was chosen on eval results, not by the pre-registered rule; the owner's reasons: latency on a
+weak machine (bge-m3 13.8 s per question, gte 5.6 s at K = 10) and +1.6-2.1 GB RAM (bge-m3 1.6 GB, gte 2.1 GB; both in
+§2 Step 1) exceed the budget, there is no @5 gain, and only an @1 gain on corpus 2; (3) `RERANK_CANDIDATES` = 10
+(chosen by the speed rule) and `RERANK_BATCH_SIZE` = 8 stay; (4) the gate stays PROVISIONAL on the dense score, no dev
+questions are added now, and gate re-calibration moves to the local LLM step (LLM refusal = second gate layer).
+
 - **Default: off** (`RERANK_PROVIDER=none`), by the pre-registered rule: both models are over 2 s at K = 10 on the
   low-end profile (gte 5.6 s, bge-m3 13.8 s median) and over the ~0.5 GB RAM budget.
-- **Opt-in "high quality" mode: bge-m3 int8, K = 10, local embedder.** Its @5 total is never below `none` on local
+- **Opt-in "high quality" mode (EXPERIMENTAL / PROVISIONAL): bge-m3 int8, K = 10, local embedder.** Its @5 total is never below `none` on local
   hybrid (v1 27 vs 26: 1 case lost, 2 gained; corpus 2 48 vs 48 and E 10 vs 10, identical cases) and it puts the
   evidence first more often on corpus 2 (@1 41 vs 31, p = 0.006), at the cost of @1 on corpus 1 (v1 14 vs 15, E 7 vs
   9). **How this was chosen:** §1 fixed K and the default-off rule, not the choice between gte and bge-m3 nor
@@ -110,7 +123,8 @@ investigated: **TBD**. On all cores the same K = 10 eval took a median 1,945 ms 
   `none` is significant, so treat the choice as provisional. Real cost: median 4.2 s per question on the i7-12700H with ONNX Runtime's default threads (full profile), 13.8 s on the low-end
   profile, about 1.6 GB more RAM. With the Gemini embedder (dense) it lowers @1 and @5 on v1: not recommended there.
 - **Gate:** no reranker gate value is adopted; the dense gate stays (0.686 / 0.5417, known limitation on corpus 2).
-  Reranker values above are PROVISIONAL; next step for a usable value: owner-approved new dev questions.
+  Reranker values above are PROVISIONAL; per the owner (2026-11-26) no dev questions are added now and the
+  re-calibration moves to the local LLM step (LLM refusal = second gate layer).
 - Open: Gemini v2 (TBD, quota); gte's RAM (TBD); a smaller/faster multilingual long-input cross-encoder that fits
   2 s would need a new candidate list from the owner.
 
@@ -125,3 +139,45 @@ every quote lies within the first 256 tokens and the model still ranks a require
 Ceiling of the candidate list (evidence_hit@5 if the best 5 of 20 were chosen; local v1 / v2 corpus 2 / E, Gemini v1):
 31/32, 49/52, 10/10, 32/32, against `none` 26, 48, 10, 30. Run folder `data/experiments/rerank-bench/20261125-run1`
 (git-ignored), candidates at commit c9dba7b with uncommitted reranker code; these numbers are exploratory only.
+
+## 4. Pair-length check (2026-11-26; tokenization only, not a rerun)
+
+**What and why.** A window is cut on the tokens of the passage alone, but the pair tokenizes it afresh, so its boundary
+tokens can come out a token or two longer than counted and a pair can pass the 512 limit. This PR cuts such a pair back
+at its window's end (ADR-0009 D2); a pair that fits is never touched. The checks below only tokenize (the `tokenizers`
+library, no ONNX session, no scoring, no benchmark or eval run); the §2 numbers are the numbers of the pre-registered
+run. The scripts were throw-away replays of `reranker_bench.py`'s worker (same candidate file, `rerank_passage` text,
+windows) and are not committed.
+
+**Pairs the benchmark scored** (`20261125-run3` candidate lists, 162 rows = 120 local + 42 Gemini; both models'
+own `tokenizer.json`; limit 512; all candidate chunk ids resolved):
+
+| model tokenizer | K | pairs | over the limit |
+|---|---:|---:|---|
+| bge-m3 | 10 / 15 / 20 | 1,766 / 2,652 / 3,535 | **0 / 0 / 0** |
+| gte | 10 | 1,766 | 14 (each by 1 token; all local, v2 corpus-2 eval) |
+| gte | 15 / 20 | 2,652 / 3,535 | 19 / 27 (each by 1 token) |
+
+- **bge-m3, the opt-in model: no benchmark pair exceeded the limit, so the cut-back changes none of them and the §2
+  bge-m3 numbers stand exactly.**
+- **gte: 14 of its 1,766 K = 10 pairs were 1 token over and were scored as such** (its model accepts 8,192 positions,
+  so 513 tokens is no error; 512 is the configured limit). With the cut-back each would lose its last window token. The
+  gte numbers in §2 come from the code before the cut-back and were not re-run; whether those 14 scores or any rank
+  would move is **not measured**. gte is not the opt-in model.
+
+**All chunks, bge tokenizer** (every chunk of arm A / arm B, all 120 dev and eval questions of v1 and v2 as question
+lengths; this counts every possible (chunk, question) pair, not only retrieved ones):
+
+| corpus / arm | pairs | over the limit |
+|---|---:|---|
+| corpus 1 / A | 90,805 | 0 |
+| corpus 1 / B | 116,687 | 0 |
+| corpus 2 / A | 158,694 | 4 (each by 1 token) |
+| corpus 2 / B | 153,701 | 10 (6 by 1 token, 4 by 2) |
+
+**The cut-back on real data** (bge tokenizer, same chunks, one question per distinct question length, 45 lengths, 197,055
+pairs; a pair depends only on the question's length, so this counts each over-limit pair once instead of once per
+question, hence 7 and not the 14 above): 7 pairs were over the limit, **exactly those 7 were changed, none is over the
+limit afterwards, every other pair is identical**.
+
+Not checked: the dropped mMiniLM model, and the Gemini v2 candidates (TBD, quota).

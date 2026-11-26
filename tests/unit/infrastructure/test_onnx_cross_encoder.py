@@ -42,6 +42,33 @@ class FakeTokenizer:
         return out
 
 
+class PrefixTokenizer(FakeTokenizer):
+    """A window re-tokenized inside a pair is not always the length it had in the passage alone (SentencePiece puts a
+    "▁" in front of a text's first word): here a word starting with "X" is one token inside a text but two when it
+    opens the text, so a window cut at such a word comes out one token longer than the count it was sized by."""
+
+    def encode(self, text, add_special_tokens=True):
+        offsets = list(super().encode(text).offsets)
+        if offsets and text[offsets[0][0]] == "X" and offsets[0][1] - offsets[0][0] > 1:
+            start, end = offsets[0]
+            offsets[:1] = [(start, start + 1), (start + 1, end)]
+        return SimpleNamespace(ids=[len(text[a:b]) for a, b in offsets], offsets=offsets)
+
+
+class StickyDriftTokenizer(FakeTokenizer):
+    """Every passage comes out `extra` tokens longer inside a pair, however short it is cut: no window can fit."""
+
+    def __init__(self, extra):
+        self.extra = extra
+
+    def encode_batch(self, pairs):
+        out = super().encode_batch(pairs)
+        for e in out:
+            e.ids[-1:-1] = [3] * self.extra
+            e.type_ids += [1] * self.extra
+        return out
+
+
 class FakeSession:
     """logit = number of non-pad tokens (longer passage = more relevant); records the feeds."""
 
@@ -72,10 +99,10 @@ def _settings(max_tokens=512, overlap=128, batch_size=20):
 
 
 def _reranker(max_tokens=512, overlap=128, inputs=("input_ids", "attention_mask"), batch_size=20, session=None,
-              positions=None):
+              positions=None, tokenizer=None):
     session = session or FakeSession(inputs)
     reranker = OnnxCrossEncoderReranker(_settings(max_tokens, overlap, batch_size), session=session,
-                                        tokenizer=FakeTokenizer(), positions=positions)
+                                        tokenizer=tokenizer or FakeTokenizer(), positions=positions)
     return reranker, session
 
 
@@ -123,6 +150,32 @@ def test_pairs_fill_the_smaller_of_max_tokens_and_positions_whatever_the_questio
     reranker, session = _reranker(max_tokens=max_tokens, overlap=4, positions=positions)
     reranker.rerank(" ".join(["q"] * question_words), [" ".join(["p"] * 50)])
     assert max(f["input_ids"].shape[1] for f in session.feeds) == 20  # window = 20 - question - 4 specials
+
+
+def test_a_window_that_re_tokenizes_longer_is_cut_back_so_no_pair_exceeds_the_limit():
+    """Windows are cut on the passage-alone tokens but the pair re-tokenizes them (boundary tokens can differ by a
+    token or two): such a pair is cut back at its end, never fed longer than min(max_tokens, positions)."""
+    reranker, session = _reranker(max_tokens=12, overlap=2, tokenizer=PrefixTokenizer())  # window 12 - 1 - 4 = 7
+    words = ["a"] * 20
+    words[5], words[10] = "Xbb", "Xcc"  # windows start at tokens 0, 5, 10, 15: two open with an "X" word
+    assert len(reranker.windows(" ".join(words), 7)) == 4
+    reranker.rerank("q", [" ".join(words)])
+    assert max(f["input_ids"].shape[1] for f in session.feeds) <= 12
+    assert sum(len(f["input_ids"]) for f in session.feeds) == 4  # all four windows are still scored
+
+
+@pytest.mark.parametrize("max_tokens", [16, 20])
+def test_a_long_question_leaves_room_for_the_window_at_a_small_limit(max_tokens):
+    reranker, session = _reranker(max_tokens=max_tokens, overlap=0)
+    reranker.rerank(" ".join(["q"] * 128), [" ".join(["p"] * 40)])
+    assert max(f["input_ids"].shape[1] for f in session.feeds) <= max_tokens
+
+
+def test_a_pair_that_cannot_fit_even_one_token_is_an_error_not_a_loop():
+    # question 11 tokens (16 - 4 specials - 1), window 1 token, but every window re-tokenizes 2 tokens longer
+    reranker, _ = _reranker(max_tokens=16, overlap=0, tokenizer=StickyDriftTokenizer(extra=2))
+    with pytest.raises(RetrievalError, match="does not fit"):
+        reranker.rerank(" ".join(["q"] * 128), [" ".join(["p"] * 40)])
 
 
 def test_a_passage_that_fits_is_one_window():

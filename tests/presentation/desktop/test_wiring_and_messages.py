@@ -35,12 +35,42 @@ def test_real_port_shares_one_llm_forces_fallback_and_builds_lazily(monkeypatch)
             made.append(self)
 
     monkeypatch.setattr(wiring, "create_llm", SpyLLM)
-    monkeypatch.setattr(wiring, "build_answer_service", lambda arm, llm, embedder: built.append((arm, llm)) or object())
+    monkeypatch.setattr(wiring, "build_answer_service",
+                        lambda arm, llm, embedder, **options: built.append((arm, llm)) or object())
     port = wiring.build_real_port()
     assert len(made) == 1 and made[0].settings.allow_fallback is True and built == []
     port._service("A")
     port._service("B")
     assert [a for a, _ in built] == ["A", "B"] and all(llm is made[0] for _, llm in built)
+
+
+def test_real_port_builds_one_reranker_and_both_arms_share_it(monkeypatch):
+    """GUI double load (ADR-0009): one reranker per arm meant two copies of a ~1.6 GB model."""
+    made, built = [], []
+    monkeypatch.setattr(wiring, "create_llm", lambda settings: object())
+    monkeypatch.setattr(wiring, "create_reranker", lambda: made.append(object()) or made[-1])
+    monkeypatch.setattr(wiring, "build_answer_service",
+                        lambda arm, llm, embedder, **options: built.append((arm, options)) or object())
+    port = wiring.build_real_port()
+    port._service("A")
+    port._service("B")
+    assert len(made) == 1
+    assert [arm for arm, _ in built] == ["A", "B"]
+    assert all(options == {"reranker": made[0]} for _, options in built)
+
+
+def test_real_port_with_the_default_provider_shares_one_noop_reranker(monkeypatch):
+    from knowledge_assistant.infrastructure.rerank.noop_reranker import NoOpReranker
+
+    monkeypatch.delenv("RERANK_PROVIDER", raising=False)
+    got = []
+    monkeypatch.setattr(wiring, "create_llm", lambda settings: object())
+    monkeypatch.setattr(wiring, "build_answer_service",
+                        lambda arm, llm, embedder, **options: got.append(options["reranker"]) or object())
+    port = wiring.build_real_port()
+    port._service("A")
+    port._service("B")
+    assert isinstance(got[0], NoOpReranker) and got[0] is got[1]
 
 
 def test_fake_fallback_scenario_shows_the_fallback_marker_in_the_status_line():

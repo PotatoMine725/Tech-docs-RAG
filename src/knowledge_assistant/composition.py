@@ -143,14 +143,17 @@ def build_answer_service(
     *,
     store: VectorStore | None = None,
     gate_off: bool = False,
+    reranker: Reranker | None = None,
 ) -> AnswerQuestion:
     """One `AnswerQuestion` for one arm. `gate_off=True` disables the retrieval gate so a low-scoring question still
-    reaches the LLM: a diagnostic for checking the LLM's own "insufficient" path, never used for evaluation."""
+    reaches the LLM: a diagnostic for checking the LLM's own "insufficient" path, never used for evaluation.
+    `reranker`: pass one instance to share it between services (the GUI builds both arms on one reranker, so its model
+    loads once); left out, each service builds the configured one."""
     answer = get_answer_settings()
     retrieval = get_retrieval_settings()
     threshold = float("-inf") if gate_off else retrieval.insufficient_score_threshold
     return AnswerQuestion(
-        create_retriever(arm, embedder, store),
+        create_retriever(arm, embedder, store, reranker=reranker),
         llm,
         PromptBuilder.from_dir(answer.prompts_dir, answer.prompt_version),
         load_messages(answer.messages_path),

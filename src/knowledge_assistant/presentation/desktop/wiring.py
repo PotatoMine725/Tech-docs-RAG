@@ -6,9 +6,11 @@ point's seam: view-model, view, adapter and fake stay free of infrastructure imp
 `build_real_port()`. `tests/unit/test_project_structure.py` pins that nothing else in presentation imports
 `composition` or `infrastructure`.
 
-Providers come from configuration (EMBEDDING_PROVIDER, LLM_PROVIDER) via the composition root; this module names
-no concrete provider. Shared state: ONE LLM for both arms, so the per-minute throttles are shared; one `AnswerQuestion` per arm,
-built on first use (the window opens even when an index is missing; the error shows on the first question).
+Providers come from configuration (EMBEDDING_PROVIDER, LLM_PROVIDER, RERANK_PROVIDER) via the composition root; this
+module names no concrete provider. Shared state: ONE LLM for both arms, so the per-minute throttles are shared; ONE
+reranker for both arms, so its model (about 1.6 GB, ADR-0009) loads once, on the first rerank; one `AnswerQuestion` per
+arm, built on first use (the window opens even when an index is missing; the error shows on the first question). The
+three providers themselves are created at start, so a bad provider setting (e.g. RERANK_PROVIDER) fails at start.
 `ALLOW_FALLBACK` is forced to true here (the app answers with the fallback model when the answer model fails;
 the evaluation runner does the opposite in its own process).
 """
@@ -18,7 +20,13 @@ import threading
 from dataclasses import replace
 
 from knowledge_assistant.application.generation.answer_question import AnswerQuestion
-from knowledge_assistant.composition import build_answer_service, create_embedder, create_llm, open_embedder
+from knowledge_assistant.composition import (
+    build_answer_service,
+    create_embedder,
+    create_llm,
+    create_reranker,
+    open_embedder,
+)
 from knowledge_assistant.config import get_answer_settings
 from knowledge_assistant.core.interfaces.embedding import EmbeddingTask
 
@@ -51,8 +59,9 @@ class PerCallEmbedder:
 def build_real_port() -> CoreAskQuestion:
     llm = create_llm(replace(get_answer_settings(), allow_fallback=True))
     embedder = PerCallEmbedder()
+    reranker = create_reranker()  # cheap: the model loads on the first rerank, and both arms then share that one load
 
     def service_for_arm(arm: str) -> AnswerQuestion:
-        return build_answer_service(arm, llm, embedder)
+        return build_answer_service(arm, llm, embedder, reranker=reranker)
 
     return CoreAskQuestion(service_for_arm)
