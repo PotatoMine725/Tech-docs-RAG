@@ -1,0 +1,337 @@
+{
+  "label": "stage1-qwen3.5-2b-instruct-q4_k_m",
+  "started": "2026-11-26T16:22:17+0700",
+  "machine": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "processor": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+    "logical_cpus": 20,
+    "total_ram_bytes": 25378844672
+  },
+  "settings": {
+    "threads": 4,
+    "prompt_tokens": [
+      800,
+      2500
+    ],
+    "gen_tokens": 200,
+    "repeats": 3,
+    "warmup_runs": 1,
+    "cache_prompt": false
+  },
+  "configs": [
+    {
+      "model": "Qwen3.5-2B-Q4_K_M.gguf",
+      "model_bytes": 1280835840,
+      "ngl": 0,
+      "mmap": true,
+      "llama_bench": {
+        "command": [
+          "E:\\models\\llama.cpp\\v1.0.0-cpu\\llama-bench.exe",
+          "-m",
+          "E:\\models\\llm\\qwen3.5-2b-instruct-q4_k_m\\Qwen3.5-2B-Q4_K_M.gguf",
+          "-t",
+          "4",
+          "-ngl",
+          "0",
+          "-p",
+          "800,2500",
+          "-n",
+          "200",
+          "-r",
+          "3",
+          "-o",
+          "json"
+        ],
+        "returncode": 0,
+        "rows": [
+          {
+            "build_commit": "b1b770d90",
+            "build_number": 12359,
+            "cpu_info": "12th Gen Intel(R) Core(TM) i7-12700H",
+            "gpu_info": "",
+            "backends": "CPU",
+            "model_filename": "E:\\models\\llm\\qwen3.5-2b-instruct-q4_k_m\\Qwen3.5-2B-Q4_K_M.gguf",
+            "model_type": "qwen35 2B Q4_K - Medium",
+            "model_size": 1269873920,
+            "model_n_params": 1881825088,
+            "n_batch": 2048,
+            "n_ubatch": 512,
+            "n_threads": 4,
+            "cpu_mask": "0x0",
+            "cpu_strict": false,
+            "poll": 50,
+            "type_k": "f16",
+            "type_v": "f16",
+            "n_gpu_layers": 0,
+            "n_cpu_moe": 0,
+            "split_mode": "layer",
+            "main_gpu": 0,
+            "no_kv_offload": false,
+            "flash_attn": -1,
+            "devices": "auto",
+            "tensor_split": "0.00",
+            "tensor_buft_overrides": "none",
+            "load_mode": "auto",
+            "lazy_mode": "auto",
+            "embeddings": false,
+            "no_op_offload": 0,
+            "no_host": false,
+            "repack": true,
+            "fit_target": 0,
+            "fit_min_ctx": 0,
+            "n_prompt": 800,
+            "n_gen": 0,
+            "n_depth": 0,
+            "test_time": "2026-11-26T09:22:18Z",
+            "avg_ns": 4216170600,
+            "stddev_ns": 12822241,
+            "avg_ts": 189.746811,
+            "stddev_ts": 0.57621,
+            "samples_ns": [
+              4206468900,
+              4230707400,
+              4211335500
+            ],
+            "samples_ts": [
+              190.183,
+              189.094,
+              189.963
+            ]
+          },
+          {
+            "build_commit": "b1b770d90",
+            "build_number": 12359,
+            "cpu_info": "12th Gen Intel(R) Core(TM) i7-12700H",
+            "gpu_info": "",
+            "backends": "CPU",
+            "model_filename": "E:\\models\\llm\\qwen3.5-2b-instruct-q4_k_m\\Qwen3.5-2B-Q4_K_M.gguf",
+            "model_type": "qwen35 2B Q4_K - Medium",
+            "model_size": 1269873920,
+            "model_n_params": 1881825088,
+            "n_batch": 2048,
+            "n_ubatch": 512,
+            "n_threads": 4,
+            "cpu_mask": "0x0",
+            "cpu_strict": false,
+            "poll": 50,
+            "type_k": "f16",
+            "type_v": "f16",
+            "n_gpu_layers": 0,
+            "n_cpu_moe": 0,
+            "split_mode": "layer",
+            "main_gpu": 0,
+            "no_kv_offload": false,
+            "flash_attn": -1,
+            "devices": "auto",
+            "tensor_split": "0.00",
+            "tensor_buft_overrides": "none",
+            "load_mode": "auto",
+            "lazy_mode": "auto",
+            "embeddings": false,
+            "no_op_offload": 0,
+            "no_host": false,
+            "repack": true,
+            "fit_target": 0,
+            "fit_min_ctx": 0,
+            "n_prompt": 2500,
+            "n_gen": 0,
+            "n_depth": 0,
+            "test_time": "2026-11-26T09:22:35Z",
+            "avg_ns": 14020642700,
+            "stddev_ns": 14331666,
+            "avg_ts": 178.308641,
+            "stddev_ts": 0.182288,
+            "samples_ns": [
+              14005742300,
+              14021857500,
+              14034328300
+            ],
+            "samples_ts": [
+              178.498,
+              178.293,
+              178.135
+            ]
+          },
+          {
+            "build_commit": "b1b770d90",
+            "build_number": 12359,
+            "cpu_info": "12th Gen Intel(R) Core(TM) i7-12700H",
+            "gpu_info": "",
+            "backends": "CPU",
+            "model_filename": "E:\\models\\llm\\qwen3.5-2b-instruct-q4_k_m\\Qwen3.5-2B-Q4_K_M.gguf",
+            "model_type": "qwen35 2B Q4_K - Medium",
+            "model_size": 1269873920,
+            "model_n_params": 1881825088,
+            "n_batch": 2048,
+            "n_ubatch": 512,
+            "n_threads": 4,
+            "cpu_mask": "0x0",
+            "cpu_strict": false,
+            "poll": 50,
+            "type_k": "f16",
+            "type_v": "f16",
+            "n_gpu_layers": 0,
+            "n_cpu_moe": 0,
+            "split_mode": "layer",
+            "main_gpu": 0,
+            "no_kv_offload": false,
+            "flash_attn": -1,
+            "devices": "auto",
+            "tensor_split": "0.00",
+            "tensor_buft_overrides": "none",
+            "load_mode": "auto",
+            "lazy_mode": "auto",
+            "embeddings": false,
+            "no_op_offload": 0,
+            "no_host": false,
+            "repack": true,
+            "fit_target": 0,
+            "fit_min_ctx": 0,
+            "n_prompt": 0,
+            "n_gen": 200,
+            "n_depth": 0,
+            "test_time": "2026-11-26T09:23:31Z",
+            "avg_ns": 9583045333,
+            "stddev_ns": 78639796,
+            "avg_ts": 20.871125,
+            "stddev_ts": 0.170486,
+            "samples_ns": [
+              9673566500,
+              9531568100,
+              9544001400
+            ],
+            "samples_ts": [
+              20.6749,
+              20.9829,
+              20.9556
+            ]
+          }
+        ]
+      },
+      "server": {
+        "command": [
+          "E:\\models\\llama.cpp\\v1.0.0-cpu\\llama-server.exe",
+          "-m",
+          "E:\\models\\llm\\qwen3.5-2b-instruct-q4_k_m\\Qwen3.5-2B-Q4_K_M.gguf",
+          "-t",
+          "4",
+          "-ngl",
+          "0",
+          "-c",
+          "4096",
+          "-np",
+          "1",
+          "--host",
+          "127.0.0.1",
+          "--port",
+          "59820"
+        ],
+        "context": 4096,
+        "load_s": 1.6068853000001582,
+        "warmup": {
+          "time_to_first_token_s": 4.418511899999885,
+          "total_s": 14.328676300000097,
+          "prompt_tokens": 800,
+          "prompt_tokens_per_s": 181.2174459847424,
+          "generated_tokens": 200,
+          "generated_tokens_per_s": 20.092311550777108
+        },
+        "answers": [
+          {
+            "target_prompt_tokens": 800,
+            "runs": [
+              {
+                "time_to_first_token_s": 4.348605099999986,
+                "total_s": 14.267559999999776,
+                "prompt_tokens": 800,
+                "prompt_tokens_per_s": 184.4989090348885,
+                "generated_tokens": 200,
+                "generated_tokens_per_s": 20.063637017148157
+              },
+              {
+                "time_to_first_token_s": 4.316358600000058,
+                "total_s": 14.470269100000223,
+                "prompt_tokens": 800,
+                "prompt_tokens_per_s": 186.41913312772857,
+                "generated_tokens": 200,
+                "generated_tokens_per_s": 19.59905262710035
+              },
+              {
+                "time_to_first_token_s": 4.266318099999808,
+                "total_s": 14.440055099999881,
+                "prompt_tokens": 800,
+                "prompt_tokens_per_s": 188.01144989729872,
+                "generated_tokens": 200,
+                "generated_tokens_per_s": 19.56085968307279
+              }
+            ],
+            "median_time_to_first_token_s": 4.316358600000058,
+            "median_prompt_tokens_per_s": 186.41913312772857,
+            "median_generated_tokens_per_s": 19.59905262710035
+          },
+          {
+            "target_prompt_tokens": 2500,
+            "runs": [
+              {
+                "time_to_first_token_s": 13.76694550000002,
+                "total_s": 24.17805249999992,
+                "prompt_tokens": 2500,
+                "prompt_tokens_per_s": 181.92582898506345,
+                "generated_tokens": 200,
+                "generated_tokens_per_s": 19.114781960371694
+              },
+              {
+                "time_to_first_token_s": 14.030351799999607,
+                "total_s": 24.663706099999672,
+                "prompt_tokens": 2500,
+                "prompt_tokens_per_s": 178.46712728318352,
+                "generated_tokens": 200,
+                "generated_tokens_per_s": 18.715357191996713
+              },
+              {
+                "time_to_first_token_s": 15.594016900000042,
+                "total_s": 26.201778099999956,
+                "prompt_tokens": 2500,
+                "prompt_tokens_per_s": 160.62438424642298,
+                "generated_tokens": 200,
+                "generated_tokens_per_s": 18.76015900318885
+              }
+            ],
+            "median_time_to_first_token_s": 14.030351799999607,
+            "median_prompt_tokens_per_s": 178.46712728318352,
+            "median_generated_tokens_per_s": 18.76015900318885
+          }
+        ],
+        "peak_memory_bytes": 2522419200
+      }
+    },
+    {
+      "model": "Qwen3.5-2B-Q4_K_M.gguf",
+      "model_bytes": 1280835840,
+      "ngl": 0,
+      "mmap": false,
+      "server": {
+        "command": [
+          "E:\\models\\llama.cpp\\v1.0.0-cpu\\llama-server.exe",
+          "-m",
+          "E:\\models\\llm\\qwen3.5-2b-instruct-q4_k_m\\Qwen3.5-2B-Q4_K_M.gguf",
+          "-t",
+          "4",
+          "-ngl",
+          "0",
+          "-c",
+          "4096",
+          "-np",
+          "1",
+          "--host",
+          "127.0.0.1",
+          "--port",
+          "59165",
+          "--no-mmap"
+        ],
+        "context": 4096,
+        "error": "RuntimeError: llama-server exited with code 1 while loading (see D:\\Code\\Python\\Knowledge assistant\\.claude\\worktrees\\local-llm-stage1\\data\\experiments\\local-llm-bench\\stage1-qwen3.5-2b-instruct-q4_k_m.server-Qwen3.5-2B-Q4_K_M-ngl0-nommap.log)"
+      }
+    }
+  ]
+}
