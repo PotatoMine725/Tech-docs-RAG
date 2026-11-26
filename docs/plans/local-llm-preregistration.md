@@ -4,7 +4,7 @@ Status: **APPROVED by owner (2026-11-26)**: candidates, procedure, thresholds an
 has been run; no number in this file is a result. Plan reference: `local-rag-upgrade-plan.md` §6
 (step 2 "Local LLM only", §6.2 output format, §6.3 go/no-go). Gate context: ADR-0009 D7 decision 4.
 
-## 1. Candidates (screen 5 + 1, keep 2)
+## 1. Candidates (screen 5, keep 2)
 
 Facts from public pages read on 2026-11-26; the exact GGUF repo, file size, SHA-256 and licence file are verified
 on the model card at download time and recorded in the report. Vietnamese quality is unknown for all of them and is
@@ -17,9 +17,8 @@ measured, not assumed.
 | Default (~2B) | Qwen3-1.7B, Q4_K_M | Apache-2.0 | Plan's baseline (§3); text-only, smallest |
 | Quality (~4B) | Qwen3.5-4B Instruct, Q4_K_M | Apache-2.0 | Opt-in "quality" profile |
 | Quality (~4B) | Gemma 4 E4B Instruct, Q4_K_M | Apache-2.0 | Opt-in "quality" profile |
-| Stage 1 only | NVIDIA-Nemotron-3-Nano-4B, Q4_K_M (~2.8 GB, unverified) | NVIDIA Nemotron Open Model License (commercial use stated; redistribution TBD) | Owner asked (2026-11-26). Card lists English only and thinking on by default; goes to stage 2 only if it passes stage 1 including the Vietnamese dev questions |
 
-Out: Llama 3.2 (Vietnamese not listed as supported, custom licence), SmolLM3 / Granite (no Vietnamese), anything
+Out: NVIDIA-Nemotron-3-Nano-4B (added, then dropped by the owner 2026-11-26: card lists English only, non-Apache licence), Llama 3.2 (Vietnamese not listed as supported, custom licence), SmolLM3 / Granite (no Vietnamese), anything
 above 4B (8 GB app budget), Vietnamese-only fine-tunes of older bases (licence varies; add only if all five fail
 Vietnamese). Image input is out of scope here (OCR is TBD); multimodal projector files are not downloaded.
 
@@ -41,7 +40,7 @@ Vietnamese). Image input is out of scope here (OCR is TBD); multimodal projector
 
 ## 3. Stages
 
-1. **Smoke + speed (all 6):** dev-v1 + dev-v2 (12 questions) and `local_llm_bench.py` at 800 and 2,500 prompt
+1. **Smoke + speed (all 5):** dev-v1 + dev-v2 (12 questions) and `local_llm_bench.py` at 800 and 2,500 prompt
    tokens. Drop a model that crashes, exceeds the RAM cap (§4), or breaks the format on more than 3 of 12.
 2. **Screen (survivors):** eval-v1 + eval-v2 (108 questions, 94 answerable / 14 unanswerable), one run each.
 3. **Pick:** best in each class by the rule in §5; the owner grades a Vietnamese sample (20 answers) of the 2 picks.
@@ -62,7 +61,16 @@ spread over days if needed (free tier ~1,000/day).
 | Answer language = question language | ≥ 95% |
 | Vietnamese owner grade (20 answers, ok / not ok) | ≥ 16 ok |
 | TTFT median, low-end profile, real passages | ≤ 15 s (2B class), ≤ 25 s (4B class) |
-| Peak RAM of `llama-server` | ≤ 2.0 GB (2B), ≤ 3.5 GB (4B); whole app ≤ 8 GB |
+| Peak RAM of `llama-server` (working set) | ≤ 3.5 GB (2B), ≤ 5.0 GB (4B); whole app ≤ 8 GB (amended, see below) |
+
+**Amendment A1 (owner, 2026-11-26, after stage 1; post-hoc).** Stage 1 (`docs/reports/2026-11-26-local-llm-stage1.md`)
+put every model over the first caps (2.0 / 3.5 GB). Those caps came from the plan's estimate "LLM 1.2-1.5 GB", not
+from the binding constraint, the 8 GB budget for the whole app. The metric stays the **working set** of
+`llama-server` (it includes the memory-mapped GGUF weights, which must be resident to run; private bytes would
+under-count them). New caps, derived from the 8 GB budget minus embedder (≤ 1 GB), index (~0.5 GB) and app/GUI/Chroma
+(~1.5 GB, estimate): **2B ≤ 3.5 GB, 4B ≤ 5.0 GB**. Effect on stage 1: the three 2B models pass, both 4B models
+(6.2-6.4 GB) are dropped. This change was made after seeing the data and is reported as such. The whole-app ≤ 8 GB
+check on the real gen-10 / 8 GB machine (stage 4) is unchanged.
 
 ## 5. Selection rule (fixed before the runs)
 
@@ -78,4 +86,4 @@ system-level threshold: dense-score gate + LLM refusal, judged together.
 ## 7. Downloads (location approved, owner 2026-11-26)
 
 Approved: models in `E:\models\llm\<model>\`, llama.cpp binaries in `E:\models\llama.cpp\<release>-cpu\`.
-Total download about 13–15 GB for six Q4 files (estimate; recorded per file at download).
+Total download about 10–12 GB for five Q4 files (estimate; recorded per file at download).
