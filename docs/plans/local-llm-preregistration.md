@@ -32,7 +32,7 @@ Vietnamese). Image input is out of scope here (OCR is TBD); multimodal projector
   markers, refusal sentinel `[[INSUFFICIENT]]` on the first line, answer in the question's language, excerpts stay
   English. Gemini runs the same `answer_v3` as the baseline.
 - **Runtime:** `llama-server` (pinned llama.cpp release, CPU build), temperature 0, fixed seed, context 4,096, one
-  slot, threads = physical cores, thinking mode **off** (chat-template switch per model, recorded), answer cap
+  slot, `--cache-ram 0` (A3), threads = physical cores, thinking mode **off** (chat-template switch per model, recorded), answer cap
   512 tokens.
 - **Low-end profile:** `-t 4`, `--ngl 0`. iGPU (Vulkan, `--ngl 99`) is a separate, later configuration.
 - **Judge:** `gemini-3.5-flash-lite`, `judge_v1`, existing label table (`metrics/mapping.py`); manual spot-check of
@@ -79,6 +79,15 @@ are reported two ways: **gate** (answerable, gate fired: a retrieval / gate-thre
 threshold) and **LLM** (answerable, reached the LLM, LLM refused: the ≤ 10% threshold applies here, over answerable
 cases that reached the LLM). Accuracy stays over all answerable cases and is compared with Gemini on the same
 retrieval, so the gate costs every model the same. The gate itself is recalibrated after this step (§6).
+
+**Amendment A3 (owner, 2026-11-26, during stage 2; post-hoc).** Stage 2 measured 5-11 GB peak working set per model,
+against 2.5-3 GB in stage 1. Cause: `llama-server`'s host-memory prompt cache (`--cache-ram`, default 8 GB) grew with
+the number of requests (7 per server in stage 1, 76 in stage 2); a short test with `--cache-ram 0` stayed flat at about
+1.5 GB. This is a server setting the app will not ship, not a property of the model, so the stage-2 RAM figures measured
+the wrong configuration. Fix: **`--cache-ram 0` is part of the fixed runtime** (§2; the in-slot prompt-prefix reuse
+stays). RAM and TTFT are re-measured over the same stage-2 requests with that flag; caps (A1) and every other threshold
+are unchanged. Quality results are kept; the re-run compares 5-10 answers against the first run to confirm they match.
+Decided after seeing the stage-2 RAM data and reported as such.
 
 ## 5. Selection rule (fixed before the runs)
 

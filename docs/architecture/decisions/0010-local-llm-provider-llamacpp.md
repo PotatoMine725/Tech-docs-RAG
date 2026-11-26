@@ -11,6 +11,9 @@ reserved), ADR-0004 (answer model). Plan: `docs/plans/local-rag-upgrade-plan.md`
   called on its OpenAI-style `/v1/chat/completions`. No Ollama in the app. No new Python dependency: the adapter uses
   the standard library HTTP client. The server is started outside the app for now; the app starting and stopping it
   (job object / watchdog, idle unload) is a later plan step.
+- **D1a Server settings (amendment A3, 2026-11-26).** The app's `llama-server` runs with `--cache-ram 0`: the
+  default host-memory prompt cache (up to 8 GB) grows with every request and breaks the 8 GB app budget. In-slot prefix
+  reuse (`cache_prompt`) still works with one slot.
 - **D2 Adapter.** `infrastructure/llm/llamacpp/LlamaCppLLM` behind `core/interfaces/llm.py`. Settings (`config.py`
   only): `LLAMACPP_URL`, `LOCAL_LLM_MODEL` (required, the pinned model id; the server is started with
   `--alias <id>`, one model per server), `LOCAL_LLM_CHAT_TEMPLATE_KWARGS` (default `{"enable_thinking": false}`),
