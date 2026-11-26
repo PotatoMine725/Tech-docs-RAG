@@ -8,10 +8,10 @@ import pytest
 
 pytest.importorskip("PySide6")
 
-from PySide6.QtCore import Qt, QUrl  # noqa: E402
-from PySide6.QtGui import QColor, QGuiApplication, QImage  # noqa: E402
+from PySide6.QtCore import QRect, Qt, QUrl  # noqa: E402
+from PySide6.QtGui import QColor, QFontMetrics, QGuiApplication, QImage, QPainter  # noqa: E402
 from PySide6.QtTest import QTest  # noqa: E402
-from PySide6.QtWidgets import QApplication  # noqa: E402
+from PySide6.QtWidgets import QApplication, QStyleOptionViewItem  # noqa: E402
 
 from knowledge_assistant.presentation.desktop.viewmodels.ask_viewmodel import AskViewModel, ViewState  # noqa: E402
 from knowledge_assistant.presentation.desktop.viewmodels.fake_ask_question import (  # noqa: E402
@@ -187,21 +187,45 @@ def test_hit_badge_survives_a_narrow_source_list(app):
     row = next(lst.item(i) for i in range(lst.count()) if lst.item(i).data(HIT_ROLE))
     assert row.text() == "Dependency Injection Guide" and row.toolTip().endswith("2 cited")
     assert row.data(Qt.ItemDataRole.AccessibleTextRole).endswith("2 cited")
-    assert isinstance(lst.itemDelegate(), SourceItemDelegate)
-    win.splitter.setSizes([190, 1000, 0])  # narrow enough that the long name must be elided
-    app.processEvents()
-    image = QImage(lst.viewport().size(), QImage.Format.Format_ARGB32)
-    image.fill(0)
-    lst.viewport().render(image)
+    delegate = lst.itemDelegate()
+    assert isinstance(delegate, SourceItemDelegate)
     badge = QColor(win.c["accent-soft"]).rgb()
+    # Sized from the font actually in use (offscreen Qt on Windows may find no font files and measure text very
+    # wide): three quarters of what the name and the badge need, so the name must be elided and the badge fits in
+    # the right third.
+    metrics = QFontMetrics(lst.font())
+    name_w, badge_w = metrics.horizontalAdvance(row.text()), metrics.horizontalAdvance("2 cited")
+    assert name_w > 3 * badge_w  # the premise of the proportions below
+    width = (name_w + badge_w + 4 * SourceItemDelegate.PAD) * 3 // 4
+    height = metrics.height() + 12
 
-    def badge_pixels(item) -> int:  # badge-coloured pixels in the right third of the row (no row is selected)
-        r = lst.visualItemRect(item)
-        return sum(image.pixel(x, y) == badge for x in range(r.right() - r.width() // 3, r.right())
-                   for y in range(r.top(), r.bottom()))
+    def paint(item) -> QImage:
+        """The delegate alone, on a fixed-size image: no window layout, DPI, hover or platform style involved."""
+        image = QImage(width, height, QImage.Format.Format_ARGB32)
+        image.fill(0)
+        option = QStyleOptionViewItem()
+        option.rect = QRect(0, 0, width, height)
+        option.font = lst.font()
+        painter = QPainter(image)
+        try:
+            delegate.paint(painter, option, lst.indexFromItem(item))
+        finally:
+            painter.end()
+        return image
+
+    def badge_pixels(image: QImage, columns: range) -> int:
+        return sum(image.pixel(x, y) == badge for x in columns for y in range(height))
 
     other = next(lst.item(i) for i in range(lst.count()) if not lst.item(i).data(HIT_ROLE))
-    assert badge_pixels(row) > 50 and badge_pixels(other) == 0
+    right_third = range(width - width // 3, width)
+    assert badge_pixels(paint(row), right_third) > 50  # the badge is painted inside the row, at its right end
+    assert badge_pixels(paint(row), range(0, width // 2)) == 0  # and not over the name
+    cited = paint(row)
+    badge_left = min(x for x in range(width) for y in range(height) if cited.pixel(x, y) == badge)
+    inked = [x for x in range(badge_left) for y in range(height) if QColor.fromRgba(cited.pixel(x, y)).alpha()]
+    assert len(inked) > 30  # the (elided) name is painted
+    assert max(inked) < badge_left - 2  # and ends before the badge: the badge does not cover it
+    assert badge_pixels(paint(other), range(width)) == 0  # an uncited row has no badge
 
 
 def test_opening_the_viewer_takes_width_from_the_conversation(app):
