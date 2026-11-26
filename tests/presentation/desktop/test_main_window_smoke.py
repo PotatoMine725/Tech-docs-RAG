@@ -9,7 +9,7 @@ import pytest
 pytest.importorskip("PySide6")
 
 from PySide6.QtCore import QRect, Qt, QUrl  # noqa: E402
-from PySide6.QtGui import QColor, QGuiApplication, QImage, QPainter  # noqa: E402
+from PySide6.QtGui import QColor, QFontMetrics, QGuiApplication, QImage, QPainter  # noqa: E402
 from PySide6.QtTest import QTest  # noqa: E402
 from PySide6.QtWidgets import QApplication, QStyleOptionViewItem  # noqa: E402
 
@@ -190,7 +190,14 @@ def test_hit_badge_survives_a_narrow_source_list(app):
     delegate = lst.itemDelegate()
     assert isinstance(delegate, SourceItemDelegate)
     badge = QColor(win.c["accent-soft"]).rgb()
-    width, height = 190, 28  # narrow enough that the long name must be elided
+    # Sized from the font actually in use (offscreen Qt on Windows may find no font files and measure text very
+    # wide): three quarters of what the name and the badge need, so the name must be elided and the badge fits in
+    # the right third.
+    metrics = QFontMetrics(lst.font())
+    name_w, badge_w = metrics.horizontalAdvance(row.text()), metrics.horizontalAdvance("2 cited")
+    assert name_w > 3 * badge_w  # the premise of the proportions below
+    width = (name_w + badge_w + 4 * SourceItemDelegate.PAD) * 3 // 4
+    height = metrics.height() + 12
 
     def paint(item) -> QImage:
         """The delegate alone, on a fixed-size image: no window layout, DPI, hover or platform style involved."""
