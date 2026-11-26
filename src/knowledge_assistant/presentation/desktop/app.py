@@ -20,20 +20,20 @@ def main(argv: list[str] | None = None) -> int:
     from .workers import QtExecutor
 
     if fake:
-        from .viewmodels.fake_ask_question import FakeAskQuestion
+        from .viewmodels.fake_ask_question import FAKE_SOURCES, FakeAskQuestion
 
-        port = FakeAskQuestion()
+        port, sources = FakeAskQuestion(), FAKE_SOURCES
     else:
         from dotenv import load_dotenv
 
-        from .wiring import build_real_port
+        from .wiring import build_real_port, load_source_titles
 
         load_dotenv(Path(__file__).resolve().parents[4] / ".env")
-        port = build_real_port()
+        port, sources = build_real_port(), load_source_titles()
 
     app = QApplication(sys.argv[:1])
-    # one question at a time (the view-model disables input while busy); a private pool keeps the global one free
-    vm = AskViewModel(port, QtExecutor(QThreadPool()))
+    # one question at a time (the view-model refuses a new one while busy); a private pool keeps the global one free
+    vm = AskViewModel(port, QtExecutor(QThreadPool()), sources)
     window = MainWindow(vm, title="Knowledge Assistant (fake data)" if fake else "Knowledge Assistant")
     window.show()
     return app.exec()

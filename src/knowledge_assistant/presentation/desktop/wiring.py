@@ -14,12 +14,14 @@ the evaluation runner does the opposite in its own process).
 """
 from __future__ import annotations
 
+import json
 import threading
 from dataclasses import replace
+from pathlib import Path
 
 from knowledge_assistant.application.generation.answer_question import AnswerQuestion
 from knowledge_assistant.composition import build_answer_service, create_embedder, create_llm, open_embedder
-from knowledge_assistant.config import get_answer_settings
+from knowledge_assistant.config import get_answer_settings, get_chunks_dir
 from knowledge_assistant.core.interfaces.embedding import EmbeddingTask
 
 from .viewmodels.core_ask_question import CoreAskQuestion
@@ -56,3 +58,21 @@ def build_real_port() -> CoreAskQuestion:
         return build_answer_service(arm, llm, embedder)
 
     return CoreAskQuestion(service_for_arm)
+
+
+def load_source_titles(chunks_dir: str | None = None) -> tuple[str, ...]:
+    """Titles of the indexed documents, A to Z, for the window's source list.
+
+    Read from the chunk files the indexes are built from (`CHUNKS_DIR`, the same setting retrieval uses), so the
+    list always names exactly the documents citations can come from. Missing or unreadable chunk files give an empty
+    list: the window still opens and answers, it only shows no sources.
+    """
+    folder = Path(chunks_dir) if chunks_dir else get_chunks_dir()
+    names: set[str] = set()
+    for arm in ("arm-a", "arm-b"):
+        try:
+            with (folder / f"{arm}.jsonl").open(encoding="utf-8") as lines:
+                names.update(json.loads(line)["document_name"] for line in lines if line.strip())
+        except (OSError, ValueError, KeyError, TypeError):
+            continue
+    return tuple(sorted(names, key=str.casefold))
