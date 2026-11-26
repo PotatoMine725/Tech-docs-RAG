@@ -74,6 +74,9 @@ investigated: **TBD**. On all cores the same K = 10 eval took a median 1,945 ms 
   at most 49). **@1 on corpus 2 improves** (bge-m3 31 → 41, b = 1, c = 11, p = 0.006; gte 31 → 38, p = 0.065), so
   the right chunk comes first more often. On corpus 1 @1 drops: local v1 15 → 12 (gte), 15 → 14 (bge-m3); E 9 → 7
   for both (b = 2, c = 0); Gemini dense v1 19 → 13 (gte, p = 0.031), 19 → 15 (bge-m3).
+- **gte's published numbers (Steps 1-3) predate the pair guard (§4):** 14 of its 1,766 K = 10 pairs were 1 token over
+  the 512 limit when scored, and the effect of cutting them back was not measured; gte is not the opt-in model, and
+  bge-m3 had no such pair.
 - Section MRR@5 (local): corpus 2 0.885 → 0.968 (gte), 0.952 (bge-m3); v1 0.919 → 0.911, 0.914.
 - Per category / language / typing (local, v2, @5): bge-m3 equals `none` in every cell (A 17/20, B 13/14, C 8/8,
   D 10/10, E 10/10; vi 39/42, en 19/20; diacritics 33/33, no_diacritics 6/9). gte is one case lower in A, E, vi, en
@@ -150,6 +153,13 @@ run. The scripts were throw-away replays of `reranker_bench.py`'s worker (same c
 windows) and are not committed. Check of the replay: for both models its window count per case equals the `windows` the
 run recorded in `rerank-{bge,gte}-int8-t512o128-c10-b8-full.json` (162 cases, 1,766 windows, 0 cases differ), so it saw
 the same chunk text as the run.
+
+**Method (to repeat it).** Per model: load its `tokenizer.json` with `tokenizers`, build
+`OnnxCrossEncoderReranker(settings, session=<stub with get_inputs()>, tokenizer=tok)` (no ONNX session), and for each row
+of the run's `candidates-*.jsonl` take its K chunk ids (`c10_chunk_ids`, `c15_chunk_ids`, `chunk_ids`), build each text
+with `rerank_passage`, cut the question and the windows as `score` does, and count the `(question, window)` pairs whose
+`tok.encode_batch` length exceeds `pair_limit`. The cut-back rows send the same pairs through `_encode_pairs`; the replay
+check sums the windows per case against `windows` in the run's result files.
 
 **Pairs the benchmark scored** (`20261125-run3` candidate lists, 162 rows = 120 local + 42 Gemini; both models'
 own `tokenizer.json`; limit 512; all candidate chunk ids resolved):

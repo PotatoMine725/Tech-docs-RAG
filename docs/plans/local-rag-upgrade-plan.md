@@ -262,9 +262,11 @@ Not worth it on this CPU: int8 and int4 builds (measured slower than fp32, `docs
 - **Reranker:** a small multilingual cross-encoder. `bge-reranker-v2-m3` is about as large as `bge-m3`, which is
   already ruled out for the 8 GB default, and reranking 20 long chunks on CPU adds seconds. Benchmark a
   MiniLM-class multilingual reranker and a shorter candidate list first; record its memory and added latency.
-- **Gate:** use the reranker's **absolute** relevance score. A threshold relative to the other results cannot detect
-  "nothing relevant", because all scores are then similarly low. Calibrate on the expanded benchmark across both
-  corpora, and keep the LLM's own refusal as the second layer.
+- **Gate:** decided in ADR-0009 D7, decision 4 (owner, 2026-11-26), replacing the plan to gate on the reranker's
+  score: the gate stays **PROVISIONAL on the dense score** (the reranker's scores overlapped on pooled dev, with 9
+  answerable cases), no dev questions are added now, and re-calibration moves to the local LLM step (§6), where the
+  LLM's own refusal is the second gate layer. A threshold relative to the other results still cannot detect "nothing
+  relevant", so whatever score the gate reads must be absolute.
 - **Cross-lingual keyword search:** run BM25 on the original question by default. Having the LLM translate keywords
   first costs an extra generation call on CPU; test it as one ablation configuration, not as the default.
 - **Ablation:** dense, sparse, hybrid, hybrid + rerank, on the expanded benchmark, reported per question type
@@ -377,7 +379,7 @@ Gemini from the shipped product (§4.3), final report including the local-versus
 |---|---|---|
 | 1 | 0 Foundations | Refactor reproduces EPIC-05 numbers; expanded benchmark frozen; measurement harness; packaging spike runs on a clean machine |
 | 2 | 1 Local models | Embedder comparison (retrieval-only); LLM comparison (retrieval fixed); CPU against integrated GPU; memory and time to first token from one run on a real gen-10 / 8 GB machine; go/no-go |
-| 3 | 2 Hybrid + rerank | Four-configuration ablation per question type; reranker-score gate calibrated |
+| 3 | 2 Hybrid + rerank | Four-configuration ablation per question type; gate stays PROVISIONAL on the dense score, re-calibration moves to the local LLM step (ADR-0009 D7, decision 4) |
 | 4–5 | 3 Ingestion | Upload, per-subject collections, incremental index, page citations; conversion-quality report |
 | 6–7 | 4 Standalone release + optional API | Packaged standalone app runs on a clean Windows machine; with the API enabled, the Planner discovers it and calls `/v1/search` and `/v1/ask`; each app verified working with the other absent |
 | 8–10 | 5 Study features | Syllabus mapping, quiz with evaluation, weak-topic tracking, as screens in the app and through the API |

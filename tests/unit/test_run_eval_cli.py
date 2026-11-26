@@ -308,6 +308,70 @@ def test_the_real_wiring_builds_the_throttles_once_and_shares_them(monkeypatch):
         assert len(built) == 1 and len(llms) == 1 and services.answerer is None and services.throttles is None
 
 
+class _SpyReranker:
+    """Absolute scores (so a retriever uses it); records how many passages each call saw."""
+
+    model_id = "spy"
+    absolute_scores = True
+
+    def __init__(self):
+        self.calls = []
+
+    def rerank(self, query, passages, top_n=None):
+        from knowledge_assistant.core.interfaces.reranker import RerankResult
+
+        self.calls.append(len(passages))
+        return [RerankResult(index=i, score=1 - i / 100) for i in range(len(passages))][:top_n]
+
+
+def _low_score_store():
+    """Six chunks scoring far below the gate threshold, so `answerer.ask` stops at the gate and needs no LLM reply."""
+    from tests.fakes import make_chunk
+
+    chunks = [make_chunk(f"{i:02d}", i, f"Passage body {i}.", ("Doc", f"Part {i}")) for i in range(1, 7)]
+    store = InMemoryVectorStore({c.chunk_id: 0.3 - n / 100 for n, c in enumerate(chunks)})
+    store.upsert(chunks, [[1.0, 0.0]] * len(chunks))
+    return store
+
+
+def test_full_mode_builds_one_reranker_and_both_retrievers_of_an_arm_share_it(monkeypatch):
+    """The reranker model is about 1.6 GB: `open_services` hands one instance to the run's retriever and to the answer
+    service's retriever (same pattern as the GUI), so the model loads once per process, not twice."""
+    import knowledge_assistant.composition as composition
+
+    built, spy = [], _SpyReranker()
+
+    def create_reranker():
+        built.append(1)
+        return spy
+
+    monkeypatch.setattr(run_eval, "open_embedder", lambda: _Embedder())
+    monkeypatch.setattr(run_eval, "open_vector_store", lambda arm: _low_score_store())
+    monkeypatch.setattr(run_eval, "build_throttles", lambda settings: {})
+    monkeypatch.setattr(run_eval, "GeminiLLM", lambda settings, throttles, on_provider_error: ScriptedLLM())
+    monkeypatch.setattr(composition, "create_reranker", create_reranker)  # what an unshared service would build its own with
+    monkeypatch.setattr(run_eval, "create_reranker", create_reranker, raising=False)
+    settings = run_eval.replace(run_eval.get_answer_settings(), allow_fallback=False)
+    with run_eval.open_services("A", "full", settings, object()) as services:
+        assert len(built) == 1  # one reranker for the two retrievers
+        services.retriever.retrieve("Question?")
+        assert services.answerer.ask("Question?").insufficient_reason == "retrieval_gate"
+        assert len(spy.calls) == 2  # each retriever reranked with the one shared instance
+    with run_eval.open_services("A", "retrieval", settings, object()) as services:  # retrieval mode: one retriever
+        assert len(built) == 2 and services.answerer is None
+
+
+def test_default_provider_none_leaves_the_retrieval_path_unchanged(monkeypatch):
+    """RERANK_PROVIDER unset: the no-op reranker is built once, is never called, and scores stay the dense ones."""
+    monkeypatch.delenv("RERANK_PROVIDER", raising=False)
+    monkeypatch.setattr(run_eval, "open_embedder", lambda: _Embedder())
+    monkeypatch.setattr(run_eval, "open_vector_store", lambda arm: _low_score_store())
+    settings = run_eval.replace(run_eval.get_answer_settings(), allow_fallback=False)
+    with run_eval.open_services("A", "retrieval", settings, object()) as services:
+        result = services.retriever.retrieve("Question?")
+        assert result.rerank_score is None and [c.score for c in result.chunks][:2] == [0.3, 0.29]
+
+
 # --- corpus as a run dimension, question set v2 (ADR-0008) ---------------------------------------------------------
 
 @pytest.fixture

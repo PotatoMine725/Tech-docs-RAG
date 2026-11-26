@@ -89,8 +89,10 @@ FP32 at 768 dims; other variants (INT4, ...) or dims are **not tuned (TBD)**.
   of 4 answerable dev cases on Arm A.
 - **Across domains (owner decision 2026-11-25, ADR-0007 amendment):** on dev v1 + v2 the dense-cosine gate does not
   separate answerable from unanswerable for embeddinggemma (corpus-2 answerable down to 0.3923, corpus-1 unanswerable
-  up to 0.5869). No per-corpus or pooled threshold; refusal moves to the reranker's absolute score (next step), with
-  the LLM layer (b) second. **Until then 0.5417 stays; known limitation: it over-refuses on corpus 2.** The Gemini
-  value is re-checked the same way once Gemini v2 runs exist (TBD).
+  up to 0.5869). No per-corpus or pooled threshold. The planned move of refusal to the reranker's absolute score was
+  **not adopted**: ADR-0009 D7, decision 4 (owner, 2026-11-26) keeps the gate PROVISIONAL on the dense score, moves its
+  re-calibration to the local LLM step, and makes the LLM refusal (b) the second gate layer. **Meanwhile 0.5417 stays;
+  known limitation: it over-refuses on corpus 2.** The Gemini value is re-checked the same way once Gemini v2 runs
+  exist (TBD).
 - Eval split, for information (not used for tuning): the gate refuses 5/32 answerable cases on each arm (Gemini 3/32
   Arm A, 2/32 Arm B) and 2/4 unanswerable ones (Gemini 3/4). See `docs/reports/2026-11-23-local-reindex.md`.
