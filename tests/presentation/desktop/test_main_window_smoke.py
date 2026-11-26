@@ -213,6 +213,11 @@ def test_hit_badge_survives_a_narrow_source_list(app):
     right_third = range(width - width // 3, width)
     assert badge_pixels(paint(row), right_third) > 50  # the badge is painted inside the row, at its right end
     assert badge_pixels(paint(row), range(0, width // 2)) == 0  # and not over the name
+    cited = paint(row)
+    badge_left = min(x for x in range(width) for y in range(height) if cited.pixel(x, y) == badge)
+    inked = [x for x in range(badge_left) for y in range(height) if QColor.fromRgba(cited.pixel(x, y)).alpha()]
+    assert len(inked) > 30  # the (elided) name is painted
+    assert max(inked) < badge_left - 2  # and ends before the badge: the badge does not cover it
     assert badge_pixels(paint(other), range(width)) == 0  # an uncited row has no badge
 
 
