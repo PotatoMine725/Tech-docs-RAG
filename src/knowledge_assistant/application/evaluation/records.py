@@ -42,6 +42,7 @@ GENERATED_DEFAULTS = {
     "prompt_tokens": None,
     "output_tokens": None,
     "thoughts_tokens": None,
+    "time_to_first_token_ms": None,  # local LLM: the server's prompt-processing time (plan §6.3); Gemini: null
     "prompt_version": None,
 }
 GENERATED_FIELDS = tuple(GENERATED_DEFAULTS)

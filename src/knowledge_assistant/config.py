@@ -1,3 +1,4 @@
+import json
 import os
 from dataclasses import dataclass
 from pathlib import Path
@@ -179,8 +180,53 @@ LLM_PROVIDERS = ("gemini", "llamacpp")
 
 
 def get_llm_provider() -> str:
-    """Which LLM writes the answers: `gemini` (default). `llamacpp` is reserved for the local GGUF provider."""
+    """Which LLM writes the answers: `gemini` (default, cloud) or `llamacpp` (a local GGUF model served by
+    `llama-server`, docs/plans/local-llm-preregistration.md)."""
     return _choice("LLM_PROVIDER", "gemini", LLM_PROVIDERS)
+
+
+@dataclass(frozen=True)
+class LlamaCppSettings:
+    """Local answer model behind `llama-server`'s OpenAI-style chat endpoint. `model` is the pinned id of the GGUF file
+    the server was started with (start it with `--alias <model>`; one server serves one model, so the id is what the
+    records and the model-purity check use). No retries and no fallback: a local server that is down stays down.
+    `chat_template_kwargs` go to the model's chat template (thinking off: `{"enable_thinking": false}`); an optional
+    `system_prompt` is for models that switch thinking by a system line. `max_output_tokens` caps every answer."""
+
+    base_url: str
+    model: str
+    timeout_s: float
+    max_output_tokens: int
+    seed: int
+    chat_template_kwargs: dict
+    system_prompt: str | None
+
+
+def get_llamacpp_settings() -> LlamaCppSettings:
+    model = (os.getenv("LOCAL_LLM_MODEL") or "").strip()
+    if not model:
+        raise ConfigurationError("LOCAL_LLM_MODEL is not set; set it to the pinned id of the GGUF model "
+                                 "(the --alias llama-server was started with)")
+    raw_kwargs = os.getenv("LOCAL_LLM_CHAT_TEMPLATE_KWARGS", '{"enable_thinking": false}')
+    try:
+        kwargs = json.loads(raw_kwargs)
+    except json.JSONDecodeError as error:
+        raise ConfigurationError(f"LOCAL_LLM_CHAT_TEMPLATE_KWARGS is not valid JSON: {error}") from error
+    if not isinstance(kwargs, dict):
+        raise ConfigurationError("LOCAL_LLM_CHAT_TEMPLATE_KWARGS must be a JSON object")
+    max_output_tokens = int(os.getenv("LOCAL_LLM_MAX_OUTPUT_TOKENS", "512"))
+    timeout_s = float(os.getenv("LOCAL_LLM_TIMEOUT_S", "600"))
+    if max_output_tokens < 1 or timeout_s <= 0:
+        raise ConfigurationError("LOCAL_LLM_MAX_OUTPUT_TOKENS must be >= 1 and LOCAL_LLM_TIMEOUT_S > 0")
+    return LlamaCppSettings(
+        base_url=(os.getenv("LLAMACPP_URL") or "http://127.0.0.1:8080").rstrip("/"),
+        model=model,
+        timeout_s=timeout_s,
+        max_output_tokens=max_output_tokens,
+        seed=int(os.getenv("LOCAL_LLM_SEED", "42")),
+        chat_template_kwargs=kwargs,
+        system_prompt=os.getenv("LOCAL_LLM_SYSTEM_PROMPT") or None,
+    )
 
 
 RERANK_PROVIDERS = ("none", "cross-encoder")

@@ -31,6 +31,7 @@ class LLMResponse:
     thoughts_tokens: int | None = None
     retry_wait_ms: float = 0.0
     throttle_wait_ms: float = 0.0
+    time_to_first_token_ms: float | None = None  # local provider: the server's prompt-processing time; None = unknown
 
 
 class LLM(Protocol):

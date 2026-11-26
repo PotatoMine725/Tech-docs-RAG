@@ -25,9 +25,10 @@ Vietnamese). Image input is out of scope here (OCR is TBD); multimodal projector
 
 ## 2. Fixed conditions (identical for every model)
 
-- **Retrieval frozen once:** local embedder (EmbeddingGemma v1), hybrid, chunker A, `RERANK_PROVIDER=none`, current
-  passage count. Retrieved contexts are saved to one JSONL and every LLM, Gemini included, reads that file. So the
-  LLM is the only variable (plan §4.2).
+- **Same retrieval for every model:** local embedder (EmbeddingGemma v1), hybrid, chunker A,
+  `RERANK_PROVIDER=none`, current passage count. Query embeddings come from the on-disk cache and the indexes do not
+  change between runs, so every run retrieves the same passages; `scripts/evaluation/llm_run_summary.py --reference`
+  checks it per case (same chunk ids, same order) and fails otherwise. The LLM is the only variable (plan §4.2).
 - **Prompt `answer_v3`** (new, versioned): fixed instructions first (prompt-cache friendly), plain text with `[n]`
   markers, refusal sentinel `[[INSUFFICIENT]]` on the first line, answer in the question's language, excerpts stay
   English. Gemini runs the same `answer_v3` as the baseline.

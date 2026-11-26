@@ -2,6 +2,10 @@
 version string is the file name. Prompts are never inlined in code.
 
 Placeholders are replaced by one regex pass (not `str.format`), so braces in passages or questions are copied unchanged.
+
+Answer format: a template whose first line is `<!-- answer_format: text -->` asks for plain text with `[n]` markers and
+the `[[INSUFFICIENT]]` sentinel (answer_v3, plan §6.2); that line is removed before the prompt is built. Without it the
+format is `json` (ANSWER_SCHEMA, answer_v2 and earlier).
 """
 import re
 from pathlib import Path
@@ -11,6 +15,8 @@ from knowledge_assistant.application.common.language import LANGUAGE_NAMES
 from knowledge_assistant.core.models import HEADING_PATH_SEPARATOR, RetrievedChunk
 
 PLACEHOLDERS = ("{answer_language}", "{passages}", "{question}")
+ANSWER_FORMATS = ("json", "text")
+_FORMAT_LINE = re.compile(r"\A<!--\s*answer_format:\s*(\w+)\s*-->[ \t]*\r?\n")
 _PLACEHOLDER = re.compile(r"\{(answer_language|passages|question)\}")
 
 # Gemini JSON mode schema (all keys required).
@@ -24,6 +30,17 @@ ANSWER_SCHEMA: dict = {
     },
     "required": ["insufficient", "answer", "cited_passages", "missing_information"],
 }
+
+
+def split_format(template: str) -> tuple[str, str]:
+    """(answer format, template without the format line)."""
+    match = _FORMAT_LINE.match(template)
+    if match is None:
+        return "json", template
+    answer_format = match.group(1).lower()
+    if answer_format not in ANSWER_FORMATS:
+        raise ValueError(f"unknown answer_format {answer_format!r}; use one of {ANSWER_FORMATS}")
+    return answer_format, template[match.end():]
 
 
 def load_template(prompts_dir: str | Path, version: str) -> str:
@@ -57,7 +74,7 @@ def build_prompt(template: str, question: str, language: str, retrieved: tuple[R
 
 class PromptBuilder:
     def __init__(self, template: str, version: str) -> None:
-        self.template = template
+        self.answer_format, self.template = split_format(template)
         self.version = version
 
     @classmethod
