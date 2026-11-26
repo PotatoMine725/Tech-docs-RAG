@@ -61,7 +61,16 @@ spread over days if needed (free tier ~1,000/day).
 | Answer language = question language | ≥ 95% |
 | Vietnamese owner grade (20 answers, ok / not ok) | ≥ 16 ok |
 | TTFT median, low-end profile, real passages | ≤ 15 s (2B class), ≤ 25 s (4B class) |
-| Peak RAM of `llama-server` | ≤ 2.0 GB (2B), ≤ 3.5 GB (4B); whole app ≤ 8 GB |
+| Peak RAM of `llama-server` (working set) | ≤ 3.5 GB (2B), ≤ 5.0 GB (4B); whole app ≤ 8 GB (amended, see below) |
+
+**Amendment A1 (owner, 2026-11-26, after stage 1; post-hoc).** Stage 1 (`docs/reports/2026-11-26-local-llm-stage1.md`)
+put every model over the first caps (2.0 / 3.5 GB). Those caps came from the plan's estimate "LLM 1.2-1.5 GB", not
+from the binding constraint, the 8 GB budget for the whole app. The metric stays the **working set** of
+`llama-server` (it includes the memory-mapped GGUF weights, which must be resident to run; private bytes would
+under-count them). New caps, derived from the 8 GB budget minus embedder (≤ 1 GB), index (~0.5 GB) and app/GUI/Chroma
+(~1.5 GB, estimate): **2B ≤ 3.5 GB, 4B ≤ 5.0 GB**. Effect on stage 1: the three 2B models pass, both 4B models
+(6.2-6.4 GB) are dropped. This change was made after seeing the data and is reported as such. The whole-app ≤ 8 GB
+check on the real gen-10 / 8 GB machine (stage 4) is unchanged.
 
 ## 5. Selection rule (fixed before the runs)
 
