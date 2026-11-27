@@ -123,3 +123,12 @@ key). The answer model and fallback (D11/D12) are unchanged, and the Gemini answ
 answers (corpus source ids written as citation markers), and judging spent the answer key's daily quota. Every run
 compared in one table is judged by one judge model; verdicts of the two judges are never mixed. Free-tier limits of
 `gemini-3.8-flash` are TBD: `JUDGE_LIMIT_*` / `JUDGE_THROTTLE_RPM` keep the flash-lite defaults until measured.
+
+## Amendment 2026-11-27: one judge fallback, `gemini-3.5-flash-lite` (owner)
+
+Owner decision after the `gemini-3.8-flash` judge returned HTTP 503/504 for most calls (plan amendment A5): when the
+primary judge is too slow or unavailable (fewer than 10 ok verdicts in the first 30 minutes, or 3 cases in a row
+ending as judge errors), the judge falls back to **`gemini-3.5-flash-lite`** by setting `JUDGE_MODEL`. The fallback is
+chosen per table, not per call: every run in that table is judged again by the fallback, and partial primary verdicts
+are archived, not counted. A daily quota 429 is not a trigger (resume the next day). The judge adapter itself keeps no
+automatic fallback model, so one judgement always comes from exactly one named model.
