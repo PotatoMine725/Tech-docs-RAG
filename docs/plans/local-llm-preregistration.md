@@ -35,7 +35,7 @@ Vietnamese). Image input is out of scope here (OCR is TBD); multimodal projector
   slot, `--cache-ram 0` (A3), threads = physical cores, thinking mode **off** (chat-template switch per model, recorded), answer cap
   512 tokens.
 - **Low-end profile:** `-t 4`, `--ngl 0`. iGPU (Vulkan, `--ngl 99`) is a separate, later configuration.
-- **Judge:** `gemini-3.8-flash` (A4; was `gemini-3.5-flash-lite`), `judge_v1`, existing label table (`metrics/mapping.py`); manual spot-check of
+- **Judge:** `gemini-3.8-flash` (A4; was `gemini-3.5-flash-lite`), fallback `gemini-3.5-flash-lite` per table (A5), `judge_v1`, existing label table (`metrics/mapping.py`); manual spot-check of
   10% of verdicts (ADR-0004 D12).
 
 ## 3. Stages
@@ -96,6 +96,19 @@ shared the answer key's quota. **All** compared runs, the Gemini baseline includ
 no table mixes judges. The flash-lite verdicts are kept (archived next to each run, not deleted) and reported as a
 secondary result. The Gemini answer baseline itself is unchanged (`gemini-3.5-flash-lite`). Thresholds are unchanged.
 Decided after seeing the stage-2 verdicts and reported as such.
+
+**Amendment A5 (owner, 2026-11-27, after the A4 re-judge failed; post-hoc).** One judge fallback:
+**`gemini-3.5-flash-lite`**, the pre-A4 judge. The primary judge stays `gemini-3.8-flash`.
+- **When:** the primary judge is too slow or unavailable. That means fewer than 10 ok verdicts in the first 30
+  minutes of a judge run, or 3 cases in a row that end as judge errors after their retries (HTTP 503/504/UNAVAILABLE).
+  A daily quota 429 is not a trigger: stop and resume the next day, as before.
+- **How:** set `JUDGE_MODEL=gemini-3.5-flash-lite` and judge **every** run of the table again with it, the Gemini
+  baseline included. The switch is per table, never per call or per case: no table mixes judges, and `judge_run.py`
+  already refuses a run whose earlier ok verdicts came from another model. Partial primary verdicts are archived next
+  to the run (`judgements.<model>-partial.jsonl`), never deleted and never counted.
+- **Report:** name the judge that produced the table and say that the fallback was used and why.
+- **Stage 2:** applied. `gemini-3.8-flash` gave 2 ok verdicts in about 11 minutes (503/504), so the stage-2 tables
+  use the flash-lite verdicts (report deviation log). Thresholds are unchanged.
 
 ## 5. Selection rule (fixed before the runs)
 
