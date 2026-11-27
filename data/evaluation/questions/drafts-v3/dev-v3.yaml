@@ -260,7 +260,7 @@
 # title page was left). So the slot moved to the mixed VI-EN doc C2-04, in a section no eval/dev case expects and
 # whose text is not in its near-duplicate C2-22. Question vi with diacritics, as the slot requires.
 - id: Q3-DEV-011
-  review_status: draft  # replaced 2026-11-27, pending owner
+  review_status: approved  # owner 2026-11-27 (replacement 011 approved)
   split: dev
   category: D_vi_on_mixed
   corpus: corpus2
