@@ -1,0 +1,467 @@
+# dev-v3: 20 dev-split questions (tuning only, never reported) for calibrating the refusal threshold
+# (dense-score gate + LLM refusal, docs/plans/local-llm-preregistration.md §6) and re-measuring language detection
+# (application/common/language.py, incl. Vietnamese typed without diacritics). DRAFT, owner review pending.
+# Same compact schema as drafts-v2/f-c2-and-dev.yaml. Extra field `question_language` (en / vi / mixed): the
+# language mix of the question text; `language` stays en / vi (the answer language). `paraphrase` in
+# retrieval_challenges marks questions written with little word overlap with the source.
+# No expected section (source + heading path) repeats one that an eval-v1 / eval-v2 case expects (rule checked by
+# scripts/evaluation/validate_questions_v3.py). Quotes are verbatim from the normalized / converted text.
+
+# ---------------------------------------------------------------- corpus 1, question en (3)
+- id: Q3-DEV-001
+  review_status: draft
+  split: dev
+  category: B_en_on_en
+  corpus: corpus1
+  language: en
+  typing: en
+  question_language: en
+  question: "A reviewer complained that my unit tests are full of unexplained literal values. Why is that a problem, and what should I do with those values instead?"
+  answerable: true
+  expected_answer: "Such hard-coded \"magic strings\" make tests less readable and harder to maintain, and make readers wonder why a value was chosen (pulling them into implementation details); assign the hard-coded values to constants to express intent."
+  answer_points:
+    - {id: P1, text: "Magic strings make the test code less readable and harder to maintain / confuse the reader.", required: true}
+    - {id: P2, text: "Assign the hard-coded values to constants.", required: true}
+  expected_sources: [{source_id: "03", heading_path: "Unit testing best practices for .NET > Best practices > Avoid magic strings", slot: S1}]
+  evidence:
+    - {source_id: "03", heading_path: "Unit testing best practices for .NET > Best practices > Avoid magic strings", supports: [P1], quote: "These values make your code less readable and harder to maintain."}
+    - {source_id: "03", heading_path: "Unit testing best practices for .NET > Best practices > Avoid magic strings", supports: [P2], quote: "Rather than using magic strings, assign any hard-coded values to constants."}
+  must_not_claim: ["Move the values into a configuration file or a database.", "Literal values only matter for performance."]
+  cognitive_level: explain
+  difficulty: medium
+  size_class: medium
+  retrieval_challenges: [B_en_on_en, paraphrase]
+  concepts: [magic strings, unit testing]
+
+- id: Q3-DEV-002
+  review_status: draft
+  split: dev
+  category: B_en_on_en
+  corpus: corpus1
+  language: en
+  typing: en
+  question_language: en
+  question: "In C#, after `object boxed = \"text\";`, what are the compile-time and run-time types of `boxed`, and which of those two types decides virtual method dispatch?"
+  answerable: true
+  expected_answer: "The compile-time type is `object` and the run-time type is `string`. The run-time type controls virtual method dispatch (and `is` / `switch` expressions); the compile-time type controls overload resolution and available conversions."
+  answer_points:
+    - {id: P1, text: "Compile-time type object, run-time type string.", required: true}
+    - {id: P2, text: "The run-time type controls virtual method dispatch.", required: true}
+    - {id: P3, text: "The compile-time type controls overload resolution and available conversions.", required: false}
+  expected_sources: [{source_id: "26", heading_path: "The C# type system > Compile-time type and run-time type", slot: S1}]
+  evidence:
+    - {source_id: "26", heading_path: "The C# type system > Compile-time type and run-time type", supports: [P1], quote: "In the preceding example, `boxed` has a compile-time type of `object` but a run-time type of `string`."}
+    - {source_id: "26", heading_path: "The C# type system > Compile-time type and run-time type", supports: [P2, P3], quote: "The compile-time type controls overload resolution and available conversions. The run-time type controls virtual method dispatch, `is` expressions, and `switch` expressions."}
+  must_not_claim: ["The compile-time type decides virtual method dispatch.", "The run-time type of boxed is object."]
+  cognitive_level: apply
+  difficulty: hard
+  size_class: medium
+  concepts: [compile-time type, run-time type, virtual dispatch]
+
+- id: Q3-DEV-003
+  review_status: draft
+  split: dev
+  category: B_en_on_en
+  corpus: corpus1
+  language: en
+  typing: en
+  question_language: en
+  question: "How can I put a set of minimal API endpoints under one shared URL prefix and require authorization for all of them at once, instead of configuring each endpoint separately?"
+  answerable: true
+  expected_answer: "Use the `MapGroup` extension method: it organizes endpoints under a common prefix and lets you customize the whole group with a single call, e.g. `RequireAuthorization` (or `WithMetadata`) on the group."
+  answer_points:
+    - {id: P1, text: "MapGroup groups endpoints under a common prefix.", required: true}
+    - {id: P2, text: "Call RequireAuthorization (one call) on the group to apply it to every endpoint in it.", required: true}
+  expected_sources: [{source_id: "23", heading_path: "Routing in ASP.NET Core > Route groups", slot: S1}]
+  evidence:
+    - {source_id: "23", heading_path: "Routing in ASP.NET Core > Route groups", supports: [P1], quote: "extension method helps organize groups of endpoints with a common prefix and reduces repetitive code."}
+    - {source_id: "23", heading_path: "Routing in ASP.NET Core > Route groups", supports: [P2], quote: "Use this method to customize entire groups of endpoints with a single call to methods like [RequireAuthorization]"}
+  must_not_claim: ["A route prefix can only be set with the [Route] attribute on a controller.", "Authorization must be added to every endpoint individually."]
+  cognitive_level: apply
+  difficulty: medium
+  size_class: huge
+  retrieval_challenges: [B_en_on_en, paraphrase]
+  concepts: [MapGroup, route groups, RequireAuthorization]
+
+# ---------------------------------------------------------------- corpus 1, question vi (3, 1 without diacritics)
+- id: Q3-DEV-004
+  review_status: draft
+  split: dev
+  category: C_vi_on_en
+  corpus: corpus1
+  language: vi
+  typing: diacritics
+  question_language: vi
+  question: "Service mình đăng ký vào DI container của ASP.NET Core có implement IDisposable. Vậy ai sẽ gọi Dispose cho nó, và mình có nên tự gọi Dispose cho service lấy từ container không?"
+  answerable: true
+  expected_answer: "Container tự gọi Dispose cho các kiểu IDisposable mà nó tạo ra (kể cả singleton); service lấy từ container thì developer không bao giờ được tự dispose."
+  answer_points:
+    - {id: P1, text: "Container gọi Dispose cho các kiểu IDisposable mà nó tạo.", required: true}
+    - {id: P2, text: "Không tự dispose service được resolve từ container.", required: true}
+  expected_sources: [{source_id: "10", heading_path: "Dependency injection in ASP.NET Core > Design services for dependency injection > Disposal of services", slot: S1}]
+  evidence:
+    - {source_id: "10", heading_path: "Dependency injection in ASP.NET Core > Design services for dependency injection > Disposal of services", supports: [P1], quote: "The container calls [Dispose](/en-us/dotnet/api/system.idisposable.dispose) for the [IDisposable](/en-us/dotnet/api/system.idisposable) types it creates."}
+    - {source_id: "10", heading_path: "Dependency injection in ASP.NET Core > Design services for dependency injection > Disposal of services", supports: [P2], quote: "Services resolved from the container should never be disposed by the developer."}
+  must_not_claim: ["The developer must call Dispose on resolved services.", "Singletons are never disposed by the container."]
+  cognitive_level: explain
+  difficulty: medium
+  size_class: medium
+  concepts: [IDisposable, service disposal, dependency injection]
+
+- id: Q3-DEV-005
+  review_status: draft
+  split: dev
+  category: C_vi_on_en
+  corpus: corpus1
+  language: vi
+  typing: no_diacritics
+  question_language: vi
+  question: "Trong C#, mot class co the ke thua tu bao nhieu base class, va lop dan xuat co duoc ke thua constructor cua lop cha khong?"
+  answerable: true
+  expected_answer: "Một class chỉ kế thừa từ một base class (nhưng có thể implement nhiều interface); lớp dẫn xuất kế thừa mọi thành viên của base class trừ constructor."
+  answer_points:
+    - {id: P1, text: "Chỉ một base class (có thể implement nhiều interface).", required: true}
+    - {id: P2, text: "Constructor không được kế thừa.", required: true}
+  expected_sources: [{source_id: "07", heading_path: "C# classes > Inheritance", slot: S1}]
+  evidence:
+    - {source_id: "07", heading_path: "C# classes > Inheritance", supports: [P1, P2], quote: "A class can inherit from one base class and implement multiple interfaces. Derived classes inherit all members of the base class except constructors."}
+  must_not_claim: ["C# classes support multiple inheritance of classes.", "Derived classes inherit the base class constructors."]
+  cognitive_level: recall
+  difficulty: easy
+  size_class: medium
+  concepts: [inheritance, base class, constructors]
+
+- id: Q3-DEV-006
+  review_status: draft
+  split: dev
+  category: C_vi_on_en
+  corpus: corpus1
+  language: vi
+  typing: diacritics
+  question_language: vi
+  question: "Trong integration test ASP.NET Core, làm sao để HttpClient tạo từ WebApplicationFactory không tự động đi theo redirect?"
+  answerable: true
+  expected_answer: "Tạo một WebApplicationFactoryClientOptions với AllowAutoRedirect = false và truyền nó vào CreateClient() của factory."
+  answer_points:
+    - {id: P1, text: "Dùng WebApplicationFactoryClientOptions, truyền vào CreateClient().", required: true}
+    - {id: P2, text: "Đặt AllowAutoRedirect = false.", required: true}
+  expected_sources: [{source_id: "17", heading_path: "Integration tests in ASP.NET Core > Client options", slot: S1}]
+  evidence:
+    - {source_id: "17", heading_path: "Integration tests in ASP.NET Core > Client options", supports: [P1], quote: "Create the `WebApplicationFactoryClientOptions` class and pass it to the [CreateClient()]"}
+    - {source_id: "17", heading_path: "Integration tests in ASP.NET Core > Client options", supports: [P2], quote: "AllowAutoRedirect = false"}
+  must_not_claim: ["Configure HttpClientHandler in Program.cs of the app under test.", "Redirects cannot be turned off in WebApplicationFactory."]
+  cognitive_level: apply
+  difficulty: hard
+  size_class: huge
+  failure_mode: exact_identifier
+  concepts: [WebApplicationFactoryClientOptions, AllowAutoRedirect, CreateClient]
+
+# ---------------------------------------------------------------- corpus 2 VI documents, question vi (5, 2 without diacritics)
+# Rule 5 leaves few free sections here: C2-10/11/24/25/29/30/32 are one whole-document section each, and eval-v2
+# expects every one of them; C2-07's large section is eval-expected too. Free: C2-16, C2-26 subsections, C2-07 preamble.
+- id: Q3-DEV-007
+  review_status: draft
+  split: dev
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  typing: diacritics
+  question_language: vi
+  question: "Theo bài giảng, đông đặc phổi thể không điển hình có những dạng gì?"
+  answerable: true
+  expected_answer: "Đông đặc một diện rộng, đông đặc khu trú (thể trung tâm), đông đặc rải rác và đông đặc co kéo."
+  answer_points:
+    - {id: P1, text: "Đông đặc một diện rộng; đông đặc khu trú (thể trung tâm).", required: true}
+    - {id: P2, text: "Đông đặc rải rác; đông đặc co kéo.", required: true}
+  expected_sources: [{source_id: C2-16, heading_path: "2.2. HC đông đặc phổi không điển hình:", slot: S1}]
+  evidence:
+    - {source_id: C2-16, heading_path: "2.2. HC đông đặc phổi không điển hình:", supports: [P1], quote: "Đông đặc một diện rộng"}
+    - {source_id: C2-16, heading_path: "2.2. HC đông đặc phổi không điển hình:", supports: [P1], quote: "Đông đặc khu trú (thể trung tâm)"}
+    - {source_id: C2-16, heading_path: "2.2. HC đông đặc phổi không điển hình:", supports: [P2], quote: "Đông đặc rải rác"}
+    - {source_id: C2-16, heading_path: "2.2. HC đông đặc phổi không điển hình:", supports: [P2], quote: "Đông đặc co kéo"}
+  must_not_claim: ["Image-only forms (e.g. 'đông đặc tròn') presented as part of the slide's list of atypical forms."]
+  cognitive_level: recall
+  difficulty: easy
+  concepts: [đông đặc phổi không điển hình]
+
+- id: Q3-DEV-008
+  review_status: draft
+  split: dev
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  typing: no_diacritics
+  question_language: vi
+  question: "Tren phim X-quang nguc, vung phoi bi dong dac trong nhu the nao va co the keo cac cau truc lan can ra sao?"
+  answerable: true
+  expected_answer: "Đám mờ chiếm một vùng, rải rác trên phế trường, một phân thùy hoặc một bên phổi; mật độ đều hoặc không, ranh giới rõ hoặc không. Có thể co kéo cơ hoành, trung thất, các khoảng liên sườn (đông đặc co rút)."
+  answer_points:
+    - {id: P1, text: "Đám mờ (một vùng / rải rác / một phân thùy / một bên phổi), mật độ đều hoặc không, ranh giới rõ hoặc không.", required: true}
+    - {id: P2, text: "Co kéo cơ hoành, trung thất, khoảng liên sườn (đông đặc co rút).", required: true}
+  expected_sources: [{source_id: C2-16, heading_path: "3. Triệu chứng X-quang", slot: S1}]
+  evidence:
+    - {source_id: C2-16, heading_path: "3. Triệu chứng X-quang", supports: [P1], quote: "Đám mờ chiếm 1 vùng/rải rác trên phế trường/ 1 phân thuỳ/1 bên phổi. Mật độ đều/không, ranh giới rõ/không."}
+    - {source_id: C2-16, heading_path: "3. Triệu chứng X-quang", supports: [P2], quote: "Tạng lân cận: co kéo cơ hoành, trung thất, các khoảng liên sườn (đông đặc co rút)."}
+  must_not_claim: ["A hyperlucent (black) area without lung markings, which fits pneumothorax."]
+  cognitive_level: recall
+  difficulty: medium
+  retrieval_challenges: [A_vi_on_vi, paraphrase]
+  concepts: [X-quang, đông đặc co rút]
+
+- id: Q3-DEV-009
+  review_status: draft
+  split: dev
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  typing: diacritics
+  question_language: vi
+  question: "Với động cơ đánh lửa cưỡng bức, tỷ số giãn nở sớm ρ và tỷ số giãn nở sau δ được lấy bằng bao nhiêu?"
+  answerable: true
+  expected_answer: "Với động cơ đánh lửa cưỡng bức, ρ = 1 và δ = ε (bằng tỷ số nén); với động cơ Diesel thì hai tỷ số này phải tính theo công thức."
+  answer_points:
+    - {id: P1, text: "ρ = 1.", required: true}
+    - {id: P2, text: "δ = ε.", required: true}
+  expected_sources: [{source_id: C2-26, heading_path: "Tính toán các thông số của chu trình: > Tính quá trình giản nở:", slot: S1}]
+  evidence:
+    - {source_id: C2-26, heading_path: "Tính toán các thông số của chu trình: > Tính quá trình giản nở:", supports: [P1], quote: "ρ = 1 (động cơ đánh lửa cưỡng bức)"}
+    - {source_id: C2-26, heading_path: "Tính toán các thông số của chu trình: > Tính quá trình giản nở:", supports: [P2], quote: "δ = ε (động cơ đánh lửa cưỡng bức)"}
+  must_not_claim: ["A Diesel formula for ρ or δ presented as text from the document (those formulas are images)."]
+  cognitive_level: recall
+  difficulty: hard
+  concepts: [tỷ số giãn nở sớm, tỷ số giãn nở sau]
+
+- id: Q3-DEV-010
+  review_status: draft
+  split: dev
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  typing: no_diacritics
+  question_language: vi
+  question: "Ton that nhiet do chay khong hoan toan Delta QH duoc tinh the nao voi dong co Diesel va dong co danh lua cuong buc?"
+  answerable: true
+  expected_answer: "Động cơ Diesel (α > 1): Δ QH = 0. Động cơ đánh lửa cưỡng bức (α < 1): Δ QH = 120.103.(1-α)M0 (theo đúng cách viết của tài liệu, tức 120·10³·(1-α)·M0)."
+  answer_points:
+    - {id: P1, text: "α > 1 (Diesel): Δ QH = 0.", required: true}
+    - {id: P2, text: "α < 1 (đánh lửa cưỡng bức): Δ QH = 120.10^3.(1-α).M0.", required: true}
+  expected_sources: [{source_id: C2-26, heading_path: "Tính toán các thông số của chu trình: > Tính quá trình cháy", slot: S1}]
+  evidence:
+    - {source_id: C2-26, heading_path: "Tính toán các thông số của chu trình: > Tính quá trình cháy", supports: [P1], quote: "α>1 thì Δ QH = 0 (động cơ Diesel)"}
+    - {source_id: C2-26, heading_path: "Tính toán các thông số của chu trình: > Tính quá trình cháy", supports: [P2], quote: "α <1 thì Δ QH = 120.103.(1-α)M0 (động cơ đánh lửa cưỡng bức)"}
+  must_not_claim: ["A non-zero ΔQH for Diesel engines with α > 1."]
+  cognitive_level: recall
+  difficulty: hard
+  failure_mode: no_diacritics
+  concepts: [tổn thất nhiệt, cháy không hoàn toàn]
+
+- id: Q3-DEV-011
+  review_status: draft
+  split: dev
+  category: A_vi_on_vi
+  corpus: corpus2
+  language: vi
+  typing: diacritics
+  question_language: vi
+  question: "Đề cương bài giảng chương 1 về sự ra đời của Đảng Cộng sản Việt Nam là của trường nào và do giảng viên nào phụ trách?"
+  answerable: true
+  expected_answer: "Trường Đại học Kinh tế, Đại học Đà Nẵng; giảng viên Đỗ Thị Hằng Nga."
+  answer_points:
+    - {id: P1, text: "Trường Đại học Kinh tế (Đại học Đà Nẵng).", required: true}
+    - {id: P2, text: "GV Đỗ Thị Hằng Nga.", required: true}
+  expected_sources: [{source_id: C2-07, heading_path: "", slot: S1}]
+  evidence:
+    - {source_id: C2-07, heading_path: "", supports: [P1], quote: "ĐẠI HỌC ĐÀ NẴNG"}
+    - {source_id: C2-07, heading_path: "", supports: [P1], quote: "TRƯỜNG ĐẠI HỌC KINH TẾ"}
+    - {source_id: C2-07, heading_path: "", supports: [P2], quote: "GV: Đỗ Thị Hằng Nga"}
+  must_not_claim: ["Any other university or lecturer name."]
+  cognitive_level: recall
+  difficulty: easy
+  concepts: [đề cương bài giảng]
+
+# ---------------------------------------------------------------- corpus 2 EN documents, question en (2)
+- id: Q3-DEV-012
+  review_status: draft
+  split: dev
+  category: B_en_on_en
+  corpus: corpus2
+  language: en
+  typing: en
+  question_language: en
+  question: "In FA Management, what status must a class have before it can be closed, and what does the system do when the class is closed?"
+  answerable: true
+  expected_answer: "The class's [Status] must be \"Pending for review\". On closing, the system sets [Status] to \"Closed\", appends a \"Closed by <user>\" line with the date time to [History], saves, returns to the listing screen and emails the FA Manager."
+  answer_points:
+    - {id: P1, text: "Pre-condition: [Status] is \"Pending for review\".", required: true}
+    - {id: P2, text: "The system sets [Status] to \"Closed\".", required: true}
+    - {id: P3, text: "It emails the FA Manager (and appends a 'Closed by' history line).", required: false}
+  expected_sources: [{source_id: C2-13, heading_path: "Use Case Specifications > Class Management > UC 18: Close a finished Class", slot: S1}]
+  evidence:
+    - {source_id: C2-13, heading_path: "Use Case Specifications > Class Management > UC 18: Close a finished Class", supports: [P1], quote: "The value of [Status] filed is equal to “Pending for review”."}
+    - {source_id: C2-13, heading_path: "Use Case Specifications > Class Management > UC 18: Close a finished Class", supports: [P2], quote: "Update the value of [Status] filed as “Closed”."}
+    - {source_id: C2-13, heading_path: "Use Case Specifications > Class Management > UC 18: Close a finished Class", supports: [P3], quote: "Send email to FA Manager as Sending email to FA Manager after a Class is closed."}
+  must_not_claim: ["A class can be closed while it is \"In progress\"."]
+  cognitive_level: recall
+  difficulty: medium
+  concepts: [UC 18, Close Class]
+
+- id: Q3-DEV-013
+  review_status: draft
+  split: dev
+  category: B_en_on_en
+  corpus: corpus2
+  language: en
+  typing: en
+  question_language: en
+  question: "A trainee's Not Attendance Rate is 25%. What Disciplinary Point does FA Management assign?"
+  answerable: true
+  expected_answer: "60%: the rule is that if 20% < Not Attendance Rate ≤ 30%, [Disciplinary Point] is set to \"60%\"."
+  answer_points:
+    - {id: P1, text: "60%.", required: true}
+  expected_sources: [{source_id: C2-13, heading_path: "Use Case Specifications > Trainee Management > UC 32: Calculate Disciplinary Point", slot: S1}]
+  evidence:
+    - {source_id: C2-13, heading_path: "Use Case Specifications > Trainee Management > UC 32: Calculate Disciplinary Point", supports: [P1], quote: "If 20% < Not Attendance Rate ≤ 30%, set the value of [Disciplinary Point] field as “60%”."}
+  must_not_claim: ["80% or 50%."]
+  cognitive_level: apply
+  difficulty: hard
+  concepts: [UC 32, Disciplinary Point]
+
+# ---------------------------------------------------------------- corpus 2 mixed VI-EN document, question mixed (1)
+- id: Q3-DEV-014
+  review_status: draft
+  split: dev
+  category: D_vi_on_mixed
+  corpus: corpus2
+  language: vi
+  typing: diacritics
+  question_language: mixed
+  question: "Trong pilot 30 ngày của AI Review Content Factory, North Star Metric là gì và core hypothesis cần validate là gì?"
+  answerable: true
+  expected_answer: "North Star Metric là Attributed Affiliate Revenue (doanh thu chuyển đổi đo được và quy gán đúng nguồn video); giả thuyết cốt lõi là liệu một AI Product (Merchant) có sẵn sàng dùng mạng lưới Creator được hỗ trợ bởi video AI để tạo lưu lượng có chuyển đổi trả phí (Paid Conversion) hay không."
+  answer_points:
+    - {id: P1, text: "North Star Metric: Attributed Affiliate Revenue.", required: true}
+    - {id: P2, text: "Giả thuyết: Merchant có sẵn sàng dùng mạng lưới Creator + video AI để tạo traffic có chuyển đổi trả phí hay không.", required: true}
+  expected_sources: [{source_id: C2-04, heading_path: "**BÁO CÁO CHIẾN LƯỢC KINH DOANH VÀ KIẾN TRÚC KỸ THUẬT TỐI ƯU HÓA CHI PHÍ & LỢI NHUẬN** > **PHẦN I: TỔNG QUAN CHIẾN LƯỢC KINH DOANH & MÔ HÌNH TÀI CHÍNH** > **1. Vấn đề thị trường và Giả thuyết kiểm chứng của Pilot (PRD §52)**", slot: S1}]
+  evidence:
+    - {source_id: C2-04, heading_path: "**BÁO CÁO CHIẾN LƯỢC KINH DOANH VÀ KIẾN TRÚC KỸ THUẬT TỐI ƯU HÓA CHI PHÍ & LỢI NHUẬN** > **PHẦN I: TỔNG QUAN CHIẾN LƯỢC KINH DOANH & MÔ HÌNH TÀI CHÍNH** > **1. Vấn đề thị trường và Giả thuyết kiểm chứng của Pilot (PRD §52)**", supports: [P1], quote: "Attributed Affiliate Revenue"}
+    - {source_id: C2-04, heading_path: "**BÁO CÁO CHIẾN LƯỢC KINH DOANH VÀ KIẾN TRÚC KỸ THUẬT TỐI ƯU HÓA CHI PHÍ & LỢI NHUẬN** > **PHẦN I: TỔNG QUAN CHIẾN LƯỢC KINH DOANH & MÔ HÌNH TÀI CHÍNH** > **1. Vấn đề thị trường và Giả thuyết kiểm chứng của Pilot (PRD §52)**", supports: [P2], quote: "Một AI Product (Merchant) có sẵn sàng sử dụng mạng lưới Creator được hỗ trợ bởi video AI để tạo ra lưu lượng truy cập có chuyển đổi trả phí (Paid Conversion) hay không?"}
+  must_not_claim: ["Contribution Margin or CTR presented as the North Star Metric."]
+  cognitive_level: recall
+  difficulty: medium
+  concepts: [North Star Metric, pilot hypothesis]
+
+# ---------------------------------------------------------------- unanswerable, near corpus 1 (2: en, vi)
+- id: Q3-DEV-015
+  review_status: draft
+  split: dev
+  category: F_unanswerable
+  corpus: corpus1
+  language: en
+  typing: en
+  question_language: en
+  question: "In EF Core, how do I run a raw SQL query with FromSqlRaw and pass parameters safely so it is not open to SQL injection?"
+  answerable: false
+  absence:
+    topic: Raw SQL queries in EF Core (#22 covers LINQ loading and filtering only)
+    zero_hit_terms: [FromSqlRaw, FromSql, SqlQuery, raw SQL, ExecuteSql]
+    closest_corpus_text: "#22 shows ToListAsync, Where and single-entity loading with LINQ; no raw SQL API."
+  near_miss_sources: ["22"]
+  must_not_claim: ["FromSqlRaw / FromSqlInterpolated usage or parameter syntax presented as from the documents."]
+  cognitive_level: apply
+  difficulty: medium
+
+- id: Q3-DEV-016
+  review_status: draft
+  split: dev
+  category: F_unanswerable
+  corpus: corpus1
+  language: vi
+  typing: diacritics
+  question_language: vi
+  question: "Trong xUnit, làm sao dùng ICollectionFixture cùng [CollectionDefinition] để nhiều class test chia sẻ chung một database fixture?"
+  answerable: false
+  absence:
+    topic: xUnit collection fixtures (#17 uses IClassFixture, #28 covers Fact / Theory)
+    zero_hit_terms: [ICollectionFixture, CollectionDefinition, collection fixture]
+    closest_corpus_text: "#17 injects CustomWebApplicationFactory through IClassFixture<...>; #28 adds [Fact] and [Theory] tests; neither covers sharing a fixture across test classes."
+  near_miss_sources: ["17", "28"]
+  must_not_claim: ["ICollectionFixture / [Collection] attribute usage presented as from the documents."]
+  cognitive_level: apply
+  difficulty: medium
+
+# ---------------------------------------------------------------- unanswerable, near corpus 2 (4: vi, vi no-diacritics, en, mixed)
+- id: Q3-DEV-017
+  review_status: draft
+  split: dev
+  category: F_unanswerable
+  corpus: corpus2
+  language: vi
+  typing: diacritics
+  question_language: vi
+  question: "Tràn khí màng phổi được chẩn đoán trên phim X-quang ngực dựa vào những hình ảnh nào?"
+  answerable: false
+  absence:
+    topic: Pneumothorax on chest X-ray (C2-16 covers the X-ray signs of consolidation only)
+    zero_hit_terms: [tràn khí màng phổi, pneumothorax]
+    closest_corpus_text: "C2-16 '3. Triệu chứng X-quang' describes the opacity of lung consolidation; no pneumothorax."
+  near_miss_sources: [C2-16]
+  must_not_claim: ["Consolidation X-ray signs presented as pneumothorax signs.", "Any pneumothorax sign presented as from the documents."]
+  cognitive_level: recall
+  difficulty: easy
+
+- id: Q3-DEV-018
+  review_status: draft
+  split: dev
+  category: F_unanswerable
+  corpus: corpus2
+  language: vi
+  typing: no_diacritics
+  question_language: vi
+  question: "Xet nghiem anti-HCV duong tinh co nghia la benh nhan dang bi viem gan C man tinh khong?"
+  answerable: false
+  absence:
+    topic: Hepatitis C serology (C2-29 covers hepatitis B markers only)
+    zero_hit_terms: [anti-HCV, viêm gan C, hepatitis C]
+    closest_corpus_text: "C2-29 explains HBsAg / anti-HBs / anti-HBc for hepatitis B; no hepatitis C test. ('HCVC' in C2-28 is 'hội chứng vành cấp', unrelated.)"
+  near_miss_sources: [C2-29]
+  must_not_claim: ["HBV marker rules applied to anti-HCV as if from the documents."]
+  cognitive_level: explain
+  difficulty: medium
+
+- id: Q3-DEV-019
+  review_status: draft
+  split: dev
+  category: F_unanswerable
+  corpus: corpus2
+  language: en
+  typing: en
+  question_language: en
+  question: "How do I add online multiplayer to my Unity game with Netcode for GameObjects and a NetworkManager?"
+  answerable: false
+  absence:
+    topic: Unity networking / multiplayer (C2-19 and C2-27 cover single-player Unity and C# scripting)
+    zero_hit_terms: [Netcode, NetworkManager, multiplayer]
+    closest_corpus_text: "C2-19 (Learning C# with Unity) and C2-27 (Unity for beginners); no networking."
+  near_miss_sources: [C2-19, C2-27]
+  must_not_claim: ["NetworkManager / NetworkObject setup steps presented as from the documents."]
+  cognitive_level: apply
+  difficulty: medium
+
+- id: Q3-DEV-020
+  review_status: draft
+  split: dev
+  category: F_unanswerable
+  corpus: corpus2
+  language: vi
+  typing: diacritics
+  question_language: mixed
+  question: "Làm sao validate một file XML theo XSD schema bằng XmlSchemaSet và XmlReaderSettings trong C#?"
+  answerable: false
+  absence:
+    topic: XML Schema (XSD) validation in .NET (C2-08 covers XmlDocument and XPath queries)
+    zero_hit_terms: [XmlSchemaSet, XSD, XmlReaderSettings, XML Schema]
+    closest_corpus_text: "C2-08 explains XmlDocument, SelectNodes / SelectSingleNode and XPath node kinds; no schema validation."
+  near_miss_sources: [C2-08]
+  must_not_claim: ["XmlReaderSettings.ValidationType / Schemas usage presented as from the documents."]
+  cognitive_level: apply
+  difficulty: hard
