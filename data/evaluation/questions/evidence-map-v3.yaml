@@ -1,0 +1,58 @@
+# dev-v3 absence proofs: why each unanswerable dev-v3 question is not answered by the corpus.
+# Scope: corpus/sources (24 accepted) + corpus2/converted (accepted C2-* only). Method: case-insensitive
+# search after NFC and diacritic folding (đ->d, combining marks dropped), so each term is checked with and
+# without diacritics; validate_questions_v3.py re-runs every zero_hit_terms search.
+version: 3
+absence_proofs:
+- id: ABS3-001
+  question: Q3-DEV-015
+  topic: Raw SQL queries in EF Core (#22 covers LINQ loading and filtering only)
+  zero_hit_terms:
+  - FromSqlRaw
+  - FromSql
+  - SqlQuery
+  - raw SQL
+  - ExecuteSql
+  closest_corpus_text: '#22 shows ToListAsync, Where and single-entity loading with LINQ; no raw SQL API.'
+- id: ABS3-002
+  question: Q3-DEV-016
+  topic: xUnit collection fixtures (#17 uses IClassFixture,
+  zero_hit_terms:
+  - ICollectionFixture
+  - CollectionDefinition
+  - collection fixture
+  closest_corpus_text: '#17 injects CustomWebApplicationFactory through IClassFixture<...>; #28 adds [Fact] and [Theory] tests;
+    neither covers sharing a fixture across test classes.'
+- id: ABS3-003
+  question: Q3-DEV-017
+  topic: Pneumothorax on chest X-ray (C2-16 covers the X-ray signs of consolidation only)
+  zero_hit_terms:
+  - tràn khí màng phổi
+  - pneumothorax
+  closest_corpus_text: C2-16 '3. Triệu chứng X-quang' describes the opacity of lung consolidation; no pneumothorax.
+- id: ABS3-004
+  question: Q3-DEV-018
+  topic: Hepatitis C serology (C2-29 covers hepatitis B markers only)
+  zero_hit_terms:
+  - anti-HCV
+  - viêm gan C
+  - hepatitis C
+  closest_corpus_text: C2-29 explains HBsAg / anti-HBs / anti-HBc for hepatitis B; no hepatitis C test. ('HCVC' in C2-28 is
+    'hội chứng vành cấp', unrelated.)
+- id: ABS3-005
+  question: Q3-DEV-019
+  topic: Unity networking / multiplayer (C2-19 and C2-27 cover single-player Unity and C# scripting)
+  zero_hit_terms:
+  - Netcode
+  - NetworkManager
+  - multiplayer
+  closest_corpus_text: C2-19 (Learning C# with Unity) and C2-27 (Unity for beginners); no networking.
+- id: ABS3-006
+  question: Q3-DEV-020
+  topic: XML Schema (XSD) validation in .NET (C2-08 covers XmlDocument and XPath queries)
+  zero_hit_terms:
+  - XmlSchemaSet
+  - XSD
+  - XmlReaderSettings
+  - XML Schema
+  closest_corpus_text: C2-08 explains XmlDocument, SelectNodes / SelectSingleNode and XPath node kinds; no schema validation.
