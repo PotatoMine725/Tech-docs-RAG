@@ -455,3 +455,18 @@ def test_v2_files_must_equal_their_version_at_the_freeze_tag(project, no_corpus_
     code, _, err = go(project, "--arm", "A", "--mode", "retrieval", "--split", "dev", "--questions", "v2",
                       "--corpus", "corpus2", "--run-id", "v2")
     assert code == 3 and "differs from its frozen version" in err
+
+
+def test_v3_is_dev_only_and_checked_against_its_freeze_tag(project, no_corpus_env):
+    questions = project / "data" / "evaluation" / "questions"
+    dev = [dict(make_case(n), id=f"Q3-DEV-{n:03d}", split="dev", corpus="corpus1") for n in (1, 2)]
+    _write_jsonl(questions / "dev-v3.jsonl", dev)
+    code, _, err = go(project, "--arm", "A", "--mode", "retrieval", "--split", "eval", "--questions", "v3")
+    assert code == 3 and "no eval split" in err
+    _git(project, "init", "-q")
+    _git(project, "add", "data")
+    _git(project, "commit", "-qm", "freeze")
+    _git(project, "tag", "dev-freeze-v3")
+    code, out, _ = go(project, "--arm", "A", "--mode", "retrieval", "--split", "dev", "--questions", "v3",
+                      "--corpus", "corpus1", "--run-id", "v3", services=FakeServices())
+    assert code == 0 and "2 cases of corpus1" in out and "dev-freeze-v3" in out
