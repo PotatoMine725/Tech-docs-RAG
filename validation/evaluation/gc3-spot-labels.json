@@ -1,0 +1,266 @@
+[
+ {
+  "item": "S01",
+  "run": "gc3-dev-v3c1-qwen3-1.7b-q4_k_m",
+  "case": "Q3-DEV-015",
+  "owner": "hallucination"
+ },
+ {
+  "item": "S02",
+  "run": "gc3-dev-v3c1-qwen3.5-2b-instruct-q4_k_m",
+  "case": "Q3-DEV-016",
+  "owner": "hallucination"
+ },
+ {
+  "item": "S03",
+  "run": "gc3-dev-v3c2-gemma-4-e2b-it-q4_k_m",
+  "case": "Q3-DEV-017",
+  "owner": "hallucination"
+ },
+ {
+  "item": "S04",
+  "run": "gc3-dev-v3c2-gemma-4-e2b-it-q4_k_m",
+  "case": "Q3-DEV-018",
+  "owner": "correct_refusal"
+ },
+ {
+  "item": "S05",
+  "run": "gc3-dev-v1-gemma-4-e2b-it-q4_k_m",
+  "case": "Q-DEV-006",
+  "owner": "correct_refusal"
+ },
+ {
+  "item": "S06",
+  "run": "gc3-dev-v3c2-gemini",
+  "case": "Q3-DEV-010",
+  "owner": "correct"
+ },
+ {
+  "item": "S07",
+  "run": "gc3-dev-v2-gemma-4-e2b-it-q4_k_m",
+  "case": "Q2-DEV-006",
+  "owner": "correct_refusal"
+ },
+ {
+  "item": "S08",
+  "run": "gc3-dev-v3c2-gemma-4-e2b-it-q4_k_m",
+  "case": "Q3-DEV-019",
+  "owner": "correct_refusal"
+ },
+ {
+  "item": "S09",
+  "run": "gc3-dev-v3c2-qwen3-1.7b-q4_k_m",
+  "case": "Q3-DEV-018",
+  "owner": "hallucination"
+ },
+ {
+  "item": "S10",
+  "run": "gc3-dev-v3c2-gemini",
+  "case": "Q3-DEV-014",
+  "owner": "correct"
+ },
+ {
+  "item": "S11",
+  "run": "gc3-dev-v2-gemini",
+  "case": "Q2-DEV-001",
+  "owner": "correct"
+ },
+ {
+  "item": "S12",
+  "run": "gc3-dev-v3c2-gemma-4-e2b-it-q4_k_m",
+  "case": "Q3-DEV-008",
+  "owner": "correct"
+ },
+ {
+  "item": "S13",
+  "run": "gc3-dev-v3c2-qwen3-1.7b-q4_k_m",
+  "case": "Q3-DEV-020",
+  "owner": "hallucination"
+ },
+ {
+  "item": "S14",
+  "run": "gc3-dev-v3c2-gemini",
+  "case": "Q3-DEV-020",
+  "owner": "correct_refusal"
+ },
+ {
+  "item": "S15",
+  "run": "gc3-dev-v1-gemini",
+  "case": "Q-DEV-005",
+  "owner": "correct_refusal"
+ },
+ {
+  "item": "S16",
+  "run": "gc3-dev-v3c1-qwen3.5-2b-instruct-q4_k_m",
+  "case": "Q3-DEV-003",
+  "owner": "incorrect"
+ },
+ {
+  "item": "S17",
+  "run": "gc3-dev-v1-qwen3-1.7b-q4_k_m",
+  "case": "Q-DEV-006",
+  "owner": "hallucination"
+ },
+ {
+  "item": "S18",
+  "run": "gc3-dev-v3c1-gemma-4-e2b-it-q4_k_m",
+  "case": "Q3-DEV-015",
+  "owner": "correct_refusal"
+ },
+ {
+  "item": "S19",
+  "run": "gc3-dev-v3c2-gemini",
+  "case": "Q3-DEV-011",
+  "owner": "correct"
+ },
+ {
+  "item": "S20",
+  "run": "gc3-dev-v3c1-qwen3-1.7b-q4_k_m",
+  "case": "Q3-DEV-016",
+  "owner": "hallucination"
+ },
+ {
+  "item": "S21",
+  "run": "gc3-dev-v1-qwen3.5-2b-instruct-q4_k_m",
+  "case": "Q-DEV-005",
+  "owner": "hallucination"
+ },
+ {
+  "item": "S22",
+  "run": "gc3-dev-v3c2-qwen3.5-2b-instruct-q4_k_m",
+  "case": "Q3-DEV-020",
+  "owner": "hallucination"
+ },
+ {
+  "item": "S23",
+  "run": "gc3-dev-v1-qwen3-1.7b-q4_k_m",
+  "case": "Q-DEV-005",
+  "owner": "correct_refusal"
+ },
+ {
+  "item": "S24",
+  "run": "gc3-dev-v1-gemini",
+  "case": "Q-DEV-006",
+  "owner": "correct_refusal"
+ },
+ {
+  "item": "S25",
+  "run": "gc3-dev-v2-qwen3.5-2b-instruct-q4_k_m",
+  "case": "Q2-DEV-006",
+  "owner": "correct_refusal"
+ },
+ {
+  "item": "S26",
+  "run": "gc3-dev-v3c2-gemma-4-e2b-it-q4_k_m",
+  "case": "Q3-DEV-020",
+  "owner": "correct_refusal"
+ },
+ {
+  "item": "S27",
+  "run": "gc3-dev-v1-qwen3.5-2b-instruct-q4_k_m",
+  "case": "Q-DEV-006",
+  "owner": "hallucination"
+ },
+ {
+  "item": "S28",
+  "run": "gc3-dev-v3c2-gemini",
+  "case": "Q3-DEV-019",
+  "owner": "correct_refusal"
+ },
+ {
+  "item": "S29",
+  "run": "gc3-dev-v3c2-gemma-4-e2b-it-q4_k_m",
+  "case": "Q3-DEV-012",
+  "owner": "partially_correct"
+ },
+ {
+  "item": "S30",
+  "run": "gc3-dev-v3c1-qwen3.5-2b-instruct-q4_k_m",
+  "case": "Q3-DEV-015",
+  "owner": "hallucination"
+ },
+ {
+  "item": "S31",
+  "run": "gc3-dev-v3c2-qwen3.5-2b-instruct-q4_k_m",
+  "case": "Q3-DEV-018",
+  "owner": "correct_refusal"
+ },
+ {
+  "item": "S32",
+  "run": "gc3-dev-v3c2-gemini",
+  "case": "Q3-DEV-017",
+  "owner": "correct_refusal"
+ },
+ {
+  "item": "S33",
+  "run": "gc3-dev-v2-gemini",
+  "case": "Q2-DEV-006",
+  "owner": "correct_refusal"
+ },
+ {
+  "item": "S34",
+  "run": "gc3-dev-v3c1-gemma-4-e2b-it-q4_k_m",
+  "case": "Q3-DEV-016",
+  "owner": "correct_refusal"
+ },
+ {
+  "item": "S35",
+  "run": "gc3-dev-v3c2-qwen3.5-2b-instruct-q4_k_m",
+  "case": "Q3-DEV-017",
+  "owner": "hallucination"
+ },
+ {
+  "item": "S36",
+  "run": "gc3-dev-v3c1-gemma-4-e2b-it-q4_k_m",
+  "case": "Q3-DEV-004",
+  "owner": "correct"
+ },
+ {
+  "item": "S37",
+  "run": "gc3-dev-v3c2-qwen3-1.7b-q4_k_m",
+  "case": "Q3-DEV-017",
+  "owner": "hallucination"
+ },
+ {
+  "item": "S38",
+  "run": "gc3-dev-v3c2-gemini",
+  "case": "Q3-DEV-018",
+  "owner": "correct_refusal"
+ },
+ {
+  "item": "S39",
+  "run": "gc3-dev-v3c2-qwen3.5-2b-instruct-q4_k_m",
+  "case": "Q3-DEV-019",
+  "owner": "correct_refusal"
+ },
+ {
+  "item": "S40",
+  "run": "gc3-dev-v3c1-gemini",
+  "case": "Q3-DEV-016",
+  "owner": "correct_refusal"
+ },
+ {
+  "item": "S41",
+  "run": "gc3-dev-v3c1-gemini",
+  "case": "Q3-DEV-015",
+  "owner": "correct_refusal"
+ },
+ {
+  "item": "S42",
+  "run": "gc3-dev-v3c2-qwen3-1.7b-q4_k_m",
+  "case": "Q3-DEV-019",
+  "owner": "correct_refusal"
+ },
+ {
+  "item": "S43",
+  "run": "gc3-dev-v1-gemma-4-e2b-it-q4_k_m",
+  "case": "Q-DEV-005",
+  "owner": "correct_refusal"
+ },
+ {
+  "item": "S44",
+  "run": "gc3-dev-v2-qwen3-1.7b-q4_k_m",
+  "case": "Q2-DEV-006",
+  "owner": "hallucination"
+ }
+]

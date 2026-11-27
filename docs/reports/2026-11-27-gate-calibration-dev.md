@@ -226,7 +226,170 @@ result changes.
 5. **Judge strictness.** On these 44 items the judge was neither too lenient on unanswerable cases (35/36) nor too
    strict. The one answerable disagreement comes from required vs optional points in the ground truth (S29).
 
-## 7. Provenance
+## 7. Label reliability (owner request 2026-11-27, before any judge or threshold change)
+
+The owner asked four questions before reviewing the threshold:
+1. How many independent questions does the spot-check hold?
+2. Where do the label boundaries lie?
+3. Does a stronger judge agree?
+4. Is the comparison between systems fair?
+
+**Threshold review waits for steps 1–4 (owner decision 2026-11-27).** No judge, threshold or config was changed.
+
+### 7.1 Dataset: what the 44 spot-check items are
+
+The 44 items are **not 44 independent questions**:
+- **Unanswerable:** **9 unique questions × 4 systems = 36 items.** The four systems are Gemini plus the three local
+  models: gemini-3.5-flash-lite, gemma-4-e2b, qwen3-1.7b and qwen3.5-2b. So each question appears 4 times, not 3.
+- **Answerable:** 8 unique questions, each sampled once (seeded 10% of 79 verdicts): 4 Gemini, 3 gemma-4-e2b,
+  1 qwen3.5-2b, and none from qwen3-1.7b.
+- **Total:** 17 unique questions. Agreement per unique question: 8 of the 9 unanswerable questions agree on all
+  4 systems. Q3-DEV-020 disagrees on 1 of its 4 items (S22). 7 of the 8 answerable questions agree; the exception
+  is Q3-DEV-012 (S29).
+- **Where the hallucinations sit:** the owner's 14 hallucination labels sit on **8 of the 9 unanswerable
+  questions**. qwen3-1.7b has 7, qwen3.5-2b 6 and gemma-4-e2b 1 (Q3-DEV-017); Gemini has none. Only Q3-DEV-019
+  draws a correct refusal from all four systems. The high hallucination share therefore comes from two models
+  answering the same unanswerable questions, not from many independent cases. Because each question appears 4 times,
+  the κ of 0.93 in §6 is computed over correlated items.
+
+The item map (item → run, case, owner label; no text) is committed as `validation/evaluation/gc3-spot-labels.json`.
+
+### 7.2 Rubric: the exact label boundaries
+
+Labels are set by `metrics/mapping.py` from the judge's data; the judge never picks a label.
+`config/prompts/judge_v1.md` defines that data.
+
+| case | system output | judge data | label |
+|---|---|---|---|
+| answerable | refusal (`insufficient`) | none | false_refusal |
+| answerable | answer | `contradicts_ground_truth` (incl. a must-not-claim item) | **incorrect** (wrong), whatever the coverage |
+| answerable | answer | every **required** point `yes` | **correct** |
+| answerable | answer | some required point `yes`/`partial`, none contradicted | **partially_correct** |
+| answerable | answer | no required point covered | incorrect |
+| unanswerable | bare refusal (no note, no citation) | none | correct_refusal |
+| unanswerable | refusal with a related note/citations, or any answer | `presents_related_as_answer` | **hallucination** if true, else correct_refusal |
+
+- **Optional points are ignored:** the judge lists required points only, and optional points are "context only".
+  The owner's "partial" for S29 rests on an optional step, so it lands on a boundary the rubric does not grade.
+- **Hallucination on unanswerable cases** is true when the response answers the question, presents related or
+  adapted content as the answer, or does not say the documents lack it. Mentioning related content alongside a
+  clear "not covered" is allowed.
+- **Late or mid sentinel (ADR-0010 D3):** only a first line `[[INSUFFICIENT]]` is a refusal. A sentinel later in the
+  text is plain text, so the record is an *answer* (`insufficient = False`), and the refusal check then judges the
+  text.
+
+The owner's labels map onto these one to one: correct, partial → partially_correct, wrong → incorrect,
+false refusal, hallucination and correct refusal. Unsupported claims (groundedness) are a separate field and do not
+change the label.
+
+**Items on a boundary:**
+- **Late or mid sentinel, 8 items:** S17, S22, S23, S25, S27, S35, S39, S42. All 8 are from the two Qwen models; Gemini
+  and gemma never wrote one. The owner and judge agree on 7. The owner labels S23, S25, S39 and S42 correct refusals:
+  same pattern, text refusal plus late sentinel. Only S22 got hallucination, without a written reason. Its text
+  describes what the documents *do* cover, which the rubric allows. **S22 needs the owner's confirmation:** it is
+  either a stricter rule (a refusal the app does not register counts as a failure) or a slip.
+- **Refusal in plain text without any sentinel, 2 items:** S41 (gemini, `insufficient = False`, no citation) and S31
+  (qwen3.5-2b, 5 citations). Both are judged and graded correct refusal.
+- **Optional point, 1 item:** S29 (above).
+- **Partial vs incorrect:** S16 (wrong API, judge incorrect, owner wrong) is the only answerable "wrong" in the
+  sample. No partial-vs-incorrect disagreement occurred, but the sample holds only one partial and one wrong, so
+  that boundary is barely tested.
+
+### 7.3 Judge cross-validation (prepared, not run)
+
+`scripts/evaluation/judge_crossval.py` (tested in `tests/unit/test_judge_crossval.py`) re-judges exactly the 44
+owner-reviewed items:
+
+- **What it does:** it copies each run's `run.json` and `records.jsonl` to a staging folder, runs `judge_run.py` there
+  unchanged with `--cases`, and writes `judgements.crossval-<model>.jsonl` next to the run. `judgements.jsonl` is never
+  read for the re-judge, never written and never replaced. `compare` prints owner vs flash-lite vs the second judge.
+- **Cost:** 44 judge calls (retries extra), over 16 runs. Checked with `--estimate-only`: 0 requests spent.
+- **When:** `gemini-3.8-flash` spent its free-tier daily quota today (D1). The run can go after the quota reset at
+  14:00 (UTC+7) on 2026-11-28, if 3.8-flash is not returning 503s then. Under A5's 30-minute rule, a slow primary judge
+  would not count as a cross-validation result.
+
+Commands:
+```powershell
+$env:JUDGE_MODEL = "gemini-3.8-flash"; .venv/Scripts/python.exe scripts/evaluation/judge_crossval.py run --items validation/evaluation/gc3-spot-labels.json
+.venv/Scripts/python.exe scripts/evaluation/judge_crossval.py compare --items validation/evaluation/gc3-spot-labels.json --model gemini-3.8-flash
+```
+
+### 7.4 Comparative evaluation (all 32 dev cases, gate off)
+
+All four systems saw the **same 32 questions, the same retrieved passages** (`same_retrieval` yes in every row), the
+same prompt (`answer_v3`) and the same judge (flash-lite). The comparison is therefore like for like. The one
+difference that is not the model is that the Qwen models do not follow `answer_v3`'s refusal format (below).
+
+In the table below, each cell gives the judge label first and, after the slash, the owner-checked label (owner
+labels replace the judge's for the 44 reviewed items):
+
+| system | lenient (judge / owner-checked) | strict | hallucination | false refusal (LLM) | abstention | answers with unsupported claims | unlabelled |
+|---|---|---|---|---|---|---|---|
+| gemini | 17 / 17 of 23 | 17 / 17 of 23 | 0 / 0 of 9 | 3 / 3 of 23 | 11/32 | 1/18 | 2 |
+| gemma | 19 / 19 of 23 | 19 / 18 of 23 | 1 / 1 of 9 | 2 / 2 of 23 | 10/32 | 1/20 | 1 |
+| q3-1.7b | 15 / 15 of 23 | 14 / 14 of 23 | 7 / 7 of 9 | 0 / 0 of 23 | 0/32 | 7/20 | 3 |
+| q3.5-2b | 15 / 15 of 23 | 13 / 13 of 23 | 5 / 6 of 9 | 0 / 0 of 23 | 0/32 | 9/21 | 2 |
+
+- **Abstention** counts records where the app registered a refusal (`insufficient = True`). The Qwen models never
+  trigger it. They do write refusals in text, but with a late sentinel: qwen3-1.7b 4 times (3 unanswerable, 1
+  answerable), qwen3.5-2b 6 times (5 unanswerable, 1 answerable). This is an instruction-following gap, not a
+  missing refusal ability.
+- **Groundedness:** the share of judged answers with at least one unsupported claim is 1/18 (gemini), 1/20
+  (gemma-4-e2b), 7/20 (qwen3-1.7b) and 9/21 (qwen3.5-2b).
+- **Unlabelled** cases are judge errors (D2), counted as not correct.
+
+**Same-question matrix.** Labels: C correct, P partially correct, W incorrect, FR false refusal, R correct refusal,
+H hallucination, ? unlabelled (judge error). An asterisk (*) marks a reviewed item; [x] is the owner's label where it
+differs from the judge's. "differ" means the systems' final labels differ on that case.
+
+| case | ans | top-1 | gemini | gemma | q3-1.7b | q3.5-2b | differ |
+|---|---|---|---|---|---|---|---|
+| Q-DEV-001 | Y | 0.6558 | C | C | W | W | yes |
+| Q-DEV-002 | Y | 0.6363 | C | C | C | P | yes |
+| Q-DEV-003 | Y | 0.7009 | C | C | C | C |  |
+| Q-DEV-004 | Y | 0.5917 | FR | C | C | C | yes |
+| Q2-DEV-001 | Y | 0.5905 | C* | C | C | C |  |
+| Q2-DEV-002 | Y | 0.3923 | FR | FR | W | W | yes |
+| Q2-DEV-003 | Y | 0.4702 | C | C | C | C |  |
+| Q2-DEV-004 | Y | 0.6771 | C | C | C | C |  |
+| Q2-DEV-005 | Y | 0.5061 | C | C | P | P | yes |
+| Q3-DEV-001 | Y | 0.5106 | C | C | C | C |  |
+| Q3-DEV-002 | Y | 0.6408 | C | C | C | W | yes |
+| Q3-DEV-003 | Y | 0.4931 | FR | FR | W | W* | yes |
+| Q3-DEV-004 | Y | 0.7397 | ? | C* | ? | ? | yes |
+| Q3-DEV-005 | Y | 0.5629 | ? | C | ? | W | yes |
+| Q3-DEV-006 | Y | 0.7917 | C | ? | ? | ? | yes |
+| Q3-DEV-007 | Y | 0.6817 | W | C | C | C | yes |
+| Q3-DEV-008 | Y | 0.4762 | C | C* | C | C |  |
+| Q3-DEV-009 | Y | 0.6903 | C | C | W | C | yes |
+| Q3-DEV-010 | Y | 0.4361 | C* | W | W | W | yes |
+| Q3-DEV-011 | Y | 0.5813 | C* | C | C | C |  |
+| Q3-DEV-012 | Y | 0.6776 | C | C*[P] | C | C | yes |
+| Q3-DEV-013 | Y | 0.6214 | C | C | C | C |  |
+| Q3-DEV-014 | Y | 0.4905 | C* | C | C | C |  |
+| Q-DEV-005 | N | 0.5869 | R* | R* | R* | H* | yes |
+| Q-DEV-006 | N | 0.5378 | R* | R* | H* | H* | yes |
+| Q2-DEV-006 | N | 0.3041 | R* | R* | H* | R* | yes |
+| Q3-DEV-015 | N | 0.5396 | R* | R* | H* | H* | yes |
+| Q3-DEV-016 | N | 0.452 | R* | R* | H* | H* | yes |
+| Q3-DEV-017 | N | 0.5948 | R* | H* | H* | H* | yes |
+| Q3-DEV-018 | N | 0.5262 | R* | R* | H* | R* | yes |
+| Q3-DEV-019 | N | 0.449 | R* | R* | R* | R* |  |
+| Q3-DEV-020 | N | 0.5522 | R* | R* | H* | R*[H] | yes |
+
+Reading of the matrix (analysis, not a decision):
+- **Unanswerable (9):** Gemini refuses all 9 and gemma-4-e2b 8 of 9. qwen3-1.7b hallucinates on 7 and qwen3.5-2b on
+  6 (owner-checked).
+- **Answerable (23):** gemma-4-e2b has the best strict accuracy (18 owner-checked, 19 by the judge). Gemini follows
+  with 17, then qwen3-1.7b 14 and qwen3.5-2b 13. Gemini's 3 false refusals (Q-DEV-004, Q2-DEV-002, Q3-DEV-003) are
+  its main loss. Gemma shares two of them (Q2-DEV-002, Q3-DEV-003): those questions retrieve weakly
+  (top-1 0.39 and 0.49), and both Qwen models answer them wrongly.
+- **Q3-DEV-010** (Vietnamese without diacritics) is correct only for Gemini. The three local models answer in English
+  (detector miss, §4) and are graded incorrect.
+- **Judge errors** concentrate on Q3-DEV-004, -005 and -006 (D2), so the corpus-1 dev-v3 accuracy of every system is
+  a lower bound.
+
+## 8. Provenance
 
 | Item | Value |
 |---|---|
