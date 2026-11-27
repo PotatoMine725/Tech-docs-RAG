@@ -1,8 +1,9 @@
 # System refusal threshold on dev: dense gate + LLM refusal, four answer models
 
 **Runs:** 2026-11-27, 18:13–18:42 (UTC+7): 16 gate-off runs `gc3-dev-{v1,v2,v3c1,v3c2}-<system>`.
-**Status:** dev measurement, **judge verdicts not yet spot-checked** (owner sheet pending). PROVISIONAL for every
-system: 1–3 cases per system have no judge label (D2) and are counted as failures.
+**Status:** dev measurement, **judge verdicts spot-checked by the owner** (2026-11-27, 44 items: agreement 42/44,
+Cohen's κ 0.93, §6). No chosen threshold changes when the owner's labels replace the judge's. PROVISIONAL for every
+system: 1–3 cases per system have no judge label (D2), and those are counted as failures.
 **Plan (fixed before the runs):** [`docs/plans/gate-calibration-v3.md`](../plans/gate-calibration-v3.md). Its rule is
 applied unchanged. **No threshold was changed in config:** the shipped gate stays 0.5417 until the owner sets a value.
 **Dev only:** these 32 cases tune a threshold. They are never reported as an evaluation result.
@@ -169,15 +170,61 @@ The cases behind each flag:
 
 Gemini answer requests: 32 (one per case, no retries). Judge requests: about 140 flash-lite calls plus 12 to 3.8-flash.
 
-## 6. Spot-check (pending)
+## 6. Owner spot-check (graded 2026-11-27)
 
-The owner's blind sheet holds 44 items, built by the seeded scratch script `spot_gc3.py`:
+**Sample.** The owner's blind sheet holds 44 items, drawn by the seeded scratch script `spot_gc3.py`:
 - every judge verdict on an unanswerable case: 36 (9 × 4);
 - a seeded 10% of answerable verdicts: 8 of 79.
 
-The sheet is at `validation/evaluation/gc3-spot-check/blind.md` with the key in `key.md`, in the `gate-cal` worktree.
-**It is not committed**, because it quotes corpus-2 passages (ADR-0008). Until it is graded, §2 rests on unverified
-judge verdicts.
+The owner graded blind: systems, sets and judge labels were hidden. Afterwards the grades were compared with the key
+(`compare_spot.py`). The sheet, key and the owner's written reasons stay local in
+`.claude/worktrees/gate-cal/validation/evaluation/gc3-spot-check/` and are **not committed**, because they quote corpus-2
+passages (ADR-0008). Only counts and case ids are reported here.
+
+**Agreement.** All 44 grades are filled in and parse.
+
+| subset | agree | disagree |
+|---|---|---|
+| unanswerable | 35/36 | 1 |
+| answerable | 7/8 | 1 |
+| all | 42/44 (95.5%) | 2 |
+
+Cohen's κ is 0.93 over all 44 items (observed 0.955, chance 0.378). The 8 answerable items are too few for a κ of
+their own.
+
+**The two disagreements:**
+
+| item | system / case | top-1 | judge | owner | reasons |
+|---|---|---|---|---|---|
+| S22 | qwen3.5-2b / Q3-DEV-020 (unanswerable, XSD) | 0.5522 | correct refusal | **hallucination** | Judge: the answer "explicitly states that the documents do not cover the topic". The owner wrote no reason. The answer text first says the documents only cover XmlDocument / XmlReader, then emits `[[INSUFFICIENT]]` mid-text, so the system did **not** record a refusal (`insufficient = False`): the app shows it as an answer. The owner's label fits that system-level view. Owner to confirm. |
+| S29 | gemma-4-e2b / Q3-DEV-012 (answerable, Close Class) | 0.6776 | correct | **partially correct** | Owner: everything is right except the return to the listing screen, which is missing. Judge: both *required* points are covered. Return-to-listing sits in the expected answer but not in a required point, so this is a ground-truth granularity question, not a judge error. |
+
+**Spot-checked calibration view.** I replaced the judge's labels with the owner's for those 2 cases and recomputed:
+
+| system | chosen t (judge = owner) | change at the chosen t | change at the current 0.5417 |
+|---|---|---|---|
+| gemini | off | none | none |
+| gemma-4-e2b | 0.6081 | strict 10 → 9 of 23 (lenient unchanged) | strict 14 → 13 |
+| qwen3-1.7b | 0.6081 | none | none |
+| qwen3.5-2b | 0.6081 | none (Q3-DEV-020 is gated at 0.6081) | hallucination 2 → **3** of 9 |
+
+The §2 tables stay as the judge-based record. With the owner's labels, no chosen threshold and no zero-hallucination
+result changes.
+
+**Systematic issues in the owner's reasons** (10 items carry a written reason, all others are bare labels):
+1. **Local models answer unanswerable questions from general knowledge** and present it as grounded. Examples are
+   S01 (FromSqlRaw), S02 (xUnit fixtures) and S13 (XSD), sometimes with a citation marker attached.
+2. **Topic drift to the nearest document.** The question's topic is swapped for the one the corpus has: S09
+   (anti-HCV answered with HBV markers from C2-29) and S03 / S35 (pneumothorax answered with consolidation opacity
+   from C2-16). This is how the near-miss unanswerable cases defeat the LLM layer.
+3. **Late refusal marker.** S27 (Q-DEV-006) and S35 write an answer and then `[[INSUFFICIENT]]`, and S22 writes the
+   marker mid-text. The owner counts content before a refusal as a hallucination. Whenever the marker is not where
+   the app expects it, the app records no refusal. This is an `answer_v3` / parser behaviour of the local models,
+   worth a look before any local model ships.
+4. **Wrong API for an answerable question.** S16 (qwen3.5-2b / Q3-DEV-003) used MapHealthChecks instead of MapGroup.
+   The owner and the judge agree (incorrect).
+5. **Judge strictness.** On these 44 items the judge was neither too lenient on unanswerable cases (35/36) nor too
+   strict. The one answerable disagreement comes from required vs optional points in the ground truth (S29).
 
 ## 7. Provenance
 
