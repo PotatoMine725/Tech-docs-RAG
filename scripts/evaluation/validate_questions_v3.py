@@ -44,11 +44,13 @@ QUESTION_LANGUAGES = {"en", "vi", "mixed"}
 MAX_PER_DOCUMENT = 2
 PARAPHRASE_LIMIT = 0.5
 # Task composition: (answerable, corpus, document language group, question_language, typing) -> count.
+# Owner 2026-11-27: Q3-DEV-011 replaced; its corpus-2 VI slot moved to the mixed doc C2-04 (no free VI-doc section left).
 COMPOSITION = Counter({
     (True, "corpus1", "en", "en", "en"): 3,
     (True, "corpus1", "en", "vi", "diacritics"): 2,
     (True, "corpus1", "en", "vi", "no_diacritics"): 1,
-    (True, "corpus2", "vi", "vi", "diacritics"): 3,
+    (True, "corpus2", "vi", "vi", "diacritics"): 2,
+    (True, "corpus2", "mixed", "vi", "diacritics"): 1,
     (True, "corpus2", "vi", "vi", "no_diacritics"): 2,
     (True, "corpus2", "en", "en", "en"): 2,
     (True, "corpus2", "mixed", "mixed", "diacritics"): 1,
