@@ -108,6 +108,7 @@ class QuestionSet:
 QUESTION_SETS = {
     "v1": QuestionSet(SPLIT_FILES, FREEZE_TAG, SNAPSHOT),
     "v2": QuestionSet({"eval": "eval-v2.jsonl", "dev": "dev-v2.jsonl"}, "eval-freeze-v2.1", None),
+    "v3": QuestionSet({"dev": "dev-v3.jsonl"}, "dev-freeze-v3", None),  # dev only: gate calibration (plan §6)
 }
 EXIT_OK, EXIT_ERRORS, EXIT_STOPPED, EXIT_ABORTED = 0, 1, 2, 3
 
@@ -279,6 +280,9 @@ def main(argv=None, *, services=open_services, git_state=collect_git_state, root
 def _run(args, emit, services, git_state, root: Path, today) -> int:
     # 1. integrity first: both frozen files of the question set, whichever split runs
     question_set = QUESTION_SETS[args.questions]
+    if args.split not in question_set.files:
+        raise EvaluationError(f"question set {args.questions} has no {args.split} split "
+                              f"(splits: {', '.join(sorted(question_set.files))})")
     files = {name: (root / QUESTIONS_DIR / name).read_bytes() for name in question_set.files.values()}
     if question_set.snapshot is not None:
         hashes = verify_frozen_files((root / question_set.snapshot).read_text(encoding="utf-8"), files)

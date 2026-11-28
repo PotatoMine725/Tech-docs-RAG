@@ -87,12 +87,35 @@ def test_sentinel_after_leading_blank_lines_and_on_the_same_line_as_the_note():
     assert data["insufficient"] and data["missing_information"] == "no date given"
 
 
-def test_sentinel_later_in_the_text_is_ordinary_text():
-    data = parse_answer_text("Answer [1].\n[[INSUFFICIENT]]")
-    assert not data["insufficient"] and data["answer"] == "Answer [1].\n[[INSUFFICIENT]]"
+@pytest.mark.parametrize(("text", "note"), [
+    ("Answer [1].\n[[INSUFFICIENT]]", ""),  # appended after an answer
+    ("The passages cover HBV only [2].\n\n[[INSUFFICIENT]]\nNo HCV marker is described.", "No HCV marker is described."),
+    ("Mid [[INSUFFICIENT]] the rest [3]", "the rest [3]"),
+    ("[[INSUFFICient]] wrong case", "wrong case"),
+])
+def test_sentinel_anywhere_in_any_case_is_a_refusal_and_drops_the_text_before_it(text, note):
+    data = parse_answer_text(text)
+    assert data["insufficient"] and data["answer"] == "" and data["missing_information"] == note
+    assert data["cited_passages"] == ([3] if "[3]" in note else [])
+
+
+def test_no_sentinel_is_an_answer():
+    data = parse_answer_text("Not in the documents: the version. The rest is here [1].")
+    assert not data["insufficient"] and data["answer"].startswith("Not in the documents")
 
 
 @pytest.mark.parametrize("text", ["", "   \n ", None])
 def test_empty_reply_is_a_generation_error(text):
     with pytest.raises(GenerationError):
         parse_answer_text(text)
+
+
+def test_answer_v4_template_is_text_format_with_all_placeholders():
+    from pathlib import Path
+
+    from knowledge_assistant.application.generation.prompt_builder import PromptBuilder
+
+    text = (Path(__file__).resolve().parents[3] / "config" / "prompts" / "answer_v4.md").read_text(encoding="utf-8")
+    builder = PromptBuilder(text, "answer_v4")
+    assert builder.answer_format == "text"
+    assert all(name in builder.template for name in ("{passages}", "{question}", "{answer_language}"))
