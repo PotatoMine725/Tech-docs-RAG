@@ -35,3 +35,16 @@ reserved), ADR-0004 (answer model). Plan: `docs/plans/local-rag-upgrade-plan.md`
 - Streaming, the GUI partial-answer state, server lifecycle and the model download (checksum, progress, manual path)
   are not built yet.
 - Model licences are checked per file at download.
+
+## Amendment 2026-11-28: D3 late sentinel is a refusal (O1); prompt `answer_v4` (owner)
+
+Owner decision (2026-11-28, after `docs/reports/2026-11-27-gate-calibration-dev.md` §8): 11 of 128 dev answers put
+`[[INSUFFICIENT]]` after some text, and the app showed every one of them as a normal answer, so ungrounded text
+reached the user. **D3 now reads:** `[[INSUFFICIENT]]` anywhere in a text-format reply, in any letter case, is the
+LLM refusal. The text after the first sentinel is the missing-information note (its markers are related citations,
+D2); the text before it is dropped and not shown (the raw reply stays in the run record as `raw_text`). The cost,
+measured on the same 128 answers: 2 correct answers that had a sentinel appended become false refusals.
+`answer_v4` (`config/prompts/answer_v4.md`, from `docs/plans/answer-v4-draft.md`) is a second text-format prompt:
+decide-first step, sentinel on line 1 only, "a related but different thing is not an answer", citation example,
+language and refusal rule repeated after the CONTEXT. It is not the default; `ANSWER_PROMPT_VERSION` selects it. Its
+dev comparison is pre-registered in `docs/plans/answer-v4-dev-comparison.md`.

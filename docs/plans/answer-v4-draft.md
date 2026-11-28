@@ -1,7 +1,8 @@
 # answer_v4 prompt: draft proposal
 
-Status: **PROPOSED, not used anywhere.** This draft is not in `config/prompts/`, so no prompt loader can pick it up.
-It is not wired into any configuration and has not been run. Source of the problems it targets:
+Status: **ADOPTED for a dev trial (owner, 2026-11-28).** The text below is now `config/prompts/answer_v4.md`; it is
+not the default (`ANSWER_PROMPT_VERSION` selects it). Comparison: `answer-v4-dev-comparison.md`. The original note:
+it was not wired into any configuration and had not been run. Source of the problems it targets:
 `docs/reports/2026-11-27-gate-calibration-dev.md` §8 (gate-off dev runs, 32 cases × 4 systems). Adopting it needs:
 - a pre-registered comparison against `answer_v3` on dev (same retrieval, same judge);
 - the owner's decision;
